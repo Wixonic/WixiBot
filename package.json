@@ -1,21 +1,21 @@
 {
-	"name": "wixi",
-	"displayName": "Wixi",
-	"description": "",
-	"author": "Wixonic <contact@wixonic.fr> (https://wixonic.fr)",
-	"version": "1.0.0",
-	"main": "main.js",
-	"scripts": {
-		"start": "clear; node .",
-		"deploy": "clear; node ./deploy.js"
-	},
-	"engines": {
-		"node": "20"
-	},
-	"dependencies": {
-		"discord.js": "^14.14.1"
-	},
-	"devDependencies": {
-		"@types/node": "^20.12.2"
-	}
+  "name": "wixi",
+  "displayName": "Wixi",
+  "description": "",
+  "author": "Wixonic <contact@wixonic.fr> (https://wixonic.fr)",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "clear; node .",
+    "deploy": "clear; node ./deploy.js"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12"
+  }
 }
