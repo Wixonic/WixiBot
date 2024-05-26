@@ -1,3 +1,6 @@
+# WixiBot
+> WixiLand Management Agency's main office
+
 [![Wakatime](https://wakatime.com/badge/github/Wixonic/WixiBot.svg?style=flat)](https://wakatime.com/badge/github/Wixonic/WixiBot)
 
 - [Support](https://github.com/Wixonic/WixiBot/blob/Default/.github/SUPPORT.md)
