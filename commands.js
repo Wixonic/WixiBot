@@ -3,26 +3,26 @@ const path = require("path");
 
 /**
  * @typedef {object} ChatCommand
- * @property {import("discord.js").SlashCommandBuilder} data
- * @property {(interaction: import("discord.js").CommandInteraction) => Promise<void>} execute
  * @property {string} name
  * @property {import("discord.js").ApplicationCommandType.ChatInput} type
+ * @property {import("discord.js").SlashCommandBuilder} data
+ * @property {(interaction: import("discord.js").CommandInteraction) => Promise<void>} execute
  */
 
 /**
  * @typedef {object} MessageCommand
- * @property {import("discord.js").ContextMenuCommandBuilder} data
- * @property {(interaction: import("discord.js").MessageContextMenuCommandInteraction) => Promise<void>} execute
  * @property {string} name
  * @property {import("discord.js").ApplicationCommandType.Message} type
+ * @property {import("discord.js").ContextMenuCommandBuilder} data
+ * @property {(interaction: import("discord.js").MessageContextMenuCommandInteraction) => Promise<void>} execute
  */
 
 /**
  * @typedef {object} UserCommand
- * @property {import("discord.js").ContextMenuCommandBuilder} data
- * @property {(interaction: import("discord.js").UserContextMenuCommandInteraction) => Promise<void>} execute
  * @property {string} name
  * @property {import("discord.js").ApplicationCommandType.User} type
+ * @property {import("discord.js").ContextMenuCommandBuilder} data
+ * @property {(interaction: import("discord.js").UserContextMenuCommandInteraction) => Promise<void>} execute
  */
 
 /**

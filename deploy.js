@@ -9,7 +9,7 @@ const requests = [];
 for (const guildId in settings.guilds) {
 	const guildSettings = settings.guilds[guildId] ?? {};
 	const guildCommands = [];
-	commands.list.filter((command) => guildSettings.allowedCommands.includes(command.name)).forEach((command) => guildCommands.push(command.data.toJSON()));
+	commands.list.filter((command) => Object.keys(guildSettings).includes(command.name) && guildSettings[command.name]?.active).forEach((command) => guildCommands.push(command.data.toJSON()));
 
 	log(`Started refreshing ${guildCommands.length} slash command${guildCommands.length > 1 ? "s" : ""}.`);
 
