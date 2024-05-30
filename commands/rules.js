@@ -1,4 +1,4 @@
-const { ApplicationCommandType, SlashCommandBuilder } = require("discord.js");
+const { ApplicationCommandType, MessageFlagsBitField, SlashCommandBuilder } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 

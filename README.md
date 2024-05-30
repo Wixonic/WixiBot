@@ -1,5 +1,5 @@
 # WixiBot
-> WixiLand Management Agency's main office
+> WixiLand Management Agency's main server
 
 [![Wakatime](https://wakatime.com/badge/github/Wixonic/WixiBot.svg?style=flat)](https://wakatime.com/badge/github/Wixonic/WixiBot)
 

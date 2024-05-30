@@ -68,7 +68,7 @@ module.exports = {
 						content += `\n- <@&${role.id}>${role.description ? ": " + role.description : ""}`;
 
 						const button = new ButtonBuilder();
-						button.setCustomId(`addRole_${role.id}`);
+						button.setCustomId(`addRole_${role.id}_${role.locked ? "locked" : "unlocked"}`);
 						button.setLabel(guildRole.name);
 						if (role.locked) button.setEmoji("🔒");
 						button.setStyle(ButtonStyle.Secondary);
