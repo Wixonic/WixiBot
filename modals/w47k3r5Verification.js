@@ -12,7 +12,7 @@ module.exports = {
 			const channelId = settings.guilds[interaction.guild.id]?.customSettings?.formResultChannel;
 
 			if (channelId) {
-				const channel = await interaction.guild.channels.fetch(settings.guilds[interaction.guild.id]?.customSettings?.formResultChannel);
+				const channel = await interaction.guild.channels.fetch(channelId);
 
 				if (channel) {
 					await channel.send({
@@ -20,9 +20,10 @@ module.exports = {
 					});
 
 					await interaction.reply({
-						content: "Your form has been sent for review. This process may take a few hours or days.\n\nPlease do not resubmit this form, or action will be taken.",
+						content: "Your form has been sent for review. This process may take a few hours or days.\nPlease do not resubmit this form, or action will be taken.",
 						ephemeral: true
 					});
+					interaction.log("Verification prompt sent");
 				} else {
 					interaction.log("Failed to fetch channel");
 					await interaction.reply({

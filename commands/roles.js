@@ -15,7 +15,7 @@ module.exports = {
 		const rolesSettings = settings.guilds[interaction.guildId].roles;
 
 		if (!rolesSettings.active) {
-			interaction.log("Disabled");
+			interaction.log("Roles automation disabled");
 			return await interaction.reply({
 				content: "Roles automation is currenlty disabled",
 				ephemeral: true

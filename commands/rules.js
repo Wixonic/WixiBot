@@ -17,7 +17,7 @@ module.exports = {
 		const rulesSettings = settings.guilds[interaction.guildId].rules;
 
 		if (!rulesSettings.active) {
-			interaction.log("Disabled");
+			interaction.log("Rumes automation disabled");
 			return await interaction.reply({
 				content: "Rules automation is currenlty disabled",
 				ephemeral: true

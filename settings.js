@@ -44,8 +44,13 @@ module.exports = process.env.DEV == "true" ? {
 				active: true,
 				channel: "1243991489575522374"
 			},
+			ticket: {
+				active: true,
+				channel: "1247240440432951347"
+			},
 			customSettings: {
-				formResultChannel: "1245809295283589170"
+				formResultChannel: "1245809295283589170",
+				ticketQueueChannel: "1243991489575522375"
 			}
 		}
 	}
@@ -110,8 +115,13 @@ module.exports = process.env.DEV == "true" ? {
 				active: true,
 				channel: "1020684346098733138"
 			},
+			ticket: {
+				active: true,
+				channel: "1247276648366080144"
+			},
 			customSettings: {
-				formResultChannel: "1245813497288331338"
+				formResultChannel: "1245813497288331338",
+				ticketQueueChannel: "1247276415880138843"
 			}
 		}
 	}
