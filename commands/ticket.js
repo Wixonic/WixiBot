@@ -33,7 +33,7 @@ module.exports = {
 		const channel = await interaction.guild.channels.fetch(ticketSettings.channel);
 
 		if (!channel) {
-			interaction.log(`Channel ${ticketSettings.channel} not found`);
+			interaction.log(`Ticket channel "${ticketSettings.channel}" not found`);
 			return await interaction.reply({
 				content: "Ticket channel not found",
 				ephemeral: true
@@ -41,7 +41,7 @@ module.exports = {
 		}
 
 		if (!channel.isTextBased()) {
-			interaction.log(`Channel ${channel.name} (${channel.id}) is not text-based`);
+			interaction.log(`Ticket channel "${channel.name}" (${channel.id}) is not text-based`);
 			return await interaction.reply({
 				content: "Ticket channel is not a text-based channel",
 				ephemeral: true
@@ -59,7 +59,7 @@ module.exports = {
 		const queueChannel = await interaction.guild.channels.fetch(ticketSettings.queue);
 
 		if (!queueChannel) {
-			interaction.log(`Queue channel ${ticketSettings.queue} not found`);
+			interaction.log(`Queue channel "${ticketSettings.queue}" not found`);
 			return await interaction.reply({
 				content: "Queue channel not found",
 				ephemeral: true
@@ -67,7 +67,7 @@ module.exports = {
 		}
 
 		if (!queueChannel.isTextBased()) {
-			interaction.log(`Queue channel ${queueChannel.name} (${queueChannel.id}) is not text-based`);
+			interaction.log(`Queue channel "${queueChannel.name}" (${queueChannel.id}) is not text-based`);
 			return await interaction.reply({
 				content: "Queue channel is not a text-based channel",
 				ephemeral: true
@@ -105,6 +105,6 @@ module.exports = {
 			ephemeral: true
 		});
 
-		interaction.log("Updated");
+		interaction.log("Ticket Tool updated");
 	}
 };
