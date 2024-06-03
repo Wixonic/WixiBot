@@ -11,7 +11,7 @@ module.exports = {
 		const member = await interaction.guild.members.fetch(interaction.member.id);
 
 		if (member) {
-			const channelId = settings.guilds[interaction.guild.id]?.customSettings?.ticketQueueChannel;
+			const channelId = settings.guilds[interaction.guild.id]?.ticket?.queue;
 
 			if (channelId) {
 				const channel = await interaction.guild.channels.fetch(channelId);

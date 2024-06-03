@@ -17,7 +17,7 @@ module.exports = {
 		const rulesSettings = settings.guilds[interaction.guildId].rules;
 
 		if (!rulesSettings.active) {
-			interaction.log("Rumes automation disabled");
+			interaction.log("Rules automation disabled");
 			return await interaction.reply({
 				content: "Rules automation is currenlty disabled",
 				ephemeral: true
@@ -25,7 +25,7 @@ module.exports = {
 		}
 
 		if (!rulesSettings.channel) {
-			interaction.log("Channel not set");
+			interaction.log("Rules channel not set");
 			return await interaction.reply({
 				content: "Rules channel is not set",
 				ephemeral: true
@@ -35,7 +35,7 @@ module.exports = {
 		const channel = await interaction.guild.channels.fetch(rulesSettings.channel);
 
 		if (!channel) {
-			interaction.log(`Channel ${rulesSettings.channel} not found`);
+			interaction.log(`Rules channel ${rulesSettings.channel} not found`);
 			return await interaction.reply({
 				content: "Rules channel not found",
 				ephemeral: true
@@ -43,7 +43,7 @@ module.exports = {
 		}
 
 		if (!channel.isTextBased()) {
-			interaction.log(`Channel ${channel.name} (${channel.id}) is not text-based`);
+			interaction.log(`Rules channel ${channel.name} (${channel.id}) is not text-based`);
 			return await interaction.reply({
 				content: "Rules channel is not a text-based channel",
 				ephemeral: true
@@ -54,7 +54,7 @@ module.exports = {
 		messages.each((message) => channel.messages.delete(message));
 
 		const rules = fs.readFileSync(path.join(__dirname, "..", "rules", interaction.guildId + ".md"), "utf-8")
-			.split("{{CHANNEL.HELP}}").join(settings.guilds[interaction.guildId].help.channel)
+			.split("{{CHANNEL.HELP}}").join(settings.guilds[interaction.guildId].ticket.channel)
 			.split("{{CHANNEL.ROLES}}").join(settings.guilds[interaction.guildId].roles.channel);
 
 		await channel.send({

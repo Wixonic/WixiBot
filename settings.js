@@ -4,8 +4,7 @@ module.exports = process.env.DEV == "true" ? {
 	guilds: {
 		"1243943943779909652": {
 			help: {
-				active: true,
-				channel: "1244194122584035349"
+				active: true
 			},
 			roles: {
 				active: true,
@@ -46,11 +45,11 @@ module.exports = process.env.DEV == "true" ? {
 			},
 			ticket: {
 				active: true,
-				channel: "1247240440432951347"
+				channel: "1247240440432951347",
+				queue: "1243991489575522375"
 			},
 			customSettings: {
-				formResultChannel: "1245809295283589170",
-				ticketQueueChannel: "1243991489575522375"
+				formResultChannel: "1245809295283589170"
 			}
 		}
 	}
@@ -117,11 +116,11 @@ module.exports = process.env.DEV == "true" ? {
 			},
 			ticket: {
 				active: true,
-				channel: "1247276648366080144"
+				channel: "1247276648366080144",
+				queue: "1247276415880138843"
 			},
 			customSettings: {
-				formResultChannel: "1245813497288331338",
-				ticketQueueChannel: "1247276415880138843"
+				formResultChannel: "1245813497288331338"
 			}
 		}
 	}
