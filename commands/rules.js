@@ -35,7 +35,7 @@ module.exports = {
 		const channel = await interaction.guild.channels.fetch(rulesSettings.channel);
 
 		if (!channel) {
-			interaction.log(`Rules channel ${rulesSettings.channel} not found`);
+			interaction.log(`Rules channel "${rulesSettings.channel}" not found`);
 			return await interaction.reply({
 				content: "Rules channel not found",
 				ephemeral: true
@@ -43,7 +43,7 @@ module.exports = {
 		}
 
 		if (!channel.isTextBased()) {
-			interaction.log(`Rules channel ${channel.name} (${channel.id}) is not text-based`);
+			interaction.log(`Rules channel "${channel.name}" (${channel.id}) is not text-based`);
 			return await interaction.reply({
 				content: "Rules channel is not a text-based channel",
 				ephemeral: true
@@ -67,6 +67,6 @@ module.exports = {
 			ephemeral: true
 		});
 
-		interaction.log("Updated");
+		interaction.log("Rules updated");
 	}
 };
