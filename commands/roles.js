@@ -23,7 +23,7 @@ module.exports = {
 		}
 
 		if (!rolesSettings.channel) {
-			interaction.log("Channel not set");
+			interaction.log("Roles channel not set");
 			return await interaction.reply({
 				content: "Roles channel is not set",
 				ephemeral: true
@@ -33,7 +33,7 @@ module.exports = {
 		const channel = await interaction.guild.channels.fetch(rolesSettings.channel);
 
 		if (!channel) {
-			interaction.log(`Channel ${rolesSettings.channel} not found`);
+			interaction.log(`Roles channel "${rolesSettings.channel}" not found`);
 			return await interaction.reply({
 				content: "Roles channel not found",
 				ephemeral: true
@@ -41,7 +41,7 @@ module.exports = {
 		}
 
 		if (!channel.isTextBased()) {
-			interaction.log(`Channel ${channel.name} (${channel.id}) is not text-based`);
+			interaction.log(`Roles channel "${channel.name}" (${channel.id}) is not text-based`);
 			return await interaction.reply({
 				content: "Roles channel is not a text-based channel",
 				ephemeral: true
@@ -92,6 +92,6 @@ module.exports = {
 			ephemeral: true
 		});
 
-		interaction.log("Updated");
+		interaction.log("Roles updated");
 	}
 };
