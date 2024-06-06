@@ -5,6 +5,7 @@ const config = require("./config.js");
 
 const client = new Client({
 	intents: [
+		GatewayIntentBits.DirectMessages,
 		GatewayIntentBits.Guilds
 	]
 });

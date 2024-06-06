@@ -21,9 +21,9 @@ client.on("ready", async (client) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-	log(`Interaction "${interaction.id}" started by user "${interaction.user.username}" (${interaction.user.id}), in guild "${interaction.guild.name}" (${interaction.guild.id})`);
+	log(`Interaction "${interaction.id}" started by user "${interaction.user.username}" (${interaction.user.id})` + (interaction.inGuild() ? `, in guild "${interaction.guild.name}"(${interaction.guild.id})` : ", outside of a guild"));
 
-	interaction.log = (text) => log(`I-${interaction.id} - ${text}`);
+	interaction.log = (text) => log(`I - ${interaction.id} - ${text}`);
 
 	if (interaction.isMessageComponent()) {
 		let found = false;
@@ -38,7 +38,7 @@ client.on("interactionCreate", async (interaction) => {
 					await component.execute(interaction, componentArgs);
 					interaction.log(`Component "${componentName}" ended`);
 				} else {
-					interaction.log(`Component "${componentName}" - ${componentArgs.length > component.args ? "Exceed" : "Missing"} arguments (${componentArgs.length}/${component.args})`);
+					interaction.log(`Component "${componentName}" - ${componentArgs.length > component.args ? "Exceed" : "Missing"} arguments(${componentArgs.length} / ${component.args})`);
 					await interaction.reply({
 						content: "This interaction is not available.",
 						ephemeral: true

@@ -12,17 +12,17 @@ module.exports = {
 		.setName("roles")
 		.setDescription("Update the roles selection menu"),
 	execute: async (interaction) => {
-		const rolesSettings = settings.guilds[interaction.guildId].roles;
+		const rolesSettings = settings?.guilds?.[interaction.guildId]?.roles;
 
-		if (!rolesSettings.active) {
+		if (!rolesSettings?.active) {
 			interaction.log("Roles automation disabled");
 			return await interaction.reply({
-				content: "Roles automation is currenlty disabled",
+				content: "Roles automation is currently disabled",
 				ephemeral: true
 			});
 		}
 
-		if (!rolesSettings.channel) {
+		if (!rolesSettings?.channel) {
 			interaction.log("Roles channel not set");
 			return await interaction.reply({
 				content: "Roles channel is not set",
@@ -30,10 +30,10 @@ module.exports = {
 			});
 		}
 
-		const channel = await interaction.guild.channels.fetch(rolesSettings.channel);
+		const channel = await interaction.guild.channels.fetch(rolesSettings?.channel);
 
 		if (!channel) {
-			interaction.log(`Roles channel "${rolesSettings.channel}" not found`);
+			interaction.log(`Roles channel "${rolesSettings?.channel}" not found`);
 			return await interaction.reply({
 				content: "Roles channel not found",
 				ephemeral: true
@@ -56,7 +56,7 @@ module.exports = {
 			flags: new MessageFlagsBitField().add("SuppressNotifications", "Crossposted")
 		});
 
-		for (const group of rolesSettings.groups) {
+		for (const group of rolesSettings?.groups ?? {}) {
 			if (group.active) {
 				let content = `## ${group.name}\n> ${group.description}`;
 				const buttons = new ActionRowBuilder();

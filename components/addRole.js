@@ -10,7 +10,7 @@ module.exports = {
 		const roleId = args[0];
 		const role = await interaction.guild.roles.fetch(roleId);
 		const roleSettings = getRoleSettingsForGuild(interaction.guildId, roleId);
-		const member = await interaction.guild.members.fetch(interaction.member.id);
+		const member = await interaction.guild.members.fetch(interaction.member?.id);
 
 		const isLocked = args[1] == "locked";
 

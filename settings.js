@@ -3,54 +3,7 @@ const { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = req
 module.exports = process.env.DEV == "true" ? {
 	guilds: {
 		"1243943943779909652": {
-			help: {
-				active: true
-			},
-			roles: {
-				active: true,
-				groups: [
-					{
-						active: true,
-						name: "Special Roles",
-						description: "These roles give exclusive perks and authorization.",
-						roles: [
-							{
-								id: "1245807475895304355",
-								locked: true,
-								modal: new ModalBuilder()
-									.setCustomId("w47k3r5Verification")
-									.setTitle("W47K3R5 Verification Form")
-									.setComponents(
-										new ActionRowBuilder()
-											.setComponents(
-												new TextInputBuilder()
-													.setCustomId("walkerId")
-													.setLabel("Walker ID")
-													.setMinLength(4)
-													.setMaxLength(7)
-													.setPlaceholder("#000000")
-													.setRequired(true)
-													.setStyle(TextInputStyle.Short)
-											)
-									)
-							}
-						]
-					}
-				],
-				channel: "1244016413501558815"
-			},
-			rules: {
-				active: true,
-				channel: "1243991489575522374"
-			},
-			ticket: {
-				active: true,
-				channel: "1247240440432951347",
-				queue: "1243991489575522375"
-			},
-			customSettings: {
-				formResultChannel: "1245809295283589170"
-			}
+
 		}
 	}
 } : {
@@ -113,6 +66,9 @@ module.exports = process.env.DEV == "true" ? {
 			rules: {
 				active: true,
 				channel: "1020684346098733138"
+			},
+			session: {
+				active: true
 			},
 			ticket: {
 				active: true,

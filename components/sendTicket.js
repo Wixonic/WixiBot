@@ -7,7 +7,7 @@ module.exports = {
 	name: "sendTicket",
 	args: 0,
 	execute: async (interaction) => {
-		const member = await interaction.guild.members.fetch(interaction.member.id);
+		const member = await interaction.guild.members.fetch(interaction.member?.id);
 
 		if (member) {
 			await interaction.showModal(

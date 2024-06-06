@@ -12,17 +12,17 @@ module.exports = {
 		.setName("ticket")
 		.setDescription("Update ticket prompt"),
 	execute: async (interaction) => {
-		const ticketSettings = settings.guilds[interaction.guildId].ticket;
+		const ticketSettings = settings?.guilds?.[interaction.guildId]?.ticket;
 
-		if (!ticketSettings.active) {
+		if (!ticketSettings?.active) {
 			interaction.log("Ticket Tool disabled");
 			return await interaction.reply({
-				content: "Ticket Tool is currenlty disabled",
+				content: "Ticket Tool is currently disabled",
 				ephemeral: true
 			});
 		}
 
-		if (!ticketSettings.channel) {
+		if (!ticketSettings?.channel) {
 			interaction.log("Ticket channel not set");
 			return await interaction.reply({
 				content: "Ticket channel is not set",
@@ -30,10 +30,10 @@ module.exports = {
 			});
 		}
 
-		const channel = await interaction.guild.channels.fetch(ticketSettings.channel);
+		const channel = await interaction.guild.channels.fetch(ticketSettings?.channel);
 
 		if (!channel) {
-			interaction.log(`Ticket channel "${ticketSettings.channel}" not found`);
+			interaction.log(`Ticket channel "${ticketSettings?.channel}" not found`);
 			return await interaction.reply({
 				content: "Ticket channel not found",
 				ephemeral: true
@@ -48,15 +48,15 @@ module.exports = {
 			});
 		}
 
-		if (!ticketSettings.channel) {
-			interaction.log("Ticket channel not set");
+		if (!ticketSettings?.queue) {
+			interaction.log("Queue channel not set");
 			return await interaction.reply({
-				content: "Ticket channel is not set",
+				content: "Queue channel is not set",
 				ephemeral: true
 			});
 		}
 
-		const queueChannel = await interaction.guild.channels.fetch(ticketSettings.queue);
+		const queueChannel = await interaction.guild.channels.fetch(ticketSettings?.queue);
 
 		if (!queueChannel) {
 			interaction.log(`Queue channel "${ticketSettings.queue}" not found`);
