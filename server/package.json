@@ -5,6 +5,7 @@
 		"start": "node ./main.js"
 	},
 	"dependencies": {
+		"@darrellvs/node-wave-link-sdk": "^1.0.14",
 		"applescript": "^1.0.0",
 		"firebase-admin": "^12.7.0",
 		"ytsr": "^3.8.4"
