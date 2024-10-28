@@ -67,8 +67,9 @@ end if`;
 	const main = () => {
 		getCurrentTrackInfo(async (error, song) => {
 			const update = async () => {
-				console.log(`Updating music with ${song?.trackName ?? "nothing"}`);
-				if (song) {
+				console.log(`Updating music with ${error ? song?.trackName ?? "unknown" : "nothing"}`);
+
+				if (error) {
 					const result = await ytsr(`${song.trackName} ${song.artistName}`, {
 						limit: 1,
 						safeSearch: true
