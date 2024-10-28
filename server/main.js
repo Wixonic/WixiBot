@@ -35,7 +35,7 @@ if application "Music" is running then
 		return {trackName, artistName, albumName}
 	end tell
 else
-	return {null, null, null}
+	return {"", "", ""}
 end if`;
 
 		applescript.execString(script, (e, result) => {
@@ -45,20 +45,19 @@ end if`;
 					artistName: null,
 					albumName: null
 				});
-				return;
+			} else {
+				const [
+					trackName,
+					artistName,
+					albumName
+				] = result;
+
+				callback(trackName == "" && artistName == "" && albumName == "", {
+					trackName,
+					artistName,
+					albumName
+				});
 			}
-
-			const [
-				trackName,
-				artistName,
-				albumName
-			] = result;
-
-			callback(trackName == null && artistName == null && albumName == null, {
-				trackName,
-				artistName,
-				albumName
-			});
 		});
 	};
 
@@ -67,39 +66,36 @@ end if`;
 	const main = () => {
 		getCurrentTrackInfo(async (error, song) => {
 			const update = async () => {
-				console.log(`Updating music with ${error ? song?.trackName ?? "unknown" : "nothing"}`);
+				console.log(`Updating music with ${error ? "nothing" : song.trackName ?? "unknown"}`);
+				currentSong = song;
 
-				if (error) {
-					const result = await ytsr(`${song.trackName} ${song.artistName}`, {
-						limit: 1,
-						safeSearch: true
+				if (error) await db.collection("activity").doc("song").delete();
+				else {
+					const result = await ytsr(`${song.trackName} - ${song.artistName}`, {
+						limit: 1
 					});
 
 					let url = null;
 
 					try {
-						url = result.items[0].url;
-					} catch {
-						url = "https://www.youtube.com";
-					}
+						url = result.items[0]?.url;
+					} catch { }
 
 					await db.collection("activity").doc("song").set({
 						track: song.trackName,
 						artist: song.artistName,
 						album: song.albumName,
 						volume: volume / 100,
-						url
+						url: url ?? "https://www.youtube.com"
 					});
-				} else await db.collection("activity").doc("song").delete();
+				}
 			};
 
 			if (error) {
 				if (currentSong != null) await update();
 			} else {
-				if (currentSong?.trackName != song.trackName || currentSong?.artistName != song.artistName || currentSong?.albumName != song.albumName) await update();
+				if (currentSong == null || (currentSong?.trackName != song.trackName || currentSong?.artistName != song.artistName || currentSong?.albumName != song.albumName)) await update();
 			}
-
-			currentSong = song;
 
 			setTimeout(main, 2500);
 		});
