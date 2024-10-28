@@ -14,7 +14,9 @@
 		"node": "20"
 	},
 	"dependencies": {
-		"discord.js": "^14.15.2"
+		"@darrellvs/node-wave-link-sdk": "^1.0.14",
+		"discord.js": "^14.15.2",
+		"ytdl-core": "^4.11.5"
 	},
 	"devDependencies": {
 		"@types/node": "^20.12.12"

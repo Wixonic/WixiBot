@@ -1,70 +1,93 @@
 const applescript = require("applescript");
-const express = require("express");
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
+const ytsr = require("ytsr");
 
 const config = require("./config.js");
 
-const app = express();
+const app = initializeApp({
+	credential: cert(config.firebase)
+});
+
+const db = getFirestore();
 
 const getCurrentTrackInfo = (callback) => {
 	const script = `
-    tell application "Music"
-        set currentTrack to current track
-        set trackName to name of currentTrack
-        set artistName to artist of currentTrack
-        set albumName to album of currentTrack
+	if application "Music" is running then
+		tell application "Music"
+			set currentTrack to current track
+			set trackName to name of currentTrack
+			set artistName to artist of currentTrack
+			set albumName to album of currentTrack
 
-        try
-            set artworkData to data of artwork 1 of currentTrack
-            set artworkURL to (open for access (POSIX file "${config.artworkPath}") with write permission)
-            write artworkData to artworkURL
-            close access artworkURL
-        end try
-
-        return {trackName, artistName, albumName}
-    end tell`;
+			return {trackName, artistName, albumName}
+		end tell
+	else
+		return {null, null, null}
+	end if`;
 
 	applescript.execString(script, (e, result) => {
 		if (e) {
-			callback(e, null);
+			callback(true, {
+				trackName: null,
+				artistName: null,
+				albumName: null
+			});
 			return;
 		}
 
 		const [
 			trackName,
 			artistName,
-			albumName,
-			artworkURL
+			albumName
 		] = result;
 
-		callback(null, {
-			success: true,
+		callback(trackName == null && artistName == null && albumName == null, {
 			trackName,
 			artistName,
-			albumName,
-			artworkURL
+			albumName
 		});
 	});
 };
 
-app.get("/song", (_, res) => {
-	getCurrentTrackInfo((e, trackInfo) => {
-		if (e) return res.status(204).json({
-			success: false,
-			trackName: null,
-			artistName: null,
-			albumName: null,
-			artworkURL: null
-		});
+let currentSong = null;
 
-		res.json(trackInfo);
+const main = () => {
+	getCurrentTrackInfo(async (error, song) => {
+		const update = async () => {
+			if (song) {
+				const result = await ytsr(`${song.trackName} ${song.artistName}`, {
+					limit: 1,
+					safeSearch: true
+				});
+
+				let url = null;
+
+				try {
+					url = result.items[0].url;
+				} catch {
+					url = "https://www.youtube.com";
+				}
+
+				await db.collection("activity").doc("song").set({
+					track: song.trackName,
+					artist: song.artistName,
+					album: song.albumName,
+					url
+				});
+			} else await db.collection("activity").doc("song").delete();
+		};
+
+		if (error) {
+			if (currentSong != null) await update();
+		} else {
+			if (currentSong?.trackName != song.trackName || currentSong?.artistName != song.artistName || currentSong?.albumName != song.albumName) await update();
+		}
+
+		currentSong = song;
+
+		setTimeout(main, 2500);
 	});
-});
+};
 
-app.get("/song/artwork.jpg", (_, res) => {
-	res.setHeader("Cache-Control", "no-cache");
-	res.sendFile(config.artworkPath, (e) => {
-		if (e) res.status(404).send("Not Found");
-	});
-});
-
-app.listen(config.port, () => console.log(`Server running on localhost:${config.port}`));
+main();
