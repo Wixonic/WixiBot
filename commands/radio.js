@@ -1,9 +1,8 @@
 const { ApplicationCommandType, ChannelType, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandChannelOption } = require("discord.js");
 
-const { client } = require("../clients.js");
+const Radio = require("../lib/radio.js");
 
 const settings = require("../settings.js");
-const Radio = require("../lib/radio.js");
 
 /**
  * @type {import("../commands.js").ChatCommand}

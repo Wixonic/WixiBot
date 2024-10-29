@@ -11,7 +11,7 @@ const client = new Client({
 	]
 });
 
-client.on("voiceStateUpdate", async (oldState, newState) => {
+client.on("voiceStateUpdate", async (_, newState) => {
 	if (newState.member.id == client.user.id && newState.channel?.type == ChannelType.GuildStageVoice && newState.suppress) newState.setSuppressed(false);
 });
 
