@@ -22,7 +22,7 @@ module.exports = process.env.DEV == "true" ? {
 				active: true
 			},
 			radio: {
-				active: false
+				active: true
 			},
 			roles: {
 				active: true,
