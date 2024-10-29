@@ -65,7 +65,7 @@ module.exports = {
 				channel = Radio.channel;
 				await Radio.quit();
 				await interaction.reply({
-					content: `Radio left at <#${channel.id}>`,
+					content: `Radio left at <#${channel?.id}>`,
 					ephemeral: true
 				});
 				break;
