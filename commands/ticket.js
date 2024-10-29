@@ -12,7 +12,7 @@ module.exports = {
 		.setName("ticket")
 		.setDescription("Update ticket prompt"),
 	execute: async (interaction) => {
-		const ticketSettings = settings?.guilds?.[interaction.guildId]?.ticket;
+		const ticketSettings = settings.guilds?.[interaction.guildId]?.ticket;
 
 		if (!ticketSettings?.active) {
 			interaction.log("Ticket Tool disabled");

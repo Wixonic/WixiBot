@@ -12,7 +12,7 @@ module.exports = {
 		.setName("roles")
 		.setDescription("Update the roles selection menu"),
 	execute: async (interaction) => {
-		const rolesSettings = settings?.guilds?.[interaction.guildId]?.roles;
+		const rolesSettings = settings.guilds?.[interaction.guildId]?.roles;
 
 		if (!rolesSettings?.active) {
 			interaction.log("Roles automation disabled");

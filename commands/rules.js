@@ -14,7 +14,7 @@ module.exports = {
 		.setName("rules")
 		.setDescription("Update and publish rules"),
 	execute: async (interaction) => {
-		const rulesSettings = settings?.guilds?.[interaction.guildId]?.rules;
+		const rulesSettings = settings.guilds?.[interaction.guildId]?.rules;
 
 		if (!rulesSettings?.active) {
 			interaction.log("Rules automation disabled");
@@ -54,8 +54,8 @@ module.exports = {
 		messages.each((message) => channel.messages.delete(message));
 
 		const rules = fs.readFileSync(path.join(__dirname, "..", "rules", interaction.guildId + ".md"), "utf-8")
-			.split("{{CHANNEL.HELP}}").join(settings?.guilds?.[interaction.guildId]?.ticket?.channel)
-			.split("{{CHANNEL.ROLES}}").join(settings?.guilds?.[interaction.guildId]?.roles?.channel);
+			.split("{{CHANNEL.HELP}}").join(settings.guilds?.[interaction.guildId]?.ticket?.channel)
+			.split("{{CHANNEL.ROLES}}").join(settings.guilds?.[interaction.guildId]?.roles?.channel);
 
 		await channel.send({
 			content: rules,

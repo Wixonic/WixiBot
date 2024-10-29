@@ -3,7 +3,12 @@ const { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = req
 module.exports = process.env.DEV == "true" ? {
 	guilds: {
 		"1243943943779909652": {
-
+			privacy: {
+				active: true
+			},
+			radio: {
+				active: true
+			}
 		}
 	}
 } : {
@@ -12,6 +17,12 @@ module.exports = process.env.DEV == "true" ? {
 			help: {
 				active: true,
 				channel: "1037855849944731808"
+			},
+			privacy: {
+				active: true
+			},
+			radio: {
+				active: false
 			},
 			roles: {
 				active: true,
@@ -66,9 +77,6 @@ module.exports = process.env.DEV == "true" ? {
 			rules: {
 				active: true,
 				channel: "1020684346098733138"
-			},
-			session: {
-				active: true
 			},
 			ticket: {
 				active: true,

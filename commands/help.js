@@ -12,7 +12,7 @@ module.exports = {
 		.setName("help")
 		.setDescription("Do you need help with something?"),
 	execute: async (interaction) => {
-		const guildSettings = settings?.guilds?.[interaction.guildId];
+		const guildSettings = settings.guilds?.[interaction.guildId];
 
 		if (!guildSettings?.help?.active) {
 			interaction.log("Help disabled");

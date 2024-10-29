@@ -14,14 +14,16 @@ const config = require("./config.js");
 	const db = getFirestore();
 
 	const wlController = new wl.WaveLinkController();
+	console.log("Connecting to WaveLink...");
 	await wlController.connect();
+	console.log("WaveLink connected");
 
 	const input = wlController.getInput({
 		name: "Music"
 	});
 
 	let volume = input.localVolume;
-	input.on("localVolumeChanged", (volume) => volume = inputVolume);
+	input.on("localVolumeChanged", (localVolume) => volume = localVolume);
 
 	const getCurrentTrackInfo = (callback) => {
 		const script = `
@@ -62,12 +64,14 @@ end if`;
 	};
 
 	let currentSong = null;
+	let currentVolume = 0;
 
 	const main = () => {
 		getCurrentTrackInfo(async (error, song) => {
 			const update = async () => {
-				console.log(`Updating music with ${error ? "nothing" : song.trackName ?? "unknown"}`);
-				currentSong = song;
+				console.log(`Updating music with ${error ? "nothing" : song.trackName ?? "unknown"}${currentVolume != volume ? ` at volume ${volume}%` : ""}`);
+				currentSong = error ? null : song;
+				currentVolume = volume;
 
 				if (error) await db.collection("activity").doc("song").delete();
 				else {
@@ -92,9 +96,9 @@ end if`;
 			};
 
 			if (error) {
-				if (currentSong != null) await update();
+				if (currentSong != null || currentVolume != volume) await update();
 			} else {
-				if (currentSong == null || (currentSong?.trackName != song.trackName || currentSong?.artistName != song.artistName || currentSong?.albumName != song.albumName)) await update();
+				if (currentSong == null || (currentSong?.trackName != song.trackName || currentSong?.artistName != song.artistName || currentSong?.albumName != song.albumName) || currentVolume != volume) await update();
 			}
 
 			setTimeout(main, 2500);
