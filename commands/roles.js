@@ -12,7 +12,9 @@ module.exports = {
 		.setName("roles")
 		.setDescription("Update the roles selection menu"),
 	execute: async (interaction) => {
-		await interaction.deferReply();
+		await interaction.deferReply({
+			ephemeral: true
+		});
 
 		const rolesSettings = settings.guilds?.[interaction.guildId]?.roles;
 
