@@ -30,8 +30,19 @@ module.exports = process.env.DEV == "true" ? {
 				groups: [
 					{
 						active: true,
+						name: "Notifications",
+						description: "These roles allow you to choose to receive notifications and be mentioned when necessary.",
+						roles: [
+							{
+								id: "1307298359651991583"
+							}, {
+								id: "1307298076389544036"
+							}
+						]
+					}, {
+						active: true,
 						name: "Colors",
-						description: "These roles are just cosmetics.",
+						description: "These roles are only cosmetic.",
 						roles: [
 							{
 								id: "1244218105979469824"
@@ -48,7 +59,7 @@ module.exports = process.env.DEV == "true" ? {
 					}, {
 						active: true,
 						name: "Special Roles",
-						description: "These roles give exclusive perks and authorization.",
+						description: "These roles give exclusive perks and permissions.",
 						roles: [
 							{
 								id: "1245812981527482378",
