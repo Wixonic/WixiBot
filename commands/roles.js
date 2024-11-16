@@ -12,11 +12,13 @@ module.exports = {
 		.setName("roles")
 		.setDescription("Update the roles selection menu"),
 	execute: async (interaction) => {
+		await interaction.deferReply();
+
 		const rolesSettings = settings.guilds?.[interaction.guildId]?.roles;
 
 		if (!rolesSettings?.active) {
 			interaction.log("Roles automation disabled");
-			return await interaction.reply({
+			return await interaction.editReply({
 				content: "Roles automation is currently disabled",
 				ephemeral: true
 			});
@@ -24,7 +26,7 @@ module.exports = {
 
 		if (!rolesSettings?.channel) {
 			interaction.log("Roles channel not set");
-			return await interaction.reply({
+			return await interaction.editReply({
 				content: "Roles channel is not set",
 				ephemeral: true
 			});
@@ -34,7 +36,7 @@ module.exports = {
 
 		if (!channel) {
 			interaction.log(`Roles channel "${rolesSettings?.channel}" not found`);
-			return await interaction.reply({
+			return await interaction.editReply({
 				content: "Roles channel not found",
 				ephemeral: true
 			});
@@ -42,7 +44,7 @@ module.exports = {
 
 		if (!channel.isTextBased()) {
 			interaction.log(`Roles channel "${channel.name}" (${channel.id}) is not text-based`);
-			return await interaction.reply({
+			return await interaction.editReply({
 				content: "Roles channel is not a text-based channel",
 				ephemeral: true
 			});
@@ -87,7 +89,7 @@ module.exports = {
 			}
 		}
 
-		await interaction.reply({
+		await interaction.editReply({
 			content: `Roles updated at <#${channel.id}>`,
 			ephemeral: true
 		});
