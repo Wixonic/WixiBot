@@ -2,7 +2,9 @@ const applescript = require("applescript");
 const { initializeApp, cert } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const wl = require("@darrellvs/node-wave-link-sdk");
-const ytsr = require("ytsr");
+const path = require("path");
+
+const youtube = require("./youtube.js");
 
 const config = require("./config.js");
 
@@ -78,29 +80,18 @@ const config = require("./config.js");
 
 					if (error) await db.collection("activity").doc("song").delete();
 					else {
-						let result;
-
+						let url;
 						try {
-							result = await ytsr(`${song.trackName} - ${song.artistName}`, {
-								limit: 1
-							});
+							youtube.search(`${song.trackName} ${song.artistName}`);
 						} catch { }
 
-						if (result != null) {
-							let url = null;
-
-							try {
-								url = result.items[0]?.url;
-							} catch { }
-
-							await db.collection("activity").doc("song").set({
-								track: song.trackName,
-								artist: song.artistName,
-								album: song.albumName,
-								volume: volume / 100,
-								url: url ?? "https://www.youtube.com"
-							});
-						}
+						await db.collection("activity").doc("song").set({
+							track: song.trackName,
+							artist: song.artistName,
+							album: song.albumName,
+							volume: volume / 100,
+							url
+						});
 					}
 				};
 
