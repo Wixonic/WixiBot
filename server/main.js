@@ -2,11 +2,9 @@ const applescript = require("applescript");
 const { initializeApp, cert } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const wl = require("@darrellvs/node-wave-link-sdk");
-const path = require("path");
-
-const youtube = require("./youtube.js");
 
 const config = require("./config.js");
+const youtube = require("./youtube.js");
 
 (async () => {
 	initializeApp({
@@ -83,7 +81,9 @@ const config = require("./config.js");
 						let id = "dQw4w9WgXcQ";
 						try {
 							id = await youtube.search(`${song.trackName} ${song.artistName}`);
-						} catch { }
+						} catch (e) {
+							console.error(e);
+						}
 
 						await db.collection("activity").doc("song").set({
 							track: song.trackName,
