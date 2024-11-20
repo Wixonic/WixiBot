@@ -80,9 +80,9 @@ const config = require("./config.js");
 
 					if (error) await db.collection("activity").doc("song").delete();
 					else {
-						let url;
+						let id = "dQw4w9WgXcQ";
 						try {
-							youtube.search(`${song.trackName} ${song.artistName}`);
+							id = await youtube.search(`${song.trackName} ${song.artistName}`);
 						} catch { }
 
 						await db.collection("activity").doc("song").set({
@@ -90,7 +90,7 @@ const config = require("./config.js");
 							artist: song.artistName,
 							album: song.albumName,
 							volume: volume / 100,
-							url
+							url: `https://www.youtube.com/watch?v=${id}`
 						});
 					}
 				};
