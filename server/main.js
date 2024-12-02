@@ -1,113 +1,73 @@
-const applescript = require("applescript");
-const { initializeApp, cert } = require("firebase-admin/app");
-const { getFirestore } = require("firebase-admin/firestore");
-const wl = require("@darrellvs/node-wave-link-sdk");
-
-const config = require("./config.js");
+const discord = require("./client.js");
+const { db } = require("./firebase.js");
+const { getCurrentTrackInfo } = require("./music.js");
+const spotify = require("./spotify.js");
 const youtube = require("./youtube.js");
+const wavelink = require("./wavelink.js");
+const config = require("./config.js");
 
-(async () => {
-	initializeApp({
-		credential: cert(config.firebase)
-	});
+let currentSong = null;
+let currentVolume = 0;
 
-	const db = getFirestore();
+const main = async () => {
+	await Promise.all([
+		discord.ready(),
+		wavelink.ready()
+	]);
 
-	const wlController = new wl.WaveLinkController();
-	console.log("Connecting to WaveLink...");
-	Promise.race([
-		await wlController.connect(),
-		new Promise((_, reject) => setTimeout(reject, 10000))
-	]).then(() => {
-		console.log("WaveLink connected");
+	getCurrentTrackInfo(async (error, song) => {
+		const update = async () => {
+			if (discord.activities.length > 0) discord.removeActivity("music");
 
-		const input = wlController.getInput({
-			name: "Music"
-		});
+			console.log(`Updating music with ${error ? "nothing" : song.trackName ?? "unknown"}${currentVolume != wavelink.volume ? ` at volume ${wavelink.volume}%` : ""}`);
+			currentSong = error ? null : song;
+			currentVolume = wavelink.volume;
 
-		let volume = input.localVolume;
-		input.on("localVolumeChanged", (localVolume) => volume = localVolume);
+			if (error) await db.collection("activity").doc("song").delete();
+			else {
 
-		const getCurrentTrackInfo = (callback) => {
-			const script = `
-	if application "Music" is running then
-		tell application "Music"
-			set currentTrack to current track
-			set trackName to name of currentTrack
-			set artistName to artist of currentTrack
-			set albumName to album of currentTrack
-	
-			return {trackName, artistName, albumName}
-		end tell
-	else
-		return {"", "", ""}
-	end if`;
-
-			applescript.execString(script, (e, result) => {
-				if (e) {
-					callback(true, {
-						trackName: null,
-						artistName: null,
-						albumName: null
-					});
-				} else {
-					const [
-						trackName,
-						artistName,
-						albumName
-					] = result;
-
-					callback(trackName == "" && artistName == "" && albumName == "", {
-						trackName,
-						artistName,
-						albumName
-					});
-				}
-			});
-		};
-
-		let currentSong = null;
-		let currentVolume = 0;
-
-		const main = () => {
-			getCurrentTrackInfo(async (error, song) => {
-				const update = async () => {
-					console.log(`Updating music with ${error ? "nothing" : song.trackName ?? "unknown"}${currentVolume != volume ? ` at volume ${volume}%` : ""}`);
-					currentSong = error ? null : song;
-					currentVolume = volume;
-
-					if (error) await db.collection("activity").doc("song").delete();
-					else {
-						let id = "dQw4w9WgXcQ";
-						try {
-							id = await youtube.search(`${song.trackName} ${song.artistName}`);
-						} catch (e) {
-							console.error(e);
-						}
-
-						await db.collection("activity").doc("song").set({
-							track: song.trackName,
-							artist: song.artistName,
-							album: song.albumName,
-							volume: volume / 100,
-							url: `https://www.youtube.com/watch?v=${id}`
-						});
-					}
-				};
-
-				if (error) {
-					if (currentSong != null || currentVolume != volume) await update();
-				} else {
-					if (currentSong == null || (currentSong?.trackName != song.trackName || currentSong?.artistName != song.artistName || currentSong?.albumName != song.albumName) || currentVolume != volume) await update();
+				let ytId = "dQw4w9WgXcQ";
+				try {
+					ytId = await youtube.search(`${song.trackName} ${song.artistName}`);
+				} catch (e) {
+					console.error(e);
 				}
 
-				setTimeout(main, 2500);
-			});
+				await db.collection("activity").doc("song").set({
+					track: song.trackName,
+					artist: song.artistName,
+					album: song.albumName,
+					volume: wavelink.volume / 100,
+					url: `https://www.youtube.com/watch?v=${ytId}`
+				});
+
+				const spotifySong = await spotify.search(`${song.trackName} ${song.artistName}`);
+				const spotifyTrackImage = spotifySong?.album?.images?.at(0)?.url;
+
+				discord.addActivity("music", {
+					flags: 48,
+					assets: {
+						large_image: `spotify:${spotifyTrackImage.slice(spotifyTrackImage.lastIndexOf("/") + 1)}`,
+						large_text: song.albumName,
+						small_image: `https://cdn.discordapp.com/app-assets/${config.discord.application.id}/${config.discord.application.assets.apple_music}.png`,
+						small_text: "Apple Music",
+					},
+					name: song.trackName,
+					details: song.trackName,
+					state: song.artistName,
+					type: 2 // LISTENING
+				});
+			}
 		};
 
-		main();
-	}).catch(() => {
-		console.error("Failed to connect to WaveLink, exiting...");
-		process.exit(1);
+		if (error) {
+			if (currentSong != null || currentVolume != wavelink.volume) await update();
+		} else {
+			if (currentSong == null || (currentSong?.trackName != song.trackName || currentSong?.artistName != song.artistName || currentSong?.albumName != song.albumName) || currentVolume != wavelink.volume) await update();
+		}
+
+		setTimeout(main, 2500);
 	});
-})();
+};
+
+main();
