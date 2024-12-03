@@ -39,7 +39,7 @@ const main = async () => {
 				const spotifySong = (await spotify.search(`${song.trackName} ${song.artistName} ${song.albumName}`)) ?? null;
 				const spotifyTrackArtwork = spotifySong?.album?.images?.at(0)?.url ?? null;
 
-				/* await db.collection("activity").doc("song").set({
+				await db.collection("activity").doc("song").set({
 					track: song.trackName,
 					artist: song.artistName,
 					album: song.albumName,
@@ -48,7 +48,7 @@ const main = async () => {
 					volume: wavelink.volume / 100,
 					spotifyArtwork: spotifyTrackArtwork?.slice((spotifyTrackArtwork?.lastIndexOf("/") ?? -1) + 1) ?? null,
 					url: `https://www.youtube.com/watch?v=${ytId}`
-				}); */
+				});
 
 				discord.addActivity("music", {
 					metadata: {
