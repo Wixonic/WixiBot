@@ -15,16 +15,19 @@ const main = async () => {
 		wavelink.ready()
 	]);
 
-	getCurrentTrackInfo(async (error, song) => {
+	getCurrentTrackInfo(async (song) => {
 		const update = async () => {
 			if (discord.activities.length > 0) discord.removeActivity("music");
 
-			console.log(`Updating music with ${error ? "nothing" : song.trackName ?? "unknown"}${currentVolume != wavelink.volume ? ` at volume ${wavelink.volume}%` : ""}`);
-			currentSong = error ? null : song;
+			currentSong = song;
 			currentVolume = wavelink.volume;
 
-			if (error) await db.collection("activity").doc("song").delete();
-			else {
+			if (song == null) {
+				console.log("Music stopped");
+				await db.collection("activity").doc("song").delete();
+				discord.removeActivity("music");
+			} else {
+				console.log(`Music set to ${song.trackName} by ${song.artistName} at volume ${currentVolume}%`);
 
 				let ytId = "dQw4w9WgXcQ";
 				try {
@@ -33,24 +36,34 @@ const main = async () => {
 					console.error(e);
 				}
 
+				const spotifySong = (await spotify.search(`${song.trackName} ${song.artistName} ${song.albumName}`)) ?? null;
+				const spotifyTrackArtwork = spotifySong?.album?.images?.at(0)?.url ?? null;
+
 				await db.collection("activity").doc("song").set({
 					track: song.trackName,
 					artist: song.artistName,
 					album: song.albumName,
+					startedAt: song.startedAt,
+					duration: song.duration,
 					volume: wavelink.volume / 100,
+					spotifyArtwork: spotifyTrackArtwork?.slice((spotifyTrackArtwork?.lastIndexOf("/") ?? -1) + 1) ?? null,
 					url: `https://www.youtube.com/watch?v=${ytId}`
 				});
 
-				const spotifySong = await spotify.search(`${song.trackName} ${song.artistName}`);
-				const spotifyTrackImage = spotifySong?.album?.images?.at(0)?.url;
-
 				discord.addActivity("music", {
-					flags: 48,
 					assets: {
-						large_image: `spotify:${spotifyTrackImage.slice(spotifyTrackImage.lastIndexOf("/") + 1)}`,
+						large_image: `spotify:${spotifyTrackArtwork?.slice((spotifyTrackArtwork?.lastIndexOf("/") ?? -1) + 1) ?? "0"}`,
 						large_text: song.albumName,
 						small_image: `https://cdn.discordapp.com/app-assets/${config.discord.application.id}/${config.discord.application.assets.apple_music}.png`,
 						small_text: "Apple Music",
+					},
+					/* buttons: [{
+						label: "Watch on YouTube",
+						url: `https://www.youtube.com/watch?v=${ytId}`
+					}], */
+					timestamps: {
+						start: song.startedAt,
+						end: song.startedAt + song.duration
 					},
 					name: song.trackName,
 					details: song.trackName,
@@ -60,10 +73,10 @@ const main = async () => {
 			}
 		};
 
-		if (error) {
-			if (currentSong != null || currentVolume != wavelink.volume) await update();
+		if (song == null) {
+			if (currentSong != null) await update();
 		} else {
-			if (currentSong == null || (currentSong?.trackName != song.trackName || currentSong?.artistName != song.artistName || currentSong?.albumName != song.albumName) || currentVolume != wavelink.volume) await update();
+			if (currentSong == null || (currentSong?.trackName != song.trackName || currentSong?.artistName != song.artistName || currentSong?.albumName != song.albumName || currentSong?.startedAt != song.startedAt || currentSong?.state != song.state) || currentVolume != wavelink.volume) await update();
 		}
 
 		setTimeout(main, 2500);
