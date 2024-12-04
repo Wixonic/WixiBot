@@ -1,5 +1,3 @@
-const { ActivityType } = require("discord.js");
-
 const components = require("./components.js");
 const { client } = require("./clients.js");
 const commands = require("./commands.js");
@@ -9,15 +7,7 @@ const modals = require("./modals.js");
 client.on("ready", async (client) => {
 	log(`${client.user.username} online`);
 
-	client.user.setPresence({
-		activities: [
-			{
-				name: process.env.DEV == "true" ? "In training" : "/help",
-				type: ActivityType.Custom
-			}
-		],
-		status: process.env.DEV == "true" ? "dnd" : "online"
-	});
+	client.setDefaultActivity();
 });
 
 client.on("interactionCreate", async (interaction) => {

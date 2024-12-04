@@ -13,7 +13,7 @@ for (const guildId in settings.guilds) {
 
 	log(`Started refreshing ${guildCommands.length} slash command${guildCommands.length > 1 ? "s" : ""}.`);
 
-	const request = rest.put(Routes.applicationGuildCommands(config.clientId, guildId), {
+	const request = rest.put(Routes.applicationGuildCommands(config.discord.application.clientId, guildId), {
 		body: guildCommands
 	});
 	requests.push(request);

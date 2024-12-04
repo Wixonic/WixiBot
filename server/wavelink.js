@@ -1,33 +1,38 @@
 const wl = require("@darrellvs/node-wave-link-sdk");
 
+const log = require("../log.js");
+
 const { abort, wait } = require("./utils.js");
 
 let ready = false;
 
 const wlController = new wl.WaveLinkController();
 
-let volume = 20;
+let volume = 0.15;
 
 (async () => {
-	console.log("Connecting to WaveLink...");
+	log("[WaveLink] Connecting...");
 	await wlController.connect();
 
 	Promise.race([
 		await wlController.connect(),
 		abort(10)
 	]).then(() => {
-		console.log("WaveLink connected");
+		log("[WaveLink] Connected.");
 
 		const input = wlController.getInput({
 			name: "Music"
 		});
 
 		volume = input.localVolume;
-		input.on("localVolumeChanged", (localVolume) => volume = localVolume);
+		input.on("localVolumeChanged", (localVolume) => {
+			log(`[WaveLink] Volume transitioned from ${volume}% to ${localVolume / 100}%.`)
+			volume = localVolume / 100;
+		});
 
 		ready = true
 	}).catch(() => {
-		console.log("Failed to connect to WaveLink, using fallback volume value");
+		log("[WaveLink] Failed to connect, using fallback volume value.");
 		ready = true;
 	});
 })();

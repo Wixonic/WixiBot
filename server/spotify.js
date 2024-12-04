@@ -1,4 +1,4 @@
-const config = require("./config.js");
+const config = require("../config.js");
 
 const request = require("./request.js");
 
@@ -34,9 +34,7 @@ const search = async (query = "never gonna give you up") => {
 		type: "json"
 	}));
 
-	const track = result?.tracks?.items?.at(0);
-
-	return track;
+	return result?.tracks?.items?.at(0);
 };
 
 module.exports = {

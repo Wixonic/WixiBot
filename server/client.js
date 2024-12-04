@@ -3,7 +3,7 @@ const { Client } = require("discord.js-selfbot-v13");
 const { BaseObject } = require("./base.js");
 const { clone, wait } = require("./utils.js");
 
-const config = require("./config.js");
+const config = require("../config.js");
 
 let ready = false;
 
@@ -52,7 +52,7 @@ class ClientManager extends BaseObject {
 
 		delete this.activities[id];
 		this.updateActivity();
-		if (fromKeepAlive) this.log(`${id} deleted by Keep-Alive`);
+		if (fromKeepAlive) this.log(`${id} deleted by Keep-Alive.`);
 	};
 
 	async updateActivity() {
@@ -88,7 +88,7 @@ class ClientManager extends BaseObject {
 		});
 
 		this.client.on("ready", () => {
-			this.log(`Logged in as ${this.client.user?.username ?? "unknown"}`);
+			this.log(`Logged in as ${this.client.user?.username ?? "unknown"}.`);
 			this.updateActivity();
 
 			ready = true;
@@ -100,7 +100,7 @@ class ClientManager extends BaseObject {
 
 		process.on("SIGINT", async () => {
 			this.client.destroy();
-			this.log("Logged out");
+			this.log("Logged out.");
 			process.exit(0);
 		});
 	};

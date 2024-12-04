@@ -1,5 +1,7 @@
 const { EventEmitter } = require("stream");
 
+const log = require("../log.js");
+
 class BaseObject extends EventEmitter {
 	constructor() {
 		super();
@@ -14,7 +16,7 @@ class BaseObject extends EventEmitter {
 		}
 	};
 
-	log = (content) => console.log(`[${this.constructor.name}] ${typeof content == "string" ? content : JSON.stringify(content, null, 2)}`);
+	log = (content) => log(`[${this.constructor.name}] ${typeof content == "string" ? content : JSON.stringify(content, null, 2)}`);
 };
 
 module.exports = {
