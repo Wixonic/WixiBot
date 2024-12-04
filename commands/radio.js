@@ -1,7 +1,9 @@
 const { ApplicationCommandType, ChannelType, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandChannelOption, SlashCommandStringOption } = require("discord.js");
+const { VoiceConnectionStatus } = require("@discordjs/voice");
 
 const Radio = require("../lib/radio.js");
 
+const config = require("../config.js");
 const settings = require("../settings.js");
 
 /**
@@ -30,8 +32,15 @@ module.exports = {
 				.setDescription("Quit the channel")
 		).addSubcommand(
 			new SlashCommandSubcommandBuilder()
-				.setName("song")
-				.setDescription("Gets current song details")
+				.setName("add")
+				.setDescription("Adds a song on the radio's waiting list")
+				.addStringOption(
+					new SlashCommandStringOption()
+						.setName("query")
+						.setDescription("Search query of the song")
+						.setRequired(true)
+						.setMinLength(3)
+				)
 		).addSubcommand(
 			new SlashCommandSubcommandBuilder()
 				.setName("pause")
@@ -42,23 +51,12 @@ module.exports = {
 				.setDescription("Resume radio")
 		).addSubcommand(
 			new SlashCommandSubcommandBuilder()
-				.setName("add")
-				.setDescription("Adds a song on the radio's waiting list")
-				.addStringOption(
-					new SlashCommandStringOption()
-						.setName("query")
-						.setDescription("Search query or URL of the song")
-						.setRequired(true)
-						.setMinLength(3)
-				)
+				.setName("stop")
+				.setDescription("Clear songs on the radio's waiting list and stops the current song")
 		).addSubcommand(
 			new SlashCommandSubcommandBuilder()
 				.setName("clear")
 				.setDescription("Clear songs on the radio's waiting list")
-		).addSubcommand(
-			new SlashCommandSubcommandBuilder()
-				.setName("list")
-				.setDescription("List all songs on the radio's waiting list")
 		).addSubcommand(
 			new SlashCommandSubcommandBuilder()
 				.setName("sync")
@@ -67,13 +65,25 @@ module.exports = {
 			new SlashCommandSubcommandBuilder()
 				.setName("desync")
 				.setDescription("Desynchronize radio")
+		).addSubcommand(
+			new SlashCommandSubcommandBuilder()
+				.setName("song")
+				.setDescription("Gets current song details")
+		).addSubcommand(
+			new SlashCommandSubcommandBuilder()
+				.setName("list")
+				.setDescription("List all songs on the radio's waiting list")
 		),
 	execute: async (interaction) => {
+		await interaction.deferReply({
+			ephemeral: true
+		});
+
 		const radioSettings = settings.guilds[interaction.guildId]?.radio;
 
 		if (!radioSettings?.active) {
 			interaction.log("Radio disabled");
-			return await interaction.reply({
+			return await interaction.editReply({
 				content: "Radio is currently disabled",
 				ephemeral: true
 			});
@@ -87,12 +97,12 @@ module.exports = {
 			case "join":
 				channel = interaction.options.get("channel").channel;
 				if (await Radio.join(channel)) {
-					await interaction.reply({
+					await interaction.editReply({
 						content: `Radio now active at <#${channel.id}>`,
 						ephemeral: true
 					});
 				} else {
-					await interaction.reply({
+					await interaction.editReply({
 						content: `Failed to launch radio at <#${channel.id}>`,
 						ephemeral: true
 					});
@@ -101,32 +111,120 @@ module.exports = {
 
 			case "quit":
 				channel = Radio.channel;
-				await Radio.quit();
-				await interaction.reply({
+				Radio.quit();
+				await interaction.editReply({
 					content: `Radio left at <#${channel?.id}>`,
 					ephemeral: true
 				});
 				break;
 
-			case "song":
-				if (Radio.song) {
-					await interaction.reply({
+			case "add":
+				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
+					const song = await Radio.search(interaction.options.getString("query"));
+					await Radio.load(song);
+
+					await interaction.editReply({
 						embeds: [{
-							title: Radio.song.track
+							title: song.track,
+							description: `This song has been added to the waiting list.\n${Radio.waitingList.length > 1 ? (Radio.waitingList.length == 2 ? "One song remaining." : `${Radio.waitingList.length} songs remaining.`) : "The next song will be this one."}`,
+							author: {
+								name: song.artist,
+								icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
+							},
+							thumbnail: {
+								url: song.spotifyArtworkURL
+							}
+						}],
+						ephemeral: true
+					});
+				} else await interaction.editReply({
+					content: "Radio is not active right now.",
+					ephemeral: true
+				});
+				break;
+
+			case "pause":
+				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
+					if (Radio.song?.state == "PLAYING") {
+
+					} else await interaction.editReply({
+						content: Radio.song.state == "PAUSED" ? "Can't pause, the song is already paused." : "There's currently no song to pause.",
+						ephemeral: true
+					});
+				} else await interaction.editReply({
+					content: "Radio is not active right now.",
+					ephemeral: true
+				});
+				break;
+
+			case "resume":
+				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
+					if (Radio.song?.state == "PAUSED") {
+
+					} else await interaction.editReply({
+						content: Radio.song.state == "PLAYING" ? "Can't resume, the song is already playing." : "There's currently no song to resume.",
+						ephemeral: true
+					});
+				} else await interaction.editReply({
+					content: "Radio is not active right now.",
+					ephemeral: true
+				});
+				break;
+
+			case "stop":
+				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
+
+				} else await interaction.editReply({
+					content: "Radio is not active right now",
+					ephemeral: true
+				});
+				break;
+
+			case "clear":
+				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
+
+				} else await interaction.editReply({
+					content: "Radio is not active right now",
+					ephemeral: true
+				});
+				break;
+
+			case "song":
+				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready && Radio.song) {
+					await interaction.editReply({
+						embeds: [{
+							title: Radio.song.track,
+							description: `This song is currently playing at <#${Radio.channel.id}>.`,
+							author: {
+								name: Radio.song.artist,
+								icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
+							},
+							thumbnail: {
+								url: Radio.song.spotifyArtworkURL
+							}
 						}],
 						ephemeral: true
 					});
 				} else {
-					await interaction.reply({
+					await interaction.editReply({
 						content: "No song currently playing on the radio.",
 						ephemeral: true
 					});
 				}
 				break;
 
+			case "list":
+				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
+
+				} else await interaction.editReply({
+					content: "Radio is not active right now",
+					ephemeral: true
+				});
+				break;
+
 			default:
 				interaction.log(`Unknown subcommand "${interaction.options.getSubcommand()}"`);
-				await interaction.reply({
+				await interaction.editReply({
 					content: `Unknown subcommand "${interaction.options.getSubcommand()}"`,
 					ephemeral: true
 				});

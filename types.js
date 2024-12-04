@@ -7,9 +7,12 @@
  * @property {number?} startedAt
  * @property {number} duration
  * @property {string?} spotifyArtwork
+ * @property {string?} spotifyArtworkURL
+ * @property {string?} spotifyArtistIconURL
  * @property {string?} spotifyId
  * @property {string?} youtubeId
  * @property {number} volume
+ * @property {string?} color
  * @property {string?} path
  */
 

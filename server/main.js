@@ -3,7 +3,7 @@ const log = require("../log.js");
 const discord = require("./client.js");
 const { db } = require("./firebase.js");
 const { getCurrentTrackInfo } = require("./music.js");
-const spotify = require("./spotify.js");
+const spotify = require("../lib/spotify.js");
 const wavelink = require("./wavelink.js");
 
 const config = require("../config.js");
@@ -36,7 +36,7 @@ const main = async () => {
 			} else {
 				log(`Music set to ${song.track} by ${song.artist} at volume ${song.volume}%.`);
 
-				const spotifySong = (await spotify.search(`${song.track} ${song.artist} ${song.album}`)) ?? null;
+				const spotifySong = (await spotify.search(`artist:${song.artist} track:${song.track}`)) ?? null;
 				song.spotifyId = spotifySong?.id ?? null;
 				const spotifyArtworkUrl = spotifySong?.album?.images?.at(0)?.url;
 				song.spotifyArtwork = spotifyArtworkUrl?.slice((spotifyArtworkUrl?.lastIndexOf("/") ?? -1) + 1) ?? null;
