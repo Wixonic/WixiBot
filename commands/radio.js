@@ -140,6 +140,15 @@ module.exports = {
 					await Radio.load(song);
 
 					await interaction.editReply({
+						components: [{
+							type: ComponentType.ActionRow,
+							components: [{
+								label: "Watch on YouTube",
+								style: ButtonStyle.Link,
+								type: ComponentType.Button,
+								url: `https://www.youtube.com/watch?v=${song.youtubeId}`
+							}]
+						}],
 						embeds: [{
 							title: song.track,
 							description: `This song has been added to the waiting list.\n${Radio.waitingList.length > 1 ? (Radio.waitingList.length == 2 ? "One song remaining." : `${Radio.waitingList.length} songs remaining.`) : "The next song will be this one."}`,
@@ -185,7 +194,28 @@ module.exports = {
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
 					if (Radio.song?.state == "PAUSED") {
 						if (Radio.resume()) await interaction.editReply({
+							components: [{
+								type: ComponentType.ActionRow,
+								components: [{
+									label: "Watch on YouTube",
+									style: ButtonStyle.Link,
+									type: ComponentType.Button,
+									url: `https://www.youtube.com/watch?v=${song.youtubeId}`
+								}]
+							}],
 							content: `Song resumed: playing ${Radio.song.track} by ${Radio.song.artist}.`,
+							embeds: [{
+								title: song.track,
+								description: `This song has been added to the waiting list.\n${Radio.waitingList.length > 1 ? (Radio.waitingList.length == 2 ? "One song remaining." : `${Radio.waitingList.length} songs remaining.`) : "The next song will be this one."}`,
+								author: {
+									name: song.artist,
+									icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
+								},
+								thumbnail: {
+									url: song.spotifyArtworkURL
+								},
+								color: hexToIntColor(song.color)
+							}],
 							ephemeral: true
 						});
 						else await interaction.editReply({
@@ -208,7 +238,28 @@ module.exports = {
 					Radio.next();
 					Radio.refresh();
 					await interaction.editReply({
+						components: [{
+							type: ComponentType.ActionRow,
+							components: [{
+								label: "Watch on YouTube",
+								style: ButtonStyle.Link,
+								type: ComponentType.Button,
+								url: `https://www.youtube.com/watch?v=${song.youtubeId}`
+							}]
+						}],
 						content: `Skipping ${previousSongName}, and playing ${Radio.song.track} by ${Radio.song.artist}.`,
+						embeds: [{
+							title: song.track,
+							description: `This song has been added to the waiting list.\n${Radio.waitingList.length > 1 ? (Radio.waitingList.length == 2 ? "One song remaining." : `${Radio.waitingList.length} songs remaining.`) : "The next song will be this one."}`,
+							author: {
+								name: song.artist,
+								icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
+							},
+							thumbnail: {
+								url: song.spotifyArtworkURL
+							},
+							color: hexToIntColor(song.color)
+						}],
 						ephemeral: true
 					});
 				} else await interaction.editReply({
@@ -306,7 +357,10 @@ module.exports = {
 
 			case "list":
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
-
+					await interaction.editReply({
+						content: "Radio's list is not available right now.",
+						ephemeral: true
+					});
 				} else await interaction.editReply({
 					content: "Radio is not active right now.",
 					ephemeral: true
