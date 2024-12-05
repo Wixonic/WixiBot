@@ -6,7 +6,7 @@ const modals = require("./modals.js");
 
 client.on("ready", async (client) => {
 	log(`${client.user.username} online`);
-
+	
 	client.setDefaultActivity();
 });
 

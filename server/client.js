@@ -1,7 +1,8 @@
 const { Client } = require("discord.js-selfbot-v13");
 
+const { clone, wait } = require("../utils.js");
+
 const { BaseObject } = require("./base.js");
-const { clone, wait } = require("./utils.js");
 
 const config = require("../config.js");
 

@@ -1,9 +1,10 @@
 const log = require("../log.js");
 
+const spotify = require("../lib/spotify.js");
+
 const discord = require("./client.js");
 const { db } = require("./firebase.js");
 const { getCurrentTrackInfo } = require("./music.js");
-const spotify = require("../lib/spotify.js");
 const wavelink = require("./wavelink.js");
 
 const config = require("../config.js");
@@ -27,14 +28,17 @@ const main = async () => {
 			if (discord.activities.length > 0) discord.removeActivity("music");
 
 			if (song == null) {
-				log("Music stopped.");
-
 				currentSong = null;
 				await db.collection("activity").doc("song").delete();
 
 				discord.removeActivity("music");
-			} else {
-				log(`Music set to ${song.track} by ${song.artist} at volume ${song.volume}%.`);
+
+				log("Music stopped.");
+			} else if ((currentSong?.state != "PAUSED" && song.state == "PAUSED") || song.state != "PAUSED") {
+				if (song.state == "PAUSED" && currentSong) {
+					song = currentSong;
+					currentSong.state = "PAUSED";
+				}
 
 				const spotifySong = (await spotify.search(`artist:${song.artist} track:${song.track}`)) ?? null;
 				song.spotifyId = spotifySong?.id ?? null;
@@ -60,9 +64,10 @@ const main = async () => {
 						state: song.artist,
 						type: 2 // LISTENING
 					});
-				}
+				} else discord.removeActivity("music");
 
 				currentSong = song;
+				log(`Music set to ${currentSong.track} by ${currentSong.artist} at volume ${currentSong.volume}% (${currentSong.state}).`);
 			}
 		};
 

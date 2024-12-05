@@ -5,6 +5,7 @@
  * @property {string} artist
  * @property {string} album
  * @property {number?} startedAt
+ * @property {number?} pausedAt
  * @property {number} duration
  * @property {string?} spotifyArtwork
  * @property {string?} spotifyArtworkURL

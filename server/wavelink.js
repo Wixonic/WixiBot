@@ -1,8 +1,7 @@
 const wl = require("@darrellvs/node-wave-link-sdk");
 
 const log = require("../log.js");
-
-const { abort, wait } = require("./utils.js");
+const { abort, wait } = require("../utils.js");
 
 let ready = false;
 

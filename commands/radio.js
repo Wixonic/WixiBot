@@ -1,7 +1,8 @@
-const { ApplicationCommandType, ChannelType, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandChannelOption, SlashCommandStringOption } = require("discord.js");
+const { ApplicationCommandType, ChannelType, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandChannelOption, SlashCommandStringOption, SlashCommandNumberOption } = require("discord.js");
 const { VoiceConnectionStatus } = require("@discordjs/voice");
 
 const Radio = require("../lib/radio.js");
+const { hexToIntColor} = require("../utils.js");
 
 const config = require("../config.js");
 const settings = require("../settings.js");
@@ -51,12 +52,27 @@ module.exports = {
 				.setDescription("Resume radio")
 		).addSubcommand(
 			new SlashCommandSubcommandBuilder()
+				.setName("next")
+				.setDescription("Skip the current song")
+		).addSubcommand(
+			new SlashCommandSubcommandBuilder()
 				.setName("stop")
 				.setDescription("Clear songs on the radio's waiting list and stops the current song")
 		).addSubcommand(
 			new SlashCommandSubcommandBuilder()
 				.setName("clear")
 				.setDescription("Clear songs on the radio's waiting list")
+		).addSubcommand(
+			new SlashCommandSubcommandBuilder()
+				.setName("volume")
+				.setDescription("Change the radio's volume")
+				.addNumberOption(
+					new SlashCommandNumberOption()
+						.setName("volume")
+						.setDescription("In percents - Defaults to 20%.")
+						.setMinValue(0)
+						.setMaxValue(100)
+				)
 		).addSubcommand(
 			new SlashCommandSubcommandBuilder()
 				.setName("sync")
@@ -133,7 +149,8 @@ module.exports = {
 							},
 							thumbnail: {
 								url: song.spotifyArtworkURL
-							}
+							},
+							color: hexToIntColor(song.color)
 						}],
 						ephemeral: true
 					});
@@ -146,7 +163,14 @@ module.exports = {
 			case "pause":
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
 					if (Radio.song?.state == "PLAYING") {
-
+						if (Radio.pause()) await interaction.editReply({
+							content: `Song paused.`,
+							ephemeral: true
+						});
+						else await interaction.editReply({
+							content: "Failed to pause the song.",
+							ephemeral: true
+						});
 					} else await interaction.editReply({
 						content: Radio.song.state == "PAUSED" ? "Can't pause, the song is already paused." : "There's currently no song to pause.",
 						ephemeral: true
@@ -160,7 +184,14 @@ module.exports = {
 			case "resume":
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
 					if (Radio.song?.state == "PAUSED") {
-
+						if (Radio.resume()) await interaction.editReply({
+							content: `Song resumed: playing ${Radio.song.track} by ${Radio.song.artist}.`,
+							ephemeral: true
+						});
+						else await interaction.editReply({
+							content: "Failed to resume the song.",
+							ephemeral: true
+						});
 					} else await interaction.editReply({
 						content: Radio.song.state == "PLAYING" ? "Can't resume, the song is already playing." : "There's currently no song to resume.",
 						ephemeral: true
@@ -171,22 +202,66 @@ module.exports = {
 				});
 				break;
 
+			case "next":
+				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
+					const previousSongName = Radio.song.track;
+					Radio.next();
+					Radio.refresh();
+					await interaction.editReply({
+						content: `Skipping ${previousSongName}, and playing ${Radio.song.track} by ${Radio.song.artist}.`,
+						ephemeral: true
+					});
+				} else await interaction.editReply({
+					content: "Radio is not active right now.",
+					ephemeral: true
+				});
+				break;
+
 			case "stop":
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
-
+					Radio.stop();
+					await interaction.editReply({
+						content: "Radio stopped. Radio's waiting list has been cleared.",
+						ephemeral: true
+					});
 				} else await interaction.editReply({
-					content: "Radio is not active right now",
+					content: "Radio is not active right now.",
+					ephemeral: true
+				});
+				break;
+
+			case "volume":
+				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
+					Radio.setVolume(interaction.options.getNumber("volume"));
+					await interaction.editReply({
+						content: `Radio's volume set to ${Radio.volume}%.`,
+						ephemeral: true
+					});
+				} else await interaction.editReply({
+					content: "Radio is not active right now.",
 					ephemeral: true
 				});
 				break;
 
 			case "clear":
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
-
+					Radio.waitingList = [];
+					await interaction.editReply({
+						content: "Radio's waiting list has been cleared.",
+						ephemeral: true
+					});
 				} else await interaction.editReply({
-					content: "Radio is not active right now",
+					content: "Radio is not active right now.",
 					ephemeral: true
 				});
+				break;
+
+			case "sync":
+
+				break;
+
+			case "desync":
+
 				break;
 
 			case "song":
@@ -201,7 +276,8 @@ module.exports = {
 							},
 							thumbnail: {
 								url: Radio.song.spotifyArtworkURL
-							}
+							},
+							color: hexToIntColor(Radio.song.color)
 						}],
 						ephemeral: true
 					});
@@ -217,7 +293,7 @@ module.exports = {
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
 
 				} else await interaction.editReply({
-					content: "Radio is not active right now",
+					content: "Radio is not active right now.",
 					ephemeral: true
 				});
 				break;
