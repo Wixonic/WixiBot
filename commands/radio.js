@@ -244,21 +244,21 @@ module.exports = {
 								label: "Watch on YouTube",
 								style: ButtonStyle.Link,
 								type: ComponentType.Button,
-								url: `https://www.youtube.com/watch?v=${song.youtubeId}`
+								url: `https://www.youtube.com/watch?v=${Radio.song.youtubeId}`
 							}]
 						}],
 						content: `Skipping ${previousSongName}, and playing ${Radio.song.track} by ${Radio.song.artist}.`,
 						embeds: [{
-							title: song.track,
+							title: Radio.song.track,
 							description: `This song has been added to the waiting list.\n${Radio.waitingList.length > 1 ? (Radio.waitingList.length == 2 ? "One song remaining." : `${Radio.waitingList.length} songs remaining.`) : "The next song will be this one."}`,
 							author: {
-								name: song.artist,
+								name: Radio.song.artist,
 								icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
 							},
 							thumbnail: {
-								url: song.spotifyArtworkURL
+								url: Radio.song.spotifyArtworkURL
 							},
-							color: hexToIntColor(song.color)
+							color: hexToIntColor(Radio.song.color)
 						}],
 						ephemeral: true
 					});
