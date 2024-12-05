@@ -1,8 +1,8 @@
-const { ApplicationCommandType, ChannelType, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandChannelOption, SlashCommandStringOption, SlashCommandNumberOption } = require("discord.js");
+const { ComponentType, ApplicationCommandType, ChannelType, SlashCommandBuilder, SlashCommandChannelOption, SlashCommandNumberOption, SlashCommandStringOption, SlashCommandSubcommandBuilder, ButtonStyle } = require("discord.js");
 const { VoiceConnectionStatus } = require("@discordjs/voice");
 
 const Radio = require("../lib/radio.js");
-const { hexToIntColor} = require("../utils.js");
+const { hexToIntColor } = require("../utils.js");
 
 const config = require("../config.js");
 const settings = require("../settings.js");
@@ -257,16 +257,31 @@ module.exports = {
 				break;
 
 			case "sync":
-
+				await interaction.editReply({
+					content: "Syncing is not available right now.",
+					ephemeral: true
+				});
 				break;
 
 			case "desync":
-
+				await interaction.editReply({
+					content: "Syncing is not available right now.",
+					ephemeral: true
+				});
 				break;
 
 			case "song":
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready && Radio.song) {
 					await interaction.editReply({
+						components: [{
+							type: ComponentType.ActionRow,
+							components: [{
+								label: "Watch on YouTube",
+								style: ButtonStyle.Link,
+								type: ComponentType.Button,
+								url: `https://www.youtube.com/watch?v=${Radio.song.youtubeId}`
+							}]
+						}],
 						embeds: [{
 							title: Radio.song.track,
 							description: `This song is currently playing at <#${Radio.channel.id}>.`,
