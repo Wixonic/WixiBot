@@ -9,6 +9,7 @@
 		"@darrellvs/node-wave-link-sdk": "^1.0.14",
 		"applescript": "^1.0.0",
 		"discord.js-selfbot-v13": "^3.4.5",
-		"firebase-admin": "^12.7.0"
+		"firebase-admin": "^12.7.0",
+		"sharp": "^0.33.5"
 	}
 }
