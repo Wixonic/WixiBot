@@ -1,10 +1,14 @@
+const { RichPresence } = require("discord.js-selfbot-v13");
+
 const log = require("../log.js");
 
+const request = require("../lib/request.js");
 const spotify = require("../lib/spotify.js");
 
 const discord = require("./client.js");
 const { db } = require("./firebase.js");
 const { getCurrentTrackInfo } = require("./music.js");
+const wt = require("./warthunder.js");
 const wavelink = require("./wavelink.js");
 
 const config = require("../config.js");
@@ -13,6 +17,7 @@ const config = require("../config.js");
  * @type {import("../types.js").Song?}
  */
 let currentSong = null;
+let lastMapRefresh = 0;
 
 const main = async () => {
 	await Promise.all([
@@ -53,7 +58,7 @@ const main = async () => {
 							large_image: `spotify:${song.spotifyArtwork}`,
 							large_text: song.album,
 							small_image: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.apple_music}.png`,
-							small_text: "Apple Music",
+							small_text: "Apple Music"
 						},
 						timestamps: {
 							start: song.startedAt,
@@ -78,11 +83,54 @@ const main = async () => {
 
 			if (currentSong == null || (currentSong?.state != song.state || currentSong?.track != song.track || currentSong?.artist != song.artist || currentSong?.album != song.album || currentSong?.startedAt != song.startedAt) || song.volume != wavelink.volume) await update();
 		}
-
-		setTimeout(main, 2500);
 	};
 
-	getCurrentTrackInfo(processTrack);
+	await processTrack(await getCurrentTrackInfo());
+
+	const processWarThunder = async () => {
+		const data = await wt();
+
+		if (data.valid) {
+			if (lastMapRefresh + 30000 < Date.now()) {
+				const getImage = async () => {
+					await request({
+						url: "http://server.wixonic.fr/warthundermap.png",
+						method: "POST",
+						headers: {
+							authorization: `WixKey ${config.wixkey}`,
+							"content-type": "image/png"
+						},
+						secure: false,
+						type: "raw",
+						body: data.map.toString("base64url")
+					});
+
+					return await RichPresence.getExternal(discord.client, config.discord.application.clientId, `http://server.wixonic.fr/warthundermap.png?t=${Date.now()}`);
+				};
+
+				const mapImage = await getImage();
+
+				discord.addActivity("wt", {
+					applicationId: config.discord.application.clientId,
+					assets: {
+						large_image: mapImage[0].external_asset_path,
+						large_text: data.vehicle,
+						small_image: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.war_thunder}.png`,
+						small_text: "War Thunder"
+					},
+					name: "War Thunder",
+					details: data.vehicle,
+					type: 0 // PLAYING
+				});
+
+				lastMapRefresh = Date.now();
+			}
+		} else discord.removeActivity("wt");
+	};
+
+	await processWarThunder();
+
+	setTimeout(main, 2500);
 };
 
 main();

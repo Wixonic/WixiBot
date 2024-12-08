@@ -3,10 +3,13 @@ const { client } = require("./clients.js");
 const commands = require("./commands.js");
 const log = require("./log.js");
 const modals = require("./modals.js");
+const server = require("./server.js");
+
+server.init();
 
 client.on("ready", async (client) => {
 	log(`${client.user.username} online`);
-	
+
 	client.setDefaultActivity();
 });
 

@@ -2,8 +2,8 @@
 	"name": "server",
 	"main": "main.js",
 	"scripts": {
-		"start": "node --no-warnings .",
-		"test": "node --trace-warnings ."
+		"start": "node --no-warnings ./main.js",
+		"test": "node --trace-warnings ./main.js"
 	},
 	"dependencies": {
 		"@darrellvs/node-wave-link-sdk": "^1.0.14",

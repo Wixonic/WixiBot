@@ -1,6 +1,6 @@
 const applescript = require("applescript");
 
-const getCurrentTrackInfo = (callback) => {
+const getCurrentTrackInfo = () => new Promise((resolve) => {
 	const script = `
 if application "Music" is running then
 	tell application "Music"
@@ -26,7 +26,7 @@ end if`;
 
 	applescript.execString(script, (e, result) => {
 		if (e || result[0] == "STOPPED") {
-			callback(null);
+			resolve(null);
 		} else {
 			const [
 				state,
@@ -37,7 +37,7 @@ end if`;
 				duration
 			] = result;
 
-			callback({
+			resolve({
 				state,
 				track: trackName == "" ? "unknown track" : trackName,
 				artist: artistName == "" ? "unknown artist" : artistName,
@@ -47,7 +47,7 @@ end if`;
 			});
 		}
 	});
-};
+});
 
 module.exports = {
 	getCurrentTrackInfo
