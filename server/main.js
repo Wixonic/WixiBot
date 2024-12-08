@@ -18,6 +18,7 @@ const config = require("../config.js");
  */
 let currentSong = null;
 let lastMapRefresh = 0;
+let inWarThunderGameSince = null;
 
 const main = async () => {
 	await Promise.all([
@@ -91,6 +92,7 @@ const main = async () => {
 		const data = await wt();
 
 		if (data.valid) {
+			if (!inWarThunderGameSince) inWarThunderGameSince = Date.now();
 			if (lastMapRefresh + 30000 < Date.now()) {
 				const getImage = async () => {
 					await request({
@@ -118,6 +120,9 @@ const main = async () => {
 						small_image: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.war_thunder}.png`,
 						small_text: "War Thunder"
 					},
+					timestamps: {
+						start: inWarThunderGameSince
+					},
 					name: "War Thunder",
 					details: data.vehicle,
 					type: 0 // PLAYING
@@ -125,7 +130,10 @@ const main = async () => {
 
 				lastMapRefresh = Date.now();
 			}
-		} else discord.removeActivity("wt");
+		} else {
+			discord.removeActivity("wt");
+			inWarThunderGameSince = null;
+		}
 	};
 
 	await processWarThunder();
