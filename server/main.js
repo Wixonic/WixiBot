@@ -131,6 +131,7 @@ const main = async () => {
 				lastMapRefresh = Date.now();
 			}
 		} else {
+			console.error(data.errors);
 			discord.removeActivity("wt");
 			inWarThunderGameSince = null;
 		}
