@@ -13,7 +13,7 @@ const server = {
 
 		app.use(bodyParser.text({
 			type: "image/png",
-			limit: "50mb"
+			limit: "500mb"
 		}));
 
 		if (!fs.existsSync(config.cache.server)) fs.mkdirSync(config.cache.server);
