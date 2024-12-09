@@ -13,44 +13,6 @@ const get = async () => {
 	let vehicle = "unknown vehicle";
 
 	try {
-		const indicators = await request({
-			url: new URL(config.warthunder.paths.vehicle.indicators, `http://localhost:${config.warthunder.port}`),
-			type: "json",
-			secure: false
-		});
-
-		switch (indicators?.army) {
-			case "tank":
-				vehicle = `Tank ${indicators.type.split("/")[1].slice(3).split("_").join(" ").toUpperCase()} (${indicators.crew_current}/${indicators.crew_total} crew members remaining)`;
-				break;
-
-			case "air":
-				const state = await request({
-					url: new URL(config.warthunder.paths.vehicle.state, `http://localhost:${config.warthunder.port}`),
-					type: "json",
-					secure: false
-				});
-
-				const name = indicators.type.split("_");
-				name.pop();
-
-				const altitude = Math.ceil(state["H, m"] / 100) * 100;
-				const speed = Math.ceil(state["TAS, km/h"] / 50) * 50;
-
-				vehicle = `Plane ${name.join(" ").toUpperCase()} (${speed} km/h - ${altitude} m)`;
-				break;
-
-			default:
-				vehicle = "Naval vehicle"
-				break;
-		};
-	} catch (e) {
-		errors.push(`Indicators: ${e}`);
-	}
-
-	await wait(config.warthunder.waitingTime);
-
-	try {
 		info = await request({
 			url: new URL(config.warthunder.paths.map.info, `http://localhost:${config.warthunder.port}`),
 			type: "json",
@@ -101,6 +63,48 @@ const get = async () => {
 		}
 	} catch (e) {
 		errors.push(`Image: ${e}`);
+	}
+
+	await wait(config.warthunder.waitingTime);
+
+	if (errors.length > 0) {
+		try {
+			const indicators = await request({
+				url: new URL(config.warthunder.paths.vehicle.indicators, `http://localhost:${config.warthunder.port}`),
+				type: "json",
+				secure: false
+			});
+
+			switch (indicators?.army) {
+				case "tank":
+					vehicle = `Tank ${indicators.type.split("/")[1].slice(3).split("_").join(" ").toUpperCase()} (${indicators.crew_current}/${indicators.crew_total} crew members remaining)`;
+					break;
+
+				case "air":
+					await wait(config.warthunder.waitingTime);
+
+					const state = await request({
+						url: new URL(config.warthunder.paths.vehicle.state, `http://localhost:${config.warthunder.port}`),
+						type: "json",
+						secure: false
+					});
+
+					const name = indicators.type.split("_");
+					name.pop();
+
+					const altitude = Math.ceil(state["H, m"] / 100) * 100;
+					const speed = Math.ceil(state["TAS, km/h"] / 50) * 50;
+
+					vehicle = `Plane ${name.join(" ").toUpperCase()} (${speed} km/h - ${altitude} m)`;
+					break;
+
+				default:
+					vehicle = "Naval vehicle"
+					break;
+			};
+		} catch (e) {
+			errors.push(`Indicators: ${e}`);
+		}
 	}
 
 	return {
