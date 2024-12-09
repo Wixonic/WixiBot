@@ -67,7 +67,7 @@ const get = async () => {
 
 	await wait(config.warthunder.waitingTime);
 
-	if (errors.length > 0) {
+	if (errors.length == 0) {
 		try {
 			const indicators = await request({
 				url: new URL(config.warthunder.paths.vehicle.indicators, `http://localhost:${config.warthunder.port}`),
