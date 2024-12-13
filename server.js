@@ -16,7 +16,9 @@ const server = {
 			limit: "500mb"
 		}));
 
-		if (!fs.existsSync(config.cache.server)) fs.mkdirSync(config.cache.server);
+		if (!fs.existsSync(config.cache.server)) fs.mkdirSync(config.cache.server, {
+			recursive: true
+		});
 
 		app.get("/warthundermap.png", (_, res) => {
 			const filePath = path.join(config.cache.server, "warthundermap.png");
