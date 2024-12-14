@@ -17,7 +17,7 @@ const requestCurrentClass = async () => {
 			if (!fs.existsSync(config.cache.pronote)) fs.mkdirSync(config.cache.pronote, { recursive: true });
 
 			const storedInformation = JSON.parse(fs.readFileSync(path.join(config.cache.pronote, "refresh.json"), "utf-8"));
-			log(storedInformation);
+			storedInformation.deviceUUID = config.pronote.deviceId;
 
 			const refreshInformation = await pawnote.loginToken(session, storedInformation);
 			fs.writeFileSync(path.join(config.cache.pronote, "refresh.json"), JSON.stringify(refreshInformation), "utf-8");
@@ -25,16 +25,11 @@ const requestCurrentClass = async () => {
 			log(`Failed to authenticate from refresh token: ${e}`);
 
 			try {
-				fs.rmSync(config.cache.pronote, { recursive: true });
-				fs.mkdirSync(config.cache.pronote, { recursive: true });
-
 				const refreshInformation = await pawnote.loginQrCode(session, {
 					deviceUUID: config.pronote.deviceId,
 					qr: config.pronote.qr,
 					pin: config.pronote.pin
 				});
-
-				log(refreshInformation);
 
 				fs.writeFileSync(path.join(config.cache.pronote, "refresh.json"), JSON.stringify(refreshInformation), "utf-8");
 			} catch (e) {
@@ -74,8 +69,6 @@ const requestCurrentClass = async () => {
 		}
 	} else return false;
 };
-
-requestCurrentClass().then((response) => log(response));
 
 module.exports = {
 	requestCurrentClass
