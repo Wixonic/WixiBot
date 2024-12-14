@@ -135,8 +135,23 @@ module.exports = {
 				break;
 
 			case "add":
+				const query = interaction.options.getString("query");
+
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
-					const song = await Radio.search(interaction.options.getString("query"));
+					const videoIdRegex = /^[a-zA-Z0-9_-]{11}$/;
+					const youtubeUrlRegex = /(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+
+					/**
+					 * @type {import("../types.js").Song}
+					 */
+					let song;
+
+					if (videoIdRegex.test(query)) song = await Radio.get(query);
+					else {
+						if (youtubeUrlRegex.test(query)) song = await Radio.get(query.match(youtubeUrlRegex)?.at(1));
+						else song = await Radio.search(query);
+					}
+
 					await Radio.load(song);
 
 					await interaction.editReply({
@@ -237,29 +252,35 @@ module.exports = {
 					const previousSongName = Radio.song.track;
 					Radio.next();
 					Radio.refresh();
-					await interaction.editReply({
-						components: [{
-							type: ComponentType.ActionRow,
+
+					if (Radio.song?.state == "PLAYING") {
+						await interaction.editReply({
 							components: [{
-								label: "Watch on YouTube",
-								style: ButtonStyle.Link,
-								type: ComponentType.Button,
-								url: `https://www.youtube.com/watch?v=${Radio.song.youtubeId}`
-							}]
-						}],
-						content: `Skipping ${previousSongName}, and playing ${Radio.song.track} by ${Radio.song.artist}.`,
-						embeds: [{
-							title: Radio.song.track,
-							description: `This song is currently playing at <#${Radio.channel.id}>.`,
-							author: {
-								name: Radio.song.artist,
-								icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
-							},
-							thumbnail: {
-								url: Radio.song.spotifyArtworkURL
-							},
-							color: hexToIntColor(Radio.song.color)
-						}],
+								type: ComponentType.ActionRow,
+								components: [{
+									label: "Watch on YouTube",
+									style: ButtonStyle.Link,
+									type: ComponentType.Button,
+									url: `https://www.youtube.com/watch?v=${Radio.song.youtubeId}`
+								}]
+							}],
+							content: `Skipping ${previousSongName}, and playing ${Radio.song.track} by ${Radio.song.artist}.`,
+							embeds: [{
+								title: Radio.song.track,
+								description: `This song is currently playing at <#${Radio.channel.id}>.`,
+								author: {
+									name: Radio.song.artist,
+									icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
+								},
+								thumbnail: {
+									url: Radio.song.spotifyArtworkURL
+								},
+								color: hexToIntColor(Radio.song.color)
+							}],
+							ephemeral: true
+						});
+					} else await interaction.editReply({
+						content: `Skipping ${previousSongName}.`,
 						ephemeral: true
 					});
 				} else await interaction.editReply({
