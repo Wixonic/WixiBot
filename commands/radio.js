@@ -166,7 +166,7 @@ module.exports = {
 						}],
 						embeds: [{
 							title: song.track,
-							description: `This song has been added to the waiting list.\n${Radio.waitingList.length > 1 ? (Radio.waitingList.length == 2 ? "One song remaining." : `${Radio.waitingList.length} songs remaining.`) : "The next song will be this one."}`,
+							description: `This song has been added to the waiting list.\n${Radio.waitingList.length > 1 ? (Radio.waitingList.length == 2 ? "One song remaining." : `${Radio.waitingList.length - 1} songs remaining.`) : "The next song will be this one."}`,
 							author: {
 								name: song.artist,
 								icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
