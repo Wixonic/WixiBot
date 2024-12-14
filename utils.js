@@ -53,7 +53,14 @@ const getRoleSettingsForGuild = (guildId, roleId) => {
 	return null;
 };
 
-const hexToIntColor = (hex) => parseInt(hex.replace("#", "0x"), 16);
+const hexToIntColor = (hex) => {
+	try {
+		return parseInt(hex.replace("#", "0x"), 16);
+	} catch {
+		return 0;
+	}
+};
+
 const titleCase = (str) => str.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 const rgbToHex = (r, g, b) => `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
 const wait = (time = 0) => new Promise((resolve) => setTimeout(() => resolve("Finished waiting"), time * 1000));
