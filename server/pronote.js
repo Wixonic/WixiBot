@@ -9,7 +9,19 @@ const config = require("../config.js");
 
 let gotError = false;
 
-const requestCurrentClass = async () => {
+/**
+ * @typedef {Object} Class
+ * @property {string} subject
+ * @property {Date} startDate
+ * @property {Date} endDate
+ * 
+ */
+
+/**
+ * @param {Date} date 
+ * @returns Class | false
+ */
+const requestClassAt = async (date) => {
 	if (!gotError) {
 		const session = pawnote.createSessionHandle();
 
@@ -40,9 +52,9 @@ const requestCurrentClass = async () => {
 		}
 
 		try {
-			const today = new Date();
+			const today = new Date(date.getTime());
 			today.setHours(0, 0, 0, 0);
-			const tomorrow = new Date();
+			const tomorrow = new Date(date.getTime());
 			tomorrow.setHours(23, 59, 59, 999);
 
 			const todayTimetable = await pawnote.timetableFromIntervals(session, today, tomorrow);
@@ -50,7 +62,7 @@ const requestCurrentClass = async () => {
 			let currentClass;
 
 			for (const el of todayTimetable.classes) {
-				if (!(el.canceled || el.exempted) && el.startDate.getTime() <= Date.now() && el.endDate.getTime() >= Date.now()) {
+				if (!(el.canceled || el.exempted) && el.startDate.getTime() <= date.getTime() && el.endDate.getTime() >= date.getTime()) {
 					currentClass = el;
 				}
 			}
@@ -71,5 +83,5 @@ const requestCurrentClass = async () => {
 };
 
 module.exports = {
-	requestCurrentClass
+	requestClassAt
 };

@@ -138,28 +138,21 @@ let lastPronoteUpdate = 0;
 
 const processPronote = async () => {
 	if (lastPronoteUpdate + 60 * 1000 < Date.now()) {
-		const currentClass = await pronote.requestCurrentClass();
+		const currentClass = await pronote.requestClassAt(new Date());
 
-		log(currentClass);
-
-		if (!currentClass) {
-			discord.removeActivity("pronote");
-		} else {
-			/* discord.addActivity("pronote", {
+		if (!currentClass) discord.removeActivity("pronote");
+		else {
+			discord.addActivity("pronote", {
 				applicationId: config.discord.application.clientId,
 				assets: {
-					large_image: mapImage[0].external_asset_path,
-					large_text: data.vehicle,
-					small_image: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.war_thunder}.png`,
-					small_text: "War Thunder"
+					large_image: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.clock}.png`,
+					large_text: `Ends at ${String(currentClass.endDate.getHours()).padStart(2, "0")}:${String(currentClass.endDate.getMinutes()).padStart(2, "0")} UTC+${-currentClass.endDate.getTimezoneOffset() / 60}`
 				},
-				timestamps: {
-					start: inWarThunderGameSince
-				},
-				name: "War Thunder",
-				details: data.vehicle,
-				type: 0 // PLAYING
-			}); */
+				name: currentClass.subject,
+				details: currentClass.subject,
+				state: `Started at ${String(currentClass.startDate.getHours()).padStart(2, "0")}:${String(currentClass.startDate.getMinutes()).padStart(2, "0")} UTC+${-currentClass.startDate.getTimezoneOffset() / 60}`,
+				type: 5 // COMPETING
+			});
 		}
 
 		lastPronoteUpdate = Date.now();
