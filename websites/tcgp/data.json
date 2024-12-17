@@ -1,0 +1,2941 @@
+{
+	"expansions": {
+		"A1": {
+			"boosters": [
+				{
+					"name": "Dracaufeu",
+					"odds": {
+						"cards": [
+							[
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									0,
+									0.9,
+									0.05,
+									0.01666,
+									0.02572,
+									0.005,
+									0.00222,
+									0.00040
+								],
+								[
+									0,
+									0.6,
+									0.2,
+									0.06664,
+									0.10288,
+									0.02,
+									0.00888,
+									0.00160
+								]
+							],
+							[
+								[
+									0,
+									0,
+									0,
+									0,
+									0.4,
+									0.5,
+									0.05,
+									0.05
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.4,
+									0.5,
+									0.05,
+									0.05
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.4,
+									0.5,
+									0.05,
+									0.05
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.4,
+									0.5,
+									0.05,
+									0.05
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.4,
+									0.5,
+									0.05,
+									0.05
+								]
+							]
+						],
+						"boosters": [
+							0.995,
+							0.05
+						]
+					}
+				},
+				{
+					"name": "Pikachu",
+					"odds": {
+						"cards": [
+							[
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									0,
+									0.9,
+									0.05,
+									0.01666,
+									0.02572,
+									0.005,
+									0.00222,
+									0.00040
+								],
+								[
+									0,
+									0.6,
+									0.2,
+									0.06664,
+									0.10288,
+									0.02,
+									0.00888,
+									0.00160
+								]
+							],
+							[
+								[
+									0,
+									0,
+									0,
+									0,
+									0.4,
+									0.5,
+									0.05,
+									0.05
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.4,
+									0.5,
+									0.05,
+									0.05
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.4,
+									0.5,
+									0.05,
+									0.05
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.4,
+									0.5,
+									0.05,
+									0.05
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.4,
+									0.5,
+									0.05,
+									0.05
+								]
+							]
+						],
+						"boosters": [
+							0.995,
+							0.05
+						]
+					}
+				},
+				{
+					"name": "Mewtwo",
+					"odds": {
+						"cards": [
+							[
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									0,
+									0.9,
+									0.05,
+									0.01666,
+									0.02572,
+									0.005,
+									0.00222,
+									0.00040
+								],
+								[
+									0,
+									0.6,
+									0.2,
+									0.06664,
+									0.10288,
+									0.02,
+									0.00888,
+									0.00160
+								]
+							],
+							[
+								[
+									0,
+									0,
+									0,
+									0,
+									0.42105,
+									0.47368,
+									0.05263,
+									0.05263
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.42105,
+									0.47368,
+									0.05263,
+									0.05263
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.42105,
+									0.47368,
+									0.05263,
+									0.05263
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.42105,
+									0.47368,
+									0.05263,
+									0.05263
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.42105,
+									0.47368,
+									0.05263,
+									0.05263
+								]
+							]
+						],
+						"boosters": [
+							0.995,
+							0.05
+						]
+					}
+				}
+			],
+			"pokémons": [
+				{
+					"name": "Bulbizarre",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Herbizarre",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 1
+				},
+				{
+					"name": "Florizarre",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 2
+				},
+				{
+					"name": "Florizarre-ex",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 3
+				},
+				{
+					"name": "Chenipan",
+					"boosters": [
+						1
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Chrysacier",
+					"boosters": [
+						1
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Papilusion",
+					"boosters": [
+						1
+					],
+					"type": 0,
+					"rarity": 2
+				},
+				{
+					"name": "Aspicot",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Coconfort",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Dardagnan",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 2
+				},
+				{
+					"name": "Mystherbe",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Ortide",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 1
+				},
+				{
+					"name": "Rafflesia",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 2
+				},
+				{
+					"name": "Paras",
+					"boosters": [
+						1
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Parasect",
+					"boosters": [
+						1
+					],
+					"type": 0,
+					"rarity": 1
+				},
+				{
+					"name": "Mimitoss",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Aéromite",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 1
+				},
+				{
+					"name": "Chétiflor",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Boustiflor",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 1
+				},
+				{
+					"name": "Empiflor",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 2
+				},
+				{
+					"name": "Noeudnoeuf",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Noadkoko",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 2
+				},
+				{
+					"name": "Noadkoko-ex",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 3
+				},
+				{
+					"name": "Saquedeneu",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Insécateur",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Scarabrute",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 0,
+					"rarity": 1
+				},
+				{
+					"name": "Doudouvet",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Farfaduvet",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 0,
+					"rarity": 1
+				},
+				{
+					"name": "Chlorobule",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Fragilady",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 0,
+					"rarity": 1
+				},
+				{
+					"name": "Cabriolaine",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Chevroum",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 0
+				},
+				{
+					"name": "Salamèche",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 0
+				},
+				{
+					"name": "Reptincel",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 1
+				},
+				{
+					"name": "Dracaufeu",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 2
+				},
+				{
+					"name": "Dracaufeu-ex",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 3
+				},
+				{
+					"name": "Goupix",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 0
+				},
+				{
+					"name": "Feunard",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 1
+				},
+				{
+					"name": "Caninos",
+					"boosters": [
+						1
+					],
+					"type": 1,
+					"rarity": 0
+				},
+				{
+					"name": "Arcanin",
+					"boosters": [
+						1
+					],
+					"type": 1,
+					"rarity": 2
+				},
+				{
+					"name": "Arcanin-ex",
+					"boosters": [
+						1
+					],
+					"type": 1,
+					"rarity": 3
+				},
+				{
+					"name": "Ponyta",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 1,
+					"rarity": 0
+				},
+				{
+					"name": "Galopa",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 1,
+					"rarity": 1
+				},
+				{
+					"name": "Magmar",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 0
+				},
+				{
+					"name": "Pyroli",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 2
+				},
+				{
+					"name": "Sulfura",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 2
+				},
+				{
+					"name": "Sulfura-ex",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 3
+				},
+				{
+					"name": "Aflamanoir",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 1,
+					"rarity": 0
+				},
+				{
+					"name": "Tritox",
+					"boosters": [
+						2
+					],
+					"type": 1,
+					"rarity": 0
+				},
+				{
+					"name": "Malamandre",
+					"boosters": [
+						2
+					],
+					"type": 1,
+					"rarity": 0
+				},
+				{
+					"name": "Grillepattes",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 1,
+					"rarity": 0
+				},
+				{
+					"name": "Scolocendre",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 1,
+					"rarity": 1
+				},
+				{
+					"name": "Carapuce",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Carabaffe",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Tortank",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 2
+				},
+				{
+					"name": "Tortank-ex",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 3
+				},
+				{
+					"name": "Psykokwak",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Akwakwak",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Ptitard",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Têtard",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Tartard",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 2
+				},
+				{
+					"name": "Tentacool",
+					"boosters": [
+						2
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Tentacruel",
+					"boosters": [
+						2
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Otaria",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Lamantine",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Kokiyas",
+					"boosters": [
+						2
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Crustabri",
+					"boosters": [
+						2
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Krabby",
+					"boosters": [
+						2
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Krabboss",
+					"boosters": [
+						2
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Hypotrempe",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Hypocéan",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Poissirène",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Poissoroy",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Stari",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Staross",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Starross-ex",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 3
+				},
+				{
+					"name": "Magicarpe",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Léviator",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 2
+				},
+				{
+					"name": "Lokhlass",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 2
+				},
+				{
+					"name": "Aquali",
+					"boosters": [
+						2
+					],
+					"type": 2,
+					"rarity": 2
+				},
+				{
+					"name": "Amonita",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Amonistar",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 2
+				},
+				{
+					"name": "Artikodin",
+					"boosters": [
+						2
+					],
+					"type": 2,
+					"rarity": 2
+				},
+				{
+					"name": "Artikodin-ex",
+					"boosters": [
+						2
+					],
+					"type": 2,
+					"rarity": 3
+				},
+				{
+					"name": "Couaneton",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Lakmécygne",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Grenousse",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Croâporal",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Amphinobi",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 2
+				},
+				{
+					"name": "Concombaffe",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Denticrisse",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Frissonille",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 2,
+					"rarity": 0
+				},
+				{
+					"name": "Beldeneige",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 2,
+					"rarity": 1
+				},
+				{
+					"name": "Pikachu",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 0
+				},
+				{
+					"name": "Raichu",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 2
+				},
+				{
+					"name": "Pikachu-ex",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 3
+				},
+				{
+					"name": "Magnéti",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 0
+				},
+				{
+					"name": "Magnéton",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 2
+				},
+				{
+					"name": "Voltorbe",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 0
+				},
+				{
+					"name": "Électrode",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 1
+				},
+				{
+					"name": "Élektek",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 0
+				},
+				{
+					"name": "Voltali",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 2
+				},
+				{
+					"name": "Électhor",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 2
+				},
+				{
+					"name": "Électhor-ex",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 3
+				},
+				{
+					"name": "Zébibron",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 3,
+					"rarity": 0
+				},
+				{
+					"name": "Zéblitz",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 3,
+					"rarity": 1
+				},
+				{
+					"name": "Anchwatt",
+					"boosters": [
+						2
+					],
+					"type": 3,
+					"rarity": 0
+				},
+				{
+					"name": "Lampéroie",
+					"boosters": [
+						2
+					],
+					"type": 3,
+					"rarity": 1
+				},
+				{
+					"name": "Ohmassacre",
+					"boosters": [
+						2
+					],
+					"type": 3,
+					"rarity": 2
+				},
+				{
+					"name": "Galvaran",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 3,
+					"rarity": 0
+				},
+				{
+					"name": "Iguolta",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 3,
+					"rarity": 0
+				},
+				{
+					"name": "Wattapik",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 3,
+					"rarity": 1
+				},
+				{
+					"name": "Médofée",
+					"boosters": [
+						1
+					],
+					"type": 4,
+					"rarity": 0
+				},
+				{
+					"name": "Médodelfe",
+					"boosters": [
+						1
+					],
+					"type": 4,
+					"rarity": 1
+				},
+				{
+					"name": "Abra",
+					"boosters": [
+						0
+					],
+					"type": 4,
+					"rarity": 0
+				},
+				{
+					"name": "Kadabra",
+					"boosters": [
+						0
+					],
+					"type": 4,
+					"rarity": 1
+				},
+				{
+					"name": "Alakazam",
+					"boosters": [
+						0
+					],
+					"type": 4,
+					"rarity": 2
+				},
+				{
+					"name": "Ramoloss",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 4,
+					"rarity": 0
+				},
+				{
+					"name": "Flagadoss",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 4,
+					"rarity": 1
+				},
+				{
+					"name": "Fantominus",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 0
+				},
+				{
+					"name": "Spectrum",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 1
+				},
+				{
+					"name": "Ectoplasma",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 4,
+					"rarity": 2
+				},
+				{
+					"name": "Ectoplasma-ex",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 3
+				},
+				{
+					"name": "Soporifik",
+					"boosters": [
+						1
+					],
+					"type": 4,
+					"rarity": 0
+				},
+				{
+					"name": "Hypnomade",
+					"boosters": [
+						1
+					],
+					"type": 4,
+					"rarity": 2
+				},
+				{
+					"name": "M. Mime",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 1
+				},
+				{
+					"name": "Lippoutou",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 0
+				},
+				{
+					"name": "Mewtwo",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 4,
+					"rarity": 2
+				},
+				{
+					"name": "Mewtwo-ex",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 3
+				},
+				{
+					"name": "Tarsal",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 0
+				},
+				{
+					"name": "Kirlia",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 1
+				},
+				{
+					"name": "Gardevoir",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 2
+				},
+				{
+					"name": "Chovsourir",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 4,
+					"rarity": 0
+				},
+				{
+					"name": "Rhinolove",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 4,
+					"rarity": 0
+				},
+				{
+					"name": "Gringolem",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 4,
+					"rarity": 0
+				},
+				{
+					"name": "Golemastoc",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 4,
+					"rarity": 1
+				},
+				{
+					"name": "Sabelette",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Sablaireau",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 5,
+					"rarity": 1
+				},
+				{
+					"name": "Taupiqueur",
+					"boosters": [
+						1
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Triopikeur",
+					"boosters": [
+						1
+					],
+					"type": 5,
+					"rarity": 1
+				},
+				{
+					"name": "Férosinge",
+					"boosters": [
+						0
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Colossinge",
+					"boosters": [
+						0
+					],
+					"type": 5,
+					"rarity": 1
+				},
+				{
+					"name": "Machoc",
+					"boosters": [
+						0
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Machopeur",
+					"boosters": [
+						0
+					],
+					"type": 5,
+					"rarity": 1
+				},
+				{
+					"name": "Mackogneur",
+					"boosters": [
+						0
+					],
+					"type": 5,
+					"rarity": 2
+				},
+				{
+					"name": "Mackogneur-ex",
+					"boosters": [
+						0
+					],
+					"type": 5,
+					"rarity": 3
+				},
+				{
+					"name": "Racaillou",
+					"boosters": [
+						1
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Gravalanch",
+					"boosters": [
+						1
+					],
+					"type": 5,
+					"rarity": 1
+				},
+				{
+					"name": "Grolem",
+					"boosters": [
+						1
+					],
+					"type": 5,
+					"rarity": 2
+				},
+				{
+					"name": "Onix",
+					"boosters": [
+						1
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Osselait",
+					"boosters": [
+						2
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Ossatueur",
+					"boosters": [
+						2
+					],
+					"type": 5,
+					"rarity": 1
+				},
+				{
+					"name": "Ossatueur-ex",
+					"boosters": [
+						2
+					],
+					"type": 5,
+					"rarity": 3
+				},
+				{
+					"name": "Kicklee",
+					"boosters": [
+						2
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Tygnon",
+					"boosters": [
+						0
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Rhinocorne",
+					"boosters": [
+						2
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Rhinoféros",
+					"boosters": [
+						2
+					],
+					"type": 5,
+					"rarity": 1
+				},
+				{
+					"name": "Kabuto",
+					"boosters": [
+						0
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Kabutops",
+					"boosters": [
+						0
+					],
+					"type": 5,
+					"rarity": 2
+				},
+				{
+					"name": "Kungfouine",
+					"boosters": [
+						1
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Shaofouine",
+					"boosters": [
+						1
+					],
+					"type": 5,
+					"rarity": 1
+				},
+				{
+					"name": "Poulpaf",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 5,
+					"rarity": 0
+				},
+				{
+					"name": "Krakos",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 5,
+					"rarity": 1
+				},
+				{
+					"name": "Abo",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 6,
+					"rarity": 0
+				},
+				{
+					"name": "Arbok",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 6,
+					"rarity": 1
+				},
+				{
+					"name": "Nidoran♀",
+					"boosters": [
+						1
+					],
+					"type": 6,
+					"rarity": 0
+				},
+				{
+					"name": "Nidorina",
+					"boosters": [
+						1
+					],
+					"type": 6,
+					"rarity": 1
+				},
+				{
+					"name": "Nidoqueen",
+					"boosters": [
+						1
+					],
+					"type": 6,
+					"rarity": 2
+				},
+				{
+					"name": "Nidoran♂",
+					"boosters": [
+						1
+					],
+					"type": 6,
+					"rarity": 0
+				},
+				{
+					"name": "Nidorino",
+					"boosters": [
+						1
+					],
+					"type": 6,
+					"rarity": 1
+				},
+				{
+					"name": "Nidoking",
+					"boosters": [
+						1
+					],
+					"type": 6,
+					"rarity": 2
+				},
+				{
+					"name": "Nosferapti",
+					"boosters": [
+						2
+					],
+					"type": 6,
+					"rarity": 0
+				},
+				{
+					"name": "Nosferalto",
+					"boosters": [
+						2
+					],
+					"type": 6,
+					"rarity": 1
+				},
+				{
+					"name": "Tadmorv",
+					"boosters": [
+						2
+					],
+					"type": 6,
+					"rarity": 0
+				},
+				{
+					"name": "Grotadmorv",
+					"boosters": [
+						2
+					],
+					"type": 6,
+					"rarity": 2
+				},
+				{
+					"name": "Smogo",
+					"boosters": [
+						2
+					],
+					"type": 6,
+					"rarity": 0
+				},
+				{
+					"name": "Smogogo",
+					"boosters": [
+						2
+					],
+					"type": 6,
+					"rarity": 2
+				},
+				{
+					"name": "Mysdibule",
+					"boosters": [
+						0
+					],
+					"type": 8,
+					"rarity": 0
+				},
+				{
+					"name": "Scalpion",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 8,
+					"rarity": 0
+				},
+				{
+					"name": "Scalproie",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 8,
+					"rarity": 1
+				},
+				{
+					"name": "Meltan",
+					"boosters": [
+						0
+					],
+					"type": 8,
+					"rarity": 0
+				},
+				{
+					"name": "Melmetal",
+					"boosters": [
+						0
+					],
+					"type": 8,
+					"rarity": 2
+				},
+				{
+					"name": "Minidraco",
+					"boosters": [
+						2
+					],
+					"type": 9,
+					"rarity": 0
+				},
+				{
+					"name": "Draco",
+					"boosters": [
+						2
+					],
+					"type": 9,
+					"rarity": 1
+				},
+				{
+					"name": "Dracolosse",
+					"boosters": [
+						2
+					],
+					"type": 9,
+					"rarity": 2
+				},
+				{
+					"name": "Roucool",
+					"boosters": [
+						2
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Roucoups",
+					"boosters": [
+						2
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Roucarnage",
+					"boosters": [
+						2
+					],
+					"type": 10,
+					"rarity": 2
+				},
+				{
+					"name": "Rattata",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Rattatac",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Piafabec",
+					"boosters": [
+						0
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Rapasdepic",
+					"boosters": [
+						0
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Roundoudou",
+					"boosters": [
+						1
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Grodoudou",
+					"boosters": [
+						1
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Grodoudou-ex",
+					"boosters": [
+						1
+					],
+					"type": 10,
+					"rarity": 3
+				},
+				{
+					"name": "Miaouss",
+					"boosters": [
+						0
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Persian",
+					"boosters": [
+						0
+					],
+					"type": 10,
+					"rarity": 1
+				},
+				{
+					"name": "Canarticho",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Doduo",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Dodrio",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 10,
+					"rarity": 1
+				},
+				{
+					"name": "Excelangue",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 10,
+					"rarity": 1
+				},
+				{
+					"name": "Leveinard",
+					"boosters": [
+						1
+					],
+					"type": 10,
+					"rarity": 1
+				},
+				{
+					"name": "Kangourex",
+					"boosters": [
+						0
+					],
+					"type": 10,
+					"rarity": 2
+				},
+				{
+					"name": "Tauros",
+					"boosters": [
+						0
+					],
+					"type": 10,
+					"rarity": 1
+				},
+				{
+					"name": "Métamorph",
+					"boosters": [
+						2
+					],
+					"type": 10,
+					"rarity": 2
+				},
+				{
+					"name": "Évoli",
+					"boosters": [
+						0
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Évoli",
+					"boosters": [
+						2
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Évoli",
+					"boosters": [
+						1
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Porygon",
+					"boosters": [
+						2
+					],
+					"type": 10,
+					"rarity": 1
+				},
+				{
+					"name": "Ptéra",
+					"boosters": [
+						2
+					],
+					"type": 10,
+					"rarity": 2
+				},
+				{
+					"name": "Ronflex",
+					"boosters": [
+						1
+					],
+					"type": 10,
+					"rarity": 2
+				},
+				{
+					"name": "Chinchidou",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Pashmilla",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 10,
+					"rarity": 1
+				},
+				{
+					"name": "Moumouton",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Moumouflon",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 10,
+					"rarity": 0
+				},
+				{
+					"name": "Fossile Nautile",
+					"boosters": [
+						1
+					],
+					"type": 11,
+					"rarity": 0
+				},
+				{
+					"name": "Fossile Dôme",
+					"boosters": [
+						0
+					],
+					"type": 11,
+					"rarity": 0
+				},
+				{
+					"name": "Vieil Ambre",
+					"boosters": [
+						2
+					],
+					"type": 11,
+					"rarity": 0
+				},
+				{
+					"name": "Erika",
+					"boosters": [
+						0
+					],
+					"type": 12,
+					"rarity": 1
+				},
+				{
+					"name": "Ondine",
+					"boosters": [
+						1
+					],
+					"type": 12,
+					"rarity": 1
+				},
+				{
+					"name": "Auguste",
+					"boosters": [
+						0
+					],
+					"type": 12,
+					"rarity": 1
+				},
+				{
+					"name": "Koga",
+					"boosters": [
+						2
+					],
+					"type": 12,
+					"rarity": 1
+				},
+				{
+					"name": "Giovanni",
+					"boosters": [
+						2
+					],
+					"type": 12,
+					"rarity": 1
+				},
+				{
+					"name": "Pierre",
+					"boosters": [
+						1
+					],
+					"type": 12,
+					"rarity": 1
+				},
+				{
+					"name": "Morgane",
+					"boosters": [
+						0
+					],
+					"type": 12,
+					"rarity": 1
+				},
+				{
+					"name": "Major Bob",
+					"boosters": [
+						1
+					],
+					"type": 12,
+					"rarity": 1
+				},
+				{
+					"name": "Bulbizarre",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 4
+				},
+				{
+					"name": "Ortide",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 4
+				},
+				{
+					"name": "Scarabrute",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 4
+				},
+				{
+					"name": "Salamèche",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 4
+				},
+				{
+					"name": "Galopa",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 4
+				},
+				{
+					"name": "Carapuce",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 4
+				},
+				{
+					"name": "Léviator",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 4
+				},
+				{
+					"name": "Lokhlass",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 4
+				},
+				{
+					"name": "Électrode",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 4
+				},
+				{
+					"name": "Alakazam",
+					"boosters": [
+						0
+					],
+					"type": 4,
+					"rarity": 4
+				},
+				{
+					"name": "Ramoloss",
+					"boosters": [
+						0
+					],
+					"type": 4,
+					"rarity": 4
+				},
+				{
+					"name": "Taupiqueur",
+					"boosters": [
+						1
+					],
+					"type": 5,
+					"rarity": 4
+				},
+				{
+					"name": "Osselait",
+					"boosters": [
+						2
+					],
+					"type": 5,
+					"rarity": 4
+				},
+				{
+					"name": "Nidoqueen",
+					"boosters": [
+						1
+					],
+					"type": 6,
+					"rarity": 4
+				},
+				{
+					"name": "Nidoking",
+					"boosters": [
+						1
+					],
+					"type": 6,
+					"rarity": 4
+				},
+				{
+					"name": "Nosferalto",
+					"boosters": [
+						2
+					],
+					"type": 6,
+					"rarity": 4
+				},
+				{
+					"name": "Smogogo",
+					"boosters": [
+						2
+					],
+					"type": 6,
+					"rarity": 4
+				},
+				{
+					"name": "Dracolosse",
+					"boosters": [
+						2
+					],
+					"type": 9,
+					"rarity": 4
+				},
+				{
+					"name": "Roucarnage",
+					"boosters": [
+						2
+					],
+					"type": 10,
+					"rarity": 4
+				},
+				{
+					"name": "Miaouss",
+					"boosters": [
+						0
+					],
+					"type": 10,
+					"rarity": 4
+				},
+				{
+					"name": "Métamorph",
+					"boosters": [
+						2
+					],
+					"type": 10,
+					"rarity": 4
+				},
+				{
+					"name": "Évoli",
+					"boosters": [
+						1
+					],
+					"type": 10,
+					"rarity": 4
+				},
+				{
+					"name": "Porygon",
+					"boosters": [
+						2
+					],
+					"type": 10,
+					"rarity": 4
+				},
+				{
+					"name": "Ronflex",
+					"boosters": [
+						1
+					],
+					"type": 10,
+					"rarity": 4
+				},
+				{
+					"name": "Florizarre-ex",
+					"boosters": [
+						2
+					],
+					"type": 0,
+					"rarity": 5
+				},
+				{
+					"name": "Noadkoko-ex",
+					"boosters": [
+						0
+					],
+					"type": 0,
+					"rarity": 5
+				},
+				{
+					"name": "Dracaufeu-ex",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 5
+				},
+				{
+					"name": "Arcanin-ex",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 5
+				},
+				{
+					"name": "Sulfura-ex",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 5
+				},
+				{
+					"name": "Tortank-ex",
+					"boosters": [
+						1
+					],
+					"type": 2,
+					"rarity": 5
+				},
+				{
+					"name": "Staross-ex",
+					"boosters": [
+						0
+					],
+					"type": 2,
+					"rarity": 5
+				},
+				{
+					"name": "Artikodin-ex",
+					"boosters": [
+						2
+					],
+					"type": 2,
+					"rarity": 5
+				},
+				{
+					"name": "Pikachu-ex",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 5
+				},
+				{
+					"name": "Électhor-ex",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 5
+				},
+				{
+					"name": "Ecloplasma-ex",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 5
+				},
+				{
+					"name": "Mewtwo-ex",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 5
+				},
+				{
+					"name": "Mackogneur-ex",
+					"boosters": [
+						0
+					],
+					"type": 5,
+					"rarity": 5
+				},
+				{
+					"name": "Ossatueur-ex",
+					"boosters": [
+						2
+					],
+					"type": 5,
+					"rarity": 5
+				},
+				{
+					"name": "Grodoudou-ex",
+					"boosters": [
+						1
+					],
+					"type": 10,
+					"rarity": 5
+				},
+				{
+					"name": "Erika",
+					"boosters": [
+						0
+					],
+					"type": 12,
+					"rarity": 5
+				},
+				{
+					"name": "Ondine",
+					"boosters": [
+						1
+					],
+					"type": 12,
+					"rarity": 5
+				},
+				{
+					"name": "Auguste",
+					"boosters": [
+						0
+					],
+					"type": 12,
+					"rarity": 5
+				},
+				{
+					"name": "Koga",
+					"boosters": [
+						2
+					],
+					"type": 12,
+					"rarity": 5
+				},
+				{
+					"name": "Giovanni",
+					"boosters": [
+						2
+					],
+					"type": 12,
+					"rarity": 5
+				},
+				{
+					"name": "Pierre",
+					"boosters": [
+						1
+					],
+					"type": 12,
+					"rarity": 5
+				},
+				{
+					"name": "Morgane",
+					"boosters": [
+						0
+					],
+					"type": 12,
+					"rarity": 5
+				},
+				{
+					"name": "Major Bob",
+					"boosters": [
+						1
+					],
+					"type": 12,
+					"rarity": 5
+				},
+				{
+					"name": "Sulfura-ex",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 5
+				},
+				{
+					"name": "Artikodin-ex",
+					"boosters": [
+						0,
+						1,
+						2
+					],
+					"type": 2,
+					"rarity": 5
+				},
+				{
+					"name": "Électhor-ex",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 5
+				},
+				{
+					"name": "Ecloplasma-ex",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 5
+				},
+				{
+					"name": "Mackogneur-ex",
+					"boosters": [
+						0
+					],
+					"type": 5,
+					"rarity": 5
+				},
+				{
+					"name": "Grodoudou-ex",
+					"boosters": [
+						1
+					],
+					"type": 10,
+					"rarity": 5
+				},
+				{
+					"name": "Dracaufeu-ex",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 6
+				},
+				{
+					"name": "Pikachu-ex",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 6
+				},
+				{
+					"name": "Mewtwo-ex",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 6
+				},
+				{
+					"name": "Mew",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 8
+				},
+				{
+					"name": "Dracaufeu-ex",
+					"boosters": [
+						0
+					],
+					"type": 1,
+					"rarity": 7
+				},
+				{
+					"name": "Pikachu-ex",
+					"boosters": [
+						1
+					],
+					"type": 3,
+					"rarity": 7
+				},
+				{
+					"name": "Mewtwo-ex",
+					"boosters": [
+						2
+					],
+					"type": 4,
+					"rarity": 7
+				}
+			]
+		},
+		"A1a": {
+			"boosters": [
+				{
+					"name": "Mew",
+					"odds": {
+						"cards": [
+							[
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									1,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0,
+									0
+								],
+								[
+									0,
+									0.9,
+									0.05,
+									0.01666,
+									0.02572,
+									0.005,
+									0.00222,
+									0.00040
+								],
+								[
+									0,
+									0.6,
+									0.2,
+									0.06664,
+									0.10288,
+									0.02,
+									0.00888,
+									0.00160
+								]
+							],
+							[
+								[
+									0,
+									0,
+									0,
+									0,
+									0.33333,
+									0.55555,
+									0.05555,
+									0.05555
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.33333,
+									0.55555,
+									0.05555,
+									0.05555
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.33333,
+									0.55555,
+									0.05555,
+									0.05555
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.33333,
+									0.55555,
+									0.05555,
+									0.05555
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.33333,
+									0.55555,
+									0.05555,
+									0.05555
+								],
+								[
+									0,
+									0,
+									0,
+									0,
+									0.33333,
+									0.55555,
+									0.05555,
+									0.05555
+								]
+							]
+						],
+						"boosters": [
+							0.995,
+							0.05
+						]
+					}
+				}
+			],
+			"pokémons": []
+		}
+	},
+	"rarities": {
+		"boosters": [
+			{
+				"name": "Booster commun"
+			},
+			{
+				"name": "Booster rare"
+			}
+		],
+		"cards": [
+			{
+				"name": "Diamand"
+			},
+			{
+				"name": "2 diamands"
+			},
+			{
+				"name": "3 diamands"
+			},
+			{
+				"name": "4 diamands"
+			},
+			{
+				"name": "Étoile"
+			},
+			{
+				"name": "2 étoiles"
+			},
+			{
+				"name": "3 étoiles"
+			},
+			{
+				"name": "Couronne"
+			},
+			{
+				"name": "Secrète"
+			}
+		]
+	},
+	"types": [
+		{
+			"name": "Plante"
+		},
+		{
+			"name": "Feu"
+		},
+		{
+			"name": "Eau"
+		},
+		{
+			"name": "Électrique"
+		},
+		{
+			"name": "Psy"
+		},
+		{
+			"name": "Combat"
+		},
+		{
+			"name": "Obscurité"
+		},
+		{
+			"name": "Métal"
+		},
+		{
+			"name": "Dragon"
+		},
+		{
+			"name": "Object"
+		},
+		{
+			"name": "Dresseur"
+		}
+	]
+}

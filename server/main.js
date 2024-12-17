@@ -92,7 +92,7 @@ const processWarThunder = async () => {
 		if (lastMapRefresh + 30 * 1000 < Date.now()) {
 			const getImage = async () => {
 				await request({
-					url: "http://server.wixonic.fr/warthundermap.png",
+					url: "https://server.wixonic.fr/warthundermap.png",
 					method: "POST",
 					headers: {
 						authorization: `WixKey ${config.wixkey}`,
@@ -103,7 +103,7 @@ const processWarThunder = async () => {
 					body: data.map.toString("base64url")
 				});
 
-				return await RichPresence.getExternal(discord.client, config.discord.application.clientId, `http://server.wixonic.fr/warthundermap.png?t=${Date.now()}`);
+				return await RichPresence.getExternal(discord.client, config.discord.application.clientId, `https://server.wixonic.fr/warthundermap.png?t=${Date.now()}`);
 			};
 
 			const mapImage = await getImage();
