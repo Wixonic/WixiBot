@@ -2864,6 +2864,17 @@
 			"pokémons": []
 		}
 	},
+	"openings": [
+		{
+			"name": "Initial"
+		},
+		{
+			"name": "Booster"
+		},
+		{
+			"name": "Pioche Miracle"
+		}
+	],
 	"rarities": {
 		"boosters": [
 			{

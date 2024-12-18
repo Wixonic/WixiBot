@@ -39,15 +39,17 @@
 
 /**
  * @typedef {Object} DroppedBooster
- * @property {number} expansion
- * @property {number} booster
  * @property {number[]} drops
  */
 
 /**
  * @typedef {Object} Opening
- * @property {number} timestamp
- * @property {DroppedBooster[]} boosters
+ * @property {number} type
+ * @property {number?} timestamp
+ * @property {number} expansion
+ * @property {number?} booster
+ * @property {DroppedBooster[]?} boosters
+ * @property {number[]?} cards
  */
 
 /**
