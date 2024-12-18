@@ -10,7 +10,6 @@ const { db } = require("./firebase.js");
 const { getCurrentTrackInfo } = require("./music.js");
 const pronote = require("./pronote.js");
 const wt = require("./warthunder.js");
-const wavelink = require("./wavelink.js");
 
 const config = require("../config.js");
 
@@ -74,9 +73,7 @@ const processTrack = async (song) => {
 	if (song == null) {
 		if (currentSong != null) await update();
 	} else {
-		song.volume = wavelink.volume;
-
-		if (currentSong == null || (currentSong?.state != song.state || currentSong?.track != song.track || currentSong?.artist != song.artist || currentSong?.album != song.album || currentSong?.startedAt != song.startedAt) || song.volume != wavelink.volume) await update();
+		if (currentSong == null || (currentSong?.state != song.state || currentSong?.track != song.track || currentSong?.artist != song.artist || currentSong?.album != song.album || currentSong?.startedAt != song.startedAt)) await update();
 	}
 };
 
@@ -127,7 +124,6 @@ const processWarThunder = async () => {
 			lastMapRefresh = Date.now();
 		}
 	} else {
-		// console.error(data.errors);
 		discord.removeActivity("wt");
 		inWarThunderGameSince = null;
 	}
@@ -161,10 +157,7 @@ const processPronote = async () => {
 
 
 const main = async () => {
-	await Promise.all([
-		discord.ready(),
-		wavelink.ready()
-	]);
+	await discord.ready();
 
 	await processTrack(await getCurrentTrackInfo());
 	await processWarThunder();

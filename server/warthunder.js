@@ -68,8 +68,7 @@ const get = async () => {
 			map = await mapImage.toBuffer();
 		}
 	} catch (e) {
-		// errors.push(`Image: ${e}`);
-		errors.push(e);
+		errors.push(`Image: ${e}`);
 	}
 
 	await wait(config.warthunder.waitingTime);

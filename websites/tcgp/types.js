@@ -54,5 +54,6 @@
 
 /**
  * @typedef {Object} User
+ * @property {number}
  * @property {Opening[]} openings
  */
