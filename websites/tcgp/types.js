@@ -16,6 +16,7 @@
 
 /**
  * @typedef {Object} Expansion
+ * @property {string} name
  * @property {Booster[]} boosters
  * @property {Pokémon[]} pokémons
  */
@@ -26,6 +27,12 @@
  */
 
 /**
+ * @typedef {Object} RarityType 
+ * @property {Rarity[]} boosters
+ * @property {Rarity[]} cards
+ */
+
+/**
  * @typedef {Object} Type
  * @property {string} name
  */
@@ -33,7 +40,7 @@
 /**
  * @typedef {Object} Data
  * @property {Expansion[]} expansions
- * @property {Rarity[]} rarities
+ * @property {RarityType} rarities
  * @property {Type[]} types
  */
 

@@ -1,6 +1,7 @@
 {
 	"expansions": {
 		"A1": {
+			"name": "Puissance Génétique",
 			"boosters": [
 				{
 					"name": "Dracaufeu",
@@ -1838,7 +1839,7 @@
 					"boosters": [
 						0
 					],
-					"type": 8,
+					"type": 7,
 					"rarity": 0
 				},
 				{
@@ -1848,7 +1849,7 @@
 						1,
 						2
 					],
-					"type": 8,
+					"type": 7,
 					"rarity": 0
 				},
 				{
@@ -1858,7 +1859,7 @@
 						1,
 						2
 					],
-					"type": 8,
+					"type": 7,
 					"rarity": 1
 				},
 				{
@@ -1866,7 +1867,7 @@
 					"boosters": [
 						0
 					],
-					"type": 8,
+					"type": 7,
 					"rarity": 0
 				},
 				{
@@ -1874,7 +1875,7 @@
 					"boosters": [
 						0
 					],
-					"type": 8,
+					"type": 7,
 					"rarity": 2
 				},
 				{
@@ -1882,7 +1883,7 @@
 					"boosters": [
 						2
 					],
-					"type": 9,
+					"type": 8,
 					"rarity": 0
 				},
 				{
@@ -1890,7 +1891,7 @@
 					"boosters": [
 						2
 					],
-					"type": 9,
+					"type": 8,
 					"rarity": 1
 				},
 				{
@@ -1898,7 +1899,7 @@
 					"boosters": [
 						2
 					],
-					"type": 9,
+					"type": 8,
 					"rarity": 2
 				},
 				{
@@ -1906,7 +1907,7 @@
 					"boosters": [
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -1914,7 +1915,7 @@
 					"boosters": [
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -1922,7 +1923,7 @@
 					"boosters": [
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 2
 				},
 				{
@@ -1932,7 +1933,7 @@
 						1,
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -1942,7 +1943,7 @@
 						1,
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -1950,7 +1951,7 @@
 					"boosters": [
 						0
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -1958,7 +1959,7 @@
 					"boosters": [
 						0
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -1966,7 +1967,7 @@
 					"boosters": [
 						1
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -1974,7 +1975,7 @@
 					"boosters": [
 						1
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -1982,7 +1983,7 @@
 					"boosters": [
 						1
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 3
 				},
 				{
@@ -1990,7 +1991,7 @@
 					"boosters": [
 						0
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -1998,7 +1999,7 @@
 					"boosters": [
 						0
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 1
 				},
 				{
@@ -2008,7 +2009,7 @@
 						1,
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -2018,7 +2019,7 @@
 						1,
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -2028,7 +2029,7 @@
 						1,
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 1
 				},
 				{
@@ -2038,7 +2039,7 @@
 						1,
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 1
 				},
 				{
@@ -2046,7 +2047,7 @@
 					"boosters": [
 						1
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 1
 				},
 				{
@@ -2054,7 +2055,7 @@
 					"boosters": [
 						0
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 2
 				},
 				{
@@ -2062,7 +2063,7 @@
 					"boosters": [
 						0
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 1
 				},
 				{
@@ -2070,7 +2071,7 @@
 					"boosters": [
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 2
 				},
 				{
@@ -2078,7 +2079,7 @@
 					"boosters": [
 						0
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -2086,7 +2087,7 @@
 					"boosters": [
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -2094,7 +2095,7 @@
 					"boosters": [
 						1
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -2102,7 +2103,7 @@
 					"boosters": [
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 1
 				},
 				{
@@ -2110,7 +2111,7 @@
 					"boosters": [
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 2
 				},
 				{
@@ -2118,7 +2119,7 @@
 					"boosters": [
 						1
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 2
 				},
 				{
@@ -2128,7 +2129,7 @@
 						1,
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -2138,7 +2139,7 @@
 						1,
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 1
 				},
 				{
@@ -2148,7 +2149,7 @@
 						1,
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -2158,7 +2159,7 @@
 						1,
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 0
 				},
 				{
@@ -2166,7 +2167,7 @@
 					"boosters": [
 						1
 					],
-					"type": 11,
+					"type": 10,
 					"rarity": 0
 				},
 				{
@@ -2174,7 +2175,7 @@
 					"boosters": [
 						0
 					],
-					"type": 11,
+					"type": 10,
 					"rarity": 0
 				},
 				{
@@ -2182,7 +2183,7 @@
 					"boosters": [
 						2
 					],
-					"type": 11,
+					"type": 10,
 					"rarity": 0
 				},
 				{
@@ -2190,7 +2191,7 @@
 					"boosters": [
 						0
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 1
 				},
 				{
@@ -2198,7 +2199,7 @@
 					"boosters": [
 						1
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 1
 				},
 				{
@@ -2206,7 +2207,7 @@
 					"boosters": [
 						0
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 1
 				},
 				{
@@ -2214,7 +2215,7 @@
 					"boosters": [
 						2
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 1
 				},
 				{
@@ -2222,7 +2223,7 @@
 					"boosters": [
 						2
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 1
 				},
 				{
@@ -2230,7 +2231,7 @@
 					"boosters": [
 						1
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 1
 				},
 				{
@@ -2238,7 +2239,7 @@
 					"boosters": [
 						0
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 1
 				},
 				{
@@ -2246,7 +2247,7 @@
 					"boosters": [
 						1
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 1
 				},
 				{
@@ -2390,7 +2391,7 @@
 					"boosters": [
 						2
 					],
-					"type": 9,
+					"type": 8,
 					"rarity": 4
 				},
 				{
@@ -2398,7 +2399,7 @@
 					"boosters": [
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 4
 				},
 				{
@@ -2406,7 +2407,7 @@
 					"boosters": [
 						0
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 4
 				},
 				{
@@ -2414,7 +2415,7 @@
 					"boosters": [
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 4
 				},
 				{
@@ -2422,7 +2423,7 @@
 					"boosters": [
 						1
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 4
 				},
 				{
@@ -2430,7 +2431,7 @@
 					"boosters": [
 						2
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 4
 				},
 				{
@@ -2438,7 +2439,7 @@
 					"boosters": [
 						1
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 4
 				},
 				{
@@ -2558,7 +2559,7 @@
 					"boosters": [
 						1
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 5
 				},
 				{
@@ -2566,7 +2567,7 @@
 					"boosters": [
 						0
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 5
 				},
 				{
@@ -2574,7 +2575,7 @@
 					"boosters": [
 						1
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 5
 				},
 				{
@@ -2582,7 +2583,7 @@
 					"boosters": [
 						0
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 5
 				},
 				{
@@ -2590,7 +2591,7 @@
 					"boosters": [
 						2
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 5
 				},
 				{
@@ -2598,7 +2599,7 @@
 					"boosters": [
 						2
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 5
 				},
 				{
@@ -2606,7 +2607,7 @@
 					"boosters": [
 						1
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 5
 				},
 				{
@@ -2614,7 +2615,7 @@
 					"boosters": [
 						0
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 5
 				},
 				{
@@ -2622,7 +2623,7 @@
 					"boosters": [
 						1
 					],
-					"type": 12,
+					"type": 11,
 					"rarity": 5
 				},
 				{
@@ -2672,7 +2673,7 @@
 					"boosters": [
 						1
 					],
-					"type": 10,
+					"type": 9,
 					"rarity": 5
 				},
 				{
@@ -2734,6 +2735,7 @@
 			]
 		},
 		"A1a": {
+			"name": "L'Île Fabuleuse",
 			"boosters": [
 				{
 					"name": "Mew",
@@ -2943,7 +2945,10 @@
 			"name": "Dragon"
 		},
 		{
-			"name": "Object"
+			"name": "Neutre"
+		},
+		{
+			"name": "Objet"
 		},
 		{
 			"name": "Dresseur"

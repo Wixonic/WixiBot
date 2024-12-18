@@ -42,6 +42,22 @@ const main = async () => {
 
 			console.info("User data:", user);
 
+			const droppedCards = {};
+
+			for (const opening of user.openings) {
+				if (!droppedCards[opening.expansion]) droppedCards[opening.expansion] = {};
+
+				if (opening.type == 0 || opening.type == 3) {
+					for (const card of opening.cards) droppedCards[opening.expansion][card] = typeof droppedCards[opening.expansion][card] == "number" ? droppedCards[opening.expansion][card] + 1 : 1;
+				} else if (opening.type == 1 || opening.type == 2) {
+					for (const booster of opening.boosters) {
+						for (const card of booster.drops) droppedCards[opening.expansion][card] = typeof droppedCards[opening.expansion][card] == "number" ? droppedCards[opening.expansion][card] + 1 : 1;
+					}
+				}
+			}
+
+			console.info("User drops:", droppedCards);
+
 			const home = () => {
 				document.body.innerHTML = "";
 
@@ -82,6 +98,17 @@ const main = async () => {
 				backButton.innerHTML = "Back";
 				backButton.addEventListener("click", home);
 
+				const title = document.createElement("h1");
+				title.innerHTML = "Cards";
+
+				const search = document.createElement("input");
+				search.type = "text";
+				search.placeholder = "Search cards...";
+				search.addEventListener("input", () => displayCards(search.value.toLowerCase()));
+
+				const cards = document.createElement("div")
+				cards.id = "cards";
+
 				for (const expansionId in data.expansions) {
 					const expansion = document.createElement("div");
 					expansion.classList.add("expansion");
@@ -89,14 +116,25 @@ const main = async () => {
 
 					for (const pokémonId in data.expansions[expansionId].pokémons) {
 						const pokémon = data.expansions[expansionId].pokémons[pokémonId];
+						const count = droppedCards[expansionId][Number(pokémonId) + 1];
+						const id = `${expansionId}-${Number(pokémonId) + 1}`;
 
 						const pokémonCard = document.createElement("div");
 						pokémonCard.classList.add("card");
-						pokémonCard.id = `${expansionId}-${Number(pokémonId) + 1}`;
+						if (!count) pokémonCard.classList.add("unobtained");
+						pokémonCard.id = id;
 
 						const pokémonCardName = document.createElement("div");
 						pokémonCardName.classList.add("name");
-						pokémonCardName.innerHTML = pokémon.name;
+						pokémonCardName.innerText = pokémon.name;
+
+						const pokémonCardCount = document.createElement("div");
+						pokémonCardCount.classList.add("count");
+						pokémonCardCount.innerText = `${count ? `${count == 1 ? "One" : count} card${count == 1 ? "" : "s"}` : "Not obtained"}`;
+
+						const pokémonCardId = document.createElement("div");
+						pokémonCardId.classList.add("id");
+						pokémonCardId.innerText = id;
 
 						const pokémonCardIllustration = new Image();
 						pokémonCardIllustration.src = new URL(`/tcgp/illustration/${expansionId}/${Number(pokémonId) + 1}.jpeg`, location.origin);
@@ -107,15 +145,42 @@ const main = async () => {
 							pokémonCard.append(pokémonCardIllustrationFallback);
 						});
 
-						pokémonCard.append(pokémonCardName, pokémonCardIllustration);
+						pokémonCard.append(pokémonCardName, pokémonCardCount, pokémonCardIllustration, pokémonCardId);
 
 						expansion.append(pokémonCard);
 					}
 
-					document.body.append(expansion);
+					cards.append(expansion);
 				}
 
-				document.body.append(backButton);
+				document.body.append(backButton, title, search, cards);
+
+				const displayCards = (query = "") => {
+					for (const expansionId in data.expansions) {
+						for (const pokémonId in data.expansions[expansionId].pokémons) {
+							const pokémon = data.expansions[expansionId].pokémons[pokémonId];
+							const id = `${expansionId}-${Number(pokémonId) + 1}`;
+
+							let displayed = query.length == 0;
+
+							for (const part of query.split(" ")) {
+								if (part.length > 0) {
+									displayed = displayed ||
+										pokémon.name.toLowerCase().includes(part) ||
+										data.rarities.cards[pokémon.rarity].name.toLowerCase().includes(part) ||
+										data.types[pokémon.type].name.toLowerCase().includes(part) ||
+										data.expansions[expansionId].name.toLowerCase().includes(part) || String(Number(pokémonId) + 1).includes(part);
+
+									for (const booster of pokémon.boosters) displayed = displayed || (data.expansions[expansionId].name.toLowerCase() + " : " + data.expansions[expansionId].boosters[booster].name.toLowerCase()).includes(part);
+								}
+							}
+
+							document.getElementById(id).style.display = displayed ? "" : "none";
+						}
+					}
+				};
+
+				displayCards();
 			};
 
 			const drops = () => {

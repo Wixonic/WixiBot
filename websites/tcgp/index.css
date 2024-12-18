@@ -50,7 +50,7 @@ h4,
 h5 {
 	display: block;
 
-	margin: 0;
+	margin: 0 auto;
 }
 
 h1 {
@@ -129,11 +129,6 @@ button {
 	padding: 0.5rem;
 }
 
-#error h1,
-#wixkey-form h1 {
-	margin: auto;
-}
-
 #wixkey-form * {
 	margin: auto;
 }
@@ -142,6 +137,8 @@ button {
 	position: fixed;
 	top: 0.5rem;
 	left: 0.5rem;
+
+	z-index: 1;
 }
 
 nav {
@@ -156,9 +153,13 @@ nav {
 .expansion {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 1rem;
+	gap: 0.5rem;
 
-	max-width: 100vw;
+	width: fit-content;
+
+	margin: auto;
+
+	overflow: visible;
 }
 
 .expansion .card {
@@ -168,16 +169,35 @@ nav {
 
 	width: 10rem;
 	height: 17rem;
+
+	border-radius: 0.5rem;
+}
+
+.expansion .card * {
+	margin: auto;
 }
 
 .expansion .card .name {
 	grid-row: 1;
+
+	font-size: 0.9rem;
+	font-weight: bold;
 }
 
 .expansion .card img {
 	grid-row: 2;
 
 	width: 10rem;
+}
 
-	margin: auto;
+.expansion .card.unobtained img {
+	filter: grayscale(100%);
+}
+
+.expansion .card .count {
+	grid-row: 3;
+
+	font-size: 0.7rem;
+
+	opacity: 0.8;
 }
