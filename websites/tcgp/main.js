@@ -167,11 +167,9 @@ const main = async () => {
 								if (part.length > 0) {
 									displayed = displayed ||
 										pokémon.name.toLowerCase().includes(part) ||
-										data.rarities.cards[pokémon.rarity].name.toLowerCase().includes(part) ||
+										data.rarities.cards[pokémon.rarity].name.toLowerCase().startsWith(part) ||
 										data.types[pokémon.type].name.toLowerCase().includes(part) ||
-										data.expansions[expansionId].name.toLowerCase().includes(part) || String(Number(pokémonId) + 1).includes(part);
-
-									for (const booster of pokémon.boosters) displayed = displayed || (data.expansions[expansionId].name.toLowerCase() + " : " + data.expansions[expansionId].boosters[booster].name.toLowerCase()).includes(part);
+										String(Number(pokémonId) + 1).startsWith(part);
 								}
 							}
 
