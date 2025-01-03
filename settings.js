@@ -5,7 +5,16 @@ module.exports = process.env.DEV == "true" ? {
 		"1243943943779909652": {
 			privacy: {
 				active: true
-			}
+			},
+			rules: {
+				active: true,
+				channel: "1243991489575522374"
+			},
+			ticket: {
+				active: true,
+				channel: "1324706187559829546",
+				queue: "1243991489575522375"
+			},
 		}
 	}
 } : {
