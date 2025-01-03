@@ -107,8 +107,8 @@ const server = {
 		https.createServer({
 			key: fs.readFileSync(config.ssl.key),
 			cert: fs.readFileSync("./websites/website.cer"),
-		}, app).listen(config.port.server, () => {
-			log(`[Server] Express server is running on https://localhost:${config.port.server}`);
+		}, app).listen(process.env.DEV == "true" ? config.port.testServer : config.port.server, () => {
+			log(`[Server] Express server is running on https://localhost:${process.env.DEV == "true" ? config.port.testServer : config.port.server}`);
 		});
 	}
 };

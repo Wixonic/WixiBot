@@ -1,5 +1,9 @@
 const { ActionRowBuilder, ApplicationCommandType, ButtonBuilder, ButtonStyle, MessageFlagsBitField, SlashCommandBuilder } = require("discord.js");
 
+const { client } = require("../clients.js");
+const log = require("../log.js");
+const { hexToIntColor } = require("../utils.js");
+
 const settings = require("../settings.js");
 
 /**
@@ -11,91 +15,174 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("roles")
 		.setDescription("Update the roles selection menu"),
-	execute: async (interaction) => {
-		await interaction.deferReply({
-			ephemeral: true
-		});
+	/**
+	 * @param {import("discord.js").ChatInputCommandInteraction | Function} interaction
+	 * @param {string?} guildId 
+	 * @returns 
+	 */
+	execute: async (interaction, guildId) => {
+		if (typeof interaction == "function") {
+			interaction = {
+				log: interaction,
+				guildId,
+				guild: await client.guilds.fetch(guildId),
+				fake: true
+			};
+		} else interaction.fake = false;
+
+		if (!interaction.fake) {
+			await interaction.deferReply({
+				ephemeral: true
+			});
+		}
 
 		const rolesSettings = settings.guilds?.[interaction.guildId]?.roles;
+		const recurrentSettings = rolesSettings?.recurrentRoles;
 
 		if (!rolesSettings?.active) {
 			interaction.log("Roles automation disabled");
-			return await interaction.editReply({
-				content: "Roles automation is currently disabled",
-				ephemeral: true
-			});
+			if (!interaction.fake) {
+				return await interaction.editReply({
+					content: "Roles automation is currently disabled",
+					ephemeral: true
+				});
+			} else return false;
 		}
 
 		if (!rolesSettings?.channel) {
 			interaction.log("Roles channel not set");
-			return await interaction.editReply({
-				content: "Roles channel is not set",
-				ephemeral: true
-			});
+			if (!interaction.fake) {
+				return await interaction.editReply({
+					content: "Roles channel is not set",
+					ephemeral: true
+				});
+			}
 		}
 
+		/**
+		 * @type {import("discord.js").TextChannel}
+		 */
 		const channel = await interaction.guild.channels.fetch(rolesSettings?.channel);
 
 		if (!channel) {
 			interaction.log(`Roles channel "${rolesSettings?.channel}" not found`);
-			return await interaction.editReply({
-				content: "Roles channel not found",
-				ephemeral: true
-			});
+
+			if (!interaction.fake) {
+				return await interaction.editReply({
+					content: "Roles channel not found",
+					ephemeral: true
+				});
+			} else return false;
 		}
 
 		if (!channel.isTextBased()) {
 			interaction.log(`Roles channel "${channel.name}" (${channel.id}) is not text-based`);
-			return await interaction.editReply({
-				content: "Roles channel is not a text-based channel",
-				ephemeral: true
-			});
+
+			if (!interaction.fake) {
+				return await interaction.editReply({
+					content: "Roles channel is not a text-based channel",
+					ephemeral: true
+				});
+			} else return false;
 		}
 
-		const messages = await channel.messages.fetch();
-		messages.each((message) => channel.messages.delete(message));
+		if (!guildId) {
+			const messages = await channel.messages.fetch();
+			messages.each((message) => channel.messages.delete(message));
 
-		await channel.send({
-			content: `# Roles\n- You can add any role by pressing buttons.\n- Buttons with :locked: require further steps`,
-			flags: new MessageFlagsBitField().add("SuppressNotifications", "Crossposted")
-		});
+			await channel.send({
+				content: `# Roles\n- You can add any role by pressing buttons.\n- Buttons with :locked: require further steps`,
+				flags: new MessageFlagsBitField().add("SuppressNotifications", "Crossposted")
+			});
 
-		for (const group of rolesSettings?.groups ?? {}) {
-			if (group.active) {
-				let content = `## ${group.name}\n> ${group.description}`;
-				const buttons = new ActionRowBuilder();
+			for (const group of rolesSettings?.groups ?? {}) {
+				if (group.active) {
+					let content = `## ${group.name}\n> ${group.description}`;
+					const buttons = new ActionRowBuilder();
 
-				for (const role of group.roles) {
-					const guildRole = await interaction.guild.roles.fetch(role.id);
+					for (const role of group.roles) {
+						/**
+						 * @type {import("discord.js").Role}
+						 */
+						const guildRole = await interaction.guild.roles.fetch(role.id);
+
+						if (guildRole) {
+							interaction.log(`Role added: ${guildRole.name} (${guildRole.id})`);
+							content += `\n- <@&${role.id}>${role.description ? ": " + role.description : ""}`;
+
+							const button = new ButtonBuilder();
+							button.setCustomId(`addRole_${role.id}_${role.locked ? "locked" : "unlocked"}`);
+							button.setLabel(guildRole.name);
+							if (role.locked) button.setEmoji("🔒");
+							button.setStyle(ButtonStyle.Secondary);
+
+							buttons.addComponents(button);
+						}
+					}
+
+					await channel.send({
+						content,
+						components: [
+							buttons.toJSON()
+						],
+						flags: new MessageFlagsBitField().add("SuppressNotifications", "Crossposted")
+					});
+				}
+			}
+		}
+
+		if (guildId) {
+			const messages = await channel.messages.fetch();
+			if (messages.size > 0) await messages.last().delete();
+		}
+
+		if (recurrentSettings?.active) {
+			let content = `## Event Roles\n> This roles are only available during the event.`;
+			const buttons = new ActionRowBuilder();
+
+			for (const role of recurrentSettings?.roles ?? {}) {
+				const year = new Date().getFullYear();
+
+				const from = new Date(`${year}-${role.from}`);
+				const to = new Date(`${year}-${role.to}`);
+
+				if (Date.now() >= from.getTime() && Date.now() <= to.getTime()) {
+					const name = `${role.name} ${year}`;
+					interaction.log(`Recurrent role active: ${name}`);
+
+					const guildRole = interaction.guild.roles.cache.find((r) => r.name === name);
 
 					if (guildRole) {
-						content += `\n- <@&${role.id}>${role.description ? ": " + role.description : ""}`;
+						content += `\n- <@&${guildRole.id}> - Available until <t:${Math.floor(to.getTime() / 1000)}:f>`;
 
 						const button = new ButtonBuilder();
-						button.setCustomId(`addRole_${role.id}_${role.locked ? "locked" : "unlocked"}`);
-						button.setLabel(guildRole.name);
-						if (role.locked) button.setEmoji("🔒");
+						button.setCustomId(`addRole_${guildRole.id}_unlocked`);
+						button.setLabel(name);
 						button.setStyle(ButtonStyle.Secondary);
 
 						buttons.addComponents(button);
 					}
 				}
-
-				await channel.send({
-					content,
-					components: [
-						buttons.toJSON()
-					],
-					flags: new MessageFlagsBitField().add("SuppressNotifications", "Crossposted")
-				});
 			}
+
+			await channel.send({
+				content,
+				components: [
+					buttons.toJSON()
+				],
+				flags: new MessageFlagsBitField().add("SuppressNotifications", "Crossposted")
+			});
 		}
 
-		await interaction.editReply({
-			content: `Roles updated at <#${channel.id}>`,
-			ephemeral: true
-		});
+		if (!interaction.fake) {
+			await interaction.editReply({
+				content: `Roles updated at <#${channel.id}>`,
+				ephemeral: true
+			});
+		}
 
 		interaction.log("Roles updated");
+
+		return true;
 	}
 };

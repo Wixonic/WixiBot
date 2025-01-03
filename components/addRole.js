@@ -1,5 +1,7 @@
 const { getRoleSettingsForGuild } = require("../utils.js");
 
+const settings = require("../settings.js");
+
 /**
  * @type {import("../components.js").Component}
  */
@@ -12,9 +14,16 @@ module.exports = {
 		const roleSettings = getRoleSettingsForGuild(interaction.guildId, roleId);
 		const member = await interaction.guild.members.fetch(interaction.member?.id);
 
+		const rolesSettings = settings.guilds?.[interaction.guildId]?.roles;
+		const recurrentSettings = rolesSettings?.recurrentRoles;
+
 		const isLocked = args[1] == "locked";
 
-		if (member && role && roleSettings) {
+		const recurrentRolesNames = [];
+		for (const role of recurrentSettings?.roles ?? []) recurrentRolesNames.push(role.name);
+		const isRecurrent = recurrentSettings?.active && recurrentRolesNames.includes(role.name.replace(` ${new Date().getFullYear()}`, ""));
+
+		if (rolesSettings?.active && member && role && (roleSettings || isRecurrent)) {
 			if (isLocked) {
 				if (roleSettings.modal) {
 					interaction.log(`Role "${role.name}" (${role.id}) - Locked, sending modal`);
