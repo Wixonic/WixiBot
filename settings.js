@@ -5,57 +5,6 @@ module.exports = process.env.DEV == "true" ? {
 		"1243943943779909652": {
 			privacy: {
 				active: true
-			},
-			roles: {
-				active: true,
-				channel: "1324670340244439080",
-				groups: [
-					{
-						active: true,
-						name: "Colors",
-						description: "These roles are only cosmetic.",
-						roles: []
-					}
-				],
-				recurrentRoles: {
-					active: true,
-					announcementChannel: "1243943943779909655",
-					cosmeticMarkerRole: "1324676103473860679",
-					oldMarkerRole: "1324676172537135145",
-					roles: [
-						{
-							name: "New Year",
-							color: "#D7B030",
-							from: "01-01T00:00:00",
-							to: "01-31T00:00:00"
-						}, {
-							name: "Valentine's Day",
-							color: "#E06287",
-							from: "02-14T00:00:00",
-							to: "02-21T00:00:00"
-						}, {
-							name: "Easter",
-							color: "#C5EBD5",
-							from: "03-23T00:00:00",
-							to: "04-25T00:00:00"
-						}, {
-							name: "Summer",
-							color: "#47927E",
-							from: "06-01T00:00:00",
-							to: "08-31T00:00:00"
-						}, {
-							name: "Halloween",
-							color: "#EB5A1C",
-							from: "10-30T00:00:00",
-							to: "11-06T00:00:00"
-						}, {
-							name: "Christmas",
-							color: "#B43B2B",
-							from: "12-24T00:00:00",
-							to: "12-31T00:00:00"
-						}
-					]
-				}
 			}
 		}
 	}
