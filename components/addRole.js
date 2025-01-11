@@ -40,6 +40,15 @@ module.exports = {
 						ephemeral: true
 					});
 				}
+
+				if (roleSettings.message) {
+					interaction.log(`Role "${role.name}" (${role.id}) - Locked, sending message`);
+
+					await interaction.reply({
+						content: roleSettings.message,
+						ephemeral: true
+					});
+				}
 			} else {
 				interaction.log(`Role "${role.name}" (${role.id})`);
 

@@ -14,7 +14,7 @@ module.exports = process.env.DEV == "true" ? {
 				active: true,
 				channel: "1324706187559829546",
 				queue: "1243991489575522375"
-			},
+			}
 		}
 	}
 } : {
@@ -42,7 +42,9 @@ module.exports = process.env.DEV == "true" ? {
 							{
 								id: "1307298359651991583"
 							}, {
-								id: "1307298076389544036"
+								id: "1327627362946388030",
+								locked: true,
+								message: "To get access to this role, you need to be a subscriber on Patreon.\n[Subscribe](https://go.wixonic.fr/patreon), and check if you linked your Discord account to your Patreon account."
 							}
 						]
 					}, {
