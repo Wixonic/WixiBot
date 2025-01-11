@@ -1,0 +1,9 @@
+{
+	"title": "WixiBot Local Server",
+	"inputs": [
+		{
+			"title": "Pronote QR Code",
+			"env": "PRONOTE_QR_CODE"
+		}
+	]
+}
