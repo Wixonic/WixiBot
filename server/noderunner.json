@@ -1,5 +1,6 @@
 {
 	"title": "WixiBot Local Server",
+	"root": "main.js",
 	"inputs": [
 		{
 			"title": "Pronote QR Code",
