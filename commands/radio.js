@@ -105,13 +105,19 @@ module.exports = {
 			});
 		}
 
+		const subcommand = interaction.options.getSubcommand();
+
+		interaction.log(`/radio ${subcommand}`);
+
 		/**
 		 * @type {import("discord.js").VoiceBasedChannel}
 		 */
 		let channel = null;
-		switch (interaction.options.getSubcommand()) {
+		switch (subcommand) {
 			case "join":
 				channel = interaction.options.get("channel").channel;
+				interaction.log(`Joining channel ${channel.id}`);
+
 				if (await Radio.join(channel)) {
 					await interaction.editReply({
 						content: `Radio now active at <#${channel.id}>`,
@@ -136,6 +142,7 @@ module.exports = {
 
 			case "add":
 				const query = interaction.options.getString("query");
+				interaction.log(`Adding song found with query "${query}"`);
 
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
 					const videoIdRegex = /^[a-zA-Z0-9_-]{11}$/;
@@ -249,38 +256,43 @@ module.exports = {
 
 			case "next":
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
-					const previousSongName = Radio.song.track;
-					Radio.next();
-					Radio.refresh();
+					if (Radio.waitingList.length > 0) {
+						const previousSongName = Radio.song.track;
+						Radio.next();
+						Radio.refresh();
 
-					if (Radio.song?.state == "PLAYING") {
-						await interaction.editReply({
-							components: [{
-								type: ComponentType.ActionRow,
+						if (Radio.song?.state == "PLAYING") {
+							await interaction.editReply({
 								components: [{
-									label: "Watch on YouTube",
-									style: ButtonStyle.Link,
-									type: ComponentType.Button,
-									url: `https://www.youtube.com/watch?v=${Radio.song.youtubeId}`
-								}]
-							}],
-							content: `Skipping ${previousSongName}, and playing ${Radio.song.track} by ${Radio.song.artist}.`,
-							embeds: [{
-								title: Radio.song.track,
-								description: `This song is currently playing at <#${Radio.channel.id}>.`,
-								author: {
-									name: Radio.song.artist,
-									icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
-								},
-								thumbnail: {
-									url: Radio.song.spotifyArtworkURL
-								},
-								color: hexToIntColor(Radio.song.color)
-							}],
+									type: ComponentType.ActionRow,
+									components: [{
+										label: "Watch on YouTube",
+										style: ButtonStyle.Link,
+										type: ComponentType.Button,
+										url: `https://www.youtube.com/watch?v=${Radio.song.youtubeId}`
+									}]
+								}],
+								content: `Skipping ${previousSongName}, and playing ${Radio.song.track} by ${Radio.song.artist}.`,
+								embeds: [{
+									title: Radio.song.track,
+									description: `This song is currently playing at <#${Radio.channel.id}>.`,
+									author: {
+										name: Radio.song.artist,
+										icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
+									},
+									thumbnail: {
+										url: Radio.song.spotifyArtworkURL
+									},
+									color: hexToIntColor(Radio.song.color)
+								}],
+								ephemeral: true
+							});
+						} else await interaction.editReply({
+							content: `Skipping ${previousSongName}.`,
 							ephemeral: true
 						});
 					} else await interaction.editReply({
-						content: `Skipping ${previousSongName}.`,
+						content: "The waiting list is currently empty.",
 						ephemeral: true
 					});
 				} else await interaction.editReply({
@@ -305,6 +317,8 @@ module.exports = {
 			case "volume":
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
 					Radio.setVolume(interaction.options.getNumber("volume"));
+					interaction.log(`Volume set to ${Radio.volume}%`);
+
 					await interaction.editReply({
 						content: `Radio's volume set to ${Radio.volume}%.`,
 						ephemeral: true
