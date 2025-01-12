@@ -173,7 +173,7 @@ module.exports = {
 						}],
 						embeds: [{
 							title: song.track,
-							description: `This song has been added to the waiting list.\n${Radio.waitingList.length > 1 ? (Radio.waitingList.length == 2 ? "One song remaining." : `${Radio.waitingList.length - 1} songs remaining.`) : "The next song will be this one."}`,
+							description: `This song has been added to the list.\n${Radio.waitingList.length > 1 ? (Radio.waitingList.length == 2 ? "One song remaining." : `${Radio.waitingList.length - 1} songs remaining.`) : "The next song will be this one."}`,
 							author: {
 								name: song.artist,
 								icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
@@ -305,7 +305,7 @@ module.exports = {
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
 					Radio.stop();
 					await interaction.editReply({
-						content: "Radio stopped. Radio's waiting list has been cleared.",
+						content: "Radio stopped. Radio's list has been cleared.",
 						ephemeral: true
 					});
 				} else await interaction.editReply({
@@ -333,7 +333,7 @@ module.exports = {
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
 					Radio.waitingList = [];
 					await interaction.editReply({
-						content: "Radio's waiting list has been cleared.",
+						content: "Radio's list has been cleared.",
 						ephemeral: true
 					});
 				} else await interaction.editReply({
@@ -392,10 +392,21 @@ module.exports = {
 
 			case "list":
 				if (Radio.connection?.state?.status == VoiceConnectionStatus.Ready) {
-					await interaction.editReply({
-						content: "Radio's list is not available right now.",
-						ephemeral: true
-					});
+					if (Radio.waitingList.length > 0) {
+						const tenFirstSongs = Radio.waitingList.slice(0, 10);
+						const songs = [];
+
+						for (const song of tenFirstSongs) songs.push(`[${song.track} by ${song.artist}](<https://www.youtube.com/watch?v=${song.youtubeId}>)`);
+
+						await interaction.editReply({
+							content: `# Radio's List \n\nThere are currently ${Radio.waitingList.length} songs in the list. Here is the first 10 songs:\n- ${songs.join("\n - ")}`,
+							ephemeral: true
+						});
+					} else
+						await interaction.editReply({
+							content: "Radio's list is empty.",
+							ephemeral: true
+						});
 				} else await interaction.editReply({
 					content: "Radio is not active right now.",
 					ephemeral: true
