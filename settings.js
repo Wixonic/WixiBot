@@ -36,7 +36,7 @@ module.exports = process.env.DEV == "true" ? {
 				groups: [
 					{
 						active: true,
-						name: "Supporter",
+						name: "Supporter Roles",
 						description: "These roles allow you to get access to exclusive content, early access to videos and more! Both roles give the same advantages.",
 						roles: [
 							{
@@ -44,14 +44,14 @@ module.exports = process.env.DEV == "true" ? {
 								locked: true,
 								message: "To get access to this role, you need to [boost this server](https://support.discord.com/hc/articles/360028038352-Server-Boosting-FAQ)."
 							}, {
-								id: "1327941659773632542",
+								id: "1327627362946388030",
 								locked: true,
 								message: "To get access to this role, you need to be a subscriber on Patreon.\n[Subscribe](https://go.wixonic.fr/patreon), and check if you linked your Discord account to your Patreon account."
 							}
 						]
 					}, {
 						active: true,
-						name: "Notifications",
+						name: "Notification Roles",
 						description: "These roles allow you to choose to receive notifications and be mentioned when necessary.",
 						roles: [
 							{
@@ -60,7 +60,7 @@ module.exports = process.env.DEV == "true" ? {
 						]
 					}, {
 						active: true,
-						name: "Colors",
+						name: "Color Roles",
 						description: "These roles are only cosmetic.",
 						roles: [
 							{
@@ -113,32 +113,32 @@ module.exports = process.env.DEV == "true" ? {
 							name: "New Year",
 							color: "#D7B030",
 							from: "01-01T00:00:00",
-							to: "01-31T00:00:00"
+							to: "01-31T23:59:59"
 						}, {
 							name: "Valentine's Day",
 							color: "#E06287",
 							from: "02-14T00:00:00",
-							to: "02-21T00:00:00"
+							to: "02-21T23:59:59"
 						}, {
 							name: "Easter",
 							color: "#C5EBD5",
 							from: "03-23T00:00:00",
-							to: "04-25T00:00:00"
+							to: "04-25T23:59:59"
 						}, {
 							name: "Summer",
 							color: "#47927E",
 							from: "06-01T00:00:00",
-							to: "08-31T00:00:00"
+							to: "08-31T23:59:59"
 						}, {
 							name: "Halloween",
 							color: "#EB5A1C",
 							from: "10-30T00:00:00",
-							to: "11-06T00:00:00"
+							to: "11-06T23:59:59"
 						}, {
 							name: "Christmas",
 							color: "#B43B2B",
 							from: "12-24T00:00:00",
-							to: "12-31T00:00:00"
+							to: "12-31T23:59:59"
 						}
 					]
 				}
