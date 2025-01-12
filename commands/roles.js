@@ -133,7 +133,7 @@ module.exports = {
 
 		if (guildId) {
 			const messages = await channel.messages.fetch();
-			if (messages.size > 0) await messages.last().delete();
+			if (messages.size > 0) await messages.sort((a, b) => b.createdTimestamp - a.createdTimestamp).first().delete();
 		}
 
 		if (recurrentSettings?.active) {

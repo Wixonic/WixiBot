@@ -66,7 +66,7 @@ const processTrack = async (song) => {
 			} else discord.removeActivity("music");
 
 			currentSong = song;
-			log(`Music set to ${currentSong.track} by ${currentSong.artist} at volume ${currentSong.volume}% (${currentSong.state}).`);
+			log(`Music set to ${currentSong.track} by ${currentSong.artist} (${currentSong.state}).`);
 		}
 	};
 

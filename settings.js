@@ -6,6 +6,26 @@ module.exports = process.env.DEV == "true" ? {
 			privacy: {
 				active: true
 			},
+			roles: {
+				active: true,
+				channel: "1328033760536428544",
+				groups: [],
+				recurrentRoles: {
+					active: true,
+					announcementChannel: "1328033804333482105",
+					cosmeticMarkerRole: "1324676103473860679",
+					oldMarkerRole: "1324676172537135145",
+					mentionRole: null,
+					roles: [
+						{
+							name: "New Year",
+							color: "#D7B030",
+							from: "01-01T00:00:00",
+							to: "01-31T23:59:59"
+						}
+					]
+				}
+			},
 			rules: {
 				active: true,
 				channel: "1243991489575522374"
@@ -108,6 +128,7 @@ module.exports = process.env.DEV == "true" ? {
 					announcementChannel: "1243950230899134596",
 					cosmeticMarkerRole: "1324669613480349729",
 					oldMarkerRole: "1324669679532380190",
+					mentionRole: "1307298359651991583",
 					roles: [
 						{
 							name: "New Year",
