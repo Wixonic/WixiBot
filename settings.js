@@ -36,15 +36,26 @@ module.exports = process.env.DEV == "true" ? {
 				groups: [
 					{
 						active: true,
+						name: "Supporter",
+						description: "These roles allow you to get access to exclusive content, early access to videos and more! Both roles give the same advantages.",
+						roles: [
+							{
+								id: "1040743271288295436",
+								locked: true,
+								message: "To get access to this role, you need to [boost this server](https://support.discord.com/hc/articles/360028038352-Server-Boosting-FAQ)."
+							}, {
+								id: "1327941659773632542",
+								locked: true,
+								message: "To get access to this role, you need to be a subscriber on Patreon.\n[Subscribe](https://go.wixonic.fr/patreon), and check if you linked your Discord account to your Patreon account."
+							}
+						]
+					}, {
+						active: true,
 						name: "Notifications",
 						description: "These roles allow you to choose to receive notifications and be mentioned when necessary.",
 						roles: [
 							{
 								id: "1307298359651991583"
-							}, {
-								id: "1327627362946388030",
-								locked: true,
-								message: "To get access to this role, you need to be a subscriber on Patreon.\n[Subscribe](https://go.wixonic.fr/patreon), and check if you linked your Discord account to your Patreon account."
 							}
 						]
 					}, {
