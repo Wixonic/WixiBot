@@ -9,12 +9,6 @@ module.exports = process.env.DEV == "true" ? {
 			rules: {
 				active: true,
 				channel: "1243991489575522374"
-			},
-			ticket: {
-				active: true,
-				channel: "1324706187559829546",
-				queue: "1243991489575522375",
-				category: "1328283454328143894"
 			}
 		}
 	}
