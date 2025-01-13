@@ -6,26 +6,6 @@ module.exports = process.env.DEV == "true" ? {
 			privacy: {
 				active: true
 			},
-			roles: {
-				active: true,
-				channel: "1328033760536428544",
-				groups: [],
-				recurrentRoles: {
-					active: true,
-					announcementChannel: "1328033804333482105",
-					cosmeticMarkerRole: "1324676103473860679",
-					oldMarkerRole: "1324676172537135145",
-					mentionRole: null,
-					roles: [
-						{
-							name: "New Year",
-							color: "#D7B030",
-							from: "01-01T00:00:00",
-							to: "01-31T23:59:59"
-						}
-					]
-				}
-			},
 			rules: {
 				active: true,
 				channel: "1243991489575522374"
@@ -33,7 +13,8 @@ module.exports = process.env.DEV == "true" ? {
 			ticket: {
 				active: true,
 				channel: "1324706187559829546",
-				queue: "1243991489575522375"
+				queue: "1243991489575522375",
+				category: "1328283454328143894"
 			}
 		}
 	}
@@ -171,9 +152,11 @@ module.exports = process.env.DEV == "true" ? {
 			ticket: {
 				active: true,
 				channel: "1247276648366080144",
-				queue: "1247276415880138843"
+				queue: "1247276415880138843",
+				category: "1328283685253943329"
 			},
 			customSettings: {
+				w47k3r5Role: "1245812981527482378",
 				formResultChannel: "1245813497288331338"
 			}
 		}

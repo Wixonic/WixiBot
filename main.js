@@ -34,7 +34,7 @@ client.on("interactionCreate", async (interaction) => {
 		for (const component of components.list) {
 			if (component.name == componentName) {
 				if (component.args == componentArgs.length) {
-					interaction.log(`Component "${componentName}" started`);
+					interaction.log(`Component "${componentName}" started${componentArgs.length > 0 ? ` using arguments ${componentArgs.join(", ")}` : ""}`);
 					await component.execute(interaction, componentArgs);
 					interaction.log(`Component "${componentName}" ended`);
 				} else {

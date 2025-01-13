@@ -1,5 +1,8 @@
-const { ActionRowBuilder, EmbedBuilder } = require("discord.js");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
+const fs = require("fs");
+const path = require("path");
 
+const config = require("../config.js");
 const settings = require("../settings.js");
 
 /**
@@ -20,25 +23,57 @@ module.exports = {
 					const channel = await interaction.guild.channels.fetch(channelId);
 
 					if (channel) {
+						if (!fs.existsSync(config.cache.tickets)) fs.mkdirSync(config.cache.tickets, { recursive: true });
+						const ticketId = `${interaction.createdTimestamp}-${fs.readdirSync(config.cache.tickets, { encoding: "utf-8" }).length}`;
+
 						await channel.send({
 							embeds: [
 								new EmbedBuilder()
 									.setAuthor({
 										name: member.displayName,
-										iconURL: member.displayAvatarURL()
+										iconURL: member.displayAvatarURL({
+											size: 256,
+											extension: "png"
+										})
 									})
-									.setColor(member.roles.highest.color)
-									.setDescription(interaction.fields.getTextInputValue("description"))
-									.setFooter({
-										text: "Sent with Wixi's Ticket Tool"
-									})
-									.setTimestamp(interaction.createdTimestamp)
 									.setTitle(interaction.fields.getTextInputValue("title"))
+									.setDescription(interaction.fields.getTextInputValue("description"))
+									.setColor(member.roles.highest.color)
+									.setTimestamp(interaction.createdTimestamp)
+									.setFooter({
+										text: `Ticket ${ticketId}`
+									})
+							],
+							components: [
+								new ActionRowBuilder()
+									.addComponents(
+										new ButtonBuilder()
+											.setCustomId(`claimTicket_${ticketId}`)
+											.setLabel("Claim Ticket")
+											.setStyle(ButtonStyle.Primary)
+									)
 							]
 						});
 
+						fs.writeFileSync(path.join(config.cache.tickets, `${ticketId}.json`), JSON.stringify({
+							type: "WAITING",
+							id: ticketId,
+							title: interaction.fields.getTextInputValue("title"),
+							description: interaction.fields.getTextInputValue("description"),
+							author: {
+								id: member.id,
+								name: member.displayName,
+								icon: member.displayAvatarURL({
+									size: 256,
+									extension: "png"
+								})
+							},
+							color: member.roles.highest.color,
+							createdAt: interaction.createdTimestamp
+						}), "utf-8");
+
 						await interaction.reply({
-							content: "Your ticket has been sent. This process may take a few hours or days.\nPlease do not reopen a ticket, as it will not make us answer faster.\n\nYou'll recieve an answer in DMs. Please check if you allowed users to send you DMs from this server.",
+							content: `Your ticket has been sent. This process may take a few hours or days.\nPlease do not reopen a ticket, as it will not make us answer faster.\n\nWhen your ticket is claimed by a staff member, you will be notified and a new channel will be created for you.\n-# Ticket ${ticketId}`,
 							ephemeral: true
 						});
 						interaction.log("Ticket sent");

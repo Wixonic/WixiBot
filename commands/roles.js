@@ -137,7 +137,7 @@ module.exports = {
 		}
 
 		if (recurrentSettings?.active) {
-			let content = `## Event Roles\n> This roles are only available during the event.`;
+			let content = `## Event Roles\n> These roles are only available during the event.`;
 			const buttons = new ActionRowBuilder();
 
 			for (const role of recurrentSettings?.roles ?? {}) {

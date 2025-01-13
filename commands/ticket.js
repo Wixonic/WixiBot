@@ -86,7 +86,7 @@ module.exports = {
 		}
 
 		await channel.send({
-			content: `## Ticket Tool\n> Ticket Content will be visible to ${rolesText.join(", ")}\n\n**If you need help and you think we can help you, please create a ticket using the button below.**\n\nWe can help you:\n- Inside, or with any issue related to this Discord server\n- In all [wixonic.fr](<https://wixonic.fr>) domain and subdomains\n- On [Wixonic's GitHub page](<https://go.wixonic.fr/github>)`,
+			content: `## Ticket Tool\n> Ticket Content will be visible to ${rolesText.join(", ")}\n**If you need help and you think we can help you, please create a ticket using the button below.**`,
 			components: [
 				new ActionRowBuilder()
 					.setComponents(

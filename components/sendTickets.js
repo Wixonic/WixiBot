@@ -23,6 +23,7 @@ module.exports = {
 									.setPlaceholder("Summarize your issue")
 									.setRequired(true)
 									.setStyle(TextInputStyle.Short)
+									.setMinLength(5)
 							),
 						new ActionRowBuilder()
 							.setComponents(
@@ -32,6 +33,7 @@ module.exports = {
 									.setPlaceholder("Describe your issue")
 									.setRequired(true)
 									.setStyle(TextInputStyle.Paragraph)
+									.setMinLength(25)
 							)
 					)
 					.toJSON()
