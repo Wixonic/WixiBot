@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, EmbedBuilder, MessageFlags } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
@@ -42,11 +42,13 @@ module.exports = {
 				ticket.channel = channel.id;
 
 				await channel.permissionOverwrites.edit(ticket.author.id, {
-					allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
+					ViewChannel: true,
+					SendMessages: true
 				});
 
 				await channel.permissionOverwrites.edit(ticket.claimedBy.id, {
-					allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
+					ViewChannel: true,
+					SendMessages: true
 				});
 
 				await channel.send({

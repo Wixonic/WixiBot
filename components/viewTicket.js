@@ -30,9 +30,8 @@ module.exports = {
 
 				const channel = await interaction.guild.channels.fetch(ticket.channel);
 
-				await channel.permissionOverwrites.edit({
-					id: viewer.id,
-					allow: [PermissionFlagsBits.ViewChannel]
+				await channel.permissionOverwrites.edit(viewer.id, {
+					ViewChannel: true
 				});
 
 				await interaction.reply({
