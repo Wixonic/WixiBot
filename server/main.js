@@ -51,9 +51,9 @@ const processBlender = async () => {
 		discord.addActivity("blender", {
 			applicationId: config.discord.application.clientId,
 			assets: {
-				small_image: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets[blenderData.small_image]}.png`,
+				small_image: blenderData.small_image ? `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets[blenderData.small_image]}.png` : null,
 				small_text: blenderData.small_text,
-				large_image: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets[blenderData.large_image]}.png`,
+				large_image: blenderData.large_image ? `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets[blenderData.large_image]}.png` : null,
 				large_text: blenderData.large_text
 			},
 			timestamps: {
