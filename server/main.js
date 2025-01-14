@@ -40,11 +40,14 @@ const server = http.createServer((req, res) => {
 
 server.listen(config.port.blenderServer, () => log(`Blender server listening on :${config.port.blenderServer}`));
 
+let lastBlenderUpdate = 0;
 const processBlender = async () => {
 	if (!blenderData || blenderData.date + 30 * 1000 < Date.now()) {
 		blenderData = null;
 		discord.removeActivity("blender");
-	} else {
+	} else if (lastBlenderUpdate + 20 * 1000 < Date.now()) {
+		log(blenderData);
+
 		discord.addActivity("blender", {
 			applicationId: config.discord.application.clientId,
 			assets: {
@@ -61,6 +64,8 @@ const processBlender = async () => {
 			state: blenderData.state,
 			type: 0 // PLAYING
 		});
+
+		lastBlenderUpdate = Date.now();
 	}
 };
 
