@@ -46,8 +46,6 @@ const processBlender = async () => {
 		blenderData = null;
 		discord.removeActivity("blender");
 	} else if (lastBlenderUpdate + 20 * 1000 < Date.now()) {
-		log(blenderData);
-
 		discord.addActivity("blender", {
 			applicationId: config.discord.application.clientId,
 			assets: {
