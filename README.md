@@ -1,7 +1,7 @@
 # WixiBot
 > WixiLand Management Agency's main server
 
-[![Wakatime](https://wakatime.com/badge/github/Wixonic/WixiBot.svg?style=flat)](https://wakatime.com/badge/github/Wixonic/WixiBot)
+[![Wakatime](https://wakatime.com/badge/github/Wixonic/WixiBot.svg?style=flat)](https://wakatime.com/badge/github/Wixonic/WixiBot) [![Patreon](https://img.shields.io/badge/Patreon-black?style=flat&logo=patreon)](https://patreon.com/Wixonic)
 
 - [Support](https://github.com/Wixonic/WixiBot/blob/Default/.github/SUPPORT.md)
 - [Code of Conduct](https://github.com/Wixonic/WixiBot/blob/Default/.github/CODE_OF_CONDUCT.md)
