@@ -8,19 +8,20 @@ const spotify = require("../lib/spotify.js");
 const blender = require("./blender.js");
 const discord = require("./client.js");
 const { db } = require("./firebase.js");
-const overlay = require("./overlay.js");
 const { getCurrentTrackInfo } = require("./music.js");
 const pronote = require("./pronote.js");
 const wt = require("./warthunder.js");
 
 const config = require("../config.js");
 
+blender.launch();
+
 let lastBlenderUpdate = 0;
 const processBlender = async () => {
-	const blenderData = blender.getBlenderData();
+	const blenderData = blender.get();
 
 	if (!blenderData || blenderData.date + 30 * 1000 < Date.now()) {
-		blenderData = null;
+		blender.reset();
 		discord.removeActivity("blender");
 	} else if (lastBlenderUpdate + 20 * 1000 < Date.now()) {
 		discord.addActivity("blender", {

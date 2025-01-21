@@ -10,28 +10,32 @@ let blenderData = {
 	date: 0
 };
 
-const server = http.createServer((req, res) => {
-	let body = "";
+const launch = () => {
+	const server = http.createServer((req, res) => {
+		let body = "";
 
-	req.on("data", (chunk) => {
-		body += chunk.toString();
+		req.on("data", (chunk) => {
+			body += chunk.toString();
+		});
+
+		req.on("end", () => {
+			try {
+				blenderData = JSON.parse(body);
+				blenderData.date = Date.now();
+
+				res.writeHead(200).end("OK");
+			} catch (e) {
+				blenderData = null;
+				res.writeHead(400).end("Bad content");
+			}
+		});
 	});
 
-	req.on("end", () => {
-		try {
-			blenderData = JSON.parse(body);
-			blenderData.date = Date.now();
-
-			res.writeHead(200).end("OK");
-		} catch (e) {
-			blenderData = null;
-			res.writeHead(400).end("Bad content");
-		}
-	});
-});
-
-server.listen(config.port.blenderServer, () => log(`Blender server listening on :${config.port.blenderServer}`));
+	server.listen(config.port.blenderServer, () => log(`Blender server listening on :${config.port.blenderServer}`));
+};
 
 module.exports = {
-	getBlenderData: () => blenderData
+	get: () => blenderData,
+	launch,
+	reset: () => blenderData = null
 };
