@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
@@ -74,35 +74,35 @@ module.exports = {
 
 						await interaction.reply({
 							content: `Your ticket has been sent. This process may take a few hours or days.\nPlease do not reopen a ticket, as it will not make us answer faster.\n\nWhen your ticket is claimed by a staff member, you will be notified and a new channel will be created for you.\n-# Ticket ${ticketId}`,
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 						interaction.log("Ticket sent");
 					} else {
 						interaction.log("Failed to fetch channel");
 						await interaction.reply({
 							content: "This interaction is not available.",
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 					}
 				} else {
 					interaction.log("Failed to find channel ID");
 					await interaction.reply({
 						content: "This interaction is not available.",
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				}
 			} else {
 				interaction.log("Ticket Tool disabled");
 				await interaction.reply({
 					content: "This interaction is not available.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 			}
 		} else {
 			interaction.log("Failed to fetch member");
 			await interaction.reply({
 				content: "This interaction is not available.",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 	}

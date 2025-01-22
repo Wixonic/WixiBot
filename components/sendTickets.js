@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require("discord.js");
+const { ActionRowBuilder, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle } = require("discord.js");
 
 /**
  * @type {import("../components.js").Component}
@@ -43,7 +43,7 @@ module.exports = {
 			interaction.log("Failed to fetch member");
 			await interaction.reply({
 				content: "This interaction is not available.",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 	}

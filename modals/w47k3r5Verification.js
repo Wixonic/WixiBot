@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder } = require("discord.js");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require("discord.js");
 
 const settings = require("../settings.js");
 
@@ -17,10 +17,10 @@ module.exports = {
 			if (rolesSettings?.active) {
 				const memberRoles = [];
 				member.roles.cache.forEach((role) => memberRoles.push(role.id));
-				if (memberRoles.includes(guildSettings?.customSettings?.w47k3r5Role || "0")) {
+				if (memberRoles.includes(guildSettings?.customSettings?.w47k3r5Role)) {
 					await interaction.reply({
 						content: "You already have this role.",
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				} else {
 					const channelId = settings?.guilds?.[interaction.guild.id]?.customSettings?.formResultChannel;
@@ -30,26 +30,39 @@ module.exports = {
 
 						if (channel) {
 							await channel.send({
-								content: `## W47K3R5 Verification:\n- **From**: <@${member.id}>\n- **Walker ID**: ${interaction.fields.getTextInputValue("walkerId")}`
+								content: `### W47K3R5 Verification:\n- **From**: <@${member.id}>\n- **Walker ID**: ${interaction.fields.getTextInputValue("walkerId")}`,
+								components: [
+									new ActionRowBuilder()
+										.addComponents(
+											new ButtonBuilder()
+												.setCustomId(`w47k3r5Verification_accept_${member.id}`)
+												.setLabel("Accept")
+												.setStyle(ButtonStyle.Success),
+											new ButtonBuilder()
+												.setCustomId(`w47k3r5Verification_reject_${member.id}`)
+												.setLabel("Reject")
+												.setStyle(ButtonStyle.Danger)
+										)
+								]
 							});
 
 							await interaction.reply({
 								content: "Your form has been sent for review. This process may take a few hours or days.\nPlease do not resubmit this form.",
-								ephemeral: true
+								flags: MessageFlags.Ephemeral
 							});
 							interaction.log("Verification prompt sent");
 						} else {
-							interaction.log("Failed to fetch channel");
+							interaction.error("Failed to fetch channel");
 							await interaction.reply({
 								content: "This role is not available.",
-								ephemeral: true
+								flags: MessageFlags.Ephemeral
 							});
 						}
 					} else {
 						interaction.log("Failed to find channel ID");
 						await interaction.reply({
 							content: "This role is not available.",
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 					}
 				}
@@ -57,14 +70,14 @@ module.exports = {
 				interaction.log("Roles automation disabled");
 				await interaction.reply({
 					content: "This role is not available.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 			}
 		} else {
 			interaction.log("Failed to fetch member");
 			await interaction.reply({
 				content: "This role is not available.",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 	}

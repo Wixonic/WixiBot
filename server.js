@@ -41,7 +41,7 @@ const server = {
 				log(`[Server] Found website folder: ${folderPath}`);
 
 				const routesPath = path.join(folderPath, "index.js");
-				if (!fs.existsSync(routesPath)) log(`[Server] No index.js found in ${folderPath}.`);
+				if (!fs.existsSync(routesPath)) log.error(`[Server] No index.js found in ${folderPath}.`);
 				else {
 					const routes = require(routesPath);
 					log(`[Server] Loaded routes from ${routesPath}`);

@@ -11,6 +11,11 @@ module.exports = process.env.DEV == "true" ? {
 				channel: "1243991489575522374"
 			}
 		}
+	},
+	log: {
+		active: true,
+		guild: "1243943943779909652",
+		channel: "1331688287835783209"
 	}
 } : {
 	guilds: {
@@ -150,9 +155,14 @@ module.exports = process.env.DEV == "true" ? {
 				category: "1328283685253943329"
 			},
 			customSettings: {
-				w47k3r5Role: "1245812981527482378",
-				formResultChannel: "1245813497288331338"
+				formResultChannel: "1245813497288331338",
+				w47k3r5Role: "1245812981527482378"
 			}
 		}
+	},
+	log: {
+		active: true,
+		guild: "1020663521530351627",
+		channel: "1331686277149491250"
 	}
 };

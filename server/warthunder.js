@@ -54,6 +54,7 @@ const get = async () => {
 				if (["ground_model", "aircraft"].includes(obj.type)) {
 					svgPoints.push(`<circle cx="${obj.x * width}" cy="${obj.y * height}" r="${Math.max(width, height) / 50}" fill="${obj.color}" stroke="#FFF" stroke-width="${Math.max(width, height) / 500}" />`);
 				}
+
 				if (["capture_zone"].includes(obj.type)) {
 					svgPoints.push(`<circle cx="${obj.x * width}" cy="${obj.y * height}" r="${Math.max(width, height) / 20}" fill="${obj.color}" stroke="#FFF" stroke-width="${Math.max(width, height) / 250}" />`);
 				}
@@ -99,10 +100,13 @@ const get = async () => {
 						const name = indicators.type.split("_");
 						name.pop();
 
-						const altitude = Math.ceil(state["H, m"] / 100) * 100;
-						const speed = Math.ceil(state["TAS, km/h"] / 50) * 50;
+						if (name.join(" ") == "DUMMY") errors.push("Not spawned");
+						else {
+							const altitude = Math.ceil(state["H, m"] / 100) * 100;
+							const speed = Math.ceil(state["TAS, km/h"] / 50) * 50;
 
-						vehicle = `Plane ${name.join(" ").toUpperCase()} (${speed} km/h - ${altitude} m)`;
+							vehicle = `Plane ${name.join(" ").toUpperCase()} (${speed} km/h - ${altitude} m)`;
+						}
 					} catch (e) {
 						errors.push(`State: ${e}`);
 					}

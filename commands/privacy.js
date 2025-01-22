@@ -1,4 +1,4 @@
-const { ApplicationCommandType, SlashCommandBuilder } = require("discord.js");
+const { ApplicationCommandType, MessageFlags, SlashCommandBuilder } = require("discord.js");
 
 const settings = require("../settings.js");
 
@@ -18,13 +18,13 @@ module.exports = {
 			interaction.log("Privacy link disabled");
 			return await interaction.reply({
 				content: "Privacy link is currently disabled",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
 		await interaction.reply({
 			content: "Check our Privacy Policy [here](<https://wixonic.fr/privacy/>).",
-			ephemeral: true
+			flags: MessageFlags.Ephemeral
 		});
 
 		interaction.log("Link to Privacy Policy sent");

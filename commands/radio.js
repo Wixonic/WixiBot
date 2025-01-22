@@ -1,4 +1,4 @@
-const { ComponentType, ApplicationCommandType, ChannelType, SlashCommandBuilder, SlashCommandChannelOption, SlashCommandNumberOption, SlashCommandStringOption, SlashCommandSubcommandBuilder, ButtonStyle } = require("discord.js");
+const { ApplicationCommandType, ButtonStyle, ChannelType, ComponentType, MessageFlags, SlashCommandBuilder, SlashCommandChannelOption, SlashCommandNumberOption, SlashCommandStringOption, SlashCommandSubcommandBuilder } = require("discord.js");
 const { VoiceConnectionStatus } = require("@discordjs/voice");
 
 const Radio = require("../lib/radio.js");
@@ -92,7 +92,7 @@ module.exports = {
 		),
 	execute: async (interaction) => {
 		await interaction.deferReply({
-			ephemeral: true
+			flags: MessageFlags.Ephemeral
 		});
 
 		const radioSettings = settings.guilds[interaction.guildId]?.radio;
@@ -101,7 +101,7 @@ module.exports = {
 			interaction.log("Radio disabled");
 			return await interaction.editReply({
 				content: "Radio is currently disabled",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -121,12 +121,12 @@ module.exports = {
 				if (await Radio.join(channel)) {
 					await interaction.editReply({
 						content: `Radio now active at <#${channel.id}>`,
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				} else {
 					await interaction.editReply({
 						content: `Failed to launch radio at <#${channel.id}>`,
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				}
 				break;
@@ -136,7 +136,7 @@ module.exports = {
 				Radio.quit();
 				await interaction.editReply({
 					content: `Radio left at <#${channel?.id}>`,
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 
@@ -159,35 +159,38 @@ module.exports = {
 						else song = await Radio.search(query);
 					}
 
-					await Radio.load(song);
-
-					await interaction.editReply({
-						components: [{
-							type: ComponentType.ActionRow,
+					if (await Radio.load(song)) {
+						await interaction.editReply({
 							components: [{
-								label: "Watch on YouTube",
-								style: ButtonStyle.Link,
-								type: ComponentType.Button,
-								url: `https://www.youtube.com/watch?v=${song.youtubeId}`
-							}]
-						}],
-						embeds: [{
-							title: song.track,
-							description: `This song has been added to the list.\n${Radio.waitingList.length > 1 ? (Radio.waitingList.length == 2 ? "One song remaining." : `${Radio.waitingList.length - 1} songs remaining.`) : "The next song will be this one."}`,
-							author: {
-								name: song.artist,
-								icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
-							},
-							thumbnail: {
-								url: song.spotifyArtworkURL
-							},
-							color: hexToIntColor(song.color)
-						}],
-						ephemeral: true
+								type: ComponentType.ActionRow,
+								components: [{
+									label: "Watch on YouTube",
+									style: ButtonStyle.Link,
+									type: ComponentType.Button,
+									url: `https://www.youtube.com/watch?v=${song.youtubeId}`
+								}]
+							}],
+							embeds: [{
+								title: song.track,
+								description: `This song has been added to the list.\n${Radio.waitingList.length > 1 ? (Radio.waitingList.length == 2 ? "One song remaining." : `${Radio.waitingList.length - 1} songs remaining.`) : "The next song will be this one."}`,
+								author: {
+									name: song.artist,
+									icon_url: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.youtube}.png`
+								},
+								thumbnail: {
+									url: song.spotifyArtworkURL
+								},
+								color: hexToIntColor(song.color)
+							}],
+							flags: MessageFlags.Ephemeral
+						});
+					} else await interaction.editReply({
+						content: "Failed to add the song.",
+						flags: MessageFlags.Ephemeral
 					});
 				} else await interaction.editReply({
 					content: "Radio is not active right now.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 
@@ -196,19 +199,19 @@ module.exports = {
 					if (Radio.song?.state == "PLAYING") {
 						if (Radio.pause()) await interaction.editReply({
 							content: `Song paused.`,
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 						else await interaction.editReply({
 							content: "Failed to pause the song.",
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 					} else await interaction.editReply({
 						content: Radio.song.state == "PAUSED" ? "Can't pause, the song is already paused." : "There's currently no song to pause.",
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				} else await interaction.editReply({
 					content: "Radio is not active right now.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 
@@ -238,19 +241,19 @@ module.exports = {
 								},
 								color: hexToIntColor(Radio.song.color)
 							}],
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 						else await interaction.editReply({
 							content: "Failed to resume the song.",
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 					} else await interaction.editReply({
 						content: Radio.song.state == "PLAYING" ? "Can't resume, the song is already playing." : "There's currently no song to resume.",
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				} else await interaction.editReply({
 					content: "Radio is not active right now.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 
@@ -285,19 +288,19 @@ module.exports = {
 									},
 									color: hexToIntColor(Radio.song.color)
 								}],
-								ephemeral: true
+								flags: MessageFlags.Ephemeral
 							});
 						} else await interaction.editReply({
 							content: `Skipping ${previousSongName}.`,
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 					} else await interaction.editReply({
 						content: "The waiting list is currently empty.",
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				} else await interaction.editReply({
 					content: "Radio is not active right now.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 
@@ -306,11 +309,11 @@ module.exports = {
 					Radio.stop();
 					await interaction.editReply({
 						content: "Radio stopped. Radio's list has been cleared.",
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				} else await interaction.editReply({
 					content: "Radio is not active right now.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 
@@ -321,11 +324,11 @@ module.exports = {
 
 					await interaction.editReply({
 						content: `Radio's volume set to ${Radio.volume}%.`,
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				} else await interaction.editReply({
 					content: "Radio is not active right now.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 
@@ -334,25 +337,25 @@ module.exports = {
 					Radio.waitingList = [];
 					await interaction.editReply({
 						content: "Radio's list has been cleared.",
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				} else await interaction.editReply({
 					content: "Radio is not active right now.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 
 			case "sync":
 				await interaction.editReply({
 					content: "Syncing is not available right now.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 
 			case "desync":
 				await interaction.editReply({
 					content: "Syncing is not available right now.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 
@@ -380,12 +383,12 @@ module.exports = {
 							},
 							color: hexToIntColor(Radio.song.color)
 						}],
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				} else {
 					await interaction.editReply({
 						content: "No song currently playing on the radio.",
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				}
 				break;
@@ -400,16 +403,16 @@ module.exports = {
 
 						await interaction.editReply({
 							content: `# Radio's List \n\nThere are currently ${Radio.waitingList.length} songs in the list. Here is the first 10 songs:\n- ${songs.join("\n - ")}`,
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 					} else
 						await interaction.editReply({
 							content: "Radio's list is empty.",
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 				} else await interaction.editReply({
 					content: "Radio is not active right now.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 
@@ -417,7 +420,7 @@ module.exports = {
 				interaction.log(`Unknown subcommand "${interaction.options.getSubcommand()}"`);
 				await interaction.editReply({
 					content: `Unknown subcommand "${interaction.options.getSubcommand()}"`,
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 				break;
 		};

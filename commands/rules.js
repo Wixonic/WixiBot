@@ -1,4 +1,4 @@
-const { ApplicationCommandType, MessageFlagsBitField, SlashCommandBuilder } = require("discord.js");
+const { ApplicationCommandType, MessageFlags, SlashCommandBuilder } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
@@ -20,7 +20,7 @@ module.exports = {
 			interaction.log("Rules automation disabled");
 			return await interaction.reply({
 				content: "Rules automation is currently disabled",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -28,7 +28,7 @@ module.exports = {
 			interaction.log("Rules channel not set");
 			return await interaction.reply({
 				content: "Rules channel is not set",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -38,7 +38,7 @@ module.exports = {
 			interaction.log(`Rules channel "${rulesSettings?.channel}" not found`);
 			return await interaction.reply({
 				content: "Rules channel not found",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -46,7 +46,7 @@ module.exports = {
 			interaction.log(`Rules channel "${channel.name}" (${channel.id}) is not text-based`);
 			return await interaction.reply({
 				content: "Rules channel is not a text-based channel",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -59,12 +59,12 @@ module.exports = {
 
 		await channel.send({
 			content: rules,
-			flags: new MessageFlagsBitField().add("SuppressNotifications")
+			flags: MessageFlags.SuppressNotifications
 		});
 
 		await interaction.reply({
 			content: `Rules updated at <#${channel.id}>`,
-			ephemeral: true
+			flags: MessageFlags.Ephemeral
 		});
 
 		interaction.log("Rules updated");

@@ -1,4 +1,4 @@
-const { PermissionFlagsBits } = require("discord.js");
+const { MessageFlags, PermissionFlagsBits } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
@@ -36,7 +36,7 @@ module.exports = {
 
 				await interaction.reply({
 					content: `Ticket ${ticketId} is now available at <#${channel.id}>.`,
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 
 				fs.writeFileSync(ticketPath, JSON.stringify(ticket));
@@ -44,7 +44,7 @@ module.exports = {
 				interaction.log(`Failed to read ticket file: ${e}`);
 				await interaction.reply({
 					content: "An error occured while reading the ticket file.",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 			}
 		} else {
@@ -52,7 +52,7 @@ module.exports = {
 			await interaction.message.delete();
 			await interaction.reply({
 				content: "This ticket does not exist anymore.",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 	}

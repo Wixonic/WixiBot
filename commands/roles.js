@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ApplicationCommandType, ButtonBuilder, ButtonStyle, MessageFlagsBitField, SlashCommandBuilder } = require("discord.js");
+const { ActionRowBuilder, ApplicationCommandType, ButtonBuilder, ButtonStyle, MessageFlags, MessageFlagsBitField, SlashCommandBuilder } = require("discord.js");
 
 const { client } = require("../clients.js");
 const log = require("../log.js");
@@ -32,7 +32,7 @@ module.exports = {
 
 		if (!interaction.fake) {
 			await interaction.deferReply({
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -44,7 +44,7 @@ module.exports = {
 			if (!interaction.fake) {
 				return await interaction.editReply({
 					content: "Roles automation is currently disabled",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 			} else return false;
 		}
@@ -54,7 +54,7 @@ module.exports = {
 			if (!interaction.fake) {
 				return await interaction.editReply({
 					content: "Roles channel is not set",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 			}
 		}
@@ -70,7 +70,7 @@ module.exports = {
 			if (!interaction.fake) {
 				return await interaction.editReply({
 					content: "Roles channel not found",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 			} else return false;
 		}
@@ -81,7 +81,7 @@ module.exports = {
 			if (!interaction.fake) {
 				return await interaction.editReply({
 					content: "Roles channel is not a text-based channel",
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 			} else return false;
 		}
@@ -177,7 +177,7 @@ module.exports = {
 		if (!interaction.fake) {
 			await interaction.editReply({
 				content: `Roles updated at <#${channel.id}>`,
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 

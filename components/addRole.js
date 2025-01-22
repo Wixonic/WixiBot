@@ -9,13 +9,14 @@ module.exports = {
 	name: "addRole",
 	args: 2,
 	execute: async (interaction, args) => {
+		const rolesSettings = settings.guilds?.[interaction.guildId]?.roles;
+		const recurrentSettings = rolesSettings?.recurrentRoles;
+
+		const member = await interaction.guild.members.fetch(interaction.member?.id);
+
 		const roleId = args[0];
 		const role = await interaction.guild.roles.fetch(roleId);
 		const roleSettings = getRoleSettingsForGuild(interaction.guildId, roleId);
-		const member = await interaction.guild.members.fetch(interaction.member?.id);
-
-		const rolesSettings = settings.guilds?.[interaction.guildId]?.roles;
-		const recurrentSettings = rolesSettings?.recurrentRoles;
 
 		const isLocked = args[1] == "locked";
 
@@ -37,7 +38,7 @@ module.exports = {
 					await interaction.reply({
 						components: roleSettings.prompt?.components ?? [],
 						content: `> As this role requires extra steps, please follow the instructions\n\n${roleSettings.prompt?.content ?? "_No instruction, good luck!_\nIf you see this message, please contact an admin."}`,
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				}
 
@@ -46,7 +47,7 @@ module.exports = {
 
 					await interaction.reply({
 						content: roleSettings.message,
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				}
 			} else {
@@ -60,13 +61,13 @@ module.exports = {
 						interaction.log(`Failed to remove: ${e}`);
 						return await interaction.reply({
 							content: "An error occured.",
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 					}
 
 					await interaction.reply({
 						content: `<@&${roleId}> successfully removed from your account.`,
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				} else {
 					try {
@@ -76,13 +77,13 @@ module.exports = {
 						interaction.log(`Failed to add: ${e}`);
 						return await interaction.reply({
 							content: "An error occured.",
-							ephemeral: true
+							flags: MessageFlags.Ephemeral
 						});
 					}
 
 					await interaction.reply({
 						content: `<@&${roleId}> successfully added to your account.`,
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				}
 			}
@@ -90,7 +91,7 @@ module.exports = {
 			interaction.log(`Failed to fetch role (${roleId}), role settings or member`);
 			await interaction.reply({
 				content: "This role is not available.",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 	}

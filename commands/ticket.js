@@ -1,4 +1,4 @@
-const { ApplicationCommandType, MessageFlagsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require("discord.js");
+const { ApplicationCommandType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } = require("discord.js");
 
 const settings = require("../settings.js");
 
@@ -18,7 +18,7 @@ module.exports = {
 			interaction.log("Ticket Tool disabled");
 			return await interaction.reply({
 				content: "Ticket Tool is currently disabled",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -26,7 +26,7 @@ module.exports = {
 			interaction.log("Ticket channel not set");
 			return await interaction.reply({
 				content: "Ticket channel is not set",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -36,7 +36,7 @@ module.exports = {
 			interaction.log(`Ticket channel "${ticketSettings?.channel}" not found`);
 			return await interaction.reply({
 				content: "Ticket channel not found",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -44,7 +44,7 @@ module.exports = {
 			interaction.log(`Ticket channel "${channel.name}" (${channel.id}) is not text-based`);
 			return await interaction.reply({
 				content: "Ticket channel is not a text-based channel",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -52,7 +52,7 @@ module.exports = {
 			interaction.log("Queue channel not set");
 			return await interaction.reply({
 				content: "Queue channel is not set",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -62,7 +62,7 @@ module.exports = {
 			interaction.log(`Queue channel "${ticketSettings.queue}" not found`);
 			return await interaction.reply({
 				content: "Queue channel not found",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -70,7 +70,7 @@ module.exports = {
 			interaction.log(`Queue channel "${queueChannel.name}" (${queueChannel.id}) is not text-based`);
 			return await interaction.reply({
 				content: "Queue channel is not a text-based channel",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
@@ -96,13 +96,12 @@ module.exports = {
 							.setStyle(ButtonStyle.Primary)
 					)
 			],
-			flags: new MessageFlagsBitField()
-				.add("SuppressNotifications")
+			flags: MessageFlags.SuppressNotifications
 		});
 
 		await interaction.reply({
 			content: `Ticket Tool updated at <#${channel.id}>`,
-			ephemeral: true
+			flags: MessageFlags.Ephemeral
 		});
 
 		interaction.log("Ticket Tool updated");

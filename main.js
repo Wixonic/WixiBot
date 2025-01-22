@@ -24,6 +24,7 @@ client.on("interactionCreate", async (interaction) => {
 	log(`Interaction "${interaction.id}" started by user "${interaction.user.username}" (${interaction.user.id})` + (interaction.inGuild() ? `, in guild "${interaction.guild.name}"(${interaction.guild.id})` : ", outside of a guild"));
 
 	interaction.log = (text) => log(`I - ${interaction.id} - ${text}`);
+	interaction.error = (text) => log.error(`I - ${interaction.id} - ${text}`);
 
 	if (interaction.isMessageComponent()) {
 		let found = false;
@@ -38,10 +39,10 @@ client.on("interactionCreate", async (interaction) => {
 					await component.execute(interaction, componentArgs);
 					interaction.log(`Component "${componentName}" ended`);
 				} else {
-					interaction.log(`Component "${componentName}" - ${componentArgs.length > component.args ? "Exceed" : "Missing"} arguments(${componentArgs.length} / ${component.args})`);
+					interaction.error(`Component "${componentName}" - ${componentArgs.length > component.args ? "Exceed" : "Missing"} arguments(${componentArgs.length} / ${component.args})`);
 					await interaction.reply({
 						content: "This interaction is not available.",
-						ephemeral: true
+						flags: MessageFlags.Ephemeral
 					});
 				}
 
@@ -51,10 +52,10 @@ client.on("interactionCreate", async (interaction) => {
 		}
 
 		if (!found) {
-			interaction.log(`Component "${componentName}" not found`);
+			interaction.error(`Component "${componentName}" not found`);
 			await interaction.reply({
 				content: "This interaction is not available.",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 	} else if (interaction.isModalSubmit()) {
@@ -73,10 +74,10 @@ client.on("interactionCreate", async (interaction) => {
 		}
 
 		if (!found) {
-			interaction.log(`Modal "${modalName}" not found`);
+			interaction.error(`Modal "${modalName}" not found`);
 			await interaction.reply({
 				content: "This interaction is not available.",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 	} else if (interaction.isChatInputCommand() || interaction.isMessageContextMenuCommand() || interaction.isUserContextMenuCommand()) {
@@ -95,10 +96,10 @@ client.on("interactionCreate", async (interaction) => {
 		}
 
 		if (!found) {
-			interaction.log(`Command "${commandName}" not found`);
+			interaction.error(`Command "${commandName}" not found`);
 			await interaction.reply({
 				content: "This interaction is not available.",
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 	}
