@@ -35,7 +35,7 @@ const requestClassAt = async (date) => {
 		try {
 			const refreshInformation = await pawnote.loginQrCode(session, {
 				deviceUUID: config.pronote.deviceId,
-				qr: fs.readFileSync(path.join(config.cache.pronote, "qr.json")),
+				qr: JSON.parse(fs.readFileSync(path.join(config.cache.pronote, "qr.json"))),
 				pin: config.pronote.pin
 			});
 
