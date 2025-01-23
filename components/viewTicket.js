@@ -1,4 +1,4 @@
-const { MessageFlags, PermissionFlagsBits } = require("discord.js");
+const { MessageFlags } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 

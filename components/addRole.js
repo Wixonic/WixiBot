@@ -1,3 +1,5 @@
+const { MessageFlags } = require("discord.js");
+
 const { getRoleSettingsForGuild } = require("../utils.js");
 
 const settings = require("../settings.js");
