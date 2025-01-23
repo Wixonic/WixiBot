@@ -3,13 +3,7 @@ const { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = req
 module.exports = process.env.DEV == "true" ? {
 	guilds: {
 		"1243943943779909652": {
-			"message-as": {
-				active: true
-			},
 			privacy: {
-				active: true
-			},
-			pronote: {
 				active: true
 			},
 			rules: {
