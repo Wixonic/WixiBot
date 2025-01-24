@@ -41,7 +41,7 @@ const server = {
 				log(`[Server] Found website folder: ${folderPath}`);
 
 				const routesPath = path.join(folderPath, "index.js");
-				if (!fs.existsSync(routesPath)) log.error(`[Server] No index.js found in ${folderPath}.`);
+				if (!fs.existsSync(routesPath)) log.error(`[Server] No index.json found in ${folderPath}.`);
 				else {
 					const routes = require(routesPath);
 					log(`[Server] Loaded routes from ${routesPath}`);
@@ -62,7 +62,7 @@ const server = {
 					});
 
 					const ignoredFiles = routes.ignore || [];
-					ignoredFiles.push(path.join(folder, "index.js"));
+					ignoredFiles.push(path.join(folder, "index.js"), ".DS_Store");
 
 					app.use((req, res, next) => {
 						const requestedPath = path.join(folder, req.path);
@@ -78,30 +78,6 @@ const server = {
 				app.use(`/${folder}`, express.static(folderPath));
 				log(`[Server] Static hosting initialized for /${folder}`);
 			}
-		});
-
-		app.get("/warthundermap.png", (_, res) => {
-			const filePath = path.join(config.cache.server, "warthundermap.png");
-			if (fs.existsSync(filePath)) {
-				log("[War Thunder] Map fetched successfully.");
-				res.status(200).sendFile(filePath);
-			} else {
-				log("[War Thunder] Map not found.");
-				res.status(404).send("Map not found.");
-			}
-		});
-
-		app.post("/warthundermap.png", async (req, res) => {
-			const authHeader = req.headers.authorization;
-
-			if (!authHeader || authHeader !== `WixKey ${config.wixkey}`) {
-				log("[War Thunder] Unauthorized access attempt.");
-				return res.status(401).send("Unauthorized: Invalid API key.");
-			}
-
-			fs.writeFileSync(path.join(config.cache.server, "warthundermap.png"), Buffer.from(req.body, "base64url"));
-			log("[War Thunder] Map uploaded successfully.");
-			res.status(200).end();
 		});
 
 		https.createServer({
