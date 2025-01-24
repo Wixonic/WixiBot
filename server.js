@@ -82,8 +82,8 @@ const server = {
 
 		https.createServer({
 			key: fs.readFileSync(config.ssl.key),
-			cert: fs.readFileSync("./websites/website.cer"),
-		}, app).listen(config.port, () => log(`[Server] Express server is running on https://localhost:${config.port}`));
+			cert: fs.readFileSync("./websites/website.cer")
+		}, app).listen(config.server.port, () => log(`[Server] Express server is running on https://localhost:${config.server.port}`));
 	}
 };
 

@@ -29,7 +29,7 @@ const launch = () => {
 		});
 	});
 
-	server.listen(config.port.blenderServer, () => log(`Blender server listening on :${config.port.blenderServer}`));
+	server.listen(config.blender.port, () => log(`Blender server listening on :${config.blender.port}`));
 };
 
 module.exports = {

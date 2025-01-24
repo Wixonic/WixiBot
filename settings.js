@@ -3,7 +3,13 @@ const { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = req
 module.exports = process.env.DEV == "true" ? {
 	guilds: {
 		"1243943943779909652": {
+			"message-as": {
+				active: true
+			},
 			privacy: {
+				active: true
+			},
+			pronote: {
 				active: true
 			},
 			rules: {
@@ -14,8 +20,7 @@ module.exports = process.env.DEV == "true" ? {
 	},
 	log: {
 		active: true,
-		guild: "1243943943779909652",
-		channel: "1331688287835783209"
+		url: "https://discord.com/api/webhooks/1332434654799593513/wuF6jnLZ8tO516Iu-pm1RfM_we97V7Wrbqma-XUezHjZ5fgm-VZnBZD7AAOnie0CYslg"
 	}
 } : {
 	guilds: {
@@ -168,7 +173,6 @@ module.exports = process.env.DEV == "true" ? {
 	},
 	log: {
 		active: true,
-		guild: "1020663521530351627",
-		channel: "1331686277149491250"
+		url: "https://discord.com/api/webhooks/1332435148289085522/kfk0oZtoxPbEZDBeUw61Fxhw2ucIKr_kKk9fA2N9zqAzebkt1ocZasU7Sv6VQpKYndw_"
 	}
 };

@@ -1,4 +1,5 @@
-const { client } = require("./clients.js");
+const request = require("./lib/request.js");
+
 const settings = require("./settings.js");
 
 const log = (any) => {
@@ -10,9 +11,15 @@ log.error = async (any) => {
 	log(any);
 
 	if (settings.log.active) {
-		const guild = (client.guilds.cache.get(settings.log.guild) ?? await client.guilds.fetch(settings.log.guild));
-		await (guild.channels.cache.get(settings.log.channel) ?? await guild.channels.fetch(settings.log.channel)).send({
-			content: `\`\`\`\n[ERROR]: ${typeof any == "string" ? any : JSON.stringify(any, null, 2)}\`\`\``
+		await request({
+			url: settings.log.url,
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				content: `\`\`\`\n[ERROR]: ${typeof any == "string" ? any : JSON.stringify(any, null, 2)}\`\`\``
+			})
 		});
 	}
 };
