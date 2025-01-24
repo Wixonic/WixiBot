@@ -1,5 +1,7 @@
 const { Client } = require("discord.js-selfbot-v13");
 
+const { db } = require("../lib/firebase.js");
+
 const { clone, wait } = require("../utils.js");
 
 const { BaseObject } = require("./base.js");
@@ -9,7 +11,7 @@ const config = require("../config.js");
 let ready = false;
 
 /**
- * @typedef {(import("discord.js-selfbot-v13").ActivitiesOptions | import("discord.js-selfbot-v13").RichPresence | import("discord.js-selfbot-v13").SpotifyRPC | import("discord.js-selfbot-v13").CustomStatus)} Activity
+ * @typedef {(import("discord.js-selfbot-v13").ActivitiesOptions | import("discord.js-selfbot-v13").RichPresence | import("discord.js-selfbot-v13").SpotifyRPC | import("discord.js-selfbot-v13").CustomStatus) | {level: number}} Activity
  */
 
 class ClientManager extends BaseObject {
@@ -61,12 +63,18 @@ class ClientManager extends BaseObject {
 		* @type {Activity[]}
 		*/
 		const activities = Object.values(clone(this.activities));
+		activities.sort((activityA, activityB) => (activityB.level ?? 0) - (activityA.level ?? 0));
 
-		while (!this.client.isReady()) await wait(1);
+		while (!this.client.isReady()) await wait(0.1);
 
-		for (const activity of activities) {
-			activity.application_id = config.applicationId;
-			delete activity.keepAliveId;
+		if (activities.length == 0) await db.collection("activity").doc("discord").delete();
+		else {
+			await db.collection("activity").doc("discord").set(activities[0]);
+
+			for (const activity of activities) {
+				activity.application_id = config.applicationId;
+				delete activity.keepAliveId;
+			}
 		}
 
 		this.client.user.setPresence({

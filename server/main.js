@@ -25,6 +25,7 @@ const processBlender = async () => {
 		discord.removeActivity("blender");
 	} else if (lastBlenderUpdate + 20 * 1000 < Date.now()) {
 		discord.addActivity("blender", {
+			level: 2,
 			applicationId: config.discord.application.clientId,
 			assets: {
 				small_image: blenderData.small_image ? `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets[blenderData.small_image]}.png` : null,
@@ -55,6 +56,7 @@ const processPronote = async () => {
 		if (!currentClass) discord.removeActivity("pronote");
 		else {
 			discord.addActivity("pronote", {
+				level: 1,
 				applicationId: config.discord.application.clientId,
 				assets: {
 					large_image: `https://cdn.discordapp.com/app-assets/${config.discord.application.clientId}/${config.discord.application.assets.clock}.png`,
@@ -100,6 +102,7 @@ const processWarThunder = async () => {
 			const mapImage = await getImage();
 
 			discord.addActivity("wt", {
+				level: 2,
 				applicationId: config.discord.application.clientId,
 				assets: {
 					large_image: mapImage[0].external_asset_path,
@@ -155,6 +158,7 @@ const processTrack = async (song) => {
 
 			if (song.state == "PLAYING") {
 				discord.addActivity("music", {
+					level: 0,
 					assets: {
 						large_image: `spotify:${song.spotifyArtwork}`,
 						large_text: song.album,
