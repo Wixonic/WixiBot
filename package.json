@@ -27,6 +27,6 @@
 		"sodium-native": "^4.3.1"
 	},
 	"devDependencies": {
-		"@types/node": "^20.17.14"
+		"@types/node": "^20.17.16"
 	}
 }
