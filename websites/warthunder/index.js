@@ -23,7 +23,7 @@ module.exports = {
 		}, {
 			url: "/warthundermap.png",
 			method: "POST",
-			run: (_, res) => {
+			run: (req, res) => {
 				const authHeader = req.headers.authorization;
 
 				if (!authHeader || authHeader !== `WixKey ${config.wixkey}`) {

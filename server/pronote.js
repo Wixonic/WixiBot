@@ -2,6 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const pawnote = require("pawnote");
 
+const request = require("../lib/request.js");
+
 const log = require("../log.js");
 const { titleCase } = require("../utils.js");
 
@@ -22,24 +24,52 @@ const requestClassAt = async (date) => {
 	const session = pawnote.createSessionHandle();
 
 	try {
-		if (!fs.existsSync(config.cache.pronote)) fs.mkdirSync(config.cache.pronote, { recursive: true });
-
-		const storedInformation = JSON.parse(fs.readFileSync(path.join(config.cache.pronote, "refresh.json"), "utf-8"));
-		storedInformation.deviceUUID = config.pronote.deviceId;
+		const storedInformation = await request({
+			url: new URL("/pronote/refresh.json", config.server.url),
+			type: "json",
+			headers: {
+				"Authorization": `WixKey ${config.wixkey}`
+			}
+		});
 
 		const refreshInformation = await pawnote.loginToken(session, storedInformation);
-		fs.writeFileSync(path.join(config.cache.pronote, "refresh.json"), JSON.stringify(refreshInformation), "utf-8");
+
+		await request({
+			url: new URL("/pronote/refresh.json", config.server.url),
+			method: "POST",
+			type: "json",
+			headers: {
+				"Authorization": `WixKey ${config.wixkey}`
+			},
+			body: refreshInformation
+		});
 	} catch (e) {
 		log(`Failed to authenticate from refresh token: ${e}`);
 
 		try {
+			const storedInformation = await request({
+				url: new URL("/pronote/refresh.json", config.server.url),
+				type: "json",
+				headers: {
+					"Authorization": `WixKey ${config.wixkey}`
+				}
+			});
+
 			const refreshInformation = await pawnote.loginQrCode(session, {
 				deviceUUID: config.pronote.deviceId,
-				qr: JSON.parse(fs.readFileSync(path.join(config.cache.pronote, "qr.json"))),
+				qr: storedInformation,
 				pin: config.pronote.pin
 			});
 
-			fs.writeFileSync(path.join(config.cache.pronote, "refresh.json"), JSON.stringify(refreshInformation), "utf-8");
+			await request({
+				url: new URL("/pronote/qr.json", config.server.url),
+				method: "POST",
+				type: "json",
+				headers: {
+					"Authorization": `WixKey ${config.wixkey}`
+				},
+				body: refreshInformation
+			});
 		} catch (e) {
 			log.error(`Failed to authenticate from QR Code: ${e}`);
 			return false;
