@@ -2,8 +2,6 @@ const http = require("http");
 
 const log = require("../log.js");
 
-const discord = require("./client.js");
-
 const config = require("../config.js");
 
 let blenderData = {

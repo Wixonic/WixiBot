@@ -2,12 +2,12 @@ const { RichPresence } = require("discord.js-selfbot-v13");
 
 const log = require("../log.js");
 
+const { db } = require("../lib/firebase.js");
 const request = require("../lib/request.js");
 const spotify = require("../lib/spotify.js");
 
 const blender = require("./blender.js");
 const discord = require("./client.js");
-const { db } = require("./firebase.js");
 const { getCurrentTrackInfo } = require("./music.js");
 const pronote = require("./pronote.js");
 const wt = require("./warthunder.js");
@@ -136,9 +136,9 @@ const processTrack = async (song) => {
 		if (discord.activities.length > 0) discord.removeActivity("music");
 
 		if (song == null) {
-			currentSong = null;
-			await db.collection("activity").doc("song").delete();
+			await db.collection("sync").doc("song").delete();
 
+			currentSong = null;
 			discord.removeActivity("music");
 
 			log("Music stopped.");
@@ -152,8 +152,6 @@ const processTrack = async (song) => {
 			song.spotifyId = spotifySong?.id ?? null;
 			const spotifyArtworkUrl = spotifySong?.album?.images?.at(0)?.url;
 			song.spotifyArtwork = spotifyArtworkUrl?.slice((spotifyArtworkUrl?.lastIndexOf("/") ?? -1) + 1) ?? null;
-
-			await db.collection("activity").doc("song").set(song);
 
 			if (song.state == "PLAYING") {
 				discord.addActivity("music", {
@@ -173,6 +171,8 @@ const processTrack = async (song) => {
 					type: 2 // LISTENING
 				});
 			} else discord.removeActivity("music");
+
+			await db.collection("sync").doc("song").set(song);
 
 			currentSong = song;
 			log(`Music set to ${currentSong.track} by ${currentSong.artist} (${currentSong.state}).`);
