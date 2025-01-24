@@ -2,7 +2,6 @@ const { RichPresence } = require("discord.js-selfbot-v13");
 
 const log = require("../log.js");
 
-const { db } = require("../lib/firebase.js");
 const request = require("../lib/request.js");
 const spotify = require("../lib/spotify.js");
 
@@ -139,8 +138,6 @@ const processTrack = async (song) => {
 		if (discord.activities.length > 0) discord.removeActivity("music");
 
 		if (song == null) {
-			await db.collection("sync").doc("song").delete();
-
 			currentSong = null;
 			discord.removeActivity("music");
 
@@ -175,8 +172,6 @@ const processTrack = async (song) => {
 					type: 2 // LISTENING
 				});
 			} else discord.removeActivity("music");
-
-			await db.collection("sync").doc("song").set(song);
 
 			currentSong = song;
 			log(`Music set to ${currentSong.track} by ${currentSong.artist} (${currentSong.state}).`);
