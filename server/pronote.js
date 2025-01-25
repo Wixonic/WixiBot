@@ -48,12 +48,14 @@ const requestClassAt = async (date) => {
 
 		try {
 			const storedInformation = await request({
-				url: new URL("/pronote/refresh.json", config.server.url),
+				url: new URL("/pronote/qr.json", config.server.url),
 				type: "json",
 				headers: {
 					"Authorization": `WixKey ${config.wixkey}`
 				}
 			});
+
+			console.log(storedInformation);
 
 			const refreshInformation = await pawnote.loginQrCode(session, {
 				deviceUUID: config.pronote.deviceId,
@@ -62,7 +64,7 @@ const requestClassAt = async (date) => {
 			});
 
 			await request({
-				url: new URL("/pronote/qr.json", config.server.url),
+				url: new URL("/pronote/refresh.json", config.server.url),
 				method: "POST",
 				type: "json",
 				headers: {
