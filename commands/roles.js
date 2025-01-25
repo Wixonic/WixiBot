@@ -1,6 +1,6 @@
 const { ActionRowBuilder, ApplicationCommandType, ButtonBuilder, ButtonStyle, MessageFlags, MessageFlagsBitField, SlashCommandBuilder } = require("discord.js");
 
-const { client } = require("../clients.js");
+const { getGuild } = require("../clients.js");
 const log = require("../log.js");
 const { hexToIntColor } = require("../utils.js");
 
@@ -25,7 +25,7 @@ module.exports = {
 			interaction = {
 				log: interaction,
 				guildId,
-				guild: await client.guilds.fetch(guildId),
+				guild: await getGuild(guildId),
 				fake: true
 			};
 		} else interaction.fake = false;

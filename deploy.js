@@ -11,12 +11,12 @@ for (const guildId in settings.guilds) {
 	const guildCommands = [];
 	commands.list.filter((command) => Object.keys(guildSettings).includes(command.name) && guildSettings[command.name]?.active).forEach((command) => guildCommands.push(command.data.toJSON()));
 
-	log(`Started refreshing ${guildCommands.length} slash command${guildCommands.length > 1 ? "s" : ""}.`);
+	log(`Started refreshing ${guildCommands.length} command${guildCommands.length > 1 ? "s" : ""}.`);
 
 	const request = rest.put(Routes.applicationGuildCommands(config.discord.application.clientId, guildId), {
 		body: guildCommands
 	});
 	requests.push(request);
-	request.then((data) => log(`Successfully reloaded ${data.length} slash command${data.length > 1 ? "s" : ""} for ${guildId}.`)).catch((reason) => log(`Failed to refresh slash command${guildCommands.length > 1 ? "s" : ""} for ${guildId}: ${reason}.`));
+	request.then((data) => log(`Successfully reloaded ${data.length} command${data.length > 1 ? "s" : ""} for ${guildId}.`)).catch((reason) => log(`Failed to refresh command${guildCommands.length > 1 ? "s" : ""} for ${guildId}: ${reason}.`));
 }
 Promise.all(requests).finally(() => process.exit(0));

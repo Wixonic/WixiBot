@@ -1,4 +1,27 @@
 /**
+ * @typedef {"GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS"} RequestMethod
+ */
+
+/**
+ * @typedef {"headers" | "json" | "raw" | "text"} RequestResponseType
+ */
+
+/**
+ * @typedef {Object} RequestOptions
+ * @property {String?} auth
+ * @property {Object?} body
+ * @property {import("http").OutgoingHttpHeaders?} headers
+ * @property {RequestMethod?} method
+ * @property {boolean?} secure
+ * @property {RequestResponseType} type
+ * @property {URL | String} url
+ */
+
+/**
+ * @typedef {(options: RequestOptions) => Promise<any>} Request
+ */
+
+/**
  * @typedef {Object} Song
  * @property {"PLAYING" | "PAUSED" | "STOPPED"} state
  * @property {string} track

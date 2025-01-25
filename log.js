@@ -1,6 +1,6 @@
 const request = require("./lib/request.js");
 
-const settings = require("./settings.js");
+const config = require("./config.js");
 
 const log = (any) => {
 	const now = new Date();
@@ -10,18 +10,16 @@ const log = (any) => {
 log.error = async (any) => {
 	log(any);
 
-	if (settings.log.active) {
-		await request({
-			url: settings.log.url,
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				content: `\`\`\`\n[ERROR]: ${typeof any == "string" ? any : JSON.stringify(any, null, 2)}\`\`\``
-			})
-		});
-	}
+	await request({
+		url: config.log,
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify({
+			content: `\`\`\`\n[ERROR]: ${typeof any == "string" ? any : JSON.stringify(any, null, 2)}\`\`\``
+		})
+	});
 };
 
 module.exports = log;

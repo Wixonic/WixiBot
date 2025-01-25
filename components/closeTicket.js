@@ -3,7 +3,7 @@ const { AttachmentBuilder, MessageFlags } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
-const { client } = require("../clients.js");
+const { getUser } = require("../clients.js");
 
 const config = require("../config.js");
 
@@ -68,13 +68,15 @@ module.exports = {
 					}
 				}
 
-				const user = await client.users.fetch(ticket.author.id);
-				const transcriptFile = new AttachmentBuilder(Buffer.from(transcript.join("\n"), "utf-8"), { name: `transcript-${ticketId}.txt`, description: "Text transcription of the ticket" });
+				const user = await getUser(ticket.author.id);
+				if (user) {
+					const transcriptFile = new AttachmentBuilder(Buffer.from(transcript.join("\n"), "utf-8"), { name: `transcript-${ticketId}.txt`, description: "Text transcription of the ticket" });
 
-				await user.send({
-					content: "Your ticket has been closed. Here is the ticket file.",
-					files: [transcriptFile]
-				});
+					await user.send({
+						content: "Your ticket has been closed. Here is the ticket file.",
+						files: [transcriptFile]
+					});
+				}
 
 				await interaction.reply({
 					content: "Ticket is now closed.",
