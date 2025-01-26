@@ -300,7 +300,7 @@ module.exports = process.env.DEV == "true" ? {
 					description: "Won at least 500 points.",
 					condition: (userRank) => userRank.points >= 500 && userRank.points < 1000
 				}, {
-					id: "1332682737034854431",
+					id: "1332692565761331293",
 					description: "Won at least 1000 points.",
 					condition: (userRank) => userRank.points >= 1000 && userRank.points < 3000
 				}, {
