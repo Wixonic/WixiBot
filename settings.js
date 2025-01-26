@@ -6,147 +6,6 @@ module.exports = process.env.DEV == "true" ? {
 			privacy: {
 				active: true
 			},
-			rank: {
-				active: true
-			},
-			ranks: {
-				active: true,
-				channel: "1332713470193434635",
-				achievements: [{
-					id: "first-message",
-					name: "First!",
-					description: "You sent your first message!",
-					points: 10,
-					condition: (userRank) => userRank.messages > 0
-				}, {
-					id: "10-messages",
-					name: "Tenfold improvement",
-					description: "You sent 10 messages!",
-					points: 20,
-					condition: (userRank) => userRank.messages >= 1
-				}, {
-					id: "25-messages",
-					name: "Talking 25/8",
-					description: "You sent 25 messages!",
-					points: 70,
-					condition: (userRank) => userRank.messages >= 2
-				}, {
-					id: "100-messages",
-					name: "Keeping it 100",
-					description: "You sent 100 messages!",
-					points: 100,
-					condition: (userRank) => userRank.messages >= 3
-				}, {
-					id: "500-messages",
-					name: "500 shades of speech!",
-					description: "You sent 500 messages!",
-					points: 300,
-					condition: (userRank) => userRank.messages >= 4
-				}, {
-					id: "1000-messages",
-					name: "Words worth a thousand pictures",
-					description: "You sent 1000 messages!",
-					points: 500,
-					condition: (userRank) => userRank.messages >= 5
-				}, {
-					id: "first-vocal",
-					name: "First! - Season 2",
-					description: "Join a voice channel for the first time!",
-					points: 20,
-					condition: (userRank) => userRank.voice.count > 0
-				}, {
-					id: "30min-vocal",
-					name: "Voice Module Activated",
-					description: "You spent 30 minutes in a voice channel!",
-					points: 30,
-					condition: (userRank) => userRank.voice.time > 10
-				}, {
-					id: "1h-vocal",
-					name: "One-Minute Wonder",
-					description: "You spent an hour in a voice channel!",
-					points: 50,
-					condition: (userRank) => userRank.voice.time > 20
-				}, {
-					id: "5h-vocal",
-					name: "5-Hour Circuit",
-					description: "You spent 5 hours in a voice channel!",
-					points: 200,
-					condition: (userRank) => userRank.voice.time > 30
-				}, {
-					id: "1d-vocal",
-					name: "24-Hour Relay",
-					description: "You spent an entire day in a voice channel!",
-					points: 500,
-					condition: (userRank) => userRank.voice.time > 40
-				}, {
-					id: "7d-vocal",
-					name: "Non-Stop Frequency",
-					description: "You spent an entire week in a voice channel!",
-					points: 800,
-					condition: (userRank) => userRank.voice.time > 50
-				}, {
-					id: "first-stream",
-					name: "First! - Season 3",
-					description: "You streamed for the first time!",
-					points: 50,
-					condition: (userRank) => userRank.voice.stream.count > 0
-				}, {
-					id: "30min-stream",
-					name: "Waveform Pioneer",
-					description: "You streamed 30 minutes in a voice channel!",
-					points: 100,
-					condition: (userRank) => userRank.voice.stream.time > 10
-				}, {
-					id: "1h-stream",
-					name: "One Hour in the Spotlight",
-					description: "You streamed an hour in a voice channel!",
-					points: 200,
-					condition: (userRank) => userRank.voice.stream.time > 20
-				}, {
-					id: "5h-stream",
-					name: "Endless Broadcast",
-					description: "You streamed 5 hours in a voice channel!",
-					points: 400,
-					condition: (userRank) => userRank.voice.stream.time > 20
-				}, {
-					id: "1d-stream",
-					name: "Live Channel",
-					description: "You streamed an entire day in a voice channel!",
-					points: 650,
-					condition: (userRank) => userRank.voice.stream.time > 20
-				}, {
-					id: "7d-stream",
-					name: "Global Signal",
-					description: "You streamed an entire week in a voice channel!",
-					points: 1000,
-					condition: (userRank) => userRank.voice.stream.time > 20
-				}],
-				roles: [{
-					id: "1332682474492526643",
-					description: "Won at least a point.",
-					condition: (userRank) => userRank.points > 0 && userRank.points < 100
-				}, {
-					id: "1332696696257384560",
-					description: "Won at least 100 points.",
-					condition: (userRank) => userRank.points >= 100 && userRank.points < 500
-				}, {
-					id: "1332696737508233339",
-					description: "Won at least 500 points.",
-					condition: (userRank) => userRank.points >= 500 && userRank.points < 1000
-				}, {
-					id: "1332696767057367152",
-					description: "Won at least 1000 points.",
-					condition: (userRank) => userRank.points >= 1000 && userRank.points < 3000
-				}, {
-					id: "1332696800393429013",
-					description: "Won at least 3000 points.",
-					condition: (userRank) => userRank.points >= 3000 && userRank.points < 5000
-				}, {
-					id: "1332696829136998442",
-					description: "Won at least 5000 points.",
-					condition: (userRank) => userRank.points >= 5000
-				}]
-			},
 			rules: {
 				active: true,
 				channel: "1243991489575522374"
@@ -215,6 +74,12 @@ module.exports = process.env.DEV == "true" ? {
 					points: 500,
 					condition: (userRank) => userRank.messages >= 1000
 				}, {
+					id: "5000-messages",
+					name: "Just why?",
+					description: "You sent 5000 messages!",
+					points: 1500,
+					condition: (userRank) => userRank.messages >= 5000
+				}, {
 					id: "first-vocal",
 					name: "First! - Season 2",
 					description: "Join a voice channel for the first time!",
@@ -236,49 +101,55 @@ module.exports = process.env.DEV == "true" ? {
 					id: "5h-vocal",
 					name: "5-Hour Circuit",
 					description: "You spent 5 hours in a voice channel!",
-					points: 200,
+					points: 100,
 					condition: (userRank) => userRank.voice.time > 5 * 60 * 60
 				}, {
 					id: "1d-vocal",
 					name: "24-Hour Relay",
 					description: "You spent an entire day in a voice channel!",
-					points: 500,
+					points: 300,
 					condition: (userRank) => userRank.voice.time > 24 * 60 * 60
 				}, {
 					id: "7d-vocal",
 					name: "Non-Stop Frequency",
 					description: "You spent an entire week in a voice channel!",
-					points: 800,
+					points: 500,
 					condition: (userRank) => userRank.voice.time > 7 * 24 * 60 * 60
+				}, {
+					id: "30d-vocal",
+					name: "Why? - Season 2",
+					description: "You spent an entire month in a voice channel!",
+					points: 1000,
+					condition: (userRank) => userRank.voice.time > 30 * 24 * 60 * 60
 				}, {
 					id: "first-stream",
 					name: "First! - Season 3",
 					description: "You streamed for the first time!",
-					points: 50,
+					points: 25,
 					condition: (userRank) => userRank.voice.stream.count > 0
 				}, {
 					id: "30min-stream",
 					name: "Waveform Pioneer",
 					description: "You streamed 30 minutes in a voice channel!",
-					points: 100,
+					points: 75,
 					condition: (userRank) => userRank.voice.stream.time > 30 * 60
 				}, {
 					id: "1h-stream",
 					name: "One Hour in the Spotlight",
 					description: "You streamed an hour in a voice channel!",
-					points: 200,
+					points: 100,
 					condition: (userRank) => userRank.voice.stream.time > 60 * 60
 				}, {
 					id: "5h-stream",
 					name: "Endless Broadcast",
 					description: "You streamed 5 hours in a voice channel!",
-					points: 400,
+					points: 300,
 					condition: (userRank) => userRank.voice.stream.time > 5 * 60 * 60
 				}, {
 					id: "1d-stream",
 					name: "Live Channel",
 					description: "You streamed an entire day in a voice channel!",
-					points: 650,
+					points: 500,
 					condition: (userRank) => userRank.voice.stream.time > 24 * 60 * 60
 				}, {
 					id: "7d-stream",
@@ -305,12 +176,12 @@ module.exports = process.env.DEV == "true" ? {
 					condition: (userRank) => userRank.points >= 1000 && userRank.points < 3000
 				}, {
 					id: "1332682737034854431",
-					description: "Won at least 3000 points.",
-					condition: (userRank) => userRank.points >= 3000 && userRank.points < 5000
+					description: "Won at least 5000 points.",
+					condition: (userRank) => userRank.points >= 5000 && userRank.points < 10000
 				}, {
 					id: "1332696028989755464",
-					description: "Won at least 5000 points.",
-					condition: (userRank) => userRank.points >= 5000
+					description: "Won at least 10000 points.",
+					condition: (userRank) => userRank.points >= 10000
 				}]
 			},
 			roles: {
