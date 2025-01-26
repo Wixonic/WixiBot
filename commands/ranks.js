@@ -67,6 +67,8 @@ module.exports = {
 				break;
 
 			case "leaderboard":
+				const leaderboard = Rank.leaderboard(interaction.guildId);
+
 				if (leaderboard.length > 0) {
 					const top10 = leaderboard.slice(0, 10).map((user, index) => `${index + 1}. <@${user.id}> - ${user.points} points`);
 
