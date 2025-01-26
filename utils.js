@@ -21,6 +21,24 @@ const clone = (obj, cloned = new WeakMap()) => {
 	return clonedObj;
 };
 
+const displayTime = (time) => {
+	const units = [
+		{ label: "year", seconds: 365 * 24 * 60 * 60 },
+		{ label: "month", seconds: 30 * 24 * 60 * 60 },
+		{ label: "day", seconds: 24 * 60 * 60 },
+		{ label: "hour", seconds: 60 * 60 },
+		{ label: "minute", seconds: 60 },
+		{ label: "second", seconds: 1 }
+	];
+
+	for (const unit of units) {
+		const quotient = Math.floor(time / unit.seconds);
+		if (quotient > 0) return `${quotient} ${unit.label}${quotient > 1 ? "s" : ""}`;
+	}
+
+	return "0 seconds";
+};
+
 const downloadImage = async (url) => {
 	const response = await request({
 		url,
@@ -69,6 +87,7 @@ const wait = (time = 0) => new Promise((resolve) => setTimeout(() => resolve("Fi
 module.exports = {
 	abort,
 	clone,
+	displayTime,
 	downloadImage,
 	getDominantColor,
 	getRoleSettingsForGuild,

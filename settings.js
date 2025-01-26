@@ -6,37 +6,12 @@ module.exports = process.env.DEV == "true" ? {
 			privacy: {
 				active: true
 			},
-			rules: {
-				active: true,
-				channel: "1243991489575522374"
-			}
-		}
-	}
-} : {
-	guilds: {
-		"1020663521530351627": {
-			help: {
-				active: true,
-				channel: "1037855849944731808"
-			},
-			"message-as": {
-				active: true
-			},
-			privacy: {
-				active: true
-			},
-			pronote: {
-				active: true
-			},
-			radio: {
-				active: true
-			},
 			rank: {
 				active: true
 			},
 			ranks: {
 				active: true,
-				channel: "1179535918277865614",
+				channel: "1243943943779909655",
 				achievements: [{
 					id: "first-message",
 					name: "First!",
@@ -75,7 +50,161 @@ module.exports = process.env.DEV == "true" ? {
 					condition: (userRank) => userRank.messages >= 1000
 				}, {
 					id: "5000-messages",
-					name: "Just why?",
+					name: "Why?",
+					description: "You sent 5000 messages!",
+					points: 1500,
+					condition: (userRank) => userRank.messages >= 5000
+				}, {
+					id: "first-vocal",
+					name: "First! - Season 2",
+					description: "Join a voice channel for the first time!",
+					points: 20,
+					condition: (userRank) => userRank.voice.count > 0
+				}, {
+					id: "30min-vocal",
+					name: "Voice Module Activated",
+					description: "You spent 30 minutes in a voice channel!",
+					points: 30,
+					condition: (userRank) => userRank.voice.time > 30 * 60
+				}, {
+					id: "1h-vocal",
+					name: "One-Minute Wonder",
+					description: "You spent an hour in a voice channel!",
+					points: 50,
+					condition: (userRank) => userRank.voice.time > 60 * 60
+				}, {
+					id: "5h-vocal",
+					name: "5-Hour Circuit",
+					description: "You spent 5 hours in a voice channel!",
+					points: 100,
+					condition: (userRank) => userRank.voice.time > 5 * 60 * 60
+				}, {
+					id: "1d-vocal",
+					name: "24-Hour Relay",
+					description: "You spent an entire day in a voice channel!",
+					points: 300,
+					condition: (userRank) => userRank.voice.time > 24 * 60 * 60
+				}, {
+					id: "7d-vocal",
+					name: "Non-Stop Frequency",
+					description: "You spent an entire week in a voice channel!",
+					points: 500,
+					condition: (userRank) => userRank.voice.time > 7 * 24 * 60 * 60
+				}, {
+					id: "30d-vocal",
+					name: "Why? - Season 2",
+					description: "You spent an entire month in a voice channel!",
+					points: 1000,
+					condition: (userRank) => userRank.voice.time > 30 * 24 * 60 * 60
+				}, {
+					id: "first-stream",
+					name: "First! - Season 3",
+					description: "You streamed for the first time!",
+					points: 25,
+					condition: (userRank) => userRank.voice.stream.count > 0
+				}, {
+					id: "30min-stream",
+					name: "Waveform Pioneer",
+					description: "You streamed 30 minutes in a voice channel!",
+					points: 75,
+					condition: (userRank) => userRank.voice.stream.time > 30 * 60
+				}, {
+					id: "1h-stream",
+					name: "One Hour in the Spotlight",
+					description: "You streamed an hour in a voice channel!",
+					points: 100,
+					condition: (userRank) => userRank.voice.stream.time > 60 * 60
+				}, {
+					id: "5h-stream",
+					name: "Endless Broadcast",
+					description: "You streamed 5 hours in a voice channel!",
+					points: 300,
+					condition: (userRank) => userRank.voice.stream.time > 5 * 60 * 60
+				}, {
+					id: "1d-stream",
+					name: "Live Channel",
+					description: "You streamed an entire day in a voice channel!",
+					points: 500,
+					condition: (userRank) => userRank.voice.stream.time > 24 * 60 * 60
+				}, {
+					id: "7d-stream",
+					name: "Global Signal",
+					description: "You streamed an entire week in a voice channel!",
+					points: 1000,
+					condition: (userRank) => userRank.voice.stream.time > 7 * 24 * 60 * 60
+				}],
+				roles: []
+			},
+			rules: {
+				active: true,
+				channel: "1243991489575522374"
+			}
+		}
+	}
+} : {
+	guilds: {
+		"1020663521530351627": {
+			help: {
+				active: true,
+				channel: "1037855849944731808"
+			},
+			"message-as": {
+				active: true
+			},
+			privacy: {
+				active: true
+			},
+			pronote: {
+				active: true
+			},
+			radio: {
+				active: false
+			},
+			rank: {
+				active: true
+			},
+			ranks: {
+				active: true,
+				channel: "1020666142274101299",
+				achievements: [{
+					id: "first-message",
+					name: "First!",
+					description: "You sent your first message!",
+					points: 10,
+					condition: (userRank) => userRank.messages > 0
+				}, {
+					id: "10-messages",
+					name: "Tenfold improvement",
+					description: "You sent 10 messages!",
+					points: 20,
+					condition: (userRank) => userRank.messages >= 10
+				}, {
+					id: "25-messages",
+					name: "Talking 25/8",
+					description: "You sent 25 messages!",
+					points: 70,
+					condition: (userRank) => userRank.messages >= 25
+				}, {
+					id: "100-messages",
+					name: "Keeping it 100",
+					description: "You sent 100 messages!",
+					points: 100,
+					condition: (userRank) => userRank.messages >= 100
+				}, {
+					id: "500-messages",
+					name: "500 shades of speech!",
+					description: "You sent 500 messages!",
+					points: 300,
+					condition: (userRank) => userRank.messages >= 500
+				}, {
+					id: "1000-messages",
+					name: "Words worth a thousand pictures",
+					description: "You sent 1000 messages!",
+					points: 500,
+					condition: (userRank) => userRank.messages >= 1000
+				}, {
+					id: "5000-messages",
+					name: "Why?",
 					description: "You sent 5000 messages!",
 					points: 1500,
 					condition: (userRank) => userRank.messages >= 5000

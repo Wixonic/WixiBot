@@ -1,6 +1,8 @@
 const { ApplicationCommandType, ContextMenuCommandBuilder, MessageFlags } = require("discord.js");
 
-const { getRank } = require("../lib/ranks.js");
+const { Rank, getRank } = require("../lib/ranks.js");
+
+const { displayTime } = require("../utils.js");
 
 const settings = require("../settings.js");
 
@@ -30,7 +32,7 @@ module.exports = {
 
 		const rank = await getRank(interaction.guildId, interaction.targetId);
 		await interaction.editReply({
-			content: `<@${interaction.targetId}> has ${rank.achievements.length == 0 ? "no" : (rank.achievements.length == 1 ? "one" : rank.achievements.length)} achievement${rank.achievements.length > 1 ? "s" : ""}, and ${rank.points == 0 ? "no" : (rank.points == 1 ? "one" : rank.points)} point${rank.points > 1 ? "s" : ""}.`,
+			content: `Rank: ${rank.rankText}\n<@${interaction.targetId}> has ${rank.achievements.length == 0 ? "no" : (rank.achievements.length == 1 ? "one" : rank.achievements.length)} achievement${rank.achievements.length > 1 ? "s" : ""}, and ${rank.points == 0 ? "no" : (rank.points == 1 ? "one" : rank.points)} point${rank.points > 1 ? "s" : ""}.\n### Stats\n- Messages sent: ${rank.messages}\n- Time spent in voice channels: ${displayTime(rank.voice.time)}, in ${rank.voice.count} times\n- Time spent streaming in voice channels: ${displayTime(rank.voice.stream.time)}, in ${rank.voice.stream.count} times`,
 			flags: MessageFlags.Ephemeral
 		});
 	}
