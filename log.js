@@ -1,4 +1,4 @@
-const request = require("./lib/request.js");
+const https = require("https");
 
 const config = require("./config.js");
 
@@ -7,19 +7,21 @@ const log = (any) => {
 	console.log(`[${now.toLocaleDateString("fr", { day: "2-digit", month: "2-digit", year: "numeric" })} ${now.toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3 })}] ${typeof any == "string" ? any : JSON.stringify(any, null, 2)}`);
 };
 
-log.error = async (any) => {
+log.error = (any) => {
 	log(any);
 
-	await request({
-		url: config.log,
+	const request = https.request(config.log, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json"
-		},
-		body: JSON.stringify({
-			content: `\`\`\`\n[ERROR]: ${typeof any == "string" ? any : JSON.stringify(any, null, 2)}\`\`\``
-		})
+		}
 	});
+
+	request.write(JSON.stringify({
+		content: `\`\`\`\n[ERROR]: ${typeof any == "string" ? any : JSON.stringify(any, null, 2)}\`\`\``
+	}));
+
+	request.end();
 };
 
 module.exports = log;

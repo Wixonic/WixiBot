@@ -1,6 +1,7 @@
 const bodyParser = require("body-parser");
 const express = require("express");
 const fs = require("fs");
+const http = require("http");
 const https = require("https");
 const path = require("path");
 
@@ -80,10 +81,11 @@ const server = {
 			}
 		});
 
-		https.createServer({
+
+		(process.env.DEV == "true" ? http.createServer(app) : https.createServer({
 			key: fs.readFileSync(config.ssl.key),
 			cert: fs.readFileSync("./websites/website.cer")
-		}, app).listen(config.server.port, () => log(`[Server] Express server is running on https://localhost:${config.server.port}`));
+		}, app)).listen(config.server.port, () => log(`[Server] Express server is running on :${config.server.port}`));
 	}
 };
 

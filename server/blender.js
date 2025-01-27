@@ -21,7 +21,7 @@ const launch = () => {
 				blenderData = JSON.parse(body);
 				blenderData.date = Date.now();
 
-				res.writeHead(200).end("OK");
+				res.writeHead(200).end("Ok");
 			} catch (e) {
 				blenderData = null;
 				res.writeHead(400).end("Bad content");

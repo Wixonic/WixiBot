@@ -6,6 +6,9 @@ module.exports = process.env.DEV == "true" ? {
 			privacy: {
 				active: true
 			},
+			pronote: {
+				active: true
+			},
 			rank: {
 				active: true
 			},

@@ -33,7 +33,7 @@ module.exports = {
 
 				fs.writeFileSync(path.join(config.cache.server, "warthundermap.png"), Buffer.from(req.body, "base64url"));
 				log("[War Thunder] Map uploaded successfully.");
-				res.status(200).end();
+				res.status(204).end();
 			}
 		}
 	]

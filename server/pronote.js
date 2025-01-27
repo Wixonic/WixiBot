@@ -1,5 +1,3 @@
-const fs = require("fs");
-const path = require("path");
 const pawnote = require("pawnote");
 
 const request = require("../lib/request.js");
@@ -29,20 +27,25 @@ const requestClassAt = async (date) => {
 			type: "json",
 			headers: {
 				"Authorization": `WixKey ${config.wixkey}`
-			}
-		});
-
-		const refreshInformation = await pawnote.loginToken(session, storedInformation);
-
-		await request({
-			url: new URL("/pronote/refresh.json", config.server.url),
-			method: "POST",
-			type: "json",
-			headers: {
-				"Authorization": `WixKey ${config.wixkey}`
 			},
-			body: refreshInformation
+			secure: !(process.env.DEV == "true")
 		});
+
+		if (!storedInformation.error) {
+			const refreshInformation = await pawnote.loginToken(session, storedInformation);
+
+			await request({
+				url: new URL("/pronote/refresh.json", config.server.url),
+				method: "POST",
+				type: "json",
+				headers: {
+					"Authorization": `WixKey ${config.wixkey}`,
+					"Content-Type": "application/json"
+				},
+				secure: !(process.env.DEV == "true"),
+				body: JSON.stringify(refreshInformation)
+			});
+		} else throw storedInformation.error;
 	} catch (e) {
 		log(`Failed to authenticate from refresh token: ${e}`);
 
@@ -52,26 +55,29 @@ const requestClassAt = async (date) => {
 				type: "json",
 				headers: {
 					"Authorization": `WixKey ${config.wixkey}`
-				}
-			});
-
-			console.log(storedInformation);
-
-			const refreshInformation = await pawnote.loginQrCode(session, {
-				deviceUUID: config.pronote.deviceId,
-				qr: storedInformation,
-				pin: config.pronote.pin
-			});
-
-			await request({
-				url: new URL("/pronote/refresh.json", config.server.url),
-				method: "POST",
-				type: "json",
-				headers: {
-					"Authorization": `WixKey ${config.wixkey}`
 				},
-				body: refreshInformation
+				secure: !(process.env.DEV == "true")
 			});
+
+			if (!storedInformation.error) {
+				const refreshInformation = await pawnote.loginQrCode(session, {
+					deviceUUID: config.pronote.deviceId,
+					qr: storedInformation,
+					pin: config.pronote.pin
+				});
+
+				await request({
+					url: new URL("/pronote/refresh.json", config.server.url),
+					method: "POST",
+					type: "json",
+					headers: {
+						"Authorization": `WixKey ${config.wixkey}`,
+						"Content-Type": "application/json"
+					},
+					secure: !(process.env.DEV == "true"),
+					body: JSON.stringify(refreshInformation)
+				});
+			} else throw storedInformation.error;
 		} catch (e) {
 			log.error(`Failed to authenticate from QR Code: ${e}`);
 			return false;
