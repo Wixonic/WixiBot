@@ -106,12 +106,12 @@ module.exports = {
 					flags: MessageFlags.SuppressNotifications
 				});
 
+				fs.writeFileSync(ticketPath, JSON.stringify(ticket), "utf-8");
+
 				await interaction.reply({
 					content: `Ticket ${ticketId} is now claimed at <#${channel.id}>.`,
 					flags: MessageFlags.Ephemeral
 				});
-
-				fs.writeFileSync(ticketPath, JSON.stringify(ticket), "utf-8");
 			} catch (e) {
 				interaction.log(`Failed to read ticket file: ${e}`);
 				await interaction.reply({
