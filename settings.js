@@ -9,6 +9,9 @@ module.exports = process.env.DEV == "true" ? {
 			pronote: {
 				active: true
 			},
+			radio: {
+				active: true
+			},
 			rank: {
 				active: true
 			},
@@ -161,7 +164,7 @@ module.exports = process.env.DEV == "true" ? {
 				active: true
 			},
 			radio: {
-				active: false
+				active: true
 			},
 			rank: {
 				active: true
