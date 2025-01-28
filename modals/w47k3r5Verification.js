@@ -8,6 +8,10 @@ const settings = require("../settings.js");
 module.exports = {
 	name: "w47k3r5Verification",
 	execute: async (interaction) => {
+		await interaction.deferReply({
+			flags: MessageFlags.Ephemeral
+		});
+
 		const member = await interaction.guild.members.fetch(interaction.member?.id);
 
 		if (member) {
@@ -46,21 +50,21 @@ module.exports = {
 								]
 							});
 
-							await interaction.reply({
+							await interaction.editReply({
 								content: "Your form has been sent for review. This process may take a few hours or days.\nPlease do not resubmit this form.",
 								flags: MessageFlags.Ephemeral
 							});
 							interaction.log("Verification prompt sent");
 						} else {
 							interaction.error("Failed to fetch channel");
-							await interaction.reply({
+							await interaction.editReply({
 								content: "This role is not available.",
 								flags: MessageFlags.Ephemeral
 							});
 						}
 					} else {
 						interaction.log("Failed to find channel ID");
-						await interaction.reply({
+						await interaction.editReply({
 							content: "This role is not available.",
 							flags: MessageFlags.Ephemeral
 						});
@@ -68,14 +72,14 @@ module.exports = {
 				}
 			} else {
 				interaction.log("Roles automation disabled");
-				await interaction.reply({
+				await interaction.editReply({
 					content: "This role is not available.",
 					flags: MessageFlags.Ephemeral
 				});
 			}
 		} else {
 			interaction.log("Failed to fetch member");
-			await interaction.reply({
+			await interaction.editReply({
 				content: "This role is not available.",
 				flags: MessageFlags.Ephemeral
 			});

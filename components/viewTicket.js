@@ -12,6 +12,10 @@ module.exports = {
 	name: "viewTicket",
 	args: 1,
 	execute: async (interaction, args) => {
+		await interaction.deferReply({
+			flags: MessageFlags.Ephemeral
+		});
+
 		const viewer = interaction.member;
 		const ticketId = args[0];
 
@@ -34,7 +38,7 @@ module.exports = {
 					ViewChannel: true
 				});
 
-				await interaction.reply({
+				await interaction.editReply({
 					content: `Ticket ${ticketId} is now available at <#${channel.id}>.`,
 					flags: MessageFlags.Ephemeral
 				});
@@ -42,7 +46,7 @@ module.exports = {
 				fs.writeFileSync(ticketPath, JSON.stringify(ticket));
 			} catch (e) {
 				interaction.log(`Failed to read ticket file: ${e}`);
-				await interaction.reply({
+				await interaction.editReply({
 					content: "An error occured while reading the ticket file.",
 					flags: MessageFlags.Ephemeral
 				});
@@ -50,7 +54,7 @@ module.exports = {
 		} else {
 			interaction.log(`Ticket file not found: ${ticketId}`);
 			await interaction.message.delete();
-			await interaction.reply({
+			await interaction.editReply({
 				content: "This ticket does not exist anymore.",
 				flags: MessageFlags.Ephemeral
 			});

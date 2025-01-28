@@ -9,6 +9,10 @@ module.exports = {
 	name: "w47k3r5Verification",
 	args: 2,
 	execute: async (interaction, args) => {
+		await interaction.deferReply({
+			flags: MessageFlags.Ephemeral
+		});
+
 		const guildSettings = settings?.guilds?.[interaction.guildId];
 
 		const mode = args[0];
@@ -18,7 +22,8 @@ module.exports = {
 
 		if (!role) {
 			interaction.error("w47k3r5 role is not set.");
-			interaction.reply({
+			await interaction.editReply({
+				content: "This role is not available.",
 				flags: MessageFlags.Ephemeral
 			});
 		} else {
@@ -33,7 +38,7 @@ module.exports = {
 						components: []
 					});
 
-					await interaction.reply({
+					await interaction.editReply({
 						content: "Request accepted.",
 						flags: MessageFlags.Ephemeral
 					});
@@ -47,7 +52,7 @@ module.exports = {
 						components: []
 					});
 
-					await interaction.reply({
+					await interaction.editReply({
 						content: "Request rejected.",
 						flags: MessageFlags.Ephemeral
 					});
@@ -56,6 +61,10 @@ module.exports = {
 					break;
 
 				default:
+					await interaction.editReply({
+						content: "This role is not available.",
+						flags: MessageFlags.Ephemeral
+					});
 					interaction.error(`Invalid mode: ${mode}`);
 					break;
 			}

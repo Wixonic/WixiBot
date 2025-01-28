@@ -11,6 +11,10 @@ const settings = require("../settings.js");
 module.exports = {
 	name: "sendTicket",
 	execute: async (interaction) => {
+		await interaction.deferReply({
+			flags: MessageFlags.Ephemeral
+		});
+
 		const member = await interaction.guild.members.fetch(interaction.member?.id);
 
 		if (member) {
@@ -72,35 +76,35 @@ module.exports = {
 							createdAt: interaction.createdTimestamp
 						}), "utf-8");
 
-						await interaction.reply({
+						await interaction.editReply({
 							content: `Your ticket has been sent. This process may take a few hours or days.\nPlease do not reopen a ticket, as it will not make us answer faster.\n\nWhen your ticket is claimed by a staff member, you will be notified and a new channel will be created for you.\n-# Ticket ${ticketId}`,
 							flags: MessageFlags.Ephemeral
 						});
 						interaction.log("Ticket sent");
 					} else {
 						interaction.log("Failed to fetch channel");
-						await interaction.reply({
+						await interaction.editReply({
 							content: "This interaction is not available.",
 							flags: MessageFlags.Ephemeral
 						});
 					}
 				} else {
 					interaction.log("Failed to find channel ID");
-					await interaction.reply({
+					await interaction.editReply({
 						content: "This interaction is not available.",
 						flags: MessageFlags.Ephemeral
 					});
 				}
 			} else {
 				interaction.log("Ticket Tool disabled");
-				await interaction.reply({
+				await interaction.editReply({
 					content: "This interaction is not available.",
 					flags: MessageFlags.Ephemeral
 				});
 			}
 		} else {
 			interaction.log("Failed to fetch member");
-			await interaction.reply({
+			await interaction.editReply({
 				content: "This interaction is not available.",
 				flags: MessageFlags.Ephemeral
 			});

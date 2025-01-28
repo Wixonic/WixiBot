@@ -11,6 +11,10 @@ module.exports = {
 	name: "addRole",
 	args: 2,
 	execute: async (interaction, args) => {
+		await interaction.deferReply({
+			flags: MessageFlags.Ephemeral
+		});
+
 		const rolesSettings = settings.guilds?.[interaction.guildId]?.roles;
 		const recurrentSettings = rolesSettings?.recurrentRoles;
 
@@ -32,12 +36,13 @@ module.exports = {
 					interaction.log(`Role "${role.name}" (${role.id}) - Locked, sending modal`);
 
 					await interaction.showModal(roleSettings.modal.toJSON());
+					await interaction.deleteReply();
 				}
 
 				if (roleSettings.prompt) {
 					interaction.log(`Role "${role.name}" (${role.id}) - Locked, sending prompt`);
 
-					await interaction.reply({
+					await interaction.editReply({
 						components: roleSettings.prompt?.components ?? [],
 						content: `> As this role requires extra steps, please follow the instructions\n\n${roleSettings.prompt?.content ?? "_No instruction, good luck!_\nIf you see this message, please contact an admin."}`,
 						flags: MessageFlags.Ephemeral
@@ -47,7 +52,7 @@ module.exports = {
 				if (roleSettings.message) {
 					interaction.log(`Role "${role.name}" (${role.id}) - Locked, sending message`);
 
-					await interaction.reply({
+					await interaction.editReply({
 						content: roleSettings.message,
 						flags: MessageFlags.Ephemeral
 					});
@@ -61,13 +66,13 @@ module.exports = {
 						interaction.log("Removed");
 					} catch (e) {
 						interaction.log(`Failed to remove: ${e}`);
-						return await interaction.reply({
+						return await interaction.editReply({
 							content: "An error occured.",
 							flags: MessageFlags.Ephemeral
 						});
 					}
 
-					await interaction.reply({
+					await interaction.editReply({
 						content: `<@&${roleId}> successfully removed from your account.`,
 						flags: MessageFlags.Ephemeral
 					});
@@ -77,13 +82,13 @@ module.exports = {
 						interaction.log("Added");
 					} catch (e) {
 						interaction.log(`Failed to add: ${e}`);
-						return await interaction.reply({
+						return await interaction.editReply({
 							content: "An error occured.",
 							flags: MessageFlags.Ephemeral
 						});
 					}
 
-					await interaction.reply({
+					await interaction.editReply({
 						content: `<@&${roleId}> successfully added to your account.`,
 						flags: MessageFlags.Ephemeral
 					});
@@ -91,7 +96,7 @@ module.exports = {
 			}
 		} else {
 			interaction.log(`Failed to fetch role (${roleId}), role settings or member`);
-			await interaction.reply({
+			await interaction.editReply({
 				content: "This role is not available.",
 				flags: MessageFlags.Ephemeral
 			});

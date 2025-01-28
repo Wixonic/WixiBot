@@ -14,6 +14,10 @@ module.exports = {
 	name: "closeTicket",
 	args: 1,
 	execute: async (interaction, args) => {
+		await interaction.deferReply({
+			flags: MessageFlags.Ephemeral
+		});
+
 		const ticketId = args[0];
 
 		const ticketPath = path.join(config.cache.tickets, ticketId + ".json");
@@ -58,7 +62,6 @@ module.exports = {
 				for (const data of await channel.messages.fetch()) {
 					const message = data[1];
 					if (!message.author.bot) {
-						console.log(message);
 						ticket.messages.push({
 							author: message.author.id,
 							content: message.content
@@ -78,7 +81,7 @@ module.exports = {
 					});
 				}
 
-				await interaction.reply({
+				await interaction.editReply({
 					content: "Ticket is now closed.",
 					flags: MessageFlags.Ephemeral
 				});
@@ -86,7 +89,7 @@ module.exports = {
 				fs.writeFileSync(ticketPath, JSON.stringify(ticket));
 			} catch (e) {
 				interaction.log(`Failed to read ticket file: ${e}`);
-				await interaction.reply({
+				await interaction.editReply({
 					content: "An error occured while reading the ticket file.",
 					flags: MessageFlags.Ephemeral
 				});
@@ -94,7 +97,7 @@ module.exports = {
 		} else {
 			interaction.log(`Ticket file not found: ${ticketId}`);
 			await interaction.message.delete();
-			await interaction.reply({
+			await interaction.editReply({
 				content: "This ticket does not exist anymore.",
 				flags: MessageFlags.Ephemeral
 			});
