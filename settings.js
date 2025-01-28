@@ -3,6 +3,9 @@ const { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = req
 module.exports = process.env.DEV == "true" ? {
 	guilds: {
 		"1243943943779909652": {
+			giveaways: {
+				active: true
+			},
 			privacy: {
 				active: true
 			},

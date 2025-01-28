@@ -22,7 +22,7 @@ client.on("ready", async (client) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-	if (interaction.user.id == client.user.id) {
+	if (interaction.user.id != client.user.id) {
 		log(`Interaction "${interaction.id}" started by user "${interaction.user.username}" (${interaction.user.id})` + (interaction.inGuild() ? `, in guild "${interaction.guild.name}" (${interaction.guild.id})` : ", outside of a guild"));
 
 		interaction.log = (text) => log(`I - ${interaction.id} - ${text}`);
@@ -111,7 +111,7 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.on("messageCreate", async (message) => {
-	if (interaction.user.id == client.user.id) {
+	if (message.author.id != client.user.id) {
 		log(`Message "${message.id}" sent by user "${message.author.username}" (${message.author.id})` + (message.inGuild() ? `, in guild "${message.guild.name}" (${message.guild.id}), in channel "${message.channel.name}" (${message.channel.id})` : ", outside of a guild"));
 
 		if (!message.author.bot && message.inGuild() && [MessageType.Default, MessageType.Reply, MessageType.ThreadStarterMessage].includes(message.type)) {
@@ -122,7 +122,7 @@ client.on("messageCreate", async (message) => {
 });
 
 client.on("voiceStateUpdate", async (oldState, newState) => {
-	if (interaction.user.id == client.user.id) {
+	if ((oldState.member?.id || newState.member?.id) != client.user.id) {
 		if (!oldState.channel && newState.channel) {
 			log(`User "${newState.member.user.username}" (${newState.member.user.id}) joined channel "${newState.channel.name}" (${newState.channel.id}), in guild "${newState.guild.name}" (${newState.guild.id})`);
 
