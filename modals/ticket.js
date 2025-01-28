@@ -28,7 +28,7 @@ module.exports = {
 
 					if (channel) {
 						if (!fs.existsSync(config.cache.tickets)) fs.mkdirSync(config.cache.tickets, { recursive: true });
-						const ticketId = `${interaction.createdTimestamp.toString(36)}.${fs.readdirSync(config.cache.tickets, { encoding: "utf-8" }).length.toString(36)}`;
+						const ticketId = `${interaction.createdTimestamp.toString(36)}T${fs.readdirSync(config.cache.tickets, { encoding: "utf-8" }).length.toString(36)}`;
 
 						await channel.send({
 							embeds: [

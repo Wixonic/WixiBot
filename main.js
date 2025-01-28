@@ -1,19 +1,14 @@
 const { MessageFlags, MessageType } = require("discord.js");
-const fs = require("fs");
-const path = require("path");
 
 const { getRank } = require("./lib/ranks.js");
 
 const components = require("./components.js");
-const { client, getChannel, getGuild } = require("./clients.js");
+const { client } = require("./clients.js");
 const commands = require("./commands.js");
 const log = require("./log.js");
+const loop = require("./loop.js");
 const modals = require("./modals.js");
 const server = require("./server.js");
-const { hexToIntColor } = require("./utils.js");
-
-const config = require("./config.js");
-const settings = require("./settings.js");
 
 server.init();
 
@@ -22,6 +17,8 @@ client.on("ready", async (client) => {
 	log(`${client.user.username} online`);
 
 	client.setDefaultActivity();
+
+	loop();
 });
 
 client.on("interactionCreate", async (interaction) => {
@@ -159,117 +156,3 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 		}
 	}
 });
-
-
-const displayRoles = require("./commands/roles.js").execute;
-const recurrentRolesFile = path.join(config.cache.server, "recurrentRoles.json");
-const recurrentCycle = async () => {
-	const cycleLog = (any) => log(`C-${recurrentCycle.id}: ${any}`);
-	const cycleError = (any) => log.error(`C-${recurrentCycle.id}: ${any}`);
-
-	try {
-		for (const guildId in settings.guilds) {
-			const guildSettings = settings.guilds[guildId];
-			const rolesSettings = guildSettings?.roles;
-			const recurrentSettings = rolesSettings?.recurrentRoles;
-
-			const guild = await getGuild(guildId);
-
-			if (guild && guildSettings?.roles?.active && guildSettings?.roles?.recurrentRoles?.active) {
-				const year = new Date().getFullYear();
-
-				/**
-				 * @typedef {{name: string, from: string, to: string, color: string, id: string?}} ReccurentRole
-				 */
-
-				/**
-				 * @typedef {ReccurentRole[]} RecurrentRolesList
-				 */
-
-				/** @type {RecurrentRolesList} */
-				const currentRecurrentRoles = [];
-				/** @type {RecurrentRolesList} */
-				const previousRecurrentRoles = fs.existsSync(recurrentRolesFile) ? JSON.parse(fs.readFileSync(recurrentRolesFile, "utf-8")) : [];
-
-				/**
-				 * @param {ReccurentRole} role
-				 * @param {RecurrentRolesList} list
-				 */
-				const isIncluded = (role, list) => {
-					for (const item of list) {
-						if (item.name == role.name) return true;
-					}
-
-					return false
-				};
-
-				for (const role of guildSettings.roles.recurrentRoles.roles ?? []) {
-					const from = new Date(`${year}-${role.from}`);
-					const to = new Date(`${year}-${role.to}`);
-
-					const active = Date.now() >= from.getTime() && Date.now() <= to.getTime();
-
-					if (active) currentRecurrentRoles.push(role);
-				}
-
-				const newRoles = [];
-				const oldRoles = [];
-
-				for (const newRole of currentRecurrentRoles) {
-					if (!isIncluded(newRole, previousRecurrentRoles)) {
-						const name = `${newRole.name} ${year}`;
-
-						const cosmeticMarkerRole = await guild.roles.fetch(recurrentSettings?.cosmeticMarkerRole);
-						const guildRole = await guild.roles.create({
-							color: hexToIntColor(newRole.color),
-							name,
-							position: cosmeticMarkerRole.position
-						});
-						newRole.id = guildRole.id;
-						newRoles.push(newRole);
-					}
-				}
-
-				for (const oldRole of previousRecurrentRoles) {
-					if (!isIncluded(oldRole, currentRecurrentRoles)) {
-						oldRoles.push(oldRole);
-						const name = `${oldRole.name} ${year}`;
-
-						const oldMarkerRole = await guild.roles.fetch(recurrentSettings?.oldMarkerRole);
-						const role = guild.roles.cache.find((r) => r.name == name);
-						guild.roles.edit(role, {
-							position: oldMarkerRole.position
-						});
-					}
-				}
-
-				if (newRoles.length > 0) {
-					const announcementChannel = await getChannel(recurrentSettings?.announcementChannel);
-
-					if (announcementChannel) {
-						for (const newRole of newRoles) {
-							const to = new Date(`${year}-${newRole.to}`);
-							await announcementChannel.send({
-								content: `Claim your <@&${newRole.id}> role now at <#${rolesSettings.channel}>!\nThis role will be available until <t:${Math.floor(to.getTime() / 1000)}:f>.${recurrentSettings?.mentionRole ? `\n<@&${recurrentSettings.mentionRole}>` : ""}`
-							});
-							cycleLog(`Announcing role ${newRole.name} ${year}`);
-						}
-					}
-				}
-
-				if (newRoles.length > 0 || oldRoles.length > 0) {
-					cycleLog("Updating recurrent roles...");
-					await displayRoles(cycleLog, guildId);
-					fs.writeFileSync(recurrentRolesFile, JSON.stringify(currentRecurrentRoles), "utf-8");
-				}
-			}
-		}
-	} catch (e) {
-		cycleError(e);
-	}
-
-	setTimeout(recurrentCycle, 60000 - (Date.now() % 60000));
-	recurrentCycle.id++;
-};
-recurrentCycle.id = 0;
-recurrentCycle();

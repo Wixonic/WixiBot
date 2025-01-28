@@ -168,7 +168,7 @@ module.exports = process.env.DEV == "true" ? {
 			},
 			ranks: {
 				active: true,
-				channel: "1020666142274101299",
+				channel: "1333782941095956541",
 				achievements: [{
 					id: "first-message",
 					name: "First!",

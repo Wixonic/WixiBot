@@ -49,7 +49,7 @@ const processBlender = async () => {
 let lastPronoteUpdate = 0;
 
 const processPronote = async () => {
-	if (lastPronoteUpdate + 60 * 1000 < Date.now()) {
+	if (lastPronoteUpdate + 5 * 60 * 1000 < Date.now()) {
 		const currentClass = await pronote.requestClassAt(new Date());
 
 		if (!currentClass) discord.removeActivity("pronote");
@@ -68,7 +68,7 @@ const processPronote = async () => {
 			});
 		}
 
-		lastPronoteUpdate = Date.now();
+		lastPronoteUpdate = Math.floor(Date.now() / 5 * 60 * 1000) * 5 * 60 * 1000;
 	}
 };
 

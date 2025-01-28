@@ -95,9 +95,7 @@ const requestClassAt = async (date) => {
 		let currentClass;
 
 		for (const el of todayTimetable.classes) {
-			if (!(el.canceled || el.exempted) && el.startDate.getTime() <= date.getTime() && el.endDate.getTime() >= date.getTime()) {
-				currentClass = el;
-			}
+			if (!(el.canceled || el.exempted) && el.startDate.getTime() <= date.getTime() && el.endDate.getTime() >= date.getTime()) currentClass = el;
 		}
 
 		if (currentClass) {

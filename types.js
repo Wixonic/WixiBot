@@ -1,4 +1,12 @@
 /**
+ * @typedef {{name: string, from: string, to: string, color: string, id: string?}} ReccurentRole
+ */
+
+/**
+ * @typedef {ReccurentRole[]} RecurrentRolesList
+ */
+
+/**
  * @typedef {"GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS"} RequestMethod
  */
 
