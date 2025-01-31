@@ -1,10 +1,9 @@
-const { MessageFlags, ModalBuilder, TextInputStyle, TextInputBuilder, ActionRow, ComponentType, ButtonStyle } = require("discord.js");
+const { ActionRowBuilder, MessageFlags, ModalBuilder, TextInputStyle, TextInputBuilder } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
 const config = require("../config.js");
 const { Giveaway } = require("../lib/giveaways.js");
-const { ActionRowBuilder } = require("discord.js");
 
 /**
  * @type {import("../components.js").Component}
@@ -37,8 +36,20 @@ module.exports = {
 						new ActionRowBuilder()
 							.setComponents(
 								new TextInputBuilder()
-									.setCustomId("starsAt")
-									.setLabel("Starts at")
+									.setCustomId("id")
+									.setLabel("Giveaway ID")
+									.setMaxLength(giveaway.giveawayId.length)
+									.setMinLength(giveaway.giveawayId.length)
+									.setPlaceholder(giveaway.giveawayId)
+									.setRequired(true)
+									.setStyle(TextInputStyle.Short)
+									.setValue(giveaway.giveawayId)
+							),
+						new ActionRowBuilder()
+							.setComponents(
+								new TextInputBuilder()
+									.setCustomId("startsAt")
+									.setLabel("Starts at (UTC)")
 									.setMaxLength(16)
 									.setMinLength(16)
 									.setPlaceholder("YYYY-MM-DD HH:mm")
@@ -50,7 +61,7 @@ module.exports = {
 							.setComponents(
 								new TextInputBuilder()
 									.setCustomId("endsAt")
-									.setLabel("Ends at")
+									.setLabel("Ends at (UTC)")
 									.setMaxLength(16)
 									.setMinLength(16)
 									.setPlaceholder("YYYY-MM-DD HH:mm")
@@ -69,7 +80,7 @@ module.exports = {
 									.setValue(gifts.join("; "))
 							)
 					)
-			)
+			);
 		} else {
 			interaction.log(`Giveaway file not found: ${giveawayId}`);
 			await interaction.reply({
@@ -78,4 +89,4 @@ module.exports = {
 			});
 		}
 	}
-}
+};

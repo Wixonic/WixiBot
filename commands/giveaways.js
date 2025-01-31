@@ -82,7 +82,7 @@ module.exports = {
 				for (const gift in editGiveaway.gifts) gifts.push(gift);
 
 				await interaction.editReply({
-					content: `Available gifts:${gifts.length > 1 ? gifts.join("\n- ") : " no available gift right now."}${typeof editGiveaway.startsAt == "number" ? `- Starts at: <t:${Math.floor(editGiveaway.startsAt / 1000)}:f>` : ""}${typeof editGiveaway.endsAt == "number" ? `- Ends at: <t:${Math.floor(editGiveaway.endsAt / 1000)}:f>` : ""}\n\n-# Giveaway ${editGiveaway.giveawayId}`,
+					content: `Available gifts:${gifts.length > 1 ? gifts.join("\n- ") : " no available gift right now."}${typeof editGiveaway.startsAt == "number" ? `\n\n- Starts at: <t:${Math.floor(editGiveaway.startsAt / 1000)}:f>` : ""}${typeof editGiveaway.endsAt == "number" ? `\n- Ends at: <t:${Math.floor(editGiveaway.endsAt / 1000)}:f>` : ""}\n\n-# Giveaway ${editGiveaway.giveawayId}`,
 					components: [{
 						type: ComponentType.ActionRow,
 						components: [{
