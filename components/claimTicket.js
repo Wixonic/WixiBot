@@ -124,7 +124,7 @@ module.exports = {
 				});
 			}
 		} else {
-			interaction.log(`Ticket file not found: ${ticketId}`);
+			interaction.log(`Ticket file not found.`);
 			await interaction.message.delete();
 			await interaction.editReply({
 				content: "This ticket does not exist anymore.",

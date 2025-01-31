@@ -9,12 +9,6 @@ module.exports = process.env.DEV == "true" ? {
 			privacy: {
 				active: true
 			},
-			pronote: {
-				active: true
-			},
-			radio: {
-				active: true
-			},
 			rank: {
 				active: true
 			},
@@ -348,6 +342,8 @@ module.exports = process.env.DEV == "true" ? {
 						roles: [
 							{
 								id: "1307298359651991583"
+							}, {
+								id: "1334918862822576159"
 							}
 						]
 					}, {

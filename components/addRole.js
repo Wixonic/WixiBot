@@ -33,14 +33,14 @@ module.exports = {
 		if (rolesSettings?.active && member && role && (roleSettings || isRecurrent)) {
 			if (isLocked) {
 				if (roleSettings.modal) {
-					interaction.log(`Role "${role.name}" (${role.id}) - Locked, sending modal`);
+					interaction.log(`Role "${role.name}" - Locked, sending modal`);
 
 					await interaction.showModal(roleSettings.modal.toJSON());
 					await interaction.deleteReply();
 				}
 
 				if (roleSettings.prompt) {
-					interaction.log(`Role "${role.name}" (${role.id}) - Locked, sending prompt`);
+					interaction.log(`Role "${role.name}" - Locked, sending prompt`);
 
 					await interaction.editReply({
 						components: roleSettings.prompt?.components ?? [],
@@ -50,7 +50,7 @@ module.exports = {
 				}
 
 				if (roleSettings.message) {
-					interaction.log(`Role "${role.name}" (${role.id}) - Locked, sending message`);
+					interaction.log(`Role "${role.name}" - Locked, sending message`);
 
 					await interaction.editReply({
 						content: roleSettings.message,
@@ -58,7 +58,7 @@ module.exports = {
 					});
 				}
 			} else {
-				interaction.log(`Role "${role.name}" (${role.id})`);
+				interaction.log(`Role "${role.name}"`);
 
 				if (member.roles.cache.has(roleId)) {
 					try {
@@ -95,7 +95,7 @@ module.exports = {
 				}
 			}
 		} else {
-			interaction.log(`Failed to fetch role (${roleId}), role settings or member`);
+			interaction.log(`Failed to fetch role, role settings or member`);
 			await interaction.editReply({
 				content: "This role is not available.",
 				flags: MessageFlags.Ephemeral

@@ -43,7 +43,7 @@ module.exports = {
 						flags: MessageFlags.Ephemeral
 					});
 
-					interaction.log(`${memberId} request accepted by ${interaction.user.id}`);
+					interaction.log(`Request accepted by ${interaction.user.id}`);
 					break;
 
 				case "reject":
@@ -57,7 +57,7 @@ module.exports = {
 						flags: MessageFlags.Ephemeral
 					});
 
-					interaction.log(`${memberId} request rejected by ${interaction.user.id}`);
+					interaction.log(`Request rejected by ${interaction.user.id}`);
 					break;
 
 				default:
