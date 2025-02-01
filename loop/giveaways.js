@@ -33,7 +33,7 @@ module.exports = async (loop) => {
 					for (const gift of giveaway.gifts) gifts.push(gift.name);
 
 					const message = await channel.send({
-						content: `## Giveaway\n\n- Ends: <t:${Math.floor(giveaway.endsAt / 1000)}:f>\n- Entries: **${giveaway.participants.length}**\n### Gifts\n${gifts.length > 0 ? "- " + gifts.join("\n- ") : "_No gift available right now._"}\n\n-# Giveaway ${giveaway.giveawayId}`,
+						content: `## Giveaway\n\n- Ends: <t:${Math.floor(giveaway.endsAt / 1000)}:f>\n- Entries: **${giveaway.participants.length}**\n### Gifts\n${gifts.length > 0 ? "- " + gifts.join("\n- ") : "_No gift available right now._"}\n\n-# Giveaway ${giveaway.giveawayId} - <@&${giveawaysSettings?.role}>`,
 						components: [
 							new ActionRowBuilder()
 								.addComponents(
