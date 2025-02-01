@@ -10,10 +10,10 @@ module.exports = process.env.DEV == "true" ? {
 				active: true
 			},
 			rank: {
-				active: true
+				active: false
 			},
 			ranks: {
-				active: true,
+				active: false,
 				channel: "1243943943779909655",
 				achievements: [{
 					id: "first-message",
@@ -137,6 +137,51 @@ module.exports = process.env.DEV == "true" ? {
 					condition: (userRank) => userRank.voice.stream.time > 7 * 24 * 60 * 60
 				}],
 				roles: []
+			},
+			roles: {
+				active: false,
+				channel: "1332713470193434635",
+				groups: [],
+				recurrentRoles: {
+					active: true,
+					announcementChannel: "1332713470193434635",
+					cosmeticMarkerRole: "1324676103473860679",
+					oldMarkerRole: "1324676172537135145",
+					mentionRole: "1245769279102517341",
+					roles: [
+						{
+							name: "New Year",
+							color: "#D7B030",
+							from: "01-01T00:00:00",
+							to: "01-31T23:59:59"
+						}, {
+							name: "Valentine's Day",
+							color: "#E06287",
+							from: "02-14T00:00:00",
+							to: "02-21T23:59:59"
+						}, {
+							name: "Easter",
+							color: "#C5EBD5",
+							from: "03-23T00:00:00",
+							to: "04-25T23:59:59"
+						}, {
+							name: "Summer",
+							color: "#47927E",
+							from: "06-01T00:00:00",
+							to: "08-31T23:59:59"
+						}, {
+							name: "Halloween",
+							color: "#EB5A1C",
+							from: "10-30T00:00:00",
+							to: "11-06T23:59:59"
+						}, {
+							name: "Christmas",
+							color: "#B43B2B",
+							from: "12-24T00:00:00",
+							to: "12-31T23:59:59"
+						}
+					]
+				}
 			},
 			rules: {
 				active: true,

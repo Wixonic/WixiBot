@@ -72,7 +72,7 @@ module.exports = async (loop) => {
 
 					const oldMarkerRole = await guild.roles.fetch(recurrentSettings?.oldMarkerRole);
 					const role = guild.roles.cache.find((r) => r.name == name);
-					guild.roles.edit(role, {
+					if (role) guild.roles.edit(role.id, {
 						position: oldMarkerRole.position
 					});
 				}

@@ -86,54 +86,47 @@ module.exports = {
 			} else return false;
 		}
 
-		if (!guildId) {
-			const messages = await channel.messages.fetch();
-			messages.each((message) => channel.messages.delete(message));
+		const messages = await channel.messages.fetch();
+		messages.each((message) => channel.messages.delete(message));
 
-			await channel.send({
-				content: `# Roles\n- You can add any role by pressing buttons.\n- Buttons with :locked: require further steps`,
-				flags: new MessageFlagsBitField().add("SuppressNotifications", "Crossposted")
-			});
+		await channel.send({
+			content: `# Roles\n- You can add any role by pressing buttons.\n- Buttons with :locked: require further steps`,
+			flags: new MessageFlagsBitField().add("SuppressNotifications", "Crossposted")
+		});
 
-			for (const group of rolesSettings?.groups ?? {}) {
-				if (group.active) {
-					let content = `## ${group.name}\n> ${group.description}`;
-					const buttons = new ActionRowBuilder();
+		for (const group of rolesSettings?.groups ?? {}) {
+			if (group.active) {
+				let content = `## ${group.name}\n> ${group.description}`;
+				const buttons = new ActionRowBuilder();
 
-					for (const role of group.roles) {
-						/**
-						 * @type {import("discord.js").Role}
-						 */
-						const guildRole = await interaction.guild.roles.fetch(role.id);
+				for (const role of group.roles) {
+					/**
+					 * @type {import("discord.js").Role}
+					 */
+					const guildRole = await interaction.guild.roles.fetch(role.id);
 
-						if (guildRole) {
-							interaction.log(`Role added: ${guildRole.name} (${guildRole.id})`);
-							content += `\n- <@&${role.id}>${role.description ? ": " + role.description : ""}`;
+					if (guildRole) {
+						interaction.log(`Role added: ${guildRole.name} (${guildRole.id})`);
+						content += `\n- <@&${role.id}>${role.description ? ": " + role.description : ""}`;
 
-							const button = new ButtonBuilder();
-							button.setCustomId(`addRole_${role.id}_${role.locked ? "locked" : "unlocked"}`);
-							button.setLabel(guildRole.name);
-							if (role.locked) button.setEmoji("🔒");
-							button.setStyle(ButtonStyle.Secondary);
+						const button = new ButtonBuilder();
+						button.setCustomId(`addRole_${role.id}_${role.locked ? "locked" : "unlocked"}`);
+						button.setLabel(guildRole.name);
+						if (role.locked) button.setEmoji("🔒");
+						button.setStyle(ButtonStyle.Secondary);
 
-							buttons.addComponents(button);
-						}
+						buttons.addComponents(button);
 					}
-
-					await channel.send({
-						content,
-						components: [
-							buttons.toJSON()
-						],
-						flags: new MessageFlagsBitField().add("SuppressNotifications", "Crossposted")
-					});
 				}
-			}
-		}
 
-		if (guildId) {
-			const messages = await channel.messages.fetch();
-			if (messages.size > 0) await messages.sort((a, b) => b.createdTimestamp - a.createdTimestamp).first().delete();
+				await channel.send({
+					content,
+					components: [
+						buttons.toJSON()
+					],
+					flags: new MessageFlagsBitField().add("SuppressNotifications", "Crossposted")
+				});
+			}
 		}
 
 		if (recurrentSettings?.active) {
@@ -165,11 +158,9 @@ module.exports = {
 				}
 			}
 
-			await channel.send({
+			if (buttons.length > 0) await channel.send({
 				content,
-				components: [
-					buttons.toJSON()
-				],
+				components: [buttons],
 				flags: new MessageFlagsBitField().add("SuppressNotifications", "Crossposted")
 			});
 		}
@@ -182,7 +173,5 @@ module.exports = {
 		}
 
 		interaction.log("Roles updated");
-
-		return true;
 	}
 };
