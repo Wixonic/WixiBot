@@ -52,11 +52,13 @@ module.exports = async (loop) => {
 					const message = await channel.messages.fetch(giveaway.message);
 
 					const winners = {};
+					const gifts = [""];
 
 					for (const gift of giveaway.gifts) {
 						const potentialWinners = giveaway.participants.filter((participant) => !Object.values(winners).includes(participant));
 						if (potentialWinners.length > 0) {
 							winners[gift.name] = potentialWinners.at(randomInt(potentialWinners.length) - 1);
+							gifts.push(`<@${winners[gift.name]}> won **${gift.name}**`);
 							const dmChannel = await client.users.createDM(winners[gift.name]);
 							await dmChannel.send(`## Congrats!\nYou won **${gift.name}** from [this giveaway](<${message.url}>)!\n\nHere is your gift:\n${gift.secret}\n\n-# If you have any problems, feel free to [open a ticket](<https://go.wixonic.fr/help>).\n-# Giveaway ${giveaway.giveawayId}`);
 						} else break;
@@ -64,7 +66,7 @@ module.exports = async (loop) => {
 
 					if (message) {
 						await message.edit({
-							content: `## Giveaway\n- Entries: **${giveaway.participants.length}**\n### Gifts\n${Object.keys(winners).length > 0 ? "- " + Object.keys(winners).join("\n- ") : "_No gift available right now._"}\n### Winners\n${Object.values(winners).length > 0 ? `- <@${Object.values(winners).join(">\n- <@")}>` : "_No winner right now._"}\n-# Giveaway ${giveaway.giveawayId}`,
+							content: `## Giveaway\n- Entries: **${giveaway.participants.length}**\n### Gifts${gifts.join("\n- ")}\n\n-# Giveaway ${giveaway.giveawayId}`,
 							components: []
 						});
 					}
