@@ -79,10 +79,10 @@ module.exports = {
 				});
 
 				const gifts = [""];
-				for (const gift in editGiveaway.gifts) gifts.push(gift);
+				for (const gift of editGiveaway.gifts) gifts.push(gift.name);
 
 				await interaction.editReply({
-					content: `Available gifts:${gifts.length > 1 ? gifts.join("\n- ") : " no available gift right now."}${typeof editGiveaway.startsAt == "number" ? `\n\n- Starts at: <t:${Math.floor(editGiveaway.startsAt / 1000)}:f>` : ""}${typeof editGiveaway.endsAt == "number" ? `\n- Ends at: <t:${Math.floor(editGiveaway.endsAt / 1000)}:f>` : ""}\n\n-# Giveaway ${editGiveaway.giveawayId}`,
+					content: `Available gifts:${gifts.length > 1 ? gifts.join("\n- ") : " _no available gift right now._"}${typeof editGiveaway.startsAt == "number" ? `\n\n- Starts at: <t:${Math.floor(editGiveaway.startsAt / 1000)}:f>` : ""}${typeof editGiveaway.endsAt == "number" ? `\n- Ends at: <t:${Math.floor(editGiveaway.endsAt / 1000)}:f>` : ""}\n\n-# Giveaway ${editGiveaway.giveawayId}`,
 					components: [{
 						type: ComponentType.ActionRow,
 						components: [{
@@ -102,7 +102,7 @@ module.exports = {
 				break;
 
 			case "list":
-				const giveaways = Giveaway.list(interaction.guildId);
+				const giveaways = Giveaway.list(interaction.guildId).filter((giveaway) => giveaway.status != Giveaway.status.done);
 
 				let giveawaysList = [""];
 				for (const giveaway of giveaways) if (giveaway.status != Giveaway.status.done) giveawaysList.push(`Giveaway ${giveaway.giveawayId}${typeof giveaway.startsAt == "number" && typeof giveaway.endsAt == "number" ? ` - from <t:${Math.floor(giveaway.startsAt / 1000)}:f> to <t:${Math.floor(giveaway.endsAt / 1000)}:f>` : ""}`);

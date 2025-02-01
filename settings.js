@@ -4,7 +4,9 @@ module.exports = process.env.DEV == "true" ? {
 	guilds: {
 		"1243943943779909652": {
 			giveaways: {
-				active: true
+				active: true,
+				channel: "1332713470193434635",
+				role: "1331689026821951639"
 			},
 			privacy: {
 				active: true

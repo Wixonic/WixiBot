@@ -24,8 +24,11 @@ module.exports = {
 			const endsAt = new Date(interaction.fields.getTextInputValue("endsAt") + " UTC");
 			const textGifts = interaction.fields.getTextInputValue("gifts").split("; ");
 
-			const gifts = {};
-			for (const textGift of textGifts) gifts[textGift.split(" _ ")[0]] = textGift.split(" _ ")[1];
+			const gifts = [];
+			for (const textGift of textGifts) gifts.push({
+				name: textGift.split(" _ ")[0],
+				secret: textGift.split(" _ ")[1]
+			});
 
 			const giveaway = Giveaway.get(interaction.guildId, giveawayId);
 			giveaway.startsAt = startsAt.getTime();

@@ -80,6 +80,8 @@ const hexToIntColor = (hex) => {
 };
 
 const titleCase = (str) => str.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+const random = (max = 1, min = 0) => Math.random() * (max - min + 1) + min;
+const randomInt = (max = 2, min = 1) => Math.floor(Math.random() * (max - min + 1)) + min;
 const rgbToHex = (r, g, b) => `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
 const wait = (time = 0) => new Promise((resolve) => setTimeout(() => resolve("Finished waiting"), time * 1000));
 
@@ -92,6 +94,8 @@ module.exports = {
 	getDominantColor,
 	getRoleSettingsForGuild,
 	titleCase,
+	random,
+	randomInt,
 	rgbToHex,
 	hexToIntColor,
 	wait

@@ -10,6 +10,9 @@ const settings = require("../settings.js");
 const recurrentRolesFile = path.join(config.cache.server, "recurrentRoles.json");
 const displayRoles = require("../commands/roles.js").execute;
 
+/**
+ * @param {import("../loop.js")} loop 
+ */
 module.exports = async (loop) => {
 	for (const guildId in settings.guilds) {
 		const guildSettings = settings.guilds[guildId];
@@ -18,7 +21,7 @@ module.exports = async (loop) => {
 
 		const guild = await getGuild(guildId);
 
-		if (guild && guildSettings?.roles?.active && guildSettings?.roles?.recurrentRoles?.active) {
+		if (guild && rolesSettings?.active && recurrentSettings?.recurrentRoles?.active) {
 			const year = new Date().getFullYear();
 
 			/** @type {import("../types.js").ReccurentRoleList} */
@@ -38,7 +41,7 @@ module.exports = async (loop) => {
 				return false
 			};
 
-			for (const role of guildSettings.roles.recurrentRoles.roles ?? []) {
+			for (const role of recurrentSettings.roles ?? []) {
 				const from = new Date(`${year}-${role.from}`);
 				const to = new Date(`${year}-${role.to}`);
 

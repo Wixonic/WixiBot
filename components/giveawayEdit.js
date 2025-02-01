@@ -74,7 +74,7 @@ module.exports = {
 								new TextInputBuilder()
 									.setCustomId("gifts")
 									.setLabel("Gifts")
-									.setPlaceholder("giftName _ winnerMessage; gift2Name _ winnerMessage; ...")
+									.setPlaceholder("name _ secret; name _ secret; ...")
 									.setRequired(true)
 									.setStyle(TextInputStyle.Paragraph)
 									.setValue(gifts.join("; "))
