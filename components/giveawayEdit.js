@@ -26,7 +26,7 @@ module.exports = {
 			if (typeof giveaway.endsAt == "number") endsAt.setTime(giveaway.endsAt);
 
 			const gifts = [];
-			for (const giftName in giveaway.gifts) gifts.push(giftName + " _ " + giveaway.gifts[giftName]);
+			for (const gift of giveaway.gifts) gifts.push(gift.name + " _ " + gift.secret);
 
 			await interaction.showModal(
 				new ModalBuilder()
