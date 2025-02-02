@@ -2,8 +2,6 @@ const { ApplicationCommandType, MessageFlags, SlashCommandBuilder, SlashCommandS
 
 const { Rank, getRank } = require("../lib/ranks.js");
 
-const { displayTime } = require("../utils.js");
-
 const settings = require("../settings.js");
 
 /**
@@ -21,12 +19,12 @@ module.exports = {
 				.setDescription("Displays your rank data")
 		).addSubcommand(
 			new SlashCommandSubcommandBuilder()
-				.setName("achievements")
-				.setDescription("Displays all achievements")
-		).addSubcommand(
-			new SlashCommandSubcommandBuilder()
 				.setName("leaderboard")
 				.setDescription("Displays the top 10")
+		).addSubcommand(
+			new SlashCommandSubcommandBuilder()
+				.setName("roles")
+				.setDescription("List all available roles")
 		),
 	execute: async (interaction) => {
 		await interaction.deferReply({
@@ -51,29 +49,24 @@ module.exports = {
 
 		switch (subcommand) {
 			case "me":
-				await interaction.editReply({
-					content: `Rank: ${userRank.rankText}\nYou have ${userRank.achievements.length == 0 ? "no" : (userRank.achievements.length == 1 ? "one" : userRank.achievements.length)} achievement${userRank.achievements.length > 1 ? "s" : ""}, and ${userRank.points == 0 ? "no" : (userRank.points == 1 ? "one" : userRank.points)} point${userRank.points > 1 ? "s" : ""}.\n### Stats\n- Messages sent: ${userRank.messages}\n- Time spent in voice channels: ${displayTime(userRank.voice.time)}, in ${userRank.voice.count} times\n- Time spent streaming in voice channels: ${displayTime(userRank.voice.stream.time)}, in ${userRank.voice.stream.count} times`,
+				if (userRank) await interaction.editReply({
+					content: await userRank.description(),
 					flags: MessageFlags.Ephemeral
-				});
-				break;
-
-			case "achievements":
-				const achievements = (rankSettings?.achievements ?? []).map((achievement) => `- ${userRank.achievements.includes(achievement.id) ? "✅" : "❌"} ${achievement.name} (${achievement.points} points): ${achievement.description}`);
-
-				await interaction.editReply({
-					content: `### Your achievements\n${achievements.join("\n")}`,
+				}); else await interaction.editReply({
+					content: "Member not found.",
 					flags: MessageFlags.Ephemeral
 				});
 				break;
 
 			case "leaderboard":
-				const leaderboard = Rank.leaderboard(interaction.guildId);
+				const leaderboard = await Rank.leaderboard(interaction.guildId);
 
-				if (leaderboard.length > 0) {
-					const top10 = leaderboard.slice(0, 10).map((user, index) => `${index + 1}. <@${user.id}> - ${user.points} points`);
+				if (leaderboard.global.length > 0 && leaderboard.month.length > 0) {
+					const globalTop10 = leaderboard.global.slice(0, 10).map((user, index) => `${index + 1}. <@${user.id}> - ${Math.ceil(user.points)} points`);
+					const monthlyTop10 = leaderboard.month.slice(0, 10).map((user, index) => `${index + 1}. <@${user.id}> - ${Math.ceil(user.points)} points`);
 
 					await interaction.editReply({
-						content: `### Top 10 members\n${top10.join("\n")}\n\n-# Updated at <t:${Math.floor(Date.now() / 1000)}:f>`,
+						content: `### Global Top 10 members\n${globalTop10.join("\n")}\n### Monthly Top 10 members\n${monthlyTop10.join("\n")}`,
 						flags: MessageFlags.Ephemeral
 					});
 				} else await interaction.editReply({
@@ -83,6 +76,12 @@ module.exports = {
 				break;
 
 			case "roles":
+				const roles = [];
+				for (const role in rankSettings?.roles) roles.push(`- <@&${role}>: ${rankSettings?.roles[role] ?? 0} point${(rankSettings?.roles[role.id] ?? 0) == 1 ? "" : "s"}`);
+				await interaction.editReply({
+					content: `## Rank roles\n${roles.length > 1 ? roles.join("\n") : "No roles available right now."}`,
+					flags: MessageFlags.Ephemeral
+				});
 				break;
 
 			default:

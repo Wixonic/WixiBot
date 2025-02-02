@@ -22,4 +22,8 @@ loop.id = 0;
 loop.log = (any) => log(`C-${loop.id}: ${any}`);
 loop.error = (any) => log.error(`C-${loop.id}: ${any}`);
 
-module.exports = loop;
+const init = () => loop();
+
+module.exports = {
+	init
+};
