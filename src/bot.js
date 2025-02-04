@@ -1,7 +1,6 @@
 const { Client } = require("discord.js");
 
 class Bot extends Client {
-
 	/**
 	 * @param {{intents: import("discord.js").GatewayIntentBits[]}} options
 	 */

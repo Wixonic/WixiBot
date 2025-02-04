@@ -6,9 +6,9 @@
 	"version": "1.0.0",
 	"main": "main.js",
 	"scripts": {
-		"test": "clear; node --trace-warnings --client=1245767039054905544 --mode=publish ./main.js; node --trace-warnings --client=1245767039054905544 ./main.js",
-		"publish": "clear; node --no-warnings --client=1179518852846067833 --mode=publish ./main.js",
-		"start": "clear; node --no-warnings --client=1179518852846067833 ./main.js"
+		"test": "clear; client=1245767039054905544 mode=publish node --trace-warnings ./main.js; client=1245767039054905544 node --trace-warnings ./main.js",
+		"publish": "clear; client=1179518852846067833 mode=publish node --no-warnings ./main.js",
+		"start": "clear; client=1179518852846067833 node --no-warnings ./main.js"
 	},
 	"engines": {
 		"node": "20"
