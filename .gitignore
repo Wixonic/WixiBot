@@ -1,6 +1,5 @@
 node_modules/
-server/warthunderlogs
 
 .DS_Store
-config.js*
+secrets.js*
 package-lock.json
