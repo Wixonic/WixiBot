@@ -14,18 +14,32 @@ const colors = {
 	blue: "\x1b[34m",
 	magenta: "\x1b[35m",
 	cyan: "\x1b[36m",
-	white: "\x1b[37m",
-	crimson: "\x1b[38m"
+	white: "\x1b[37m"
 };
 
-const log = (level, color, ...any) => {
+/**
+ * 
+ * @param {string} level
+ * @param {string} color
+ * @param  {...string} any
+ */
+const rawLog = (level, color, ...any) => {
 	const now = new Date();
-	console.log(`${color}[${level.toUpperCase()}]${colors.reset} ${colors.dim + colors.white}${now.toLocaleDateString("fr", { day: "2-digit", month: "2-digit", year: "numeric" })} ${now.toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3 })}${colors.reset} ${color}${[...any].join(" ")}${colors.reset}`);
+	console.log(`${color}${level}${colors.reset} ${colors.dim + colors.white}${now.toLocaleDateString("fr", { day: "2-digit", month: "2-digit", year: "numeric" })} ${now.toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3 })}${colors.reset} ${color}${[...any].join(" ")}${colors.reset}`);
 };
 
-log.debug = (...any) => log("debug", colors.dim + colors.gray, ...any);
-log.info = (...any) => log("info", colors.cyan, ...any);
-log.error = (...any) => log("error", colors.red, ...any);
-log.warn = (...any) => log("warn", colors.dim + colors.yellow, ...any);
+/**
+ * @type {Logger}
+ */
+const log = {
+	debug: (...any) => rawLog("[DEBUG]", colors.dim + colors.white, ...any),
+	info: (...any) => rawLog(" [INFO]", colors.cyan, ...any),
+	error: (...any) => rawLog("[ERROR]", colors.red, ...any),
+	warn: (...any) => rawLog(" [WARN]", colors.yellow, ...any)
+};
 
-module.exports = log;
+module.exports = {
+	colors,
+	log,
+	rawLog
+};

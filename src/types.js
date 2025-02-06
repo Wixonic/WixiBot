@@ -1,4 +1,13 @@
 /**
+ * @typedef {object} Logger
+ * @property {(any: ...string) => void} debug
+ * @property {(any: ...string) => void} info
+ * @property {(any: ...string) => void} error
+ * @property {(any: ...string) => void} warn
+ */
+
+
+/**
  * Located in settings → _GUILD ID_ → application.js
  * @typedef {object} ApplicationSettings
  * @property {string} clientId
@@ -34,3 +43,4 @@
  * @property {ApplicationSettings} application
  * @property {SecretsSettings} secrets
  */
+
