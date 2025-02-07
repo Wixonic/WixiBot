@@ -29,8 +29,11 @@ const init = async (logger, applicationId) => {
 	});
 
 	if (await bot.login(settings.application.token)) {
-		logger.debug("Starting Client...");
-
+		try {
+			await bot.init();
+		} catch {
+			await bot.destroy();
+		}
 	} else throw "Failed to start client";
 };
 
@@ -71,6 +74,7 @@ const main = async (logger) => {
 			}, process.env.client);
 		} catch (e) {
 			if (e != "--already-logged--") logger.error(tries.text, "Failed to initialize:", e);
+
 			if (tries.current < tries.max) await wait(tries.delay * tries.current * 1000);
 			else {
 				logger.warn("-".repeat(tries.text.length), "Failed to initialize. Restarting in 5 minutes.");

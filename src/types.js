@@ -50,3 +50,22 @@
  * @property {SecretsSettings} secrets
  */
 
+
+/**
+ * @typedef {"GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS"} RequestMethod
+ */
+
+/**
+ * @typedef {"headers" | "json" | "raw" | "text"} RequestResponseType
+ */
+
+/**
+ * @typedef {Object} RequestOptions
+ * @property {String?} auth
+ * @property {Object?} body
+ * @property {import("http").OutgoingHttpHeaders?} headers
+ * @property {RequestMethod?} method
+ * @property {boolean?} secure
+ * @property {RequestResponseType} type
+ * @property {URL | String} url
+ */

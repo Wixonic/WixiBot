@@ -14,18 +14,22 @@ const colors = {
 	blue: "\x1b[34m",
 	magenta: "\x1b[35m",
 	cyan: "\x1b[36m",
-	white: "\x1b[37m"
+	white: "\x1b[37m",
+
+	regexp: /\x1b\[\d+(;\d+)*m/g
 };
 
 /**
- * 
  * @param {string} level
  * @param {string} color
  * @param  {...string} any
+ * @returns {string}
  */
 const rawLog = (level, color, ...any) => {
 	const now = new Date();
-	console.log(`${color}${level}${colors.reset} ${colors.dim + colors.white}${now.toLocaleDateString("fr", { day: "2-digit", month: "2-digit", year: "numeric" })} ${now.toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3 })}${colors.reset} ${color}${[...any].join(" ")}${colors.reset}`);
+	const text = `${color}${level}${colors.reset} ${colors.dim + colors.white}${now.toLocaleDateString("fr", { day: "2-digit", month: "2-digit", year: "numeric" })} ${now.toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3 })}${colors.reset} ${color}${[...any].join(" ")}${colors.reset}`
+	console.log(text);
+	return text;
 };
 
 /**
