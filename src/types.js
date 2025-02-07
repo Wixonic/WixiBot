@@ -18,13 +18,19 @@
 
 
 /**
- * @typedef {object} SecretsDiscordClientSettings
+ * @typedef {object} SecretsDiscordApplicationSettings
  * @property {string} secret
  * @property {string} token
  */
 
 /**
+ * @typedef {object} SecretsDiscordClientSettings
+ * @property {string} token
+ */
+
+/**
  * @typedef {object} SecretsDiscordSettings
+ * @property {SecretsDiscordApplicationSettings} application
  * @property {SecretsDiscordClientSettings} client
  * @property {string} webhook
  */
