@@ -18,12 +18,11 @@ class Bot extends Client {
 
 		this.logger = {
 			debug: (...any) => logger.debug("[Client]", ...any),
-			info: (...any) => logger.info("[Client]", ...any),
 			error: (...any) => {
 				request({
 					debug: (...any) => logger.debug("[Client]", ...any),
-					info: (...any) => logger.info("[Client]", ...any),
 					error: (...any) => logger.error("[Client]", ...any),
+					info: (...any) => logger.info("[Client]", ...any),
 					warn: (...any) => logger.warn("[Client]", ...any)
 				}, {
 					body: JSON.stringify({
@@ -39,6 +38,7 @@ class Bot extends Client {
 
 				logger.error("[Client]", ...any);
 			},
+			info: (...any) => logger.info("[Client]", ...any),
 			warn: (...any) => logger.warn("[Client]", ...any)
 		};
 	};
@@ -49,22 +49,11 @@ class Bot extends Client {
 	async login(token) {
 		try {
 			this.logger.debug("Attempting to log in...");
-			const result = await super.login(token);
+			await super.login(token);
 			this.logger.info("Successfully logged in");
-			return result;
 		} catch (e) {
 			this.logger.error("Failed to login:", e);
 		}
-	};
-
-	async init() {
-		this.logger.debug("Initializing...");
-
-		// Initialize everything
-
-		this.logger.error("This is a test");
-
-		this.logger.info("Successfully initialized");
 	};
 
 	async destroy() {
