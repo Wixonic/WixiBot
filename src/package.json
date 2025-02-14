@@ -6,17 +6,19 @@
 	"version": "1.0.0",
 	"main": "main.js",
 	"scripts": {
-		"test": "clear; client=1245767039054905544 mode=publish node --trace-warnings ./main.js; client=1245767039054905544 node --trace-warnings ./main.js",
-		"publish": "clear; client=1179518852846067833 mode=publish node --no-warnings ./main.js",
-		"start": "clear; client=1179518852846067833 node --no-warnings ./main.js"
+		"pretest": "client=1245767039054905544 mode=publish node --trace-warnings ./main.js",
+		"test": "client=1245767039054905544 node --trace-warnings ./main.js",
+		"serve": "clear; npm run pretest; npm run test",
+		"publish": "client=1179518852846067833 mode=publish node --no-warnings ./main.js",
+		"start": "client=1179518852846067833 node --no-warnings ./main.js"
 	},
 	"engines": {
 		"node": "20"
 	},
 	"dependencies": {
-		"discord.js": "14.17.3"
+		"discord.js": "14.18.0"
 	},
 	"devDependencies": {
-		"@types/node": "20.17.17"
+		"@types/node": "20.17.19"
 	}
 }
