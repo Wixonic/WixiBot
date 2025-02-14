@@ -42,6 +42,16 @@ const log = {
 	warn: (...any) => rawLog(" [WARN]", colors.yellow, ...any)
 };
 
+log.basicIndent = (...indent) => {
+	return {
+		debug: (...any) => log.debug(...indent, ...any),
+		info: (...any) => log.info(...indent, ...any),
+		error: (...any) => log.info(...indent, ...any),
+		warn: (...any) => log.info(...indent, ...any),
+		basicIndent: (...any) => log.basicIndent(...indent, ...any)
+	};
+};
+
 module.exports = {
 	colors,
 	log,

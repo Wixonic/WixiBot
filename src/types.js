@@ -4,6 +4,7 @@
  * @property {(any: ...string) => void} info
  * @property {(any: ...string) => void} error
  * @property {(any: ...string) => void} warn
+ * @property {(any: ...string) => Logger} basicIndent
  */
 
 
@@ -60,12 +61,35 @@
  */
 
 /**
- * @typedef {Object} RequestOptions
- * @property {String?} auth
- * @property {Object?} body
+ * @typedef {object} RequestOptions
+ * @property {string?} auth
+ * @property {object?} body
  * @property {import("http").OutgoingHttpHeaders?} headers
  * @property {RequestMethod?} method
  * @property {boolean?} secure
  * @property {RequestResponseType} type
- * @property {URL | String} url
+ * @property {URL | string} url
+ */
+
+
+/**
+ * @typedef {object} CommandOptions
+ * @property {string} id
+ * @property {string} name
+ * @property {string} path
+ */
+
+/**
+ * @typedef {object} CommandInfo
+ * @property {import("discord.js").APIApplicationCommand} deploy
+ * @property {string} name
+ * @property {Function} run
+ */
+
+
+/**
+ * @typedef {object} ListenerInfo
+ * @property {string} id
+ * @property {string} name
+ * @property {Function} run
  */

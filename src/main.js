@@ -1,7 +1,7 @@
 const { GatewayIntentBits } = require("discord.js");
 
 const { Bot } = require("./bot.js");
-const Command = require("./commands.js");
+const CommandHandler = require("./commands.js");
 const { Settings } = require("./settings.js");
 
 const { log } = require("./log.js");
@@ -30,13 +30,6 @@ const init = async (logger, applicationId) => {
 	});
 
 	await bot.login(settings.application.token);
-
-	await Command.init({
-		debug: (...any) => logger.debug("[Commands]", ...any),
-		error: (...any) => logger.error("[Commands]", ...any),
-		info: (...any) => logger.info("[Commands]", ...any),
-		warn: (...any) => logger.warn("[Commands]", ...any)
-	});
 };
 
 
@@ -47,6 +40,11 @@ const init = async (logger, applicationId) => {
 const publish = async (logger, applicationId) => {
 	logger.warn("Publishing...");
 	const settings = new Settings(applicationId);
+
+	const commandHandler = new CommandHandler(logger.basicIndent("[Commands]"));
+	commandHandler.loadCommands();
+
+	await commandHandler.deployCommands(applicationId, settings.application.token);
 	logger.info("Successfully published.");
 
 	process.exit(0);
@@ -75,7 +73,8 @@ const main = async (logger) => {
 						debug: (...any) => logger.debug(`[PUBLISH ${tries.text}]`, ...any),
 						error: (...any) => { logger.error(`[PUBLISH ${tries.text}]`, ...any); throw "--already-logged--" },
 						info: (...any) => logger.info(`[PUBLISH ${tries.text}]`, ...any),
-						warn: (...any) => logger.warn(`[PUBLISH ${tries.text}]`, ...any)
+						warn: (...any) => logger.warn(`[PUBLISH ${tries.text}]`, ...any),
+						basicIndent: (...any) => logger.basicIndent(`[PUBLISH ${tries.text}]`, ...any)
 					}, process.env.client);
 					break;
 
@@ -84,7 +83,8 @@ const main = async (logger) => {
 						debug: (...any) => logger.debug(`[RUN ${tries.text}]`, ...any),
 						error: (...any) => { logger.error(`[RUN ${tries.text}]`, ...any); throw "--already-logged--" },
 						info: (...any) => logger.info(`[RUN ${tries.text}]`, ...any),
-						warn: (...any) => logger.warn(`[RUN ${tries.text}]`, ...any)
+						warn: (...any) => logger.warn(`[RUN ${tries.text}]`, ...any),
+						basicIndent: (...any) => logger.basicIndent(`[RUN ${tries.text}]`, ...any)
 					}, process.env.client);
 					break;
 			}

@@ -1,5 +1,7 @@
 const { Client } = require("discord.js");
 
+const CommandHandler = require("./commands.js");
+const ListenerHandler = require("./listeners.js");
 const { colors } = require("./log.js");
 const request = require("./request.js");
 
@@ -19,12 +21,7 @@ class Bot extends Client {
 		this.logger = {
 			debug: (...any) => logger.debug("[Client]", ...any),
 			error: (...any) => {
-				request({
-					debug: (...any) => logger.debug("[Client]", ...any),
-					error: (...any) => logger.error("[Client]", ...any),
-					info: (...any) => logger.info("[Client]", ...any),
-					warn: (...any) => logger.warn("[Client]", ...any)
-				}, {
+				request(logger.basicIndent("[Client]"), {
 					body: JSON.stringify({
 						content: `\`\`\`${["[Client]", ...any].join(" ").replace(colors.regexp, "")}\`\`\``
 					}),
@@ -39,8 +36,31 @@ class Bot extends Client {
 				logger.error("[Client]", ...any);
 			},
 			info: (...any) => logger.info("[Client]", ...any),
-			warn: (...any) => logger.warn("[Client]", ...any)
+			warn: (...any) => logger.warn("[Client]", ...any),
+			basicIndent: (...any) => logger.basicIndent("[Client]", ...any)
 		};
+
+		this.commandHandler = new CommandHandler(this.logger.basicIndent("[Commands]"));
+		this.listenerHandler = new ListenerHandler(this.logger.basicIndent("[Listeners]"));
+
+		this.destroyed = false;
+		for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
+			process.on(signal, async (reason, code) => {
+				if (!this.destroyed) {
+					this.destroyed = true;
+					this.logger.warn("Destroying... | Reason:", reason ?? "Unknown", "| Code:", code ?? "None");
+
+					try {
+						await this.destroy();
+						this.logger.debug("Destroyed.");
+					} catch (e) {
+						this.logger.error("Failed to exit:", e);
+					}
+
+					process.exit(code);
+				}
+			});
+		}
 	};
 
 	/**
@@ -51,19 +71,17 @@ class Bot extends Client {
 			this.logger.debug("Attempting to log in...");
 			await super.login(token);
 			this.logger.info("Successfully logged in");
+
+			this.commandHandler.loadCommands(this.application.id);
+			this.listenerHandler.loadListeners(this);
 		} catch (e) {
 			this.logger.error("Failed to login:", e);
 		}
 	};
 
 	async destroy() {
-		// Destroy everything
-		this.logger = {
-			debug: new Function(),
-			error: new Function(),
-			info: new Function(),
-			warn: new Function()
-		};
+		this.commandHandler.destroy();
+		this.listenerHandler.destroy(this);
 		await super.destroy();
 	};
 };
