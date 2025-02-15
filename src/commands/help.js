@@ -1,4 +1,4 @@
-const { ApplicationCommandType, MessageFlags } = require("discord.js");
+const { ApplicationCommandType, InteractionContextType, MessageFlags } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
@@ -8,9 +8,12 @@ const path = require("path");
 const info = {
 	name: "Help",
 	deploy: {
-		type: 1,
+		type: ApplicationCommandType.ChatInput,
 		name: "help",
-		description: "Need help?"
+		description: "Need help?",
+		contexts: [
+			InteractionContextType.Guild
+		]
 	},
 
 	/**
