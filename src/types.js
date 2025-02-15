@@ -19,6 +19,13 @@
 
 
 /**
+ * Located in settings → _GUILD ID_ → paths.js
+ * @typedef {object} PathsSettings
+ * @property {URL} ollama
+ */
+
+
+/**
  * @typedef {object} SecretsDiscordApplicationSettings
  * @property {string} secret
  * @property {string} token
@@ -48,6 +55,7 @@
  * @typedef {object} MainSettings
  * @property {boolean} active
  * @property {ApplicationSettings} application
+ * @property {PathsSettings} paths
  * @property {SecretsSettings} secrets
  */
 

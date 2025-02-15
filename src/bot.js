@@ -1,5 +1,6 @@
 const { Client } = require("discord.js");
 
+const ChatHandler = require("./chat.js");
 const CommandHandler = require("./commands.js");
 const ListenerHandler = require("./listeners.js");
 const { colors } = require("./log.js");
@@ -40,6 +41,7 @@ class Bot extends Client {
 			basicIndent: (...any) => logger.basicIndent("[Client]", ...any)
 		};
 
+		this.chatHandler = new ChatHandler(this.logger.basicIndent("[Ollama]"));
 		this.commandHandler = new CommandHandler(this.logger.basicIndent("[Commands]"));
 		this.listenerHandler = new ListenerHandler(this.logger.basicIndent("[Listeners]"));
 

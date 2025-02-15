@@ -1,3 +1,5 @@
+const { ActivityType } = require("discord.js");
+
 /**
  * @type {ListenerInfo}
  */
@@ -11,6 +13,13 @@ const listener = {
 	 */
 	run: (bot, logger, client) => {
 		logger.info("Connected as:", client.user.username);
+
+		const package = require("../package.json");
+
+		bot.user.setActivity({
+			name: `/init-dm, then DM me! - ${package.displayName} v${package.version}`,
+			type: ActivityType.Custom
+		});
 	}
 };
 
