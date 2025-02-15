@@ -83,7 +83,7 @@
  * @typedef {object} CommandInfo
  * @property {import("discord.js").APIApplicationCommand} deploy
  * @property {string} name
- * @property {Function} run
+ * @property {(bot: import("./bot.js").Bot, logger: Logger, ...any) => Promise<void>} run
  */
 
 
@@ -91,5 +91,5 @@
  * @typedef {object} ListenerInfo
  * @property {string} id
  * @property {string} name
- * @property {Function} run
+ * @property {(bot: import("./bot.js").Bot, logger: Logger, ...any) => Promise<void>} run
  */

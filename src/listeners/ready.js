@@ -9,7 +9,7 @@ const listener = {
 	 * @param {Logger} logger
 	 * @param {import("discord.js").Client} client
 	 */
-	run: (logger, client) => {
+	run: (bot, logger, client) => {
 		logger.info("Connected as:", client.user.username);
 	}
 };

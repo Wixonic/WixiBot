@@ -1,3 +1,5 @@
+const CommandHandler = require("../commands");
+
 /**
  * @type {ListenerInfo}
  */
@@ -6,13 +8,29 @@ const listener = {
 	event: "interactionCreate",
 
 	/**
-	 * @param {Logger} logger
 	 * @param {import("discord.js").Interaction} interaction
 	 */
-	run: (logger, interaction) => {
-		logger.info("Hey");
+	run: async (bot, logger, interaction) => {
+		if (interaction.isCommand()) {
+			for (const command of CommandHandler.commands) {
+				const commandLogger = logger.basicIndent(`[${command.name}]`);
 
-		// Execute commands
+				if (command.deploy.type == interaction.commandType && command.deploy.name == interaction.commandName) {
+					try {
+						commandLogger.debug("Runnning...");
+						await command.run(bot, commandLogger, interaction);
+					} catch (e) {
+						commandLogger.error(e);
+					}
+
+					return;
+				}
+			}
+
+			logger.error("Invalid command:", interaction.commandName);
+		}
+
+		logger.warn("Invalid interaction");
 	}
 };
 

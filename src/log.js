@@ -27,9 +27,7 @@ const colors = {
  */
 const rawLog = (level, color, ...any) => {
 	const now = new Date();
-	const text = `${color}${level}${colors.reset} ${colors.dim + colors.white}${now.toLocaleDateString("fr", { day: "2-digit", month: "2-digit", year: "numeric" })} ${now.toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3 })}${colors.reset} ${color}${[...any].join(" ")}${colors.reset}`
-	console.log(text);
-	return text;
+	console.log(`${color}${level}${colors.reset} ${colors.dim + colors.white}${now.toLocaleDateString("fr", { day: "2-digit", month: "2-digit", year: "numeric" })} ${now.toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3 })}${colors.reset} ${color}${[...any].join(" ")}${colors.reset}`);
 };
 
 /**
@@ -46,8 +44,8 @@ log.basicIndent = (...indent) => {
 	return {
 		debug: (...any) => log.debug(...indent, ...any),
 		info: (...any) => log.info(...indent, ...any),
-		error: (...any) => log.info(...indent, ...any),
-		warn: (...any) => log.info(...indent, ...any),
+		error: (...any) => log.error(...indent, ...any),
+		warn: (...any) => log.warn(...indent, ...any),
 		basicIndent: (...any) => log.basicIndent(...indent, ...any)
 	};
 };

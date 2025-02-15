@@ -80,7 +80,6 @@ class Bot extends Client {
 	};
 
 	async destroy() {
-		this.commandHandler.destroy();
 		this.listenerHandler.destroy(this);
 		await super.destroy();
 	};

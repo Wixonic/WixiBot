@@ -1,36 +1,62 @@
-const { REST, Routes } = require("discord.js");
+const { REST, Routes, ApplicationCommandType } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
 class CommandHandler {
 	/**
+	 * @type {CommandInfo[]}
+	 */
+	static slashCommands = [];
+
+	/**
+	 * @type {CommandInfo[]}
+	 */
+	static userCommands = [];
+
+	/**
+	 * @type {CommandInfo[]}
+	 */
+	static messageCommands = [];
+
+	/**
+	 * @type {CommandInfo[]}
+	 */
+	static get commands() {
+		return [
+			...CommandHandler.slashCommands,
+			...CommandHandler.userCommands,
+			...CommandHandler.messageCommands
+		];
+	};
+
+	/**
 	 * @param {Logger} logger
 	 */
 	constructor(logger) {
 		this.logger = logger;
-		this.slashCommands = [];
-		this.userCommands = [];
-		this.messageCommands = [];
 	};
 
 	loadCommands() {
 		const commandsPath = path.join(__dirname, "commands");
-		const files = fs.readdirSync(commandsPath).filter(file => file.endsWith(".js"));
+		const files = fs.readdirSync(commandsPath).filter((file) => file.endsWith(".js"));
 
-		files.forEach(file => {
-			const command = require(path.join(commandsPath, file));
+		for (const file of files) {
+			const modulePath = path.join(commandsPath, file);
+			delete require.cache[require.resolve(modulePath)];
+			const command = require(modulePath);
+
 			if (command.deploy && command.deploy.type) {
 				switch (command.deploy.type) {
-					case 1:
-						this.slashCommands.push(command.deploy);
+					case ApplicationCommandType.ChatInput:
+						CommandHandler.slashCommands.push(command);
 						break;
 
-					case 2:
-						this.userCommands.push(command.deploy);
+					case ApplicationCommandType.User:
+						CommandHandler.userCommands.push(command);
 						break;
 
-					case 3:
-						this.messageCommands.push(command.deploy);
+					case ApplicationCommandType.Message:
+						CommandHandler.messageCommands.push(command);
 						break;
 
 					default:
@@ -40,7 +66,7 @@ class CommandHandler {
 
 				this.logger.debug("Loaded command:", command.name);
 			} else this.logger.warn("Invalid command:", command.name);
-		});
+		}
 	};
 
 	/**
@@ -48,29 +74,22 @@ class CommandHandler {
 	 * @param {string} token
 	 */
 	async deployCommands(applicationId, token) {
-		const allCommands = [
-			...this.slashCommands,
-			...this.userCommands,
-			...this.messageCommands
-		];
-
 		if (!token) this.logger.error("Missing bot token");
 
 		const rest = new REST({ version: "10" }).setToken(token);
 
+		const deploys = [];
+		for (const command of CommandHandler.commands) deploys.push(command.deploy);
+
 		try {
-			this.logger.info(`Deploying ${allCommands.length} commands...`);
+			this.logger.info(`Deploying ${deploys.length} commands...`);
 			await rest.put(Routes.applicationCommands(applicationId), {
-				body: allCommands
+				body: deploys
 			});
 			this.logger.info("Commands successfully deployed");
 		} catch (e) {
 			this.logger.error("Failed to deploy commands:", e);
 		}
-	};
-
-	destroy() {
-		// Empty for now
 	};
 };
 
