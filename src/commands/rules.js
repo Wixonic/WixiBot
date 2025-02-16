@@ -1,6 +1,8 @@
-const { ApplicationCommandType, ApplicationCommandOptionType, ChannelType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
+const { ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
+
+const Settings = require("../settings.js");
 
 /**
  * @type {CommandInfo}
@@ -14,19 +16,7 @@ const info = {
 		contexts: [
 			InteractionContextType.Guild
 		],
-		default_member_permissions: PermissionFlagsBits.Administrator.toString(),
-		options: [
-			{
-				type: ApplicationCommandOptionType.Channel,
-				name: "channel",
-				description: "The channel where the rules will be published",
-				channel_types: [
-					ChannelType.GuildAnnouncement,
-					ChannelType.GuildText
-				],
-				required: true
-			}
-		]
+		default_member_permissions: PermissionFlagsBits.Administrator.toString()
 	},
 
 	/**
@@ -37,17 +27,23 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
+		const settings = new Settings(bot.user.id);
+
 		const rulesPath = path.join(__dirname, "..", "settings", bot.application.id, "rules.md");
 		const rulesMessage = fs.existsSync(rulesPath) ? fs.readFileSync(rulesPath, "utf-8") : null;
 
 		if (rulesMessage) {
-			/**
-			 * @type {import("discord.js").TextBasedChannel}
-			 */
-			const channel = interaction.options.getChannel("channel");
-			await channel.send(rulesMessage);
-			await interaction.editReply("Rules updated");
-		} else logger.error("Rules file missing.");
+			const channel = await bot.channels.fetch(settings.application.commands.rules.channel);
+
+			if (channel && channel.isTextBased() && channel.isSendable()) {
+				await channel.send({
+					content: rulesMessage,
+					flags: MessageFlags.SuppressNotifications
+				});
+
+				await interaction.editReply(`Rules published at <#${channel.id}>.`);
+			} else logger.error("Invalid channel");
+		} else logger.error("Rules file missing");
 	}
 };
 

@@ -4,7 +4,6 @@
  * @property {(any: ...string) => void} info
  * @property {(any: ...string) => void} error
  * @property {(any: ...string) => void} warn
- * @property {(any: ...string) => Logger} basicIndent
  */
 
 
@@ -15,13 +14,20 @@
  * @property {SecretsDiscordClientSettings.secret} clientSecret
  * @property {string} publicKey
  * @property {SecretsDiscordClientSettings.token} token
+ * @property {CommandsSettings} commands
+ */
+
+/**
+ * Located in settings → _GUILD ID_ → commands.js
+ * @typedef {object} CommandsSettings
+ * @property {{channel: string}} ticket
+ * @property {{channel: string}} rules
  */
 
 
 /**
  * Located in settings → _GUILD ID_ → paths.js
  * @typedef {object} PathsSettings
- * @property {URL} ollama
  */
 
 
@@ -91,7 +97,7 @@
  * @typedef {object} CommandInfo
  * @property {import("discord.js").APIApplicationCommand} deploy
  * @property {string} name
- * @property {(bot: import("./bot.js").Bot, logger: Logger, ...any) => Promise<void>} run
+ * @property {(bot: import("./bot.js"), logger: Logger, ...any) => Promise<void>} run
  */
 
 
@@ -99,5 +105,5 @@
  * @typedef {object} ListenerInfo
  * @property {string} id
  * @property {string} name
- * @property {(bot: import("./bot.js").Bot, logger: Logger, ...any) => Promise<void>} run
+ * @property {(bot: import("./bot.js"), logger: Logger, ...any) => Promise<void>} run
  */

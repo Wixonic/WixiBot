@@ -16,6 +16,19 @@ const colors = {
 	cyan: "\x1b[36m",
 	white: "\x1b[37m",
 
+	get debug() {
+		return this.dim + this.white;
+	},
+	get error() {
+		return this.red;
+	},
+	get info() {
+		return this.cyan;
+	},
+	get warn() {
+		return this.yellow;
+	},
+
 	regexp: /\x1b\[\d+(;\d+)*m/g
 };
 
@@ -34,20 +47,10 @@ const rawLog = (level, color, ...any) => {
  * @type {Logger}
  */
 const log = {
-	debug: (...any) => rawLog("[DEBUG]", colors.dim + colors.white, ...any),
-	info: (...any) => rawLog(" [INFO]", colors.cyan, ...any),
-	error: (...any) => rawLog("[ERROR]", colors.red, ...any),
-	warn: (...any) => rawLog(" [WARN]", colors.yellow, ...any)
-};
-
-log.basicIndent = (...indent) => {
-	return {
-		debug: (...any) => log.debug(...indent, ...any),
-		info: (...any) => log.info(...indent, ...any),
-		error: (...any) => log.error(...indent, ...any),
-		warn: (...any) => log.warn(...indent, ...any),
-		basicIndent: (...any) => log.basicIndent(...indent, ...any)
-	};
+	debug: (...any) => rawLog("[DEBUG]", colors.debug, ...any),
+	error: (...any) => rawLog("[ERROR]", colors.error, ...any),
+	info: (...any) => rawLog(" [INFO]", colors.info, ...any),
+	warn: (...any) => rawLog(" [WARN]", colors.warn, ...any)
 };
 
 module.exports = {

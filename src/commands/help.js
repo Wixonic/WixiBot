@@ -35,8 +35,8 @@ const info = {
 				for (const command of commands.filter((command) => command.type == ApplicationCommandType.ChatInput).values()) slashCommandList.push(`- </${command.name}:${command.id}>: ${command.description}`);
 
 				await interaction.editReply(helpMessage.replace("{{SLASHCOMMANDS}}", slashCommandList.join("\n")));
-			} else logger.error("Failed to fetch commands.");
-		} else logger.error("Help file missing.");
+			} else logger.error("Failed to fetch commands");
+		} else logger.error("Help file missing");
 	}
 };
 

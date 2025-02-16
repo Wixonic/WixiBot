@@ -1,10 +1,10 @@
 const { GatewayIntentBits } = require("discord.js");
 
-const { Bot } = require("./bot.js");
+const Bot = require("./bot.js");
 const CommandHandler = require("./commands.js");
-const { Settings } = require("./settings.js");
+const Settings = require("./settings.js");
 
-const { log } = require("./log.js");
+const { colors, log } = require("./log.js");
 const { wait } = require("./utils.js");
 
 /**
@@ -41,7 +41,12 @@ const publish = async (logger, applicationId) => {
 	logger.warn("Publishing...");
 	const settings = new Settings(applicationId);
 
-	const commandHandler = new CommandHandler(logger.basicIndent("[Commands]"));
+	const commandHandler = new CommandHandler({
+		debug: (...any) => logger.debug("[Commands]", ...any),
+		error: (...any) => logger.error("[Commands]", ...any),
+		info: (...any) => logger.info("[Commands]", ...any),
+		warn: (...any) => logger.warn("[Commands]", ...any)
+	});
 	commandHandler.loadCommands();
 
 	await commandHandler.deployCommands(applicationId, settings.application.token);
@@ -57,46 +62,59 @@ const main = async (logger) => {
 	const tries = {
 		current: 0,
 		max: 10,
-		delay: 2,
+		delay: 3,
 		get text() {
 			return `${String(this.current).padStart(String(this.max).length, "0")}/${this.max}`;
 		}
 	};
 
+	const restart = async () => {
+		if (tries.current < tries.max) await wait(tries.delay * tries.current * 1000);
+		else {
+			logger.warn("-".repeat(tries.text.length), "Exceeded maximum number of retries. Restarting in 5 minutes.");
+			await wait(5 * 60 * 1000);
+			tries.current = 0;
+		}
+		await execute();
+	};
+
+	process.on("unhandledRejection", (e) => {
+		if (e.message != "--restart--") log.error(`Unhandled Rejection at [INIT ${tries.text}:`, e.message);
+		if (e.stack) console.log(colors.error + e.stack.split("\n").slice(1).join("\n"));
+		if (e.cause) log.debug("Cause:", e.cause);
+		if (e.message == "--restart--") restart();
+		else process.exit(1);
+	});
+
+	process.on("uncaughtException", (e) => {
+		if (e.message != "--restart--") log.error(`Uncaught Exception at [INIT ${tries.text}:`, e.message);
+		if (e.stack) console.log(colors.error + e.stack.split("\n").slice(1).join("\n"));
+		if (e.cause) log.debug("Cause:", e.cause);
+		if (e.message == "--restart--") restart();
+		else process.exit(1);
+	});
+
 	const execute = async () => {
 		tries.current++;
 
-		try {
-			switch (process.env.mode) {
-				case "publish":
-					await publish({
-						debug: (...any) => logger.debug(`[PUBLISH ${tries.text}]`, ...any),
-						error: (...any) => { logger.error(`[PUBLISH ${tries.text}]`, ...any); throw "--already-logged--" },
-						info: (...any) => logger.info(`[PUBLISH ${tries.text}]`, ...any),
-						warn: (...any) => logger.warn(`[PUBLISH ${tries.text}]`, ...any),
-						basicIndent: (...any) => logger.basicIndent(`[PUBLISH ${tries.text}]`, ...any)
-					}, process.env.client);
-					break;
+		switch (process.env.mode) {
+			case "publish":
+				await publish({
+					debug: (...any) => logger.debug(`[PUBLISH ${tries.text}]`, ...any),
+					error: (...any) => { logger.error(`[PUBLISH ${tries.text}]`, ...any); throw new Error("--restart--") },
+					info: (...any) => logger.info(`[PUBLISH ${tries.text}]`, ...any),
+					warn: (...any) => logger.warn(`[PUBLISH ${tries.text}]`, ...any)
+				}, process.env.client);
+				break;
 
-				default:
-					await init({
-						debug: (...any) => logger.debug(`[RUN ${tries.text}]`, ...any),
-						error: (...any) => { logger.error(`[RUN ${tries.text}]`, ...any); throw "--already-logged--" },
-						info: (...any) => logger.info(`[RUN ${tries.text}]`, ...any),
-						warn: (...any) => logger.warn(`[RUN ${tries.text}]`, ...any),
-						basicIndent: (...any) => logger.basicIndent(`[RUN ${tries.text}]`, ...any)
-					}, process.env.client);
-					break;
-			}
-		} catch (e) {
-			if (e != "--already-logged--") logger.error(`[INIT ${tries.text}]`, e);
-			if (tries.current < tries.max) await wait(tries.delay * tries.current * 1000);
-			else {
-				logger.warn("-".repeat(tries.text.length), "Failed to initialize. Restarting in 5 minutes.");
-				await wait(5 * 60 * 1000);
-				tries.current = 0;
-			}
-			await execute();
+			default:
+				await init({
+					debug: (...any) => logger.debug(`[RUN ${tries.text}]`, ...any),
+					error: (...any) => { logger.error(`[RUN ${tries.text}]`, ...any); throw new Error("--restart--") },
+					info: (...any) => logger.info(`[RUN ${tries.text}]`, ...any),
+					warn: (...any) => logger.warn(`[RUN ${tries.text}]`, ...any)
+				}, process.env.client);
+				break;
 		}
 	};
 

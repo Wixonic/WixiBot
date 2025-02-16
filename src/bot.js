@@ -21,7 +21,12 @@ class Bot extends Client {
 		this.logger = {
 			debug: (...any) => logger.debug("[Client]", ...any),
 			error: (...any) => {
-				request(logger.basicIndent("[Client]"), {
+				request({
+					debug: (...any) => logger.debug("[Client]", ...any),
+					error: (...any) => logger.error("[Client]", ...any),
+					info: (...any) => logger.info("[Client]", ...any),
+					warn: (...any) => logger.warn("[Client]", ...any)
+				}, {
 					body: JSON.stringify({
 						content: `\`\`\`${["[Client]", ...any].join(" ").replace(colors.regexp, "")}\`\`\``
 					}),
@@ -36,19 +41,29 @@ class Bot extends Client {
 				logger.error("[Client]", ...any);
 			},
 			info: (...any) => logger.info("[Client]", ...any),
-			warn: (...any) => logger.warn("[Client]", ...any),
-			basicIndent: (...any) => logger.basicIndent("[Client]", ...any)
+			warn: (...any) => logger.warn("[Client]", ...any)
 		};
 
-		this.commandHandler = new CommandHandler(this.logger.basicIndent("[Commands]"));
-		this.listenerHandler = new ListenerHandler(this.logger.basicIndent("[Listeners]"));
+		this.commandHandler = new CommandHandler({
+			debug: (...any) => this.logger.debug("[Commands]", ...any),
+			error: (...any) => this.logger.error("[Commands]", ...any),
+			info: (...any) => this.logger.info("[Commands]", ...any),
+			warn: (...any) => this.logger.warn("[Commands]", ...any)
+		});
+
+		this.listenerHandler = new ListenerHandler({
+			debug: (...any) => this.logger.debug("[Listeners]", ...any),
+			error: (...any) => this.logger.error("[Listeners]", ...any),
+			info: (...any) => this.logger.info("[Listeners]", ...any),
+			warn: (...any) => this.logger.warn("[Listeners]", ...any)
+		});
 
 		this.destroyed = false;
 		for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
 			process.on(signal, async (reason, code) => {
 				if (!this.destroyed) {
 					this.destroyed = true;
-					this.logger.warn("Destroying... | Reason:", reason ?? "Unknown", "| Code:", code ?? "None");
+					if (reason != "Error: --restart--") this.logger.warn("Destroying... | Reason:", reason ?? "Unknown", "| Code:", code ?? "None");
 
 					try {
 						await this.destroy();
@@ -56,8 +71,6 @@ class Bot extends Client {
 					} catch (e) {
 						this.logger.error("Failed to exit:", e);
 					}
-
-					process.exit(code);
 				}
 			});
 		}
@@ -85,6 +98,4 @@ class Bot extends Client {
 	};
 };
 
-module.exports = {
-	Bot
-};
+module.exports = Bot;

@@ -17,7 +17,7 @@ const listener = {
 		const package = require("../package.json");
 
 		bot.user.setActivity({
-			name: `/init-dm, then DM me! - ${package.displayName} v${package.version}`,
+			name: `/help - ${package.displayName} v${package.version}`,
 			type: ActivityType.Custom
 		});
 	}
