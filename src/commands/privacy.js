@@ -1,4 +1,4 @@
-const { ApplicationCommandType, InteractionContextType, MessageFlags } = require("discord.js");
+const { ApplicationCommandType, MessageFlags } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
@@ -10,10 +10,7 @@ const info = {
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "privacy",
-		description: "Learn how we collect, manage, store and delete your personal data",
-		contexts: [
-			InteractionContextType.Guild
-		]
+		description: "Learn how we collect, manage, store and delete your personal data"
 	},
 
 	/**

@@ -1,4 +1,4 @@
-const { ApplicationCommandType, ApplicationCommandOptionType, ChannelType, MessageFlags, PermissionFlagsBits } = require("discord.js");
+const { ApplicationCommandType, ApplicationCommandOptionType, ChannelType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
 
 /**
  * @type {CommandInfo}
@@ -10,6 +10,9 @@ const info = {
 		name: "message-as",
 		description: "Sends a message as the bot in the specified channel",
 		default_member_permissions: PermissionFlagsBits.ManageMessages.toString(),
+		contexts: [
+			InteractionContextType.Guild
+		],
 		options: [
 			{
 				type: ApplicationCommandOptionType.String,
