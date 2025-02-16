@@ -1,0 +1,35 @@
+const { ApplicationCommandType, InteractionContextType, MessageFlags } = require("discord.js");
+const fs = require("fs");
+const path = require("path");
+
+/**
+ * @type {CommandInfo}
+ */
+const info = {
+	name: "Privacy",
+	deploy: {
+		type: ApplicationCommandType.ChatInput,
+		name: "privacy",
+		description: "Learn how we collect, manage, store and delete your personal data",
+		contexts: [
+			InteractionContextType.Guild
+		]
+	},
+
+	/**
+	 * @param {import("discord.js").CommandInteraction} interaction
+	 */
+	run: async (bot, logger, interaction) => {
+		await interaction.deferReply({
+			flags: MessageFlags.Ephemeral
+		});
+
+		const privacyPath = path.join(__dirname, "..", "settings", bot.application.id, "privacy.md");
+		const privacyMessage = fs.existsSync(privacyPath) ? fs.readFileSync(privacyPath, "utf-8") : null;
+
+		if (privacyMessage) await interaction.editReply(privacyMessage);
+		else logger.error("Privacy file missing");
+	}
+};
+
+module.exports = info;

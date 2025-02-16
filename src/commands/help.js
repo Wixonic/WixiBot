@@ -10,10 +10,7 @@ const info = {
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "help",
-		description: "Need help?",
-		contexts: [
-			InteractionContextType.Guild
-		]
+		description: "Need help?"
 	},
 
 	/**
@@ -32,7 +29,12 @@ const info = {
 
 			if (commands.size > 0) {
 				const slashCommandList = [];
-				for (const command of commands.filter((command) => command.type == ApplicationCommandType.ChatInput).values()) slashCommandList.push(`- </${command.name}:${command.id}>: ${command.description}`);
+				for (const command of commands.values()) {
+					let valid = command.type == ApplicationCommandType.ChatInput;
+					if (command.contexts && interaction.context) valid &&= command.contexts.includes(interaction.context);
+					if (interaction.inGuild() && command.defaultMemberPermissions) valid &&= interaction.memberPermissions.has(command.defaultMemberPermissions);
+					if (valid) slashCommandList.push(`- </${command.name}:${command.id}>: ${command.description}`);
+				}
 
 				await interaction.editReply(helpMessage.replace("{{SLASHCOMMANDS}}", slashCommandList.join("\n")));
 			} else logger.error("Failed to fetch commands");
