@@ -94,7 +94,9 @@ class Bot extends Client {
 
 	async destroy() {
 		this.listenerHandler.destroy(this);
+		this.emit("destroy");
 		await super.destroy();
+		process.exit();
 	};
 };
 

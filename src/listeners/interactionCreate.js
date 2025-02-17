@@ -35,7 +35,7 @@ const listener = {
 			logger.error("Invalid command:", interaction.commandName);
 		}
 
-		logger.warn("Invalid interaction:", Object.keys(InteractionType).find((key) => InteractionType[key] === interaction.type));
+		logger.warn("Invalid interaction:", Object.keys(InteractionType).find((key) => InteractionType[key] == interaction.type));
 	}
 };
 

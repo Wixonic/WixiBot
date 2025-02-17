@@ -18,6 +18,7 @@ const init = async (logger, applicationId) => {
 		intents: [
 			GatewayIntentBits.Guilds,
 			GatewayIntentBits.GuildModeration,
+			GatewayIntentBits.GuildVoiceStates,
 			GatewayIntentBits.GuildPresences,
 			GatewayIntentBits.GuildMessages,
 			GatewayIntentBits.GuildMessageReactions,
@@ -79,7 +80,7 @@ const main = async (logger) => {
 	};
 
 	process.on("unhandledRejection", (e) => {
-		if (e.message != "--restart--") log.error(`Unhandled Rejection at [INIT ${tries.text}:`, e.message);
+		if (e.message != "--restart--") log.error(`Unhandled Rejection at [INIT ${tries.text}]:`, e.message);
 		if (e.stack) console.log(colors.error + e.stack.split("\n").slice(1).join("\n"));
 		if (e.cause) log.debug("Cause:", e.cause);
 		if (e.message == "--restart--") restart();
@@ -87,7 +88,7 @@ const main = async (logger) => {
 	});
 
 	process.on("uncaughtException", (e) => {
-		if (e.message != "--restart--") log.error(`Uncaught Exception at [INIT ${tries.text}:`, e.message);
+		if (e.message != "--restart--") log.error(`Uncaught Exception at [INIT ${tries.text}]:`, e.message);
 		if (e.stack) console.log(colors.error + e.stack.split("\n").slice(1).join("\n"));
 		if (e.cause) log.debug("Cause:", e.cause);
 		if (e.message == "--restart--") restart();
