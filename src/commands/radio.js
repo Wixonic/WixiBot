@@ -128,7 +128,7 @@ const info = {
 					logger.debug(`${oldState.member.displayName} left, broadcasting with ${membersCount == 1 ? "one" : membersCount} member${membersCount == 1 ? "" : "s"}`);
 				}
 
-				if (((newState.member.id == bot.user.id && !newState.channel) || membersCount < 2) && connection.state.status != VoiceConnectionStatus.Destroyed) connection.destroy();
+				if (((newState.member.id == bot.user.id && !newState.channel) || membersCount < 1) && connection.state.status != VoiceConnectionStatus.Destroyed) connection.destroy();
 				else bot.once("voiceStateUpdate", handleVoiceStateUpdate);
 			};
 
