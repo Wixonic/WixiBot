@@ -16,10 +16,10 @@ let connectionChannelId = null;
  * @type {CommandInfo}
  */
 const info = {
-	name: "Radio",
+	name: "Broadcast",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
-		name: "radio",
+		name: "broadcast",
 		description: "Broadcast audio from WixiBot Local",
 		contexts: [
 			InteractionContextType.Guild
@@ -29,7 +29,7 @@ const info = {
 			{
 				type: ApplicationCommandOptionType.Channel,
 				name: "channel",
-				description: "The channel where the radio audio will be broadcasted",
+				description: "The channel where the audio will be broadcasted",
 				required: true,
 				channel_types: [
 					ChannelType.GuildStageVoice,
