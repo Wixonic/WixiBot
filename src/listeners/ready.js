@@ -12,7 +12,7 @@ const listener = {
 	 * @param {import("discord.js").Client} client
 	 */
 	run: (bot, logger, client) => {
-		logger.info("Connected as:", client.user.username);
+		logger.info("Connected as:", client.user.displayName);
 
 		const package = require("../package.json");
 

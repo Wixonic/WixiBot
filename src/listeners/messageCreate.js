@@ -10,7 +10,7 @@ const listener = {
 	 */
 	run: async (bot, logger, message) => {
 		if (!message.author.bot) {
-			logger.debug(`Message "${message.id}" sent by user "${message.author.username}" (${message.author.id})` + (message.inGuild() ? `, in guild "${message.guild.name}" (${message.guild.id}), in channel "${message.channel.name}" (${message.channel.id})` : ", outside of a guild"));
+			logger.debug(`Message "${message.id}" sent by user "${message.author.displayName}" (${message.author.id})` + (message.inGuild() ? `, in guild "${message.guild.name}" (${message.guild.id}), in channel "${message.channel.name}" (${message.channel.id})` : ", outside of a guild"));
 		}
 	}
 };

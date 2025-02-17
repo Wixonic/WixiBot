@@ -23,8 +23,9 @@ const listener = {
 
 				if (command.deploy.type == interaction.commandType && command.deploy.name == interaction.commandName) {
 					try {
-						commandLogger.debug("Runnning...");
+						commandLogger.debug(`Launched by "${(interaction.member ?? interaction.user).displayName}" (${(interaction.member ?? interaction.user).id})`);
 						await command.run(bot, commandLogger, interaction);
+						commandLogger.debug("Finished");
 						return;
 					} catch (e) {
 						commandLogger.error(e);
