@@ -1,8 +1,6 @@
-const fs = require("fs");
 const http = require("http");
 const https = require("https");
-
-const { log } = require("./log.js");
+const { log } = require("@wixonic/logger");
 
 /**
  * @param {RequestOptions} options

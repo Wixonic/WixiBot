@@ -1,8 +1,8 @@
 const { Client } = require("discord.js");
+const { colors } = require("@wixonic/logger");
 
 const CommandHandler = require("./commands.js");
 const ListenerHandler = require("./listeners.js");
-const { colors } = require("./log.js");
 const request = require("./request.js");
 
 class Bot extends Client {

@@ -1,10 +1,10 @@
 const { GatewayIntentBits } = require("discord.js");
+const { colors, log } = require("@wixonic/logger");
 
 const Bot = require("./bot.js");
 const CommandHandler = require("./commands.js");
 const Settings = require("./settings.js");
 
-const { colors, log } = require("./log.js");
 const { wait } = require("./utils.js");
 
 /**
