@@ -1,14 +1,14 @@
 const { ActivityType } = require("discord.js");
 
 /**
- * @type {ListenerInfo}
+ * @type {import("../types.d.ts").ListenerInfo}
  */
 const listener = {
 	name: "Ready",
 	event: "ready",
 
 	/**
-	 * @param {Logger} logger
+	 * @param {import("@wixonic/logger").Logger} logger
 	 * @param {import("discord.js").Client} client
 	 */
 	run: (bot, logger, client) => {

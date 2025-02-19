@@ -2,7 +2,8 @@ const http = require("http");
 const https = require("https");
 
 /**
- * @param {RequestOptions} options
+ * @param {import("@wixonic/logger").Logger} logger
+ * @param {import("./types.d.ts").RequestOptions} options
  * @returns {Promise<any>}
  */
 const request = (logger, options = {}) => {

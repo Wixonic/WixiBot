@@ -8,18 +8,14 @@ class Settings {
 
 		if (fs.existsSync(this.path)) {
 			/**
-			 * @type {MainSettings}
+			 * @type {import("./types.d.ts").MainSettings}
 			 */
 			const settings = require(this.path);
 
-			/**
-			 * @type {ApplicationSettings}
-			 */
+			this.active = settings.active;
+			this.port = settings.port;
 			this.application = settings.application;
-
-			/**
-			 * @type {SecretsSettings}
-			 */
+			this.paths = settings.paths;
 			this.secrets = settings.secrets;
 		} else throw "Settings not found.";
 	};

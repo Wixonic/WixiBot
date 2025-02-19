@@ -4,22 +4,22 @@ const path = require("path");
 
 class CommandHandler {
 	/**
-	 * @type {CommandInfo[]}
+	 * @type {import("./types.d.ts").CommandInfo[]}
 	 */
 	static slashCommands = [];
 
 	/**
-	 * @type {CommandInfo[]}
+	 * @type {import("./types.d.ts").CommandInfo[]}
 	 */
 	static userCommands = [];
 
 	/**
-	 * @type {CommandInfo[]}
+	 * @type {import("./types.d.ts").CommandInfo[]}
 	 */
 	static messageCommands = [];
 
 	/**
-	 * @type {CommandInfo[]}
+	 * @type {import("./types.d.ts").CommandInfo[]}
 	 */
 	static get commands() {
 		return [
@@ -30,10 +30,15 @@ class CommandHandler {
 	};
 
 	/**
-	 * @param {Logger} logger
+	 * @param {import("@wixonic/logger").Logger} logger
 	 */
 	constructor(logger) {
-		this.logger = logger;
+		this.logger = {
+			debug: (...any) => logger.debug("[Commands]", ...any),
+			error: (...any) => logger.error("[Commands]", ...any),
+			info: (...any) => logger.info("[Commands]", ...any),
+			warn: (...any) => logger.warn("[Commands]", ...any)
+		};
 	};
 
 	loadCommands() {

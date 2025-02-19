@@ -3,7 +3,7 @@ const secrets = require("./secrets.js");
 
 
 /**
- * @type {ApplicationSettings}
+ * @type {import("../../types.d.ts").ApplicationSettings}
  */
 const applicationSettings = {
 	clientId: "1245767039054905544",

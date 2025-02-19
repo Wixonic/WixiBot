@@ -1,5 +1,5 @@
 /**
- * @type {ListenerInfo}
+ * @type {import("../types.d.ts").ListenerInfo}
  */
 const listener = {
 	name: "Message Create",

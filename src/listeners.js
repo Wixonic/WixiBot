@@ -3,15 +3,23 @@ const path = require("path");
 
 class ListenerHandler {
 	/**
-	 * @param {Logger} logger
+	 * @param {import("@wixonic/logger").Logger} logger
 	 */
 	constructor(logger) {
-		this.logger = logger;
+		/**
+		 * @type {import("@wixonic/logger").Logger}
+		 */
+		this.logger = {
+			debug: (...any) => logger.debug("[Listeners]", ...any),
+			error: (...any) => logger.error("[Listeners]", ...any),
+			info: (...any) => logger.info("[Listeners]", ...any),
+			warn: (...any) => logger.warn("[Listeners]", ...any)
+		};
 		this.listeners = [];
 	};
 
 	/**
-	 * @param {import("./bot.js").Bot} bot
+	 * @param {import("./bot.js")} bot
 	 */
 	loadListeners(bot) {
 		const listenersPath = path.join(__dirname, "listeners");
@@ -35,7 +43,7 @@ class ListenerHandler {
 	};
 
 	/**
-	 * @param {import("./bot.js").Bot} bot
+	 * @param {import("./bot.js")} bot
 	 */
 	destroy(bot) {
 		for (const listener of this.listeners) {

@@ -1,5 +1,5 @@
 /**
- * @type {CommandsSettings}
+ * @type {import("../../types.d.ts").CommandsSettings}
  */
 const commandsSettings = {
 	ticket: {

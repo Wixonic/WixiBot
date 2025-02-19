@@ -1,7 +1,7 @@
 const { ApplicationCommandType, ApplicationCommandOptionType, ChannelType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
 
 /**
- * @type {CommandInfo}
+ * @type {import("../types.d.ts").CommandInfo}
  */
 const info = {
 	name: "Message As",

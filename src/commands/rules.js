@@ -5,7 +5,7 @@ const path = require("path");
 const Settings = require("../settings.js");
 
 /**
- * @type {CommandInfo}
+ * @type {import("../types.d.ts").CommandInfo}
  */
 const info = {
 	name: "Rules",

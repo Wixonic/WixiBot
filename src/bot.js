@@ -3,14 +3,17 @@ const { colors } = require("@wixonic/logger");
 
 const CommandHandler = require("./commands.js");
 const ListenerHandler = require("./listeners.js");
+const Server = require("./server.js");
+
 const request = require("./request.js");
 
 class Bot extends Client {
 	/**
-	 * @param {Logger} logger
+	 * @param {import("@wixonic/logger").Logger} logger
 	 * @param {{intents: import("discord.js").GatewayIntentBits[], webhook: URL | string}} options
+	 * @param {import("./settings.js")} settings
 	 */
-	constructor(logger, options) {
+	constructor(logger, options, settings) {
 		super({
 			intents: options.intents
 		});
@@ -44,18 +47,12 @@ class Bot extends Client {
 			warn: (...any) => logger.warn("[Client]", ...any)
 		};
 
-		this.commandHandler = new CommandHandler({
-			debug: (...any) => this.logger.debug("[Commands]", ...any),
-			error: (...any) => this.logger.error("[Commands]", ...any),
-			info: (...any) => this.logger.info("[Commands]", ...any),
-			warn: (...any) => this.logger.warn("[Commands]", ...any)
-		});
-
-		this.listenerHandler = new ListenerHandler({
-			debug: (...any) => this.logger.debug("[Listeners]", ...any),
-			error: (...any) => this.logger.error("[Listeners]", ...any),
-			info: (...any) => this.logger.info("[Listeners]", ...any),
-			warn: (...any) => this.logger.warn("[Listeners]", ...any)
+		this.commandHandler = new CommandHandler(logger);
+		this.listenerHandler = new ListenerHandler(logger);
+		this.server = new Server(logger, {
+			cert: settings.secrets.server.cert,
+			key: settings.secrets.server.key,
+			port: settings.port
 		});
 
 		this.destroyed = false;
@@ -85,6 +82,8 @@ class Bot extends Client {
 			await super.login(token);
 			this.logger.info("Successfully logged in");
 
+			await this.server.init();
+
 			this.commandHandler.loadCommands(this.application.id);
 			this.listenerHandler.loadListeners(this);
 		} catch (e) {
@@ -94,6 +93,7 @@ class Bot extends Client {
 
 	async destroy() {
 		this.listenerHandler.destroy(this);
+		await this.server.destroy();
 		this.emit("destroy");
 		await super.destroy();
 		process.exit();

@@ -2,7 +2,7 @@ const { InteractionType } = require("discord.js");
 const CommandHandler = require("../commands.js");
 
 /**
- * @type {ListenerInfo}
+ * @type {import("../types.d.ts").ListenerInfo}
  */
 const listener = {
 	name: "Interaction Create",
@@ -23,7 +23,7 @@ const listener = {
 
 				if (command.deploy.type == interaction.commandType && command.deploy.name == interaction.commandName) {
 					try {
-						commandLogger.debug(`Launched by "${(interaction.member ?? interaction.user).displayName}" (${(interaction.member ?? interaction.user).id})`);
+						commandLogger.info(`Launched by "${(interaction.member ?? interaction.user).displayName}" (${(interaction.member ?? interaction.user).id})`);
 						await command.run(bot, commandLogger, interaction);
 						commandLogger.debug("Finished");
 						return;

@@ -1,7 +1,6 @@
 const { ApplicationCommandType, ApplicationCommandOptionType, ChannelType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, VoiceConnectionStatus, StreamType } = require("@discordjs/voice");
 const { Readable } = require("stream");
-const WebSocket = require("ws");
 
 /**
  * @type {import("@discordjs/voice").VoiceConnection?}
@@ -13,7 +12,7 @@ let connection = null;
 let connectionChannelId = null;
 
 /**
- * @type {CommandInfo}
+ * @type {import("../types.d.ts").CommandInfo}
  */
 const info = {
 	name: "Broadcast",
@@ -67,7 +66,6 @@ const info = {
 			const audioPlayer = createAudioPlayer();
 			connection.subscribe(audioPlayer);
 
-			let wss = new WebSocket.Server({ port: 1001 });
 			let stream = new Readable({
 				read() { }
 			});
@@ -88,14 +86,23 @@ const info = {
 				logger.debug("Stream and audio resource reset");
 			};
 
-			wss.on("connection", (ws) => {
-				logger.debug("New WebSocket connection");
-				reset();
-
-				ws.on("message", (data) => stream.push(data));
-				ws.on("close", () => {
-					audioPlayer.stop();
-					logger.debug("WebSocket connection closed");
+			/**
+			 * @type {import("ws").WebSocket?}
+			 */
+			let currentWs = null;
+			bot.server.ws.on("connection", (ws) => {
+				ws.once("message", (data) => {
+					if (data[0] == 0x01) {
+						logger.debug("Broadcasting started");
+						currentWs = ws;
+						reset();
+						ws.send(Buffer.from([0x00]));
+						ws.on("message", (data) => stream.push(data));
+						ws.on("close", () => {
+							currentWs = null;
+							audioPlayer.stop();
+						});
+					}
 				});
 			});
 
@@ -103,42 +110,33 @@ const info = {
 				logger.debug("Connection state changed from", Object.keys(VoiceConnectionStatus).find((key) => VoiceConnectionStatus[key] == oldState.status), "to", Object.keys(VoiceConnectionStatus).find((key) => VoiceConnectionStatus[key] == newState.status));
 
 				if (newState.status == VoiceConnectionStatus.Destroyed) {
-					wss.close((e) => {
-						if (e) logger.error("WebSocket server closed with error:", e);
-						else logger.debug("WebSocket server closed");
-					});
-					for (const client of wss.clients) client.terminate();
+					if (currentWs && currentWs.readyState < 2) currentWs.terminate();
 					connectionChannelId = null;
 					logger.debug("Connection destroyed");
 				}
 			});
 
-			let membersCount = channel.members.size;
+			let membersCount = 0;
+			channel.members.forEach((member) => membersCount += (!member.user.bot ? 1 : 0))
 
 			/**
 			 * @param {import("discord.js").VoiceState} oldState 
 			 * @param {import("discord.js").VoiceState} newState 
 			 */
 			const handleVoiceStateUpdate = (oldState, newState) => {
-				if (newState.member.id != bot.user.id && !oldState.channel && newState.channelId == channel.id) {
+				if (!newState.member.user.bot && !oldState.channel && newState.channelId == channel.id) {
 					membersCount++;
 					logger.debug(`${newState.member.displayName} joined, broadcasting with ${membersCount == 1 ? "one" : membersCount} member${membersCount == 1 ? "" : "s"}`);
-				} else if (newState.member.id != bot.user.id && oldState.channelId == channel.id && !newState.channel) {
+				} else if (!newState.member.user.bot && oldState.channelId == channel.id && !newState.channel) {
 					membersCount--;
 					logger.debug(`${oldState.member.displayName} left, broadcasting with ${membersCount == 1 ? "one" : membersCount} member${membersCount == 1 ? "" : "s"}`);
 				}
 
-				if (((newState.member.id == bot.user.id && !newState.channel) || membersCount < 1) && connection.state.status != VoiceConnectionStatus.Destroyed) connection.destroy();
+				if ((membersCount < 1 || (newState.member.id == bot.user.id && !newState.channel)) && connection.state.status != VoiceConnectionStatus.Destroyed) connection.destroy();
 				else bot.once("voiceStateUpdate", handleVoiceStateUpdate);
 			};
 
 			bot.once("voiceStateUpdate", handleVoiceStateUpdate);
-
-			for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
-				process.once(signal, () => {
-					if (connection.state.status != VoiceConnectionStatus.Destroyed) connection.destroy();
-				});
-			}
 
 			await interaction.editReply(`Broadcasting in <#${channel.id}> with ${membersCount == 1 ? "one" : membersCount} member${membersCount == 1 ? "" : "s"}.`);
 		} else await interaction.editReply("Invalid voice channel or unable to join.");

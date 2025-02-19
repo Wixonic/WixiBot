@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 /**
- * @type {CommandInfo}
+ * @type {import("../types.d.ts").CommandInfo}
  */
 const info = {
 	name: "Privacy",

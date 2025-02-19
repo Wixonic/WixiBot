@@ -1,8 +1,10 @@
 /**
- * @type {MainSettings}
+ * @type {import("../../types.d.ts").MainSettings}
  */
 const mainSettings = {
 	active: true,
+
+	port: 999,
 
 	application: require("./application.js"),
 	secrets: require("./secrets.js"),

@@ -8,7 +8,7 @@ const Settings = require("./settings.js");
 const { wait } = require("./utils.js");
 
 /**
- * @param {Logger} logger
+ * @param {import("@wixonic/logger").Logger} logger
  * @param {string} applicationId
  */
 const init = async (logger, applicationId) => {
@@ -28,26 +28,21 @@ const init = async (logger, applicationId) => {
 			GatewayIntentBits.GuildScheduledEvents
 		],
 		webhook: settings.application.webhook
-	});
+	}, settings);
 
 	await bot.login(settings.application.token);
 };
 
 
 /**
- * @param {Logger} logger
+ * @param {import("@wixonic/logger").Logger} logger
  * @param {string} applicationId
  */
 const publish = async (logger, applicationId) => {
 	logger.warn("Publishing...");
 	const settings = new Settings(applicationId);
 
-	const commandHandler = new CommandHandler({
-		debug: (...any) => logger.debug("[Commands]", ...any),
-		error: (...any) => logger.error("[Commands]", ...any),
-		info: (...any) => logger.info("[Commands]", ...any),
-		warn: (...any) => logger.warn("[Commands]", ...any)
-	});
+	const commandHandler = new CommandHandler(logger);
 	commandHandler.loadCommands();
 
 	await commandHandler.deployCommands(applicationId, settings.application.token);
@@ -57,7 +52,7 @@ const publish = async (logger, applicationId) => {
 };
 
 /**
- * @param {Logger} logger
+ * @param {import("@wixonic/logger").Logger} logger
  */
 const main = async (logger) => {
 	const tries = {
