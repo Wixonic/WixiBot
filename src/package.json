@@ -15,10 +15,10 @@
 		"node": "20"
 	},
 	"dependencies": {
-		"@discordjs/voice": "0.18.0",
-		"@wixonic/logger": "1.0.1",
 		"discord.js": "14.18.0",
-		"express": "4.21.2"
+		"@discordjs/voice": "0.18.0",
+		"express": "4.21.2",
+		"@wixonic/logger": "1.0.2"
 	},
 	"devDependencies": {
 		"@types/node": "20.17.19"
