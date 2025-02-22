@@ -60,7 +60,7 @@ const info = {
 					flags: MessageFlags.SuppressNotifications
 				});
 
-				await interaction.editReply("Ticket prompt updated");
+				await interaction.followUp("Ticket prompt updated");
 			} else logger.error("Invalid channel");
 		} else logger.error("Ticket prompt file missing");
 	}

@@ -62,6 +62,7 @@ const info = {
 				guildId: channel.guild.id,
 				adapterCreator: channel.guild.voiceAdapterCreator
 			});
+
 			connectionChannelId = channel.id;
 			const audioPlayer = createAudioPlayer();
 			connection.subscribe(audioPlayer);
@@ -112,12 +113,12 @@ const info = {
 				if (newState.status == VoiceConnectionStatus.Destroyed) {
 					if (currentWs && currentWs.readyState < 2) currentWs.terminate();
 					connectionChannelId = null;
+					bot.off("voiceStateUpdate", handleVoiceStateUpdate);
 					logger.debug("Connection destroyed");
 				}
 			});
 
-			let membersCount = 0;
-			channel.members.forEach((member) => membersCount += (!member.user.bot ? 1 : 0))
+			let membersCount = channel.members.filter(member => !member.user.bot).size;
 
 			/**
 			 * @param {import("discord.js").VoiceState} oldState 
@@ -138,8 +139,8 @@ const info = {
 
 			bot.once("voiceStateUpdate", handleVoiceStateUpdate);
 
-			await interaction.editReply(`Broadcasting in <#${channel.id}> with ${membersCount == 1 ? "one" : membersCount} member${membersCount == 1 ? "" : "s"}.`);
-		} else await interaction.editReply("Invalid voice channel or unable to join.");
+			await interaction.followUp(`Broadcasting in <#${channel.id}> with ${membersCount == 1 ? "one" : membersCount} member${membersCount == 1 ? "" : "s"}.`);
+		} else await interaction.followUp("Invalid voice channel or unable to join.");
 	}
 };
 

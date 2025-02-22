@@ -41,7 +41,7 @@ const info = {
 					flags: MessageFlags.SuppressNotifications
 				});
 
-				await interaction.editReply(`Rules published at <#${channel.id}>.`);
+				await interaction.followUp(`Rules published at <#${channel.id}>.`);
 			} else logger.error("Invalid channel");
 		} else logger.error("Rules file missing");
 	}
