@@ -77,12 +77,12 @@ export interface CommandOptions {
 export interface CommandInfo {
 	deploy: import("discord.js").APIApplicationCommand;
 	name: string;
-	run: (bot: import("./bot.js"), logger: Logger, ...any: any[]) => Promise<void>;
+	run: (bot: import("./lib/bot.js"), logger: Logger, ...any: any[]) => Promise<void>;
 };
 
 
 export interface ListenerInfo {
 	id: string;
 	name: string;
-	run: (bot: import("./bot.js"), logger: Logger, ...any: any[]) => Promise<void>;
+	run: (bot: import("./lib/bot.js"), logger: Logger, ...any: any[]) => Promise<void>;
 };

@@ -1,11 +1,10 @@
 const { GatewayIntentBits } = require("discord.js");
 const { colors, log } = require("@wixonic/logger");
 
-const Bot = require("./bot.js");
-const CommandHandler = require("./commands.js");
-const Settings = require("./settings.js");
-
-const { wait } = require("./utils.js");
+const Bot = require("./lib/bot.js");
+const CommandHandler = require("./lib/commands.js");
+const Settings = require("./lib/settings.js");
+const { wait } = require("./lib/utils.js");
 
 /**
  * @param {import("@wixonic/logger").Logger} logger

@@ -1,5 +1,6 @@
 const { InteractionType } = require("discord.js");
-const CommandHandler = require("../commands.js");
+
+const CommandHandler = require("../lib/commands.js");
 
 /**
  * @type {import("../types.d.ts").ListenerInfo}

@@ -7,7 +7,7 @@ const ws = require("ws");
 class Server {
 	/**
 	 * @param {import("@wixonic/logger").Logger} logger
-	 * @param {import("./types.d.ts").ServerSecretsSettings | import("./types.d.ts").MainSettings} config
+	 * @param {import("../types.d.ts").ServerSecretsSettings | import("../types.d.ts").MainSettings} config
 	 */
 	constructor(logger, config) {
 		/**

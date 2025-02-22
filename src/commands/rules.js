@@ -2,7 +2,7 @@ const { ApplicationCommandType, InteractionContextType, MessageFlags, Permission
 const fs = require("fs");
 const path = require("path");
 
-const Settings = require("../settings.js");
+const Settings = require("../lib/settings.js");
 
 /**
  * @type {import("../types.d.ts").CommandInfo}

@@ -4,22 +4,22 @@ const path = require("path");
 
 class CommandHandler {
 	/**
-	 * @type {import("./types.d.ts").CommandInfo[]}
+	 * @type {import("../types.d.ts").CommandInfo[]}
 	 */
 	static slashCommands = [];
 
 	/**
-	 * @type {import("./types.d.ts").CommandInfo[]}
+	 * @type {import("../types.d.ts").CommandInfo[]}
 	 */
 	static userCommands = [];
 
 	/**
-	 * @type {import("./types.d.ts").CommandInfo[]}
+	 * @type {import("../types.d.ts").CommandInfo[]}
 	 */
 	static messageCommands = [];
 
 	/**
-	 * @type {import("./types.d.ts").CommandInfo[]}
+	 * @type {import("../types.d.ts").CommandInfo[]}
 	 */
 	static get commands() {
 		return [

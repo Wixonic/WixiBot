@@ -8,7 +8,7 @@ class Settings {
 
 		if (fs.existsSync(this.path)) {
 			/**
-			 * @type {import("./types.d.ts").MainSettings}
+			 * @type {import("../types.d.ts").MainSettings}
 			 */
 			const settings = require(this.path);
 

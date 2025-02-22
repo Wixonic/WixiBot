@@ -1,6 +1,4 @@
 const { ApplicationCommandType, ApplicationCommandOptionType, InteractionContextType, MessageFlags } = require("discord.js");
-const fs = require("fs");
-const path = require("path");
 
 /**
  * @type {import("../types.d.ts").CommandInfo}
