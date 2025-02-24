@@ -1,5 +1,7 @@
 const { ApplicationCommandType, ApplicationCommandOptionType, InteractionContextType, MessageFlags } = require("discord.js");
 
+const Rank = require("../lib/rank.js");
+
 /**
  * @type {import("../types.d.ts").CommandInfo}
  */
@@ -30,9 +32,14 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
+		/**
+		 * @type {import("discord.js").User}
+		 */
 		const targetUser = interaction.options.getUser("user") ?? interaction.user;
+		if (targetUser.bot) return await interaction.followUp("Ranks are disabled for bots.");
 
-		await interaction.followUp(`## <@${targetUser.id}>`);
+		const userRank = await Rank.get(logger, interaction.guild.id, targetUser.user.id);
+		await interaction.followUp(await userRank.description());
 	}
 };
 

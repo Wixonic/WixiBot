@@ -7,6 +7,11 @@ export interface ApplicationSettings {
 };
 
 export interface CommandsSettings {
+	rank: {
+		roles: {
+			string: number;
+		};
+	};
 	ticket: {
 		channel: string;
 	};
@@ -16,7 +21,7 @@ export interface CommandsSettings {
 };
 
 export interface PathsSettings {
-
+	rank: (guildId: string) => string
 };
 
 export interface SecretsDiscordApplicationSettings {

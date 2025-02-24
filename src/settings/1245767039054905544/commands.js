@@ -2,6 +2,15 @@
  * @type {import("../../types.d.ts").CommandsSettings}
  */
 const commandsSettings = {
+	rank: {
+		channel: "1332713470193434635",
+		points: {
+			messages: 3,
+			voice: 2 / 60,
+			stream: 1 / 60
+		},
+		roles: {}
+	},
 	ticket: {
 		channel: "1340598588270579712"
 	},
