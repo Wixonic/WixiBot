@@ -4,6 +4,12 @@
 	"description": "WixiLand Management Agency's main server",
 	"author": "Wixonic <contact@wixonic.fr> (https://wixonic.fr)",
 	"version": "1.0.0-dev",
+	"license": "Wix Non-Commercial License",
+	"repository": "github:Wixonic/WixiBot-Local",
+	"funding": {
+		"type": "patreon",
+		"url": "https://www.patreon.com/wixonic"
+	},
 	"main": "main.js",
 	"scripts": {
 		"pretest": "client=1245767039054905544 mode=publish node --trace-warnings ./main.js",
@@ -14,7 +20,6 @@
 	"engines": {
 		"node": "20"
 	},
-	"typings": "./types.d.ts",
 	"dependencies": {
 		"discord.js": "14.18.0",
 		"@discordjs/voice": "0.18.0",
@@ -23,5 +28,6 @@
 	},
 	"devDependencies": {
 		"@types/node": "20.17.19"
-	}
+	},
+	"typings": "./types.d.ts"
 }
