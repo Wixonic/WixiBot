@@ -22,7 +22,7 @@ class ListenerHandler {
 	 * @param {import("./bot.js")} bot
 	 */
 	loadListeners(bot) {
-		const listenersPath = path.join(__dirname, "listeners");
+		const listenersPath = path.join(__dirname, "..", "listeners");
 		const files = fs.readdirSync(listenersPath).filter((file) => file.endsWith(".js"));
 
 		for (const file of files) {

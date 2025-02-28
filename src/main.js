@@ -29,7 +29,7 @@ const init = async (logger, applicationId) => {
 		webhook: settings.application.webhook
 	}, settings);
 
-	await bot.login(settings.application.token);
+	await bot.login(settings.application.token, settings);
 };
 
 

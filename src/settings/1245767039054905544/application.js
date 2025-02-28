@@ -1,7 +1,6 @@
 const commands = require("./commands.js");
 const secrets = require("./secrets.js");
 
-
 /**
  * @type {import("../../types.d.ts").ApplicationSettings}
  */

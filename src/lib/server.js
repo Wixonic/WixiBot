@@ -7,9 +7,9 @@ const ws = require("ws");
 class Server {
 	/**
 	 * @param {import("@wixonic/logger").Logger} logger
-	 * @param {import("../types.d.ts").ServerSecretsSettings | import("../types.d.ts").MainSettings} config
+	 * @param {import("../types.d.ts").ServerSecretsSettings & import("../types.d.ts").MainSettings} settings
 	 */
-	constructor(logger, config) {
+	constructor(logger, settings) {
 		/**
 		 * @type {import("@wixonic/logger").Logger}
 		 */
@@ -20,27 +20,28 @@ class Server {
 			warn: (...any) => logger.warn("[Server]", ...any)
 		};
 
-		if (!fs.existsSync(config.cert) || !fs.existsSync(config.key)) throw new Error("SSL certificate or key are missing.");
+		if (!fs.existsSync(settings.cert) || !fs.existsSync(settings.key)) throw new Error("SSL certificate or key are missing.");
 
 		this.app = express();
 
 		this.http = https.createServer({
-			cert: fs.readFileSync(config.cert),
-			key: fs.readFileSync(config.key)
+			cert: fs.readFileSync(settings.cert),
+			key: fs.readFileSync(settings.key)
 		});
 
 		this.ws = new ws.Server({
 			noServer: true
 		});
 
-		this.port = config.port;
+		this.port = settings.port;
 	};
 
 	/**
+	 * @param {import("../types.d.ts").MainSettings} settings
 	 * @returns {Promise<void>}
 	 */
-	init() {
-		const websitePath = path.join(__dirname, "website");
+	init(settings) {
+		const websitePath = path.join(__dirname, "..", "website");
 
 		return new Promise((resolve) => {
 			this.app.use((req, res, next) => {
@@ -49,6 +50,21 @@ class Server {
 			});
 
 			this.app.use(express.static(websitePath));
+			this.app.use(express.text({ limit: "1gb", type: "*/*" }));
+
+			for (const handlerFile of fs.readdirSync(path.join(websitePath, "handlers"))) {
+				if (handlerFile.endsWith(".js")) {
+					/**
+					 * @type {import("../types.d.ts").HandlerInfo}
+					 */
+					const handler = require(path.join(websitePath, "handlers", handlerFile));
+
+					for (const method in handler.handlers) {
+						this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, settings, req, res));
+						this.logger.debug("Added handler for", handlerFile.replace(".js", ""), "with method", method);
+					}
+				}
+			}
 
 			this.app.use((req, res) => {
 				this.logger.warn(`404: ${req.method} ${req.url}`);

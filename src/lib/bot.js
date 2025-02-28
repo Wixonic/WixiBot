@@ -11,7 +11,7 @@ class Bot extends Client {
 	/**
 	 * @param {import("@wixonic/logger").Logger} logger
 	 * @param {{intents: import("discord.js").GatewayIntentBits[], webhook: URL | string}} options
-	 * @param {import("./settings.js")} settings
+	 * @param {import("../types.d.ts").MainSettings} settings
 	 */
 	constructor(logger, options, settings) {
 		super({
@@ -75,14 +75,15 @@ class Bot extends Client {
 
 	/**
 	 * @param {string} token
+	 * @param {import("../types.d.ts").MainSettings} settings
 	 */
-	async login(token) {
+	async login(token, settings) {
 		try {
 			this.logger.debug("Attempting to log in...");
 			await super.login(token);
 			this.logger.info("Successfully logged in");
 
-			await this.server.init();
+			await this.server.init(settings);
 
 			this.commandHandler.loadCommands(this.application.id);
 			this.listenerHandler.loadListeners(this);

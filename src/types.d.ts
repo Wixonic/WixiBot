@@ -21,23 +21,28 @@ export interface CommandsSettings {
 };
 
 export interface PathsSettings {
+	cache: string;
 	rank: (guildId: string) => string
 };
 
-export interface SecretsDiscordApplicationSettings {
+export interface DiscordApplicationSecretsSettings {
 	secret: string;
 	token: string;
 };
 
-export interface SecretsDiscordClientSettings {
+export interface DiscordClientSecretsSettings {
 	token: string;
 };
 
-export interface SecretsDiscordSettings {
-	application: SecretsDiscordApplicationSettings;
-	client: SecretsDiscordClientSettings;
+export interface DiscordSecretsSettings {
+	application: DiscordApplicationSecretsSettings;
+	client: DiscordClientSecretsSettings;
 	webhook: string;
 }
+
+export interface PathsSecretsSettings {
+	root: string;
+};
 
 export interface ServerSecretsSettings {
 	cert: string;
@@ -45,8 +50,10 @@ export interface ServerSecretsSettings {
 };
 
 export interface SecretsSettings {
-	discord: SecretsDiscordSettings;
+	discord: DiscordSecretsSettings;
+	paths: PathsSecretsSettings;
 	server: ServerSecretsSettings;
+	wixkey: string;
 };
 
 export interface MainSettings {
@@ -82,12 +89,18 @@ export interface CommandOptions {
 export interface CommandInfo {
 	deploy: import("discord.js").APIApplicationCommand;
 	name: string;
-	run: (bot: import("./lib/bot.js"), logger: Logger, ...any: any[]) => Promise<void>;
+	run: (bot: import("./lib/bot.js"), logger: import("@wixonic/logger").Logger, ...any: any[]) => Promise<void>;
 };
 
 
 export interface ListenerInfo {
 	id: string;
 	name: string;
-	run: (bot: import("./lib/bot.js"), logger: Logger, ...any: any[]) => Promise<void>;
+	run: (bot: import("./lib/bot.js"), logger: import("@wixonic/logger").Logger, ...any: any[]) => Promise<void>;
+};
+
+
+export interface HandlerInfo {
+	path: string;
+	handlers: Record<string, (logger: import("@wixonic/logger").Logger, settings: MainSettings, req: Express.Request, res: Express.Response) => void>
 };

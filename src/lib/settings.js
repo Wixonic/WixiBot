@@ -4,7 +4,7 @@ const path = require("path");
 class Settings {
 	constructor(applicationId) {
 		this.applicationId = applicationId;
-		this.path = path.join(__dirname, "settings", this.applicationId, "main.js");
+		this.path = path.join(__dirname, "..", "settings", this.applicationId, "main.js");
 
 		if (fs.existsSync(this.path)) {
 			/**
