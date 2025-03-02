@@ -23,11 +23,11 @@
 	"dependencies": {
 		"discord.js": "14.18.0",
 		"@discordjs/voice": "0.18.0",
-		"express": "4.21.2",
+		"express": "5.0.1",
 		"@wixonic/logger": "1.0.2"
 	},
 	"devDependencies": {
-		"@types/node": "20.17.19"
+		"@types/node": "20.17.22"
 	},
 	"typings": "./types.d.ts"
 }
