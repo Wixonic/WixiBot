@@ -27,7 +27,7 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const settings = new Settings(bot.user.id);
+		const settings = Settings.get(bot.user.id);
 
 		const ticketPath = path.join(__dirname, "..", "settings", bot.application.id, "ticket.md");
 		const ticketMessage = fs.existsSync(ticketPath) ? fs.readFileSync(ticketPath, "utf-8") : null;

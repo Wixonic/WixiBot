@@ -1,54 +1,8 @@
-const { GatewayIntentBits } = require("discord.js");
-const { colors, log } = require("@wixonic/logger");
+const { spawn } = require("child_process");
+const { log } = require("@wixonic/logger");
+const process = require("process");
 
-const Bot = require("./lib/bot.js");
-const CommandHandler = require("./lib/commands.js");
-const Settings = require("./lib/settings.js");
 const { wait } = require("./lib/utils.js");
-
-/**
- * @param {import("@wixonic/logger").Logger} logger
- * @param {string} applicationId
- */
-const init = async (logger, applicationId) => {
-	const settings = new Settings(applicationId);
-
-	const bot = new Bot(logger, {
-		intents: [
-			GatewayIntentBits.Guilds,
-			GatewayIntentBits.GuildModeration,
-			GatewayIntentBits.GuildVoiceStates,
-			GatewayIntentBits.GuildPresences,
-			GatewayIntentBits.GuildMessages,
-			GatewayIntentBits.GuildMessageReactions,
-			GatewayIntentBits.DirectMessages,
-			GatewayIntentBits.DirectMessageReactions,
-			GatewayIntentBits.MessageContent,
-			GatewayIntentBits.GuildScheduledEvents
-		],
-		webhook: settings.application.webhook
-	}, settings);
-
-	await bot.login(settings.application.token, settings);
-};
-
-
-/**
- * @param {import("@wixonic/logger").Logger} logger
- * @param {string} applicationId
- */
-const publish = async (logger, applicationId) => {
-	logger.warn("Publishing...");
-	const settings = new Settings(applicationId);
-
-	const commandHandler = new CommandHandler(logger);
-	commandHandler.loadCommands();
-
-	await commandHandler.deployCommands(applicationId, settings.application.token);
-	logger.info("Successfully published.");
-
-	process.exit(0);
-};
 
 /**
  * @param {import("@wixonic/logger").Logger} logger
@@ -59,11 +13,12 @@ const main = async (logger) => {
 		max: 10,
 		delay: 3,
 		get text() {
-			return `${String(this.current).padStart(String(this.max).length, "0")}/${this.max}`;
+			return `[TRY ${String(this.current).padStart(String(this.max).length, "0")}/${this.max}]`;
 		}
 	};
 
 	const restart = async () => {
+		logger.warn("-".repeat(tries.text.length), "Restarting");
 		if (tries.current < tries.max) await wait(tries.delay * tries.current * 1000);
 		else {
 			logger.warn("-".repeat(tries.text.length), "Exceeded maximum number of retries. Restarting in 5 minutes.");
@@ -73,44 +28,100 @@ const main = async (logger) => {
 		await execute();
 	};
 
-	process.on("unhandledRejection", (e) => {
-		if (e.message != "--restart--") log.error(`Unhandled Rejection at [INIT ${tries.text}]:`, e.message);
-		if (e.stack) console.log(colors.error + e.stack.split("\n").slice(1).join("\n"));
-		if (e.cause) log.debug("Cause:", e.cause);
-		if (e.message == "--restart--") restart();
-		else process.exit(1);
-	});
-
-	process.on("uncaughtException", (e) => {
-		if (e.message != "--restart--") log.error(`Uncaught Exception at [INIT ${tries.text}]:`, e.message);
-		if (e.stack) console.log(colors.error + e.stack.split("\n").slice(1).join("\n"));
-		if (e.cause) log.debug("Cause:", e.cause);
-		if (e.message == "--restart--") restart();
-		else process.exit(1);
-	});
-
 	const execute = async () => {
 		tries.current++;
 
-		switch (process.env.mode) {
-			case "publish":
-				await publish({
-					debug: (...any) => logger.debug(`[PUBLISH ${tries.text}]`, ...any),
-					error: (...any) => { logger.error(`[PUBLISH ${tries.text}]`, ...any); throw new Error("--restart--") },
-					info: (...any) => logger.info(`[PUBLISH ${tries.text}]`, ...any),
-					warn: (...any) => logger.warn(`[PUBLISH ${tries.text}]`, ...any)
-				}, process.env.client);
-				break;
+		const args = [
+			...process.execArgv,
+			"./process.js"
+		];
 
-			default:
-				await init({
-					debug: (...any) => logger.debug(`[RUN ${tries.text}]`, ...any),
-					error: (...any) => { logger.error(`[RUN ${tries.text}]`, ...any); throw new Error("--restart--") },
-					info: (...any) => logger.info(`[RUN ${tries.text}]`, ...any),
-					warn: (...any) => logger.warn(`[RUN ${tries.text}]`, ...any)
-				}, process.env.client);
-				break;
+		logger.debug(tries.text, "Launching node process with args:", ...args);
+
+		const child = spawn("node", args, {
+			env: process.env
+		});
+
+		for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
+			process.once(signal, async (reason, code) => {
+				if (!child.killed) {
+					child.removeAllListeners("exit");
+					child.kill(signal);
+					await new Promise((callback) => process.once("exit", callback));
+					process.exit(code);
+				} else process.exit(code);
+			});
 		}
+
+		child.on("error", (e) => logger.error(e));
+
+		const processLog = (line) => {
+			line = line.replace(/\x1b\[[0-9;]*m/g, "").trim();
+
+			if (line.length > 0) {
+				const data = line.split(" ");
+				const level = data.shift();
+				const message = data.join(" ").replaceAll("<br />", "\n");
+
+				switch (level) {
+					case "[DEBUG]":
+						logger.debug(tries.text, message);
+						break;
+
+					case "[ERROR]":
+						logger.error(tries.text, message);
+						break;
+
+					case "[INFO]":
+						logger.info(tries.text, message);
+						break;
+
+					case "[WARN]":
+						logger.warn(tries.text, message);
+						break;
+
+					default:
+						logger.warn(tries.text, "Invalid level:", level);
+						logger.debug(tries.text, "Content:", message);
+						break;
+				};
+			}
+		};
+
+		let buffer = "";
+		let cursor = 0;
+		child.stdout.on("data", (data) => {
+			buffer += data.toString();
+
+			const lines = buffer.split("\n");
+			while (cursor < lines.length) {
+				const line = lines[cursor - 1] ?? "";
+				processLog(line);
+				cursor++;
+			}
+		});
+		child.stderr.on("data", (data) => {
+			buffer += data.toString();
+
+			const lines = buffer.split("\n");
+			while (cursor < lines.length) {
+				const line = lines[cursor - 1] ?? "";
+				processLog(line);
+				cursor++;
+			}
+		});
+
+		child.on("exit", (code, signal) => {
+			if (code == 0) {
+				logger.debug(tries.text, `Exited with code ${code} and signal ${signal}`);
+				process.exit(0);
+			} else {
+				logger.error(tries.text, `Exited with code ${code} and signal ${signal}`);
+				const remainingBufferData = buffer.split("\n").slice(cursor).join("\n");
+				if (remainingBufferData.length > 0) logger.debug(tries.text, "Remaining buffer data:", remainingBufferData);
+				restart();
+			}
+		});
 	};
 
 	await execute();

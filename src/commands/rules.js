@@ -27,7 +27,7 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const settings = new Settings(bot.user.id);
+		const settings = Settings.get(bot.user.id);
 
 		const rulesPath = path.join(__dirname, "..", "settings", bot.application.id, "rules.md");
 		const rulesMessage = fs.existsSync(rulesPath) ? fs.readFileSync(rulesPath, "utf-8") : null;

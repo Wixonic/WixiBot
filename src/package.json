@@ -24,7 +24,7 @@
 		"discord.js": "14.18.0",
 		"@discordjs/voice": "0.18.0",
 		"express": "5.0.1",
-		"@wixonic/logger": "1.1.0"
+		"@wixonic/logger": "1.2.0"
 	},
 	"devDependencies": {
 		"@types/node": "20.17.22"

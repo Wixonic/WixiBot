@@ -1,4 +1,7 @@
+const fs = require("fs");
 const path = require("path");
+
+const { displayTime } = require("./utils.js");
 
 class Rank {
 	static convert = {
@@ -71,7 +74,7 @@ class Rank {
 
 	/**
 	 * @param {import("@wixonic/logger")} logger
-	 * @param {import("./settings.js")} settings
+	 * @param {import("../types.d.ts").MainSettings} settings
 	 * @param {string} guildId
 	 * @param {string} memberId
 	 * @returns {Promise<Rank>}
@@ -79,13 +82,14 @@ class Rank {
 	static async get(logger, settings, guildId, memberId) {
 		const memberPath = path.join(settings.paths.rank(guildId), memberId + ".json");
 
-		if (!fs.existsSync(memberPath)) return new Rank(settings, guildId, memberId);
+		if (!fs.existsSync(memberPath)) return new Rank(logger, settings, guildId, memberId);
 		else {
 			try {
-				return new Rank(settings, guildId, memberId, JSON.parse(fs.readFileSync(memberPath, "utf-8")));
+				return new Rank(logger, settings, guildId, memberId, JSON.parse(fs.readFileSync(memberPath, "utf-8")));
 			} catch (e) {
-				logger.warn("[Rank] Failed to read rank data:", e);
-				return new Rank(settings, guildId, memberId);
+				if (e?.stack) logger.warn("[Rank] Failed to read rank data:", e, e.stack.replaceAll("\n", "<br />"));
+				else logger.warn("[Rank] Failed to read rank data:", e);
+				return new Rank(logger, settings, guildId, memberId);
 			}
 		}
 	};
@@ -98,7 +102,7 @@ class Rank {
 
 	/**
 	 * @param {import("@wixonic/logger")} logger
-	 * @param {import("./settings.js")} settings
+	 * @param {import("../types.d.ts").MainSettings} settings
 	 * @param {string} guildId
 	 * @returns {Promise<import("../typ.d.ts").Leaderboard>}
 	 */
@@ -117,7 +121,7 @@ class Rank {
 				try {
 					const rank = await Rank.get(guildId, file.replace(".json", ""));
 
-					if (rank) {
+					if (rank && !settings.application.commands.rank.ignored.includes(rank.memberId)) {
 						leaderboard.global.push({
 							id: rank.memberId,
 							points: rank.points.global
@@ -129,7 +133,7 @@ class Rank {
 						});
 					}
 				} catch (e) {
-					log.error(`[Rank] Failed to read rank data for file ${file}: ${e}`);
+					logger.error(`[Rank] Failed to read rank data for file ${file}:`, e);
 				}
 			}
 		}
@@ -141,11 +145,13 @@ class Rank {
 	};
 
 	/**
-	 * @param {import("./settings.js")} settings
+	 * @param {import("@wixonic/logger").Logger} logger
+	 * @param {import("../types.d.ts").MainSettings} settings
 	 * @param {string} guildId
 	 * @param {string} memberId
 	 */
-	constructor(settings, guildId, memberId, data) {
+	constructor(logger, settings, guildId, memberId, data) {
+		this.logger = logger;
 		this.settings = settings;
 
 		if (data) {
@@ -252,8 +258,8 @@ class Rank {
 
 	get points() {
 		return {
-			global: this.settings.commands.rank.points.messages * this.messages.global + this.settings.commands.rank.points.voice * this.voice.time.global + this.settings.commands.rank.points.stream * this.voice.stream.time.global,
-			month: this.settings.commands.rank.points.messages * this.messages.month + this.settings.commands.rank.points.voice * this.voice.time.month + this.settings.commands.rank.points.stream * this.voice.stream.time.month
+			global: this.settings.application.commands.rank.points.messages * this.messages.global + this.settings.application.commands.rank.points.voice * this.voice.time.global + this.settings.application.commands.rank.points.stream * this.voice.stream.time.global,
+			month: this.settings.application.commands.rank.points.messages * this.messages.month + this.settings.application.commands.rank.points.voice * this.voice.time.month + this.settings.application.commands.rank.points.stream * this.voice.stream.time.month
 		};
 	};
 
@@ -296,74 +302,73 @@ class Rank {
 	};
 
 	async rank() {
-		const leaderboard = await Rank.leaderboard(this.guildId);
+		const leaderboard = await Rank.leaderboard(this.logger, this.settings, this.guildId);
 		return {
 			global: leaderboard.global.findIndex((rank) => rank.id == this.memberId),
 			month: leaderboard.month.findIndex((rank) => rank.id == this.memberId)
 		};
 	};
 
-	/**
-	 * @param {import("./settings.js")} settings 
-	 */
-	async save(settings) {
-		const rankSettings = settings.paths.rank(this.guildId);
-
+	async save() {
+		/* const rankSettings = this.settings.application.commands.rank(this.guildId);
+		
 		const roles = [];
 		for (const role in rankSettings.roles) {
 			if (rankSettings?.roles[role] <= this.points.global) roles.push(role);
 		}
-
-		if (this.roles.values() != roles.values()) {
-			/* for (const roleId of this.roles) {
-				if (!roles.includes(roleId)) {
-					const member = await getMember(this.guildId, this.memberId);
-					try {
-						await member.roles.remove(roleId);
-						log(`[Rank] Removed role ${roleId}.`);
-					} catch (e) {
-						log.error(`[Rank] Failed to remove role "${roleId}": ${e}.`);
-					}
+		
+		if (this.roles.values() != roles.values()) { */
+		/* for (const roleId of this.roles) {
+			if (!roles.includes(roleId)) {
+				const member = await getMember(this.guildId, this.memberId);
+				try {
+					await member.roles.remove(roleId);
+					log(`[Rank] Removed role ${roleId}.`);
+				} catch (e) {
+					log.error(`[Rank] Failed to remove role "${roleId}": ${e}.`);
+					// Add stack
 				}
 			}
-
-			for (const roleId of roles) {
-				if (!this.roles.includes(roleId)) {
-					const member = await getMember(this.guildId, this.memberId);
-					try {
-						await member.roles.add(roleId);
-						log(`[Rank] Added role "${roleId}".`);
-
-						const role = await getRole(this.guildId, roleId);
-
-						const channel = await getChannel(this.guildId, rankSettings.channel);
-						if (channel) await channel.send({
-							content: `<@${this.memberId}> just unlocked a new rank role!`,
-							embeds: [{
-								title: role.name,
-								description: `Reached ${rankSettings?.roles[role.id] ?? 0} point${(rankSettings?.roles[role.id] ?? 0) == 1 ? "" : "s"}`,
-								color: role.color
-							}]
-						});
-					} catch (e) {
-						log.error(`Failed to add role "${roleId}": ${e}.`);
-					}
-				}
-			}
-
-			this.roles = roles; */
 		}
-
-		const memberPath = path.join(settings.paths.rank(this.guildId), this.memberId + ".json");
-
-		if (!fs.existsSync(path.dirname(memberPath))) fs.mkdirSync(path.dirname(memberPath), { recursive: true });
+		
+		for (const roleId of roles) {
+			if (!this.roles.includes(roleId)) {
+				const member = await getMember(this.guildId, this.memberId);
+				try {
+					await member.roles.add(roleId);
+					log(`[Rank] Added role "${roleId}".`);
+		
+					const role = await getRole(this.guildId, roleId);
+		
+					const channel = await getChannel(this.guildId, rankSettings.channel);
+					if (channel) await channel.send({
+						content: `<@${this.memberId}> just unlocked a new rank role!`,
+						embeds: [{
+							title: role.name,
+							description: `Reached ${rankSettings?.roles[role.id] ?? 0} point${(rankSettings?.roles[role.id] ?? 0) == 1 ? "" : "s"}`,
+							color: role.color
+						}]
+					});
+				} catch (e) {
+					log.error(`Failed to add role "${roleId}": ${e}.`);
+					// Add stack
+				}
+			}
+		}
+		
+		this.roles = roles; */
+		/*}
+			
+		const memberPath = path.join(this.settings.paths.rank(this.guildId), this.memberId + ".json");
+			
+		if(!fs.existsSync(path.dirname(memberPath))) fs.mkdirSync(path.dirname(memberPath), { recursive: true });
 		fs.writeFileSync(memberPath, JSON.stringify({
-			version: "3",
-			lastUpdate: this.lastUpdate.getTime(),
-			messages: this.messages,
-			roles: this.roles,
-			voice: this.voice
-		}), "utf-8");
+		version: "3",
+		lastUpdate: this.lastUpdate.getTime(),
+		messages: this.messages,
+		roles: this.roles,
+		voice: this.voice
+		}), "utf-8"); */
 	}
 };
 

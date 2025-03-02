@@ -49,11 +49,7 @@ class Bot extends Client {
 
 		this.commandHandler = new CommandHandler(logger);
 		this.listenerHandler = new ListenerHandler(logger);
-		this.server = new Server(logger, {
-			cert: settings.secrets.server.cert,
-			key: settings.secrets.server.key,
-			port: settings.port
-		});
+		this.server = new Server(logger, settings);
 
 		this.destroyed = false;
 		for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
@@ -97,7 +93,7 @@ class Bot extends Client {
 		await this.server.destroy();
 		this.emit("destroy");
 		await super.destroy();
-		process.exit();
+		process.exit(1);
 	};
 };
 

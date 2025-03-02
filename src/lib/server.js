@@ -7,7 +7,7 @@ const ws = require("ws");
 class Server {
 	/**
 	 * @param {import("@wixonic/logger").Logger} logger
-	 * @param {import("../types.d.ts").ServerSecretsSettings & import("../types.d.ts").MainSettings} settings
+	 * @param {import("../types.d.ts").MainSettings} settings
 	 */
 	constructor(logger, settings) {
 		/**
@@ -20,13 +20,13 @@ class Server {
 			warn: (...any) => logger.warn("[Server]", ...any)
 		};
 
-		if (!fs.existsSync(settings.cert) || !fs.existsSync(settings.key)) throw new Error("SSL certificate or key are missing.");
+		if (!fs.existsSync(settings.secrets.server.cert) || !fs.existsSync(settings.secrets.server.key)) throw new Error("SSL certificate or key are missing.");
 
 		this.app = express();
 
 		this.http = https.createServer({
-			cert: fs.readFileSync(settings.cert),
-			key: fs.readFileSync(settings.key)
+			cert: fs.readFileSync(settings.secrets.server.cert),
+			key: fs.readFileSync(settings.secrets.server.key)
 		});
 
 		this.ws = new ws.Server({
