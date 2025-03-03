@@ -27,13 +27,11 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const settings = Settings.get(bot.user.id);
-
 		const ticketPath = path.join(__dirname, "..", "settings", bot.application.id, "ticket.md");
 		const ticketMessage = fs.existsSync(ticketPath) ? fs.readFileSync(ticketPath, "utf-8") : null;
 
 		if (ticketMessage) {
-			const channel = await bot.channels.fetch(settings.application.commands.ticket.channel);
+			const channel = await bot.channels.fetch(bot.settings.application.commands.ticket.channel);
 
 			if (channel && channel.isTextBased() && channel.isSendable()) {
 				const rolesText = [];

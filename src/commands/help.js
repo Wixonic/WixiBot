@@ -21,7 +21,6 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const helpPath = path.join(__dirname, "..", "settings", bot.application.id, "help.md");
 		const helpMessage = fs.existsSync(helpPath) ? fs.readFileSync(helpPath, "utf-8") : null;
 
 		if (helpMessage) {

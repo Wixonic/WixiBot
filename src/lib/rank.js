@@ -54,18 +54,16 @@ class Rank {
 						global: data.voice?.count?.global ?? 0,
 						month: data.voice?.count?.month ?? 0
 					},
-					startedAt: data.voice?.startedAt ?? null,
-					stream: {
-						time: {
-							global: data.voice?.stream?.time?.global ?? 0,
-							month: data.voice?.stream?.time?.month ?? 0
-						},
-						count: {
-							global: data.voice?.stream?.count?.global ?? 0,
-							month: data.voice?.stream?.count?.month ?? 0
-						},
-						startedAt: data.voice?.stream?.startedAt ?? null
-					}
+					startedAt: data.voice?.startedAt ?? null
+				},
+				streak: {
+					best: 0,
+					count: 0,
+					last: 0
+				},
+				monthFirst: {
+					count: 0,
+					last: 0
 				},
 				lastUpdate: data.lastUpdate ?? 0
 			};
@@ -177,18 +175,16 @@ class Rank {
 					global: data.voice?.count?.global ?? 0,
 					month: data.voice?.count?.month ?? 0
 				},
-				startedAt: data.voice?.startedAt ?? null,
-				stream: {
-					time: {
-						global: data.voice?.stream?.time?.global ?? 0,
-						month: data.voice?.stream?.time?.month ?? 0
-					},
-					count: {
-						global: data.voice?.stream?.count?.global ?? 0,
-						month: data.voice?.stream?.count?.month ?? 0
-					},
-					startedAt: data.voice?.stream?.startedAt ?? null
-				}
+				startedAt: data.voice?.startedAt ?? null
+			};
+			this.streak = {
+				best: 0,
+				count: 0,
+				last: 0
+			};
+			this.monthFirst = {
+				count: 0,
+				last: 0
 			};
 
 			const beginningOfTheMonth = new Date();

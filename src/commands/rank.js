@@ -33,15 +33,13 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const settings = Settings.get(bot.user.id);
-
 		/**
 		 * @type {import("discord.js").User}
 		 */
 		const targetUser = interaction.options.getUser("user") ?? interaction.user;
 		if (targetUser.bot) return await interaction.followUp("Ranks are disabled for bots.");
 
-		const userRank = await Rank.get(logger, settings, interaction.guild.id, targetUser.id);
+		const userRank = await Rank.get(logger, bot.settings, interaction.guild.id, targetUser.id);
 		await interaction.followUp(await userRank.description());
 	}
 };

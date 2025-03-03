@@ -46,6 +46,7 @@ class Bot extends Client {
 			info: (...any) => logger.info("[Client]", ...any),
 			warn: (...any) => logger.warn("[Client]", ...any)
 		};
+		this.settings = settings;
 
 		this.commandHandler = new CommandHandler(logger);
 		this.listenerHandler = new ListenerHandler(logger);

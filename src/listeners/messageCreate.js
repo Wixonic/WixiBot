@@ -1,3 +1,5 @@
+const Rank = require("../lib/rank.js");
+
 /**
  * @type {import("../types.d.ts").ListenerInfo}
  */
@@ -11,6 +13,11 @@ const listener = {
 	run: async (bot, logger, message) => {
 		if (!message.author.bot) {
 			logger.debug(`Message "${message.id}" sent by user "${message.author.displayName}" (${message.author.id})` + (message.inGuild() ? `, in guild "${message.guild.name}" (${message.guild.id}), in channel "${message.channel.name}" (${message.channel.id})` : ", outside of a guild"));
+
+			if (message.guild) {
+				const userRank = await Rank.get(logger, bot.settings, interaction.guild.id, targetUser.id);
+				await userRank.addMessage();
+			}
 		}
 	}
 };
