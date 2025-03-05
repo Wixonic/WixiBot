@@ -1,8 +1,6 @@
-const { ApplicationCommandType, ButtonStyle, ChannelType, ComponentType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
+const { ApplicationCommandType, ButtonStyle, ComponentType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
-
-const Settings = require("../lib/settings.js");
 
 /**
  * @type {import("../types.d.ts").CommandInfo}
