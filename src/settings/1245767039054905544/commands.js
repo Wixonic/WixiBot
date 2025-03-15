@@ -4,6 +4,9 @@
 const commandsSettings = {
 	rank: {
 		channel: "1332713470193434635",
+		ignored: [
+			"1020454688467980308" // wixonic
+		],
 		points: {
 			messages: 3,
 			voice: 2 / 60,

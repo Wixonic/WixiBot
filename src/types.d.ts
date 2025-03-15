@@ -8,8 +8,15 @@ export interface ApplicationSettings {
 
 export interface CommandsSettings {
 	rank: {
+		channel: string;
+		ignored: string[];
+		points: {
+			messages: number;
+			voice: number;
+			stream: number;
+		};
 		roles: {
-			string: number;
+
 		};
 	};
 	ticket: {

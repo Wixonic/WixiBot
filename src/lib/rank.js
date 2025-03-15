@@ -129,7 +129,7 @@ class Rank {
 							id: rank.memberId,
 							points: rank.points.month
 						});
-					}
+					} else if (settings.application.commands.rank.ignored.includes(rank.memberId)) logger.debug(`User "${rank.memberId}" ignored`);
 				} catch (e) {
 					logger.error(`[Rank] Failed to read rank data for file ${file}:`, e);
 				}
