@@ -22,18 +22,7 @@ class Rank {
 						global: data.voice?.count ?? 0,
 						month: 0
 					},
-					startedAt: data.voice?.startedAt ?? null,
-					stream: {
-						time: {
-							global: data.voice?.stream?.time ?? 0,
-							month: 0
-						},
-						count: {
-							global: data.voice?.stream?.count ?? 0,
-							month: 0
-						},
-						startedAt: data.voice?.stream?.startedAt ?? null
-					}
+					startedAt: data.voice?.startedAt ?? null
 				}
 			};
 		},
@@ -117,7 +106,7 @@ class Rank {
 		for (const file of fs.readdirSync(guildPath)) {
 			if (![".DS_Store"].includes(file)) {
 				try {
-					const rank = await Rank.get(guildId, file.replace(".json", ""));
+					const rank = await Rank.get(logger, settings, guildId, file.replace(".json", ""));
 
 					if (rank && !settings.application.commands.rank.ignored.includes(rank.memberId)) {
 						leaderboard.global.push({
@@ -254,8 +243,8 @@ class Rank {
 
 	get points() {
 		return {
-			global: this.settings.application.commands.rank.points.messages * this.messages.global + this.settings.application.commands.rank.points.voice * this.voice.time.global + this.settings.application.commands.rank.points.stream * this.voice.stream.time.global,
-			month: this.settings.application.commands.rank.points.messages * this.messages.month + this.settings.application.commands.rank.points.voice * this.voice.time.month + this.settings.application.commands.rank.points.stream * this.voice.stream.time.month
+			global: this.settings.application.commands.rank.points.messages * this.messages.global + this.settings.application.commands.rank.points.voice * this.voice.time.global,
+			month: this.settings.application.commands.rank.points.messages * this.messages.month + this.settings.application.commands.rank.points.voice * this.voice.time.month
 		};
 	};
 
@@ -294,7 +283,7 @@ class Rank {
 	};
 
 	async description() {
-		return `## <@${this.memberId}>\n### Ranks\n- Global: ${Rank.getRankText((await this.rank()).global)} (${Math.ceil(this.points.global)} points)\n- Month: ${Rank.getRankText((await this.rank()).month)} (${Math.ceil(this.points.month)} points)\n### Stats\n- Messages sent: ${this.messages.global} (${this.messages.month} this month)\n- Time spent in voice channels: ${displayTime(this.voice.time.global)} (${displayTime(this.voice.time.month)} this month)\n- Time spent streaming: ${displayTime(this.voice.stream.time.global)} (${displayTime(this.voice.stream.time.month)} this month)`;
+		return `## <@${this.memberId}>\n### Ranks\n- Global: ${Rank.getRankText((await this.rank()).global)} (${Math.ceil(this.points.global)} points)\n- Month: ${Rank.getRankText((await this.rank()).month)} (${Math.ceil(this.points.month)} points)\n### Stats\n- Messages sent: ${this.messages.global} (${this.messages.month} this month)\n- Time spent in voice channels: ${displayTime(this.voice.time.global)} (${displayTime(this.voice.time.month)} this month)`;
 	};
 
 	async rank() {
@@ -306,8 +295,9 @@ class Rank {
 	};
 
 	async save() {
-		/* const rankSettings = this.settings.application.commands.rank(this.guildId);
-		
+		const rankSettings = this.settings.application.commands.rank;
+
+		/*
 		const roles = [];
 		for (const role in rankSettings.roles) {
 			if (rankSettings?.roles[role] <= this.points.global) roles.push(role);
@@ -322,7 +312,6 @@ class Rank {
 					log(`[Rank] Removed role ${roleId}.`);
 				} catch (e) {
 					log.error(`[Rank] Failed to remove role "${roleId}": ${e}.`);
-					// Add stack
 				}
 			}
 		}
@@ -347,24 +336,23 @@ class Rank {
 					});
 				} catch (e) {
 					log.error(`Failed to add role "${roleId}": ${e}.`);
-					// Add stack
 				}
 			}
 		}
 		
-		this.roles = roles; */
-		/*}
-			
-		const memberPath = path.join(this.settings.paths.rank(this.guildId), this.memberId + ".json");
-			
-		if(!fs.existsSync(path.dirname(memberPath))) fs.mkdirSync(path.dirname(memberPath), { recursive: true });
+		this.roles = roles;
+		}*/
+
+		const memberPath = path.join(this.settings.paths.rank(this.guildId), memberId + ".json");
+
+		if (!fs.existsSync(path.dirname(memberPath))) fs.mkdirSync(path.dirname(memberPath), { recursive: true });
 		fs.writeFileSync(memberPath, JSON.stringify({
-		version: "3",
-		lastUpdate: this.lastUpdate.getTime(),
-		messages: this.messages,
-		roles: this.roles,
-		voice: this.voice
-		}), "utf-8"); */
+			version: "3",
+			lastUpdate: this.lastUpdate.getTime(),
+			messages: this.messages,
+			roles: this.roles,
+			voice: this.voice
+		}), "utf-8");
 	}
 };
 
