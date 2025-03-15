@@ -268,20 +268,6 @@ class Rank {
 		await this.save();
 	};
 
-	async startedStreaming() {
-		this.voice.stream.startedAt = Date.now();
-		this.voice.stream.count.global++;
-		this.voice.stream.count.month++;
-		await this.save();
-	};
-
-	async stoppedStreaming() {
-		this.voice.stream.time.global += Math.floor((Date.now() - this.voice.stream.startedAt) / 1000);
-		this.voice.stream.time.month += Math.floor((Date.now() - this.voice.stream.startedAt) / 1000);
-		this.voice.stream.startedAt = null;
-		await this.save();
-	};
-
 	async description() {
 		return `## <@${this.memberId}>\n### Ranks\n- Global: ${Rank.getRankText((await this.rank()).global)} (${Math.ceil(this.points.global)} points)\n- Month: ${Rank.getRankText((await this.rank()).month)} (${Math.ceil(this.points.month)} points)\n### Stats\n- Messages sent: ${this.messages.global} (${this.messages.month} this month)\n- Time spent in voice channels: ${displayTime(this.voice.time.global)} (${displayTime(this.voice.time.month)} this month)`;
 	};
@@ -343,7 +329,7 @@ class Rank {
 		this.roles = roles;
 		}*/
 
-		const memberPath = path.join(this.settings.paths.rank(this.guildId), memberId + ".json");
+		const memberPath = path.join(this.settings.paths.rank(this.guildId), this.memberId + ".json");
 
 		if (!fs.existsSync(path.dirname(memberPath))) fs.mkdirSync(path.dirname(memberPath), { recursive: true });
 		fs.writeFileSync(memberPath, JSON.stringify({
