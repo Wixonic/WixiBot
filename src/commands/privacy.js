@@ -21,8 +21,7 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const privacyPath = path.join(__dirname, "..", "settings", bot.application.id, "privacy.md");
-		const privacyMessage = fs.existsSync(privacyPath) ? fs.readFileSync(privacyPath, "utf-8") : null;
+		const privacyMessage = fs.existsSync(bot.settings.paths.markdown.privacy) ? fs.readFileSync(bot.settings.paths.markdown.privacy, "utf-8") : null;
 
 		if (privacyMessage) await interaction.followUp(privacyMessage);
 		else logger.error("Privacy file missing");

@@ -25,8 +25,7 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const ticketPath = path.join(__dirname, "..", "settings", bot.application.id, "ticket.md");
-		const ticketMessage = fs.existsSync(ticketPath) ? fs.readFileSync(ticketPath, "utf-8") : null;
+		const ticketMessage = fs.existsSync(bot.settings.paths.markdown.ticket) ? fs.readFileSync(bot.settings.paths.markdown.ticket, "utf-8") : null;
 
 		if (ticketMessage) {
 			const channel = await bot.channels.fetch(bot.settings.application.commands.ticket.channel);

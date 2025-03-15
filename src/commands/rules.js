@@ -25,8 +25,7 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const rulesPath = path.join(__dirname, "..", "settings", bot.application.id, "rules.md");
-		const rulesMessage = fs.existsSync(rulesPath) ? fs.readFileSync(rulesPath, "utf-8") : null;
+		const rulesMessage = fs.existsSync(bot.settings.paths.markdown.rules) ? fs.readFileSync(bot.settings.paths.markdown.rules, "utf-8") : null;
 
 		if (rulesMessage) {
 			const channel = await bot.channels.fetch(bot.settings.application.commands.rules.channel);

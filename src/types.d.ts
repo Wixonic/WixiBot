@@ -22,7 +22,13 @@ export interface CommandsSettings {
 
 export interface PathsSettings {
 	cache: string;
-	rank: (guildId: string) => string
+	markdown: {
+		help: string;
+		privacy: string;
+		rules: string;
+		ticket: string;
+	};
+	rank: (guildId: string) => string;
 };
 
 export interface DiscordApplicationSecretsSettings {
