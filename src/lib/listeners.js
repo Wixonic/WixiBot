@@ -27,7 +27,13 @@ class ListenerHandler {
 
 		for (const file of files) {
 			const listener = require(path.join(listenersPath, file));
-			if (typeof listener.event !== "string" || typeof listener.run !== "function") this.logger.warn("Invalid listener:", file);
+
+			if (!listener) {
+				this.logger.warn("Invalid listener at", file);
+				continue;
+			} else if (typeof listener.name != "string") listener.name = file.slice(0, -3);
+
+			if (typeof listener.event !== "string" || typeof listener.run !== "function") this.logger.warn("Invalid listener:", listener.name);
 			else {
 				bot.on(listener.event, (...args) => listener.run(bot, {
 					debug: (...any) => this.logger.debug(`[${listener.name}]`, ...any),
