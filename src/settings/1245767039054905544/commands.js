@@ -8,9 +8,8 @@ const commandsSettings = {
 			"1020454688467980308" // wixonic
 		],
 		points: {
-			messages: 3,
-			voice: 2 / 60,
-			stream: 1 / 60
+			messages: 5,
+			voice: 2 / 60
 		},
 		roles: {}
 	},
