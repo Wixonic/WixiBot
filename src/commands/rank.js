@@ -1,13 +1,13 @@
 const { ApplicationCommandType, ApplicationCommandOptionType, InteractionContextType, MessageFlags } = require("discord.js");
 
 const Rank = require("../lib/rank.js");
-const Settings = require("../lib/settings.js");
 
 /**
  * @type {import("../types.d.ts").CommandInfo}
  */
 const info = {
 	name: "Rank",
+	mode: "guild",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "rank",
@@ -28,7 +28,7 @@ const info = {
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 */
-	run: async (bot, logger, interaction) => {
+	run: async (logger, bot, interaction) => {
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});
@@ -39,8 +39,8 @@ const info = {
 		const targetUser = interaction.options.getUser("user") ?? interaction.user;
 		if (targetUser.bot) return await interaction.followUp("Ranks are disabled for bots.");
 
-		const userRank = await Rank.get(logger, bot.settings, interaction.guild.id, targetUser.id);
-		await interaction.followUp(await userRank.description());
+		const userRank = Rank.get(logger, bot.settings, targetUser.id);
+		await interaction.followUp(userRank.description);
 	}
 };
 

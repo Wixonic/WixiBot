@@ -5,6 +5,7 @@ const { ApplicationCommandType, ApplicationCommandOptionType, ChannelType, Inter
  */
 const info = {
 	name: "Message As",
+	mode: "global",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "message-as",
@@ -35,7 +36,7 @@ const info = {
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 */
-	run: async (bot, logger, interaction) => {
+	run: async (logger, bot, interaction) => {
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});

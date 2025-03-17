@@ -13,6 +13,7 @@ const pathsSettings = {
 		rules: path.join(__dirname, "..", "rules.md"),
 		ticket: path.join(__dirname, "..", "ticket.md")
 	},
+	leaderboard: (guildId) => path.join(secrets.paths.root, "ranks", "leaderboards", guildId + ".json"),
 	rank: (guildId) => path.join(secrets.paths.root, "ranks", guildId)
 };
 

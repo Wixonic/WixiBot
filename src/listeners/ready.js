@@ -11,13 +11,13 @@ const listener = {
 	 * @param {import("@wixonic/logger").Logger} logger
 	 * @param {import("discord.js").Client} client
 	 */
-	run: (bot, logger, client) => {
+	run: (logger, bot, client) => {
 		logger.info("Connected as:", client.user.displayName);
 
-		const package = require("../package.json");
+		const packageInfo = require("../package.json");
 
 		bot.user.setActivity({
-			name: `/help - ${package.displayName} v${package.version}`,
+			name: `/help - ${packageInfo.displayName} v${packageInfo.version}`,
 			type: ActivityType.Custom
 		});
 	}

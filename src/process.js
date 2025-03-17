@@ -46,7 +46,7 @@ const publish = async (logger, applicationId) => {
 	const commandHandler = new CommandHandler(logger);
 	commandHandler.loadCommands();
 
-	await commandHandler.deployCommands(applicationId, settings.application.token);
+	await commandHandler.deployCommands(applicationId, settings.application.token, settings.application.guildId);
 	logger.info("Successfully published.");
 
 	process.exit(0);

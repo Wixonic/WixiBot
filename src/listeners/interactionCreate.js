@@ -12,7 +12,7 @@ const listener = {
 	/**
 	 * @param {import("discord.js").Interaction} interaction
 	 */
-	run: async (bot, logger, interaction) => {
+	run: async (logger, bot, interaction) => {
 		if (interaction.isCommand()) {
 			for (const command of CommandHandler.commands) {
 				const commandLogger = {
@@ -25,7 +25,7 @@ const listener = {
 				if (command.deploy.type == interaction.commandType && command.deploy.name == interaction.commandName) {
 					try {
 						commandLogger.info(`Launched by "${(interaction.member ?? interaction.user).displayName}" (${(interaction.member ?? interaction.user).id})`);
-						await command.run(bot, commandLogger, interaction);
+						await command.run(commandLogger, bot, interaction);
 						commandLogger.debug("Finished");
 						return;
 					} catch (e) {

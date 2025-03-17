@@ -1,12 +1,12 @@
 const { ApplicationCommandType, ButtonStyle, ComponentType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const fs = require("fs");
-const path = require("path");
 
 /**
  * @type {import("../types.d.ts").CommandInfo}
  */
 const info = {
 	name: "Ticket Prompt",
+	mode: "global",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "ticket",
@@ -20,7 +20,7 @@ const info = {
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 */
-	run: async (bot, logger, interaction) => {
+	run: async (logger, bot, interaction) => {
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});

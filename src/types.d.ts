@@ -1,13 +1,17 @@
 export interface ApplicationSettings {
 	clientId: string;
-	clientSecret: SecretsDiscordClientSettings["secret"];
+	clientSecret: DiscordApplicationSecretsSettings["secret"];
 	publicKey: string;
-	token: SecretsDiscordClientSettings["token"];
+	token: DiscordApplicationSecretsSettings["token"];
+
+	guildId: string;
+
 	commands: CommandsSettings;
 };
 
 export interface CommandsSettings {
 	rank: {
+		bestRole: string;
 		channel: string;
 		ignored: string[];
 		points: {
@@ -15,9 +19,7 @@ export interface CommandsSettings {
 			voice: number;
 			stream: number;
 		};
-		roles: {
-
-		};
+		roles: { [id: string]: number };
 	};
 	ticket: {
 		channel: string;
@@ -35,6 +37,7 @@ export interface PathsSettings {
 		rules: string;
 		ticket: string;
 	};
+	leaderboard: (guildId: string) => string;
 	rank: (guildId: string) => string;
 };
 
@@ -78,6 +81,19 @@ export interface MainSettings {
 };
 
 
+export interface LeaderboardUser {
+	id: string;
+	points: number;
+};
+
+export interface Leaderboard {
+	global: LeaderboardUser[];
+	month: LeaderboardUser[];
+	updatedAt: number;
+	firstOfTheMonth: LeaderboardUser | null;
+};
+
+
 export type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
 export type RequestResponseType = "headers" | "json" | "raw" | "text";
 
@@ -102,18 +118,25 @@ export interface CommandOptions {
 export interface CommandInfo {
 	deploy: import("discord.js").APIApplicationCommand;
 	name: string;
-	run: (bot: import("./lib/bot.js"), logger: import("@wixonic/logger").Logger, ...any: any[]) => Promise<void>;
+	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), ...any: any[]) => Promise<void>;
 };
 
 
 export interface ListenerInfo {
 	id: string;
 	name: string;
-	run: (bot: import("./lib/bot.js"), logger: import("@wixonic/logger").Logger, ...any: any[]) => Promise<void>;
+	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), ...any: any[]) => Promise<void>;
 };
 
 
 export interface HandlerInfo {
 	path: string;
 	handlers: Record<string, (logger: import("@wixonic/logger").Logger, settings: MainSettings, req: Express.Request, res: Express.Response) => void>
+};
+
+
+export interface CronInfo {
+	name: string;
+	condition: (minutes: number, now: Date) => boolean;
+	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), minutes: number, now: Date) => Promise<void>;
 };

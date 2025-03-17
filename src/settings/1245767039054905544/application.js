@@ -11,6 +11,8 @@ const applicationSettings = {
 	token: secrets.discord.application.token,
 	webhook: secrets.discord.webhook,
 
+	guildId: "1243943943779909652",
+
 	commands
 };
 

@@ -78,22 +78,44 @@ class CommandHandler {
 	 * @param {string} applicationId
 	 * @param {string} token
 	 */
-	async deployCommands(applicationId, token) {
+	async deployCommands(applicationId, token, guildId) {
 		if (!token) this.logger.error("Missing bot token");
 
 		const rest = new REST({ version: "10" }).setToken(token);
 
 		const deploys = [];
-		for (const command of CommandHandler.commands) deploys.push(command.deploy);
+		const guildDeploys = [];
+
+		for (const command of CommandHandler.commands) {
+			switch (command.mode) {
+				case "global":
+					deploys.push(command.deploy);
+					break;
+
+				case "guild":
+					guildDeploys.push(command.deploy);
+					break;
+			}
+		}
 
 		try {
-			this.logger.info(`Deploying ${deploys.length} commands...`);
+			this.logger.info(`Deploying ${deploys.length} global commands...`);
 			await rest.put(Routes.applicationCommands(applicationId), {
 				body: deploys
 			});
-			this.logger.info("Commands successfully deployed");
+			this.logger.info("Global commands successfully deployed");
 		} catch (e) {
-			this.logger.error("Failed to deploy commands:", e);
+			this.logger.error("Failed to deploy global commands:", e);
+		}
+
+		try {
+			this.logger.info(`Deploying ${guildDeploys.length} guild commands...`);
+			await rest.put(Routes.applicationGuildCommands(applicationId, guildId), {
+				body: guildDeploys
+			});
+			this.logger.info("Guild commands successfully deployed");
+		} catch (e) {
+			this.logger.error("Failed to deploy guild commands:", e);
 		}
 	};
 };

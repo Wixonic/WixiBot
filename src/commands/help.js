@@ -7,6 +7,7 @@ const path = require("path");
  */
 const info = {
 	name: "Help",
+	mode: "global",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "help",
@@ -16,7 +17,7 @@ const info = {
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 */
-	run: async (bot, logger, interaction) => {
+	run: async (logger, bot, interaction) => {
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});

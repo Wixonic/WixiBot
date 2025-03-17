@@ -2,6 +2,7 @@ const { Client } = require("discord.js");
 const { colors } = require("@wixonic/logger");
 
 const CommandHandler = require("./commands.js");
+const CronHandler = require("./crons.js");
 const ListenerHandler = require("./listeners.js");
 const Server = require("./server.js");
 
@@ -49,6 +50,7 @@ class Bot extends Client {
 		this.settings = settings;
 
 		this.commandHandler = new CommandHandler(logger);
+		this.cronHandler = new CronHandler(logger);
 		this.listenerHandler = new ListenerHandler(logger);
 		this.server = new Server(logger, settings);
 
@@ -60,7 +62,7 @@ class Bot extends Client {
 					if (reason != "Error: --restart--") this.logger.warn("Destroying... | Reason:", reason ?? "Unknown", "| Code:", code ?? "None");
 
 					try {
-						await this.destroy();
+						await this.destroy(code);
 						this.logger.debug("Destroyed.");
 					} catch (e) {
 						this.logger.error("Failed to exit:", e);
@@ -80,21 +82,26 @@ class Bot extends Client {
 			await super.login(token);
 			this.logger.info("Successfully logged in");
 
-			await this.server.init(settings);
-
 			this.commandHandler.loadCommands(this.application.id);
+			this.cronHandler.loadCrons();
 			this.listenerHandler.loadListeners(this);
+
+			this.cronHandler.init(this);
+			await this.server.init(settings);
 		} catch (e) {
 			this.logger.error("Failed to login:", e);
 		}
 	};
 
-	async destroy() {
+	async destroy(code = 0) {
 		this.listenerHandler.destroy(this);
+		this.cronHandler.destroy();
 		await this.server.destroy();
+
 		this.emit("destroy");
 		await super.destroy();
-		process.exit(1);
+
+		process.exit(typeof code == "number" ? code : 1);
 	};
 };
 
