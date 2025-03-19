@@ -18,10 +18,6 @@ class Rank {
 						global: data.voice?.time ?? 0,
 						month: 0
 					},
-					count: {
-						global: data.voice?.count ?? 0,
-						month: 0
-					},
 					startedAt: data.voice?.startedAt ?? null
 				}
 			};
@@ -41,14 +37,8 @@ class Rank {
 					last: null
 				},
 				voice: {
-					time: {
-						global: 0,
-						month: 0
-					},
-					count: {
-						global: 0,
-						month: 0
-					},
+					global: 0,
+					month: 0,
 					startedAt: null
 				}
 			};
@@ -202,7 +192,16 @@ class Rank {
 	 * @param {string} memberId
 	 */
 	constructor(logger, settings, memberId, data) {
-		this.logger = logger;
+		/**
+		 * @type {import("@wixonic/logger").Logger}
+		 */
+		this.logger = {
+			debug: (...any) => logger.debug(`[Rank ${memberId}]`, ...any),
+			error: (...any) => logger.error(`[Rank ${memberId}]`, ...any),
+			info: (...any) => logger.info(`[Rank ${memberId}]`, ...any),
+			warn: (...any) => logger.warn(`[Rank ${memberId}]`, ...any)
+		};
+
 		this.settings = settings;
 
 		if (data) {
@@ -226,10 +225,7 @@ class Rank {
 		} else {
 			this.memberId = memberId;
 
-			this.firstOfTheMonth = {
-				count: 0,
-				last: 0
-			};
+			this.firstOfTheMonth = [];
 			this.messages = {
 				global: 0,
 				month: 0
@@ -241,24 +237,9 @@ class Rank {
 				last: 0
 			};
 			this.voice = {
-				time: {
-					global: 0,
-					month: 0
-				},
-				count: {
-					global: 0,
-					month: 0
-				},
-				stream: {
-					time: {
-						global: 0,
-						month: 0
-					},
-					count: {
-						global: 0,
-						month: 0
-					}
-				}
+				global: 0,
+				month: 0,
+				startedAt: null
 			};
 
 			this.save();
@@ -267,34 +248,38 @@ class Rank {
 
 	get points() {
 		return {
-			global: this.settings.application.commands.rank.points.messages * this.messages.global + this.settings.application.commands.rank.points.voice * this.voice.time.global,
-			month: this.settings.application.commands.rank.points.messages * this.messages.month + this.settings.application.commands.rank.points.voice * this.voice.time.month
+			global: this.settings.application.commands.rank.points.messages * this.messages.global + this.settings.application.commands.rank.points.voice * this.voice.global,
+			month: this.settings.application.commands.rank.points.messages * this.messages.month + this.settings.application.commands.rank.points.voice * this.voice.month
 		};
 	};
 
 	async addMessage() {
 		this.messages.global++;
 		this.messages.month++;
+		this.logger.debug("Message added");
 		await this.save();
 	};
 
-	async joinedVoice() {
+	async voiceStart() {
+		if (this.voice.startedAt) await this.voiceStop();
 		this.voice.startedAt = Date.now();
-		this.voice.count.global++;
-		this.voice.count.month++;
+		this.logger.debug("Started to add voice time");
 		await this.save();
 	};
 
-	async leftVoice() {
-		this.voice.time.global += Math.floor((Date.now() - this.voice.startedAt) / 1000);
-		this.voice.time.month += Math.floor((Date.now() - this.voice.startedAt) / 1000);
-		this.voice.startedAt = null;
-		await this.save();
+	async voiceStop() {
+		if (this.voice.startedAt) {
+			this.voice.global += Math.ceil((Date.now() - this.voice.startedAt) / 1000);
+			this.voice.month += Math.ceil((Date.now() - this.voice.startedAt) / 1000);
+			this.voice.startedAt = null;
+			this.logger.debug("Voice time added");
+			await this.save();
+		}
 	};
 
 	get description() {
 		const rank = this.rank;
-		return `## <@${this.memberId}>\n### Ranks\n- Global: ${Rank.getRankText(rank.global)} (${Math.ceil(this.points.global)} points)\n- Month: ${Rank.getRankText(rank.month)} (${Math.ceil(this.points.month)} points)\n-# Last rank update: <t:${Math.floor(rank.updatedAt / 1000)}:R>\n### Stats\n- Messages sent: ${this.messages.global} (${this.messages.month} this month)\n- Time spent in voice channels: ${displayTime(this.voice.time.global)} (${displayTime(this.voice.time.month)} this month)`;
+		return `## <@${this.memberId}>\n### Ranks\n- Global: ${Rank.getRankText(rank.global)} (${Math.ceil(this.points.global)} points)\n- Month: ${Rank.getRankText(rank.month)} (${Math.ceil(this.points.month)} points)\n-# Last rank update: <t:${Math.floor(rank.updatedAt / 1000)}:R>\n### Stats\n- Messages sent: ${this.messages.global} (${this.messages.month} this month)\n- Time spent in voice channels: ${displayTime(this.voice.global)} (${displayTime(this.voice.month)} this month)`;
 	};
 
 	get rank() {
