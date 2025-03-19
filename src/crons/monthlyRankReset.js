@@ -24,15 +24,15 @@ const cron = {
 					if (channel && channel.isSendable()) {
 						try {
 							await channel.send({
-								content: `# New First of the Month winner!\n<@${previousLeaderboard.firstOfTheMonth.id}> was first of the monthly leaderboard and got the <@&${bot.settings.application.commands.rank.firstOfTheMonthRole}> role!\n\n**Send some love to <@${previousLeaderboard.firstOfTheMonth.id}> in <#${bot.settings.application.commands.rank.defaultTextChannel}>!**\n-# <@${previousLeaderboard.firstOfTheMonth.id}> won with ${previousLeaderboard.firstOfTheMonth.points.toFixed(2)} points this month.`,
+								content: `# New <@&${bot.settings.application.commands.rank.firstOfTheMonthRole}>!\n<@${previousLeaderboard.firstOfTheMonth.id}> was first of the monthly leaderboard and got the <@&${bot.settings.application.commands.rank.firstOfTheMonthRole}> role!\n\n**Send some love to <@${previousLeaderboard.firstOfTheMonth.id}> in <#${bot.settings.application.commands.rank.defaultTextChannel}>!**\n-# <@${previousLeaderboard.firstOfTheMonth.id}> won with ${previousLeaderboard.firstOfTheMonth.points.toFixed(2)} points this month.`,
 								allowedMentions: {
 									users: [previousLeaderboard.firstOfTheMonth.id]
 								}
 							});
 						} catch (e) {
-							logger.warn("Failed to ping new First of the Month:", e);
+							logger.warn("Failed to ping new Elite of the Month:", e);
 						}
-					} else logger.error("Failed to ping new First of the Month: invalid channel");
+					} else logger.error("Failed to ping new Elite of the Month: invalid channel");
 				} catch (e) {
 					logger.error(`Failed to add ${role.name} (${role.id}):`, e);
 				}

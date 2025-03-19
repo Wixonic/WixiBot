@@ -26,9 +26,9 @@ const cron = {
 							}
 						});
 					} catch (e) {
-						logger.warn("Failed to ping new First of the Month:", e);
+						logger.warn("Failed to ping new Elite of the Month:", e);
 					}
-				} else logger.error("Failed to ping new First of the Month: invalid channel");
+				} else logger.error("Failed to ping new Elite of the Month: invalid channel");
 			}
 		}
 	}

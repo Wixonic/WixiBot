@@ -1,0 +1,1 @@
+Check our Privacy Policy [here](https://wixonic.fr/privacy/).

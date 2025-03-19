@@ -28,7 +28,7 @@
 		"@wixonic/logger": "1.1.0"
 	},
 	"devDependencies": {
-		"@types/node": "20.17.22"
+		"@types/node": "20.17.24"
 	},
 	"typings": "./types.d.ts"
 }

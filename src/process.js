@@ -15,23 +15,25 @@ log.displayDate = false;
 const init = async (logger, applicationId) => {
 	const settings = Settings.get(applicationId);
 
-	const bot = new Bot(logger, {
-		intents: [
-			GatewayIntentBits.Guilds,
-			GatewayIntentBits.GuildModeration,
-			GatewayIntentBits.GuildVoiceStates,
-			GatewayIntentBits.GuildPresences,
-			GatewayIntentBits.GuildMessages,
-			GatewayIntentBits.GuildMessageReactions,
-			GatewayIntentBits.DirectMessages,
-			GatewayIntentBits.DirectMessageReactions,
-			GatewayIntentBits.MessageContent,
-			GatewayIntentBits.GuildScheduledEvents
-		],
-		webhook: settings.application.webhook
-	}, settings);
+	if (settings.active) {
+		const bot = new Bot(logger, {
+			intents: [
+				GatewayIntentBits.Guilds,
+				GatewayIntentBits.GuildModeration,
+				GatewayIntentBits.GuildVoiceStates,
+				GatewayIntentBits.GuildPresences,
+				GatewayIntentBits.GuildMessages,
+				GatewayIntentBits.GuildMessageReactions,
+				GatewayIntentBits.DirectMessages,
+				GatewayIntentBits.DirectMessageReactions,
+				GatewayIntentBits.MessageContent,
+				GatewayIntentBits.GuildScheduledEvents
+			],
+			webhook: settings.application.webhook
+		}, settings);
 
-	await bot.login(settings.application.token, settings);
+		await bot.login(settings.application.token, settings);
+	} else logger.warn("Application disabled.");
 };
 
 
