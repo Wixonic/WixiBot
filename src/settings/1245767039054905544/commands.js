@@ -3,8 +3,8 @@
  */
 const commandsSettings = {
 	rank: {
-		bestRole: "1351231320721723476",
 		channel: "1332713470193434635",
+		defaultTextChannel: "1243943943779909655",
 		ignored: [
 			"1020454688467980308" // wixonic
 		],
@@ -12,6 +12,7 @@ const commandsSettings = {
 			messages: 5,
 			voice: 3 / 60
 		},
+		firstOfTheMonthRole: "1351231320721723476",
 		roles: {
 			"1351231617045233704": 10000,
 			"1351231916560355523": 5000,

@@ -132,18 +132,15 @@ class Rank {
 						const rank = this.get(logger, settings, file.replace(".json", ""));
 
 						if (rank) {
-							if (settings.application.commands.rank.ignored.includes(rank.memberId)) logger.debug(`User "${rank.memberId}" ignored`);
-							else {
-								leaderboard.global.push({
-									id: rank.memberId,
-									points: rank.points.global
-								});
+							leaderboard.global.push({
+								id: rank.memberId,
+								points: rank.points.global
+							});
 
-								leaderboard.month.push({
-									id: rank.memberId,
-									points: rank.points.month
-								});
-							}
+							leaderboard.month.push({
+								id: rank.memberId,
+								points: rank.points.month
+							});
 						} else logger.warn("[Rank]", `Failed to read rank data for file ${file}:`, e);
 					} catch (e) {
 						logger.error("[Rank]", `Failed to read rank data for file ${file}:`, e);
@@ -154,7 +151,14 @@ class Rank {
 			leaderboard.global.sort((rankA, rankB) => rankB.points - rankA.points);
 			leaderboard.month.sort((rankA, rankB) => rankB.points - rankA.points);
 
-			leaderboard.firstOfTheMonth = leaderboard.month[0] && leaderboard.month[0].points > 0 ? leaderboard.month[0] : null;
+			for (const user of leaderboard.month) {
+				if (user.points > 0) {
+					if (!settings.application.commands.rank.ignored.includes(user.memberId) && user.points > 0) {
+						leaderboard.firstOfTheMonth = user;
+						break;
+					} else logger.debug(`User "${user.memberId}" ignored`);
+				}
+			}
 		}
 
 		if (!fs.existsSync(path.dirname(leaderboardPath))) fs.mkdirSync(path.dirname(leaderboardPath), { recursive: true });
@@ -290,14 +294,15 @@ class Rank {
 
 	get description() {
 		const rank = this.rank;
-		return `## <@${this.memberId}>\n### Ranks\n- Global: ${Rank.getRankText(rank.global)} (${Math.ceil(this.points.global)} points)\n- Month: ${Rank.getRankText(rank.month)} (${Math.ceil(this.points.month)} points)\n### Stats\n- Messages sent: ${this.messages.global} (${this.messages.month} this month)\n- Time spent in voice channels: ${displayTime(this.voice.time.global)} (${displayTime(this.voice.time.month)} this month)`;
+		return `## <@${this.memberId}>\n### Ranks\n- Global: ${Rank.getRankText(rank.global)} (${Math.ceil(this.points.global)} points)\n- Month: ${Rank.getRankText(rank.month)} (${Math.ceil(this.points.month)} points)\n-# Last rank update: <t:${Math.floor(rank.updatedAt / 1000)}:R>\n### Stats\n- Messages sent: ${this.messages.global} (${this.messages.month} this month)\n- Time spent in voice channels: ${displayTime(this.voice.time.global)} (${displayTime(this.voice.time.month)} this month)`;
 	};
 
 	get rank() {
 		const leaderboard = Rank.getLeaderboard(this.logger, this.settings);
 		return {
 			global: leaderboard.global.findIndex((rank) => rank.id == this.memberId),
-			month: leaderboard.month.findIndex((rank) => rank.id == this.memberId)
+			month: leaderboard.month.findIndex((rank) => rank.id == this.memberId),
+			updatedAt: leaderboard.updatedAt
 		};
 	};
 

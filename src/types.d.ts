@@ -11,14 +11,15 @@ export interface ApplicationSettings {
 
 export interface CommandsSettings {
 	rank: {
-		bestRole: string;
 		channel: string;
+		defaultTextChannel: string;
 		ignored: string[];
 		points: {
 			messages: number;
 			voice: number;
 			stream: number;
 		};
+		firstOfTheMonthRole: string;
 		roles: { [id: string]: number };
 	};
 	ticket: {
