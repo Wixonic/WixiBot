@@ -279,11 +279,11 @@ class Rank {
 
 	get description() {
 		const rank = this.rank;
-		return `## <@${this.memberId}>\n### Ranks\n- Global: ${Rank.getRankText(rank.global)} (${Math.ceil(this.points.global)} points)\n- Month: ${Rank.getRankText(rank.month)} (${Math.ceil(this.points.month)} points)\n-# Last rank update: <t:${Math.floor(rank.updatedAt / 1000)}:R>\n### Stats\n- Messages sent: ${this.messages.global} (${this.messages.month} this month)\n- Time spent in voice channels: ${displayTime(this.voice.global)} (${displayTime(this.voice.month)} this month)`;
+		return `## <@${this.memberId}>\n### Ranks\n- Global: ${Rank.getRankText(rank.global)} (${Math.ceil(this.points.global)} points)\n- Monthly: ${Rank.getRankText(rank.month)} (${Math.ceil(this.points.month)} points)\n-# Last updated: <t:${Math.floor(rank.updatedAt / 1000)}:R>\n### Stats\n- Messages sent: ${this.messages.global} (${this.messages.month} this month)\n- Time spent in voice channels: ${displayTime(this.voice.global)} (${displayTime(this.voice.month)} this month)`;
 	};
 
 	get rank() {
-		const leaderboard = Rank.getLeaderboard(this.logger, this.settings);
+		const leaderboard = Rank.getLeaderboard(this.logger, this.bot);
 		return {
 			global: leaderboard.global.findIndex((rank) => rank.id == this.memberId),
 			month: leaderboard.month.findIndex((rank) => rank.id == this.memberId),

@@ -47,8 +47,8 @@ const info = {
 							type: ComponentType.ActionRow,
 							components: [{
 								type: ComponentType.Button,
-								custom_id: "openTicket",
-								label: "Open a ticket",
+								custom_id: "createTicket",
+								label: "Create a ticket",
 								style: ButtonStyle.Primary
 							}]
 						}
