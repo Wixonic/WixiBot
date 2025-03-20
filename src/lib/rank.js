@@ -143,7 +143,7 @@ class Rank {
 
 			for (const user of leaderboard.month) {
 				if (user.points > 0) {
-					if (!settings.application.commands.rank.ignored.includes(user.memberId) && user.points > 0) {
+					if (!bot.settings.application.commands.rank.ignored.includes(user.memberId) && user.points > 0) {
 						leaderboard.firstOfTheMonth = user;
 						break;
 					} else logger.debug(`User "${user.memberId}" ignored`);

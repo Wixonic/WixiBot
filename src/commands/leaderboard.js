@@ -33,7 +33,10 @@ const info = {
 		for (const member of leaderboard.month.slice(0, 10)) monthLeaderboard.push(`- <@${member.id}>: ${Math.ceil(member.points)} points`);
 		for (const member of leaderboard.global.slice(0, 10)) globalLeaderboard.push(`- <@${member.id}>: ${Math.ceil(member.points)} points`);
 
-		await interaction.followUp(`# Leaderboard\n> The first member of each month's leaderboard will receive an unique <@&${bot.settings.application.commands.rank.firstOfTheMonthRole}> role!\n\n## Month Leaderboard\n${monthLeaderboard.join("\n")}\n## Global Leaderboard\n${globalLeaderboard.join("\n")}\n\n-# Last update: <t:${Math.floor(leaderboard.updatedAt / 1000)}:R>`);
+		await interaction.followUp({
+			allowedMentions: {},
+			content: `# Leaderboard\n> The first member of each month's leaderboard will receive an unique <@&${bot.settings.application.commands.rank.firstOfTheMonthRole}> role!\n\n## Month Leaderboard\n${monthLeaderboard.join("\n")}\n## Global Leaderboard\n${globalLeaderboard.join("\n")}\n\n-# Last update: <t:${Math.floor(leaderboard.updatedAt / 1000)}:R>`
+		});
 	}
 };
 

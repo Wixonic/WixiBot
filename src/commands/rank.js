@@ -40,7 +40,10 @@ const info = {
 		if (targetUser.bot) return await interaction.followUp("Ranks are disabled for bots.");
 
 		const userRank = Rank.get(logger, bot, targetUser.id);
-		await interaction.followUp(userRank.description);
+		await interaction.followUp({
+			allowedMentions: {},
+			content: userRank.description
+		});
 	}
 };
 
