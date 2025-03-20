@@ -7,7 +7,7 @@ const secrets = require("./secrets.js");
 const applicationSettings = {
 	clientId: "1179518852846067833",
 	clientSecret: secrets.discord.application.secret,
-	publicKey: "",
+	publicKey: "c4ca4a071987566209192e7bd331276d3cf81faeb61acb0c78a1cc02ff11e562",
 	token: secrets.discord.application.token,
 	webhook: secrets.discord.webhook,
 
