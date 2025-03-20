@@ -11,6 +11,8 @@ const applicationSettings = {
 	token: secrets.discord.application.token,
 	webhook: secrets.discord.webhook,
 
+	adminRole: "1179522523201802290",
+	defaultTextChannel: "1179535918277865614",
 	guildId: "1020663521530351627",
 
 	commands

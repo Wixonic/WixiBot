@@ -82,7 +82,7 @@ class CronHandler {
 
 	destroy() {
 		this.destroyed = true;
-		for (const cron of this.crons) this.logger.debug(`Removed cron: ${cron}`);
+		for (const cron of this.crons) this.logger.debug(`Removed cron: ${cron.name}`);
 		this.crons = [];
 	};
 };

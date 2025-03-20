@@ -9,7 +9,7 @@ const cron = {
 	condition: (minutes, now) => minutes % (60 * 24) == 0 && now.getUTCDate() == 1, // 1st of the month, at 00:00 UTC
 	run: async (logger, bot, minutes, now) => {
 		const guild = await bot.guilds.fetch(bot.settings.application.guildId);
-		const previousLeaderboard = Rank.getLeaderboard(logger, bot.settings);
+		const previousLeaderboard = Rank.getLeaderboard(logger, bot);
 		const role = await guild.roles.fetch(bot.settings.application.commands.rank.firstOfTheMonthRole);
 
 		if (role) {
@@ -39,7 +39,7 @@ const cron = {
 			}
 		}
 
-		await Rank.resetLeaderboard(logger, bot.settings);
+		await Rank.resetLeaderboard(logger, bot);
 	}
 };
 

@@ -25,7 +25,7 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const leaderboard = Rank.getLeaderboard(logger, bot.settings);
+		const leaderboard = Rank.getLeaderboard(logger, bot);
 
 		const monthLeaderboard = [];
 		const globalLeaderboard = [];

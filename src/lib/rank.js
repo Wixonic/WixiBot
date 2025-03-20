@@ -47,21 +47,21 @@ class Rank {
 
 	/**
 	 * @param {import("@wixonic/logger")} logger
-	 * @param {import("../types.d.ts").MainSettings} settings
+	 * @param {import("./bot.js")} bot
 	 * @param {string} memberId
 	 * @returns {Rank}
 	 */
-	static get(logger, settings, memberId) {
-		const memberPath = path.join(settings.paths.rank(settings.application.guildId), memberId + ".json");
+	static get(logger, bot, memberId) {
+		const memberPath = path.join(bot.settings.paths.rank(bot.settings.application.guildId), memberId + ".json");
 
-		if (!fs.existsSync(memberPath)) return new this(logger, settings, memberId);
+		if (!fs.existsSync(memberPath)) return new this(logger, bot, memberId);
 		else {
 			try {
-				return new this(logger, settings, memberId, JSON.parse(fs.readFileSync(memberPath, "utf-8")));
+				return new this(logger, bot, memberId, JSON.parse(fs.readFileSync(memberPath, "utf-8")));
 			} catch (e) {
 				if (e?.stack) logger.warn("[Rank] Failed to read rank data:", e, e.stack.replaceAll("\n", "<br />"));
 				else logger.warn("[Rank] Failed to read rank data:", e);
-				return new this(logger, settings, memberId);
+				return new this(logger, bot, memberId);
 			}
 		}
 	};
@@ -75,10 +75,10 @@ class Rank {
 
 	/**
 	 * @param {import("@wixonic/logger")} logger
-	 * @param {import("../types.d.ts").MainSettings} settings
+	 * @param {import("./bot.js")} bot
 	 * @returns {import("../types.d.ts").Leaderboard}
 	*/
-	static getLeaderboard = (logger, settings) => {
+	static getLeaderboard = (logger, bot) => {
 		let leaderboard = {
 			global: [],
 			month: [],
@@ -86,7 +86,7 @@ class Rank {
 			firstOfTheMonth: null
 		};
 
-		const leaderboardPath = settings.paths.leaderboard(settings.application.guildId);
+		const leaderboardPath = bot.settings.paths.leaderboard(bot.settings.application.guildId);
 		try {
 			leaderboard = JSON.parse(fs.readFileSync(leaderboardPath, "utf-8"));
 		} catch (e) {
@@ -98,12 +98,12 @@ class Rank {
 
 	/**
 	 * @param {import("@wixonic/logger")} logger
-	 * @param {import("../types.d.ts").MainSettings} settings
+	 * @param {import("./bot.js")} bot
 	 * @returns {import("../types.d.ts").Leaderboard}
 	 */
-	static updateLeaderboard(logger, settings) {
-		const guildPath = settings.paths.rank(settings.application.guildId);
-		const leaderboardPath = settings.paths.leaderboard(settings.application.guildId);
+	static updateLeaderboard(logger, bot) {
+		const guildPath = bot.settings.paths.rank(bot.settings.application.guildId);
+		const leaderboardPath = bot.settings.paths.leaderboard(bot.settings.application.guildId);
 
 		/**
 		 * @type {import("../types.d.ts").Leaderboard}
@@ -119,7 +119,7 @@ class Rank {
 			for (const file of fs.readdirSync(guildPath)) {
 				if (![".DS_Store"].includes(file)) {
 					try {
-						const rank = this.get(logger, settings, file.replace(".json", ""));
+						const rank = this.get(logger, bot, file.replace(".json", ""));
 
 						if (rank) {
 							leaderboard.global.push({
@@ -159,17 +159,17 @@ class Rank {
 
 	/**
 	 * @param {import("@wixonic/logger")} logger
-	 * @param {import("../types.d.ts").MainSettings} settings
+	 * @param {import("./bot.js")} bot
 	 * @returns {Promise<import("../types.d.ts").Leaderboard>}
 	 */
-	static async resetLeaderboard(logger, settings) {
-		const guildPath = settings.paths.rank(settings.application.guildId);
+	static async resetLeaderboard(logger, bot) {
+		const guildPath = bot.settings.paths.rank(bot.settings.application.guildId);
 
 		if (fs.existsSync(guildPath)) {
 			for (const file of fs.readdirSync(guildPath)) {
 				if (![".DS_Store"].includes(file)) {
 					try {
-						const rank = this.get(logger, settings, file.replace(".json", ""));
+						const rank = this.get(logger, bot, file.replace(".json", ""));
 
 						rank.messages.month = 0;
 						rank.voice.count.month = 0;
@@ -183,15 +183,15 @@ class Rank {
 			}
 		}
 
-		return this.updateLeaderboard(logger, settings);
+		return this.updateLeaderboard(logger, bot);
 	};
 
 	/**
 	 * @param {import("@wixonic/logger").Logger} logger
-	 * @param {import("../types.d.ts").MainSettings} settings
+	 * @param {import("./bot.js")} bot
 	 * @param {string} memberId
 	 */
-	constructor(logger, settings, memberId, data) {
+	constructor(logger, bot, memberId, data) {
 		/**
 		 * @type {import("@wixonic/logger").Logger}
 		 */
@@ -202,7 +202,7 @@ class Rank {
 			warn: (...any) => logger.warn(`[Rank ${memberId}]`, ...any)
 		};
 
-		this.settings = settings;
+		this.bot = bot;
 
 		if (data) {
 			let converted = false;
@@ -248,8 +248,8 @@ class Rank {
 
 	get points() {
 		return {
-			global: this.settings.application.commands.rank.points.messages * this.messages.global + this.settings.application.commands.rank.points.voice * this.voice.global,
-			month: this.settings.application.commands.rank.points.messages * this.messages.month + this.settings.application.commands.rank.points.voice * this.voice.month
+			global: this.bot.settings.application.commands.rank.points.messages * this.messages.global + this.bot.settings.application.commands.rank.points.voice * this.voice.global,
+			month: this.bot.settings.application.commands.rank.points.messages * this.messages.month + this.bot.settings.application.commands.rank.points.voice * this.voice.month
 		};
 	};
 
@@ -292,55 +292,66 @@ class Rank {
 	};
 
 	async save() {
-		const rankSettings = this.settings.application.commands.rank;
+		const rankSettings = this.bot.settings.application.commands.rank;
 
-		/*
 		const roles = [];
+
 		for (const role in rankSettings.roles) {
 			if (rankSettings?.roles[role] <= this.points.global) roles.push(role);
 		}
-		
-		if (this.roles.values() != roles.values()) { */
-		/* for (const roleId of this.roles) {
-			if (!roles.includes(roleId)) {
-				const member = await getMember(this.guildId, this.memberId);
-				try {
-					await member.roles.remove(roleId);
-					log(`[Rank] Removed role ${roleId}.`);
-				} catch (e) {
-					log.error(`[Rank] Failed to remove role "${roleId}": ${e}.`);
-				}
-			}
-		}
-		
-		for (const roleId of roles) {
-			if (!this.roles.includes(roleId)) {
-				const member = await getMember(this.guildId, this.memberId);
-				try {
-					await member.roles.add(roleId);
-					log(`[Rank] Added role "${roleId}".`);
-		
-					const role = await getRole(this.guildId, roleId);
-		
-					const channel = await getChannel(this.guildId, rankSettings.channel);
-					if (channel) await channel.send({
-						content: `<@${this.memberId}> just unlocked a new rank role!`,
-						embeds: [{
-							title: role.name,
-							description: `Reached ${rankSettings?.roles[role.id] ?? 0} point${(rankSettings?.roles[role.id] ?? 0) == 1 ? "" : "s"}`,
-							color: role.color
-						}]
-					});
-				} catch (e) {
-					log.error(`Failed to add role "${roleId}": ${e}.`);
-				}
-			}
-		}
-		
-		this.roles = roles;
-		}*/
 
-		const memberPath = path.join(this.settings.paths.rank(this.settings.application.guildId), this.memberId + ".json");
+		if (this.roles.values() != roles.values()) {
+			const guild = await this.bot.guilds.fetch(this.bot.settings.application.guildId);
+
+			if (guild) {
+				const member = await guild.members.fetch(this.memberId);
+
+				if (member) {
+					for (const roleId of this.roles) {
+						const role = await guild.roles.fetch(roleId);
+
+						if (!role) this.logger.info(`Removed role "${roleId}" as it doesn't exist anymore.`);
+						else if (!roles.includes(roleId)) {
+							try {
+								await member.roles.remove(role);
+								this.logger.info(`Role removed: "${role.name}" (${role.id})`);
+							} catch (e) {
+								this.logger.error(`Failed to remove role "${role.name}" (${role.id}):`, e);
+							}
+						}
+					}
+
+					for (const roleId of roles) {
+						const role = await guild.roles.fetch(roleId);
+
+						if (!role) this.logger.error(`Failed to add role "${role.id}": Role doesn't exist`);
+						else if (!this.roles.includes(roleId)) {
+							try {
+								const channel = await guild.channels.fetch(rankSettings.channel);
+
+								if (channel) await channel.send({
+									content: `<@${this.memberId}> just unlocked a new rank role!`,
+									embeds: [{
+										title: role.name,
+										description: `Reached ${rankSettings?.roles[role.id] ?? 0} point${(rankSettings?.roles[role.id] ?? 0) == 1 ? "" : "s"}`,
+										color: role.color
+									}]
+								});
+
+								await member.roles.add(role);
+								this.logger.info(`Role added: "${role.name}" (${role.id})`);
+							} catch (e) {
+								this.logger.error(`Failed to add role "${role.name}" (${role.id}):`, e);
+							}
+						}
+					}
+
+					this.roles = roles;
+				} else this.logger.error("Invalid member:", this.memberId);
+			} else this.logger.error("Invalid guild:", this.bot.settings.application.guildId);
+		}
+
+		const memberPath = path.join(this.bot.settings.paths.rank(this.bot.settings.application.guildId), this.memberId + ".json");
 
 		if (!fs.existsSync(path.dirname(memberPath))) fs.mkdirSync(path.dirname(memberPath), { recursive: true });
 		fs.writeFileSync(memberPath, JSON.stringify({

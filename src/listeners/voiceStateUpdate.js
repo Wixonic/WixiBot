@@ -44,7 +44,7 @@ const listener = {
 					 */
 					const checkChannel = async (channel) => {
 						for (const member of channel.members.values()) {
-							const userRank = Rank.get(logger, bot.settings, member.id);
+							const userRank = Rank.get(logger, bot, member.id);
 
 							if (canGetPoint(member, channel)) await userRank.voiceStart();
 							else await userRank.voiceStop();

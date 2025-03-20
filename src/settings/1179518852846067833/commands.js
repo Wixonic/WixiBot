@@ -4,7 +4,6 @@
 const commandsSettings = {
 	rank: {
 		channel: "1333782941095956541",
-		defaultTextChannel: "1179535918277865614",
 		ignored: [
 			"1020454688467980308" // wixonic
 		],
@@ -21,11 +20,14 @@ const commandsSettings = {
 			"1352048580025913435": 1
 		}
 	},
-	ticket: {
-		channel: "1247276648366080144"
+	roles: {
+		channel: "1244017962843897936"
 	},
 	rules: {
 		channel: "1020684346098733138"
+	},
+	ticket: {
+		channel: "1247276648366080144"
 	}
 };
 

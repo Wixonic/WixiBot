@@ -40,7 +40,8 @@ const info = {
 				}
 
 				await channel.send({
-					content: ticketMessage.replace("{{PERMISSIONS}}", rolesText),
+					allowedMentions: {},
+					content: ticketMessage.replace("{{PERMISSIONS}}", rolesText.join(", ")),
 					components: [
 						{
 							type: ComponentType.ActionRow,
@@ -51,8 +52,7 @@ const info = {
 								style: ButtonStyle.Primary
 							}]
 						}
-					],
-					flags: MessageFlags.SuppressNotifications
+					]
 				});
 
 				await interaction.followUp("Ticket prompt updated");

@@ -10,8 +10,8 @@ const cron = {
 	condition: (minutes, now) => minutes % 30 == 0, // Every half hour
 	run: async (logger, bot, minutes, now) => {
 		const guild = await bot.guilds.fetch(bot.settings.application.guildId);
-		const previousLeaderboard = Rank.getLeaderboard(logger, bot.settings);
-		const leaderboard = Rank.updateLeaderboard(logger, bot.settings);
+		const previousLeaderboard = Rank.getLeaderboard(logger, bot);
+		const leaderboard = Rank.updateLeaderboard(logger, bot);
 
 		if (previousLeaderboard.firstOfTheMonth?.id != leaderboard.firstOfTheMonth?.id && leaderboard.firstOfTheMonth?.id) {
 			const channel = await guild.channels.fetch(bot.settings.application.commands.rank.channel);

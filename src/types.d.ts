@@ -4,6 +4,8 @@ export interface ApplicationSettings {
 	publicKey: string;
 	token: DiscordApplicationSecretsSettings["token"];
 
+	adminRole: string;
+	defaultTextChannel: string;
 	guildId: string;
 
 	commands: CommandsSettings;
@@ -12,7 +14,6 @@ export interface ApplicationSettings {
 export interface CommandsSettings {
 	rank: {
 		channel: string;
-		defaultTextChannel: string;
 		ignored: string[];
 		points: {
 			messages: number;
@@ -21,6 +22,9 @@ export interface CommandsSettings {
 		};
 		firstOfTheMonthRole: string;
 		roles: { [id: string]: number };
+	};
+	roles: {
+		channel: string;
 	};
 	ticket: {
 		channel: string;

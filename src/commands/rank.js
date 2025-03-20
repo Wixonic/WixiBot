@@ -39,7 +39,7 @@ const info = {
 		const targetUser = interaction.options.getUser("user") ?? interaction.user;
 		if (targetUser.bot) return await interaction.followUp("Ranks are disabled for bots.");
 
-		const userRank = Rank.get(logger, bot.settings, targetUser.id);
+		const userRank = Rank.get(logger, bot, targetUser.id);
 		await interaction.followUp(userRank.description);
 	}
 };
