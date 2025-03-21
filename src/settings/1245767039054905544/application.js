@@ -14,6 +14,7 @@ const applicationSettings = {
 	adminRole: "1352221761877442564",
 	defaultTextChannel: "1243943943779909655",
 	guildId: "1243943943779909652",
+	moderationChannel: "1243991489575522375",
 
 	commands
 };

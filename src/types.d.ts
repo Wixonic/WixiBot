@@ -7,6 +7,7 @@ export interface ApplicationSettings {
 	adminRole: string;
 	defaultTextChannel: string;
 	guildId: string;
+	moderationChannel: string;
 
 	commands: CommandsSettings;
 };

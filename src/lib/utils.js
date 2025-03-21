@@ -35,6 +35,18 @@ const displayTime = (time) => {
 };
 
 /**
+ * @param {string} hex
+ * @returns {number}
+ */
+const hexToIntColor = (hex) => {
+	try {
+		return parseInt(hex.replace("#", "0x"), 16);
+	} catch {
+		return 0;
+	}
+};
+
+/**
  * @param {number} milliseconds
  * @returns {Promise<void>}
  */
@@ -43,5 +55,6 @@ const wait = (milliseconds) => new Promise((resolve) => setTimeout(() => resolve
 module.exports = {
 	clone,
 	displayTime,
+	hexToIntColor,
 	wait
 };

@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const { displayTime } = require("./utils.js");
+const { displayTime, hexToIntColor } = require("./utils.js");
 
 class Rank {
 	static convert = {
@@ -40,7 +40,8 @@ class Rank {
 					global: 0,
 					month: 0,
 					startedAt: null
-				}
+				},
+				penalty: 0
 			};
 		}
 	};
@@ -59,8 +60,7 @@ class Rank {
 			try {
 				return new this(logger, bot, memberId, JSON.parse(fs.readFileSync(memberPath, "utf-8")));
 			} catch (e) {
-				if (e?.stack) logger.warn("[Rank] Failed to read rank data:", e, e.stack.replaceAll("\n", "<br />"));
-				else logger.warn("[Rank] Failed to read rank data:", e);
+				logger.warn(`[Rank] Error reading rank data:`, e);
 				return new this(logger, bot, memberId);
 			}
 		}
@@ -90,7 +90,7 @@ class Rank {
 		try {
 			leaderboard = JSON.parse(fs.readFileSync(leaderboardPath, "utf-8"));
 		} catch (e) {
-			logger.warn("Failed to read leaderboard:", e);
+			logger.warn("Error reading leaderboard:", e);
 		}
 
 		return leaderboard;
@@ -131,9 +131,9 @@ class Rank {
 								id: rank.memberId,
 								points: rank.points.month
 							});
-						} else logger.warn("[Rank]", `Failed to read rank data for file ${file}:`, e);
+						} else logger.warn(`[Rank] Error reading rank data for file ${file}:`, e);
 					} catch (e) {
-						logger.error("[Rank]", `Failed to read rank data for file ${file}:`, e);
+						logger.error(`[Rank] Error reading rank data for file ${file}:`, e);
 					}
 				}
 			}
@@ -143,10 +143,10 @@ class Rank {
 
 			for (const user of leaderboard.month) {
 				if (user.points > 0) {
-					if (!bot.settings.application.commands.rank.ignored.includes(user.memberId) && user.points > 0) {
+					if (!bot.settings.application.commands.rank.ignored.includes(user.id) && user.points > 0) {
 						leaderboard.firstOfTheMonth = user;
 						break;
-					} else logger.debug(`User "${user.memberId}" ignored`);
+					} else logger.debug(`Ignoring user "${user.id}"`);
 				}
 			}
 		}
@@ -177,7 +177,7 @@ class Rank {
 
 						await rank.save();
 					} catch (e) {
-						logger.error(`[Rank] Failed to read rank data for file ${file}:`, e);
+						logger.error(`[Rank] Error reading rank data for file ${file}:`, e);
 					}
 				}
 			}
@@ -210,7 +210,7 @@ class Rank {
 				if (data.version == null || data.version == "1") data = Rank.convert["1"](data);
 				if (data.version == "2") data = Rank.convert["2"](data);
 				converted = true;
-				this.logger.info(`Converting "${memberId}"'s rank data`);
+				this.logger.info(`Converting rank data for member "${memberId}"`);
 			}
 
 			this.memberId = memberId;
@@ -220,6 +220,7 @@ class Rank {
 			this.roles = data.roles;
 			this.streak = data.streak;
 			this.voice = data.voice;
+			this.penalty = data.penalty;
 
 			if (converted) this.save();
 		} else {
@@ -241,6 +242,7 @@ class Rank {
 				month: 0,
 				startedAt: null
 			};
+			this.penalty = 0;
 
 			this.save();
 		}
@@ -248,22 +250,22 @@ class Rank {
 
 	get points() {
 		return {
-			global: this.bot.settings.application.commands.rank.points.messages * this.messages.global + this.bot.settings.application.commands.rank.points.voice * this.voice.global,
-			month: this.bot.settings.application.commands.rank.points.messages * this.messages.month + this.bot.settings.application.commands.rank.points.voice * this.voice.month
+			global: this.bot.settings.application.commands.rank.points.messages * this.messages.global + this.bot.settings.application.commands.rank.points.voice * this.voice.global - this.penalty,
+			month: this.bot.settings.application.commands.rank.points.messages * this.messages.month + this.bot.settings.application.commands.rank.points.voice * this.voice.month - this.penalty
 		};
 	};
 
 	async addMessage() {
 		this.messages.global++;
 		this.messages.month++;
-		this.logger.debug("Message added");
+		this.logger.debug("Incremented message count");
 		await this.save();
 	};
 
 	async voiceStart() {
 		if (this.voice.startedAt) await this.voiceStop();
 		this.voice.startedAt = Date.now();
-		this.logger.debug("Started to add voice time");
+		this.logger.debug("Started recording voice time");
 		await this.save();
 	};
 
@@ -272,9 +274,49 @@ class Rank {
 			this.voice.global += Math.ceil((Date.now() - this.voice.startedAt) / 1000);
 			this.voice.month += Math.ceil((Date.now() - this.voice.startedAt) / 1000);
 			this.voice.startedAt = null;
-			this.logger.debug("Voice time added");
+			this.logger.debug("Stopped recording voice time");
 			await this.save();
 		}
+	};
+
+	/**
+	 * @param {number} amount
+	 * @param {import("discord.js").GuildMember} by
+	 * @param {string?} reason
+	 */
+	async applyPenalty(amount, by, reason) {
+		this.penalty += amount;
+		this.logger.debug("Applied a penalty of", amount);
+
+		const moderationChannel = await this.bot.channels.fetch(this.bot.settings.application.moderationChannel);
+		if (moderationChannel && moderationChannel.isSendable()) await moderationChannel.send({
+			allowedMentions: {},
+			embeds: [
+				{
+					title: "Rank penalty",
+					color: hexToIntColor("#FF0000"),
+					fields: [{
+						name: "Author",
+						value: `<@${by.id}>`,
+						inline: true
+					}, {
+						name: "Target",
+						value: `<@${this.memberId}>`,
+						inline: true
+					}, {
+						name: "Penalty",
+						value: `${amount} point${Math.abs(amount) == 1 ? "" : "s"}`,
+						inline: true
+					}, {
+						name: "Reason",
+						value: reason ?? "Unknown reason"
+					}]
+				}
+			]
+		});
+		else logger.warn("Invalid moderation channel:", this.bot.settings.application.moderationChannel);
+
+		await this.save();
 	};
 
 	get description() {
@@ -301,22 +343,22 @@ class Rank {
 		}
 
 		if (this.roles.values() != roles.values()) {
-			const guild = await this.bot.guilds.fetch(this.bot.settings.application.guildId);
+			try {
+				const guild = await this.bot.guilds.fetch(this.bot.settings.application.guildId);
 
-			if (guild) {
-				const member = await guild.members.fetch(this.memberId);
+				try {
+					const member = await guild.members.fetch(this.memberId);
 
-				if (member) {
 					for (const roleId of this.roles) {
 						const role = await guild.roles.fetch(roleId);
 
-						if (!role) this.logger.info(`Removed role "${roleId}" as it doesn't exist anymore.`);
+						if (!role) this.logger.info(`Removed role "${roleId}" because it no longer exists.`);
 						else if (!roles.includes(roleId)) {
 							try {
 								await member.roles.remove(role);
 								this.logger.info(`Role removed: "${role.name}" (${role.id})`);
 							} catch (e) {
-								this.logger.error(`Failed to remove role "${role.name}" (${role.id}):`, e);
+								this.logger.error(`Error removing role "${role.name}" (${role.id}):`, e);
 							}
 						}
 					}
@@ -324,7 +366,7 @@ class Rank {
 					for (const roleId of roles) {
 						const role = await guild.roles.fetch(roleId);
 
-						if (!role) this.logger.error(`Failed to add role "${role.id}": Role doesn't exist`);
+						if (!role) this.logger.error(`Error adding role "${role.id}": Role does not exist`);
 						else if (!this.roles.includes(roleId)) {
 							try {
 								const channel = await guild.channels.fetch(rankSettings.channel);
@@ -341,14 +383,18 @@ class Rank {
 								await member.roles.add(role);
 								this.logger.info(`Role added: "${role.name}" (${role.id})`);
 							} catch (e) {
-								this.logger.error(`Failed to add role "${role.name}" (${role.id}):`, e);
+								this.logger.error(`Error adding role "${role.name}" (${role.id}):`, e);
 							}
 						}
 					}
 
 					this.roles = roles;
-				} else this.logger.error("Invalid member:", this.memberId);
-			} else this.logger.error("Invalid guild:", this.bot.settings.application.guildId);
+				} catch {
+					this.logger.warn("Member not found:", this.memberId);
+				}
+			} catch {
+				this.logger.warn("Guild not found:", this.bot.settings.application.guildId);
+			}
 		}
 
 		const memberPath = path.join(this.bot.settings.paths.rank(this.bot.settings.application.guildId), this.memberId + ".json");
@@ -360,7 +406,8 @@ class Rank {
 			messages: this.messages,
 			roles: this.roles,
 			streak: this.streak,
-			voice: this.voice
+			voice: this.voice,
+			penalty: this.penalty
 		}), "utf-8");
 	}
 };

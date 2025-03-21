@@ -54,22 +54,25 @@ class Bot extends Client {
 		this.listenerHandler = new ListenerHandler(logger);
 		this.server = new Server(logger, settings);
 
-		this.destroyed = false;
-		for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
-			process.on(signal, async (reason, code) => {
-				if (!this.destroyed) {
-					this.destroyed = true;
-					if (reason != "Error: --restart--") this.logger.warn("Destroying... | Reason:", reason ?? "Unknown", "| Code:", code ?? "None");
+		const processSignal = async (reason, code) => {
+			if (!this.destroyed) {
+				this.destroyed = true;
+				if (reason != "Error: --restart--") this.logger.warn("Destroying... | Reason:", reason ?? "Unknown", "| Code:", code ?? "None");
+				else if (reason.stack) for (const line of reason.stack.split("\n")) this.logger.debug(line.trim());
 
-					try {
-						await this.destroy(code);
-						this.logger.debug("Destroyed.");
-					} catch (e) {
-						this.logger.error("Failed to exit:", e);
-					}
+				try {
+					await this.destroy(code);
+					this.logger.debug("Destroyed.");
+				} catch (e) {
+					this.logger.error("Failed to exit:", e);
 				}
-			});
-		}
+			}
+		};
+
+		this.destroyed = false;
+		for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "exit"]) process.on(signal, (reason, code) => processSignal(reason, code));
+		process.on("uncaughtException", (reason) => processSignal(reason, 1));
+		process.on("unhandledRejection", (reason) => processSignal(reason, 1));
 	};
 
 	/**
