@@ -7,7 +7,6 @@ const Rank = require("../lib/rank.js");
  */
 const info = {
 	name: "Leaderboard",
-	mode: "guild",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "leaderboard",
@@ -39,7 +38,7 @@ const info = {
 
 		await interaction.followUp({
 			allowedMentions: {},
-			content: `# Leaderboard\n> The top member of each month's leaderboard will receive a unique <@&${bot.settings.application.commands.rank.firstOfTheMonthRole}> role!\n## Monthly Leaderboard\n${monthlyLeaderboard.join("\n")}\n## Global Leaderboard\n${globalLeaderboard.join("\n")}\n\n-# Last updated: <t:${Math.floor(leaderboard.updatedAt / 1000)}:R>`
+			content: `# Leaderboard\n> The top member of each month's leaderboard will receive a unique <@&${bot.settings.application.commands.ranks.firstOfTheMonthRole}> role!\n## Monthly Leaderboard\n${monthlyLeaderboard.join("\n")}\n## Global Leaderboard\n${globalLeaderboard.join("\n")}\n\n-# Last updated: <t:${Math.floor(leaderboard.updatedAt / 1000)}:R>`
 		});
 	}
 };

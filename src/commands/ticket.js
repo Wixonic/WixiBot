@@ -6,15 +6,14 @@ const fs = require("fs");
  */
 const info = {
 	name: "Ticket Prompt",
-	mode: "global",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "ticket",
 		description: "Publishes the ticket prompt the specified channel",
+		default_member_permissions: PermissionFlagsBits.Administrator.toString(),
 		contexts: [
 			InteractionContextType.Guild
-		],
-		default_member_permissions: PermissionFlagsBits.Administrator.toString()
+		]
 	},
 
 	/**
@@ -28,7 +27,7 @@ const info = {
 		const ticketMessage = fs.existsSync(bot.settings.paths.markdown.ticket) ? fs.readFileSync(bot.settings.paths.markdown.ticket, "utf-8") : null;
 
 		if (ticketMessage) {
-			const channel = await bot.channels.fetch(bot.settings.application.commands.ticket.channel);
+			const channel = await bot.channels.fetch(bot.settings.application.commands.tickets.channel);
 
 			if (channel && channel.isTextBased() && channel.isSendable()) {
 				const rolesText = [];

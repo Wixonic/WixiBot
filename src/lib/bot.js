@@ -2,6 +2,7 @@ const { Client } = require("discord.js");
 const { colors } = require("@wixonic/logger");
 
 const CommandHandler = require("./commands.js");
+const ComponentHandler = require("./components.js");
 const CronHandler = require("./crons.js");
 const ListenerHandler = require("./listeners.js");
 const Server = require("./server.js");
@@ -50,6 +51,7 @@ class Bot extends Client {
 		this.settings = settings;
 
 		this.commandHandler = new CommandHandler(logger);
+		this.componentHandler = new ComponentHandler(logger);
 		this.cronHandler = new CronHandler(logger);
 		this.listenerHandler = new ListenerHandler(logger);
 		this.server = new Server(logger, settings);
@@ -57,22 +59,20 @@ class Bot extends Client {
 		const processSignal = async (reason, code) => {
 			if (!this.destroyed) {
 				this.destroyed = true;
-				if (reason != "Error: --restart--") this.logger.warn("Destroying... | Reason:", reason ?? "Unknown", "| Code:", code ?? "None");
-				else if (reason.stack) for (const line of reason.stack.split("\n")) this.logger.debug(line.trim());
+				this.logger.warn("Destroying... | Reason:", reason ?? "Unknown", "| Code:", code ?? "None");
 
 				try {
 					await this.destroy(code);
-					this.logger.debug("Destroyed.");
 				} catch (e) {
 					this.logger.error("Failed to exit:", e);
 				}
-			}
+			};
 		};
 
 		this.destroyed = false;
 		for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "exit"]) process.on(signal, (reason, code) => processSignal(reason, code));
-		process.on("uncaughtException", (reason) => processSignal(reason, 1));
-		process.on("unhandledRejection", (reason) => processSignal(reason, 1));
+		process.on("uncaughtException", (e) => this.logger.error(e));
+		process.on("unhandledRejection", (e) => this.logger.error(e));
 	};
 
 	/**
@@ -85,7 +85,8 @@ class Bot extends Client {
 			await super.login(token);
 			this.logger.info("Successfully logged in");
 
-			this.commandHandler.loadCommands(this.application.id);
+			this.commandHandler.loadCommands();
+			this.componentHandler.loadComponents();
 			this.cronHandler.loadCrons();
 			this.listenerHandler.loadListeners(this);
 
@@ -97,8 +98,9 @@ class Bot extends Client {
 	};
 
 	async destroy(code = 0) {
-		this.listenerHandler.destroy(this);
 		this.cronHandler.destroy();
+		this.listenerHandler.destroy(this);
+
 		await this.server.destroy();
 
 		this.emit("destroy");

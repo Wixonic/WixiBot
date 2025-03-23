@@ -6,15 +6,14 @@ const fs = require("fs");
  */
 const info = {
 	name: "Rules",
-	mode: "global",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "rules",
 		description: "Publishes the server rules in the specified channel",
+		default_member_permissions: PermissionFlagsBits.Administrator.toString(),
 		contexts: [
 			InteractionContextType.Guild
-		],
-		default_member_permissions: PermissionFlagsBits.Administrator.toString()
+		]
 	},
 
 	/**

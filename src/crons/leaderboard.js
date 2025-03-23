@@ -14,21 +14,21 @@ const cron = {
 		const leaderboard = Rank.updateLeaderboard(logger, bot);
 
 		if (previousLeaderboard.firstOfTheMonth?.id != leaderboard.firstOfTheMonth?.id && leaderboard.firstOfTheMonth?.id) {
-			const channel = await guild.channels.fetch(bot.settings.application.commands.rank.channel);
+			const channel = await guild.channels.fetch(bot.settings.application.commands.ranks.channel);
 
 			if (!monthlyRankResetCron.condition(minutes, now)) {
 				if (channel && channel.isSendable()) {
 					try {
 						await channel.send({
-							content: `<@${leaderboard.firstOfTheMonth.id}> is now first on the monthly leaderboard and the next candidate for the <@&${bot.settings.application.commands.rank.firstOfTheMonthRole}> role!`,
+							content: `<@${leaderboard.firstOfTheMonth.id}> is now first on the monthly leaderboard and the next candidate for the <@&${bot.settings.application.commands.ranks.firstOfTheMonthRole}> role!`,
 							allowedMentions: {
 								users: [leaderboard.firstOfTheMonth.id]
 							}
 						});
 					} catch (e) {
-						logger.warn("Failed to ping new Elite of the Month:", e);
+						logger.warn(e);
 					}
-				} else logger.error("Failed to ping new Elite of the Month: invalid channel");
+				} else logger.error("Invalid channel");
 			}
 		}
 	}

@@ -47,6 +47,12 @@ const hexToIntColor = (hex) => {
 };
 
 /**
+ * @param {number} max
+ * @param {number} min
+ */
+const randomInt = (max = 2, min = 1) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+/**
  * @param {number} milliseconds
  * @returns {Promise<void>}
  */
@@ -56,5 +62,6 @@ module.exports = {
 	clone,
 	displayTime,
 	hexToIntColor,
+	randomInt,
 	wait
 };

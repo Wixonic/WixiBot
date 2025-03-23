@@ -43,6 +43,7 @@ const init = async (logger, applicationId) => {
  */
 const publish = async (logger, applicationId) => {
 	logger.warn("Publishing...");
+
 	const settings = Settings.get(applicationId);
 
 	const commandHandler = new CommandHandler(logger);
@@ -61,23 +62,21 @@ const main = async (logger) => {
 		process.exit(1);
 	}
 
+	const handler = clone(logger);
+	handler.error = (...any) => {
+		let stacks = "";
+		any.forEach((el) => {
+			if (el instanceof Error) {
+				stacks += el.stack;
+				el = `${el.name}: ${el.message}`;
+			}
+		});
+		logger.error(...any);
+		if (stacks.length > 0) logger.debug("{Stack}", stacks.replaceAll("\n", "<br />"));
+		process.exit(1);
+	};
+
 	try {
-		const handler = clone(logger);
-		handler.error = (...any) => {
-			let stacks = "";
-			any.forEach((el) => {
-				if (el instanceof Error) {
-					stacks += el.stack ?? "";
-					el = `${el.name}: ${el.message}`;
-				}
-			});
-			logger.error(...any);
-
-			if (stacks.length > 0) logger.debug("Stack:", stacks.replaceAll("\n", "<br />"));
-
-			throw new Error("--restart--");
-		};
-
 		switch (process.env.mode) {
 			case "publish":
 				await publish({
@@ -89,12 +88,16 @@ const main = async (logger) => {
 				break;
 
 			default:
-				await init(handler, process.env.client);
+				await init({
+					debug: (...any) => handler.debug(...any),
+					error: (...any) => handler.error(...any),
+					info: (...any) => handler.info(...any),
+					warn: (...any) => handler.warn(...any)
+				}, process.env.client);
 				break;
 		};
 	} catch (e) {
-		logger.error(e);
-		process.exit(1);
+		handler.error(e);
 	}
 };
 

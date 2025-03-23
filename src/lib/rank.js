@@ -53,7 +53,7 @@ class Rank {
 	 * @returns {Rank}
 	 */
 	static get(logger, bot, memberId) {
-		const memberPath = path.join(bot.settings.paths.rank(bot.settings.application.guildId), memberId + ".json");
+		const memberPath = bot.settings.paths.rank(bot.settings.application.guildId, memberId);
 
 		if (!fs.existsSync(memberPath)) return new this(logger, bot, memberId);
 		else {
@@ -87,6 +87,7 @@ class Rank {
 		};
 
 		const leaderboardPath = bot.settings.paths.leaderboard(bot.settings.application.guildId);
+
 		try {
 			leaderboard = JSON.parse(fs.readFileSync(leaderboardPath, "utf-8"));
 		} catch (e) {
@@ -143,7 +144,7 @@ class Rank {
 
 			for (const user of leaderboard.month) {
 				if (user.points > 0) {
-					if (!bot.settings.application.commands.rank.ignored.includes(user.id) && user.points > 0) {
+					if (!bot.settings.application.commands.ranks.ignored.includes(user.id) && user.points > 0) {
 						leaderboard.firstOfTheMonth = user;
 						break;
 					} else logger.debug(`Ignoring user "${user.id}"`);
@@ -163,7 +164,7 @@ class Rank {
 	 * @returns {Promise<import("../types.d.ts").Leaderboard>}
 	 */
 	static async resetLeaderboard(logger, bot) {
-		const guildPath = bot.settings.paths.rank(bot.settings.application.guildId);
+		const guildPath = bot.settings.paths.ranks(bot.settings.application.guildId);
 
 		if (fs.existsSync(guildPath)) {
 			for (const file of fs.readdirSync(guildPath)) {
@@ -250,8 +251,8 @@ class Rank {
 
 	get points() {
 		return {
-			global: this.bot.settings.application.commands.rank.points.messages * this.messages.global + this.bot.settings.application.commands.rank.points.voice * this.voice.global - this.penalty,
-			month: this.bot.settings.application.commands.rank.points.messages * this.messages.month + this.bot.settings.application.commands.rank.points.voice * this.voice.month - this.penalty
+			global: this.bot.settings.application.commands.ranks.points.messages * this.messages.global + this.bot.settings.application.commands.ranks.points.voice * this.voice.global - this.penalty,
+			month: this.bot.settings.application.commands.ranks.points.messages * this.messages.month + this.bot.settings.application.commands.ranks.points.voice * this.voice.month - this.penalty
 		};
 	};
 
@@ -334,7 +335,7 @@ class Rank {
 	};
 
 	async save() {
-		const rankSettings = this.bot.settings.application.commands.rank;
+		const rankSettings = this.bot.settings.application.commands.ranks;
 
 		const roles = [];
 
@@ -397,7 +398,7 @@ class Rank {
 			}
 		}
 
-		const memberPath = path.join(this.bot.settings.paths.rank(this.bot.settings.application.guildId), this.memberId + ".json");
+		const memberPath = this.bot.settings.paths.rank(this.bot.settings.application.guildId, this.memberId);
 
 		if (!fs.existsSync(path.dirname(memberPath))) fs.mkdirSync(path.dirname(memberPath), { recursive: true });
 		fs.writeFileSync(memberPath, JSON.stringify({

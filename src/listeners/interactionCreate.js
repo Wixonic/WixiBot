@@ -1,6 +1,7 @@
 const { InteractionType } = require("discord.js");
 
 const CommandHandler = require("../lib/commands.js");
+const ComponentHandler = require("../lib/components.js");
 
 /**
  * @type {import("../types.d.ts").ListenerInfo}
@@ -16,17 +17,16 @@ const listener = {
 		if (interaction.isCommand()) {
 			for (const command of CommandHandler.commands) {
 				const commandLogger = {
-					debug: (...any) => logger.debug(`[${command.name}]`, ...any),
-					error: (...any) => logger.error(`[${command.name}]`, ...any),
-					info: (...any) => logger.info(`[${command.name}]`, ...any),
-					warn: (...any) => logger.warn(`[${command.name}]`, ...any)
+					debug: (...any) => logger.debug(`[Command ${command.name}]`, ...any),
+					error: (...any) => logger.error(`[Command ${command.name}]`, ...any),
+					info: (...any) => logger.info(`[Command ${command.name}]`, ...any),
+					warn: (...any) => logger.warn(`[Command ${command.name}]`, ...any)
 				};
 
 				if (command.deploy.type == interaction.commandType && command.deploy.name == interaction.commandName) {
 					try {
-						commandLogger.info(`Launched by "${(interaction.member ?? interaction.user).displayName}" (${(interaction.member ?? interaction.user).id})`);
+						commandLogger.info(`Launched by "${(interaction.member ?? interaction.user).displayName}" (${interaction.user.id})`);
 						await command.run(commandLogger, bot, interaction);
-						commandLogger.debug("Finished");
 						return;
 					} catch (e) {
 						commandLogger.error(e);
@@ -34,10 +34,34 @@ const listener = {
 				}
 			}
 
-			logger.error("Invalid command:", interaction.commandName);
-		}
+			logger.warn("Invalid command:", interaction.commandName);
+		} else if (interaction.isButton()) {
+			const id = interaction.customId.split("_")[0];
+			const args = interaction.customId.split("_").slice(1);
 
-		logger.warn("Invalid interaction:", Object.keys(InteractionType).find((key) => InteractionType[key] == interaction.type));
+			for (const component of ComponentHandler.buttons) {
+				const componentLogger = {
+					debug: (...any) => logger.debug(`[Button ${component.name}]`, ...any),
+					error: (...any) => logger.error(`[Button ${component.name}]`, ...any),
+					info: (...any) => logger.info(`[Button ${component.name}]`, ...any),
+					warn: (...any) => logger.warn(`[Button ${component.name}]`, ...any)
+				};
+
+				if (component.id == id) {
+					try {
+						componentLogger.info(`Launched by "${(interaction.member ?? interaction.user).displayName}" (${interaction.user.id})` + (args.length > 0 ? ` with args: ${args.join(", ")}` : ""));
+						await component.run(componentLogger, bot, interaction, ...args);
+						return;
+					} catch (e) {
+						componentLogger.error(e);
+					}
+				}
+			}
+
+			logger.warn("Invalid button interaction:", interaction.customId);
+		} else if (interaction.isModalSubmit()) {
+
+		} else logger.warn("Invalid interaction:", Object.keys(InteractionType).find((key) => InteractionType[key] == interaction.type));
 	}
 };
 

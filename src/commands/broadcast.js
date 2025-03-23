@@ -16,14 +16,10 @@ let connectionChannelId = null;
  */
 const info = {
 	name: "Broadcast",
-	mode: "global",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "broadcast",
 		description: "Broadcast audio from WixiBot Local",
-		contexts: [
-			InteractionContextType.Guild
-		],
 		default_member_permissions: PermissionFlagsBits.Administrator.toString(),
 		options: [
 			{

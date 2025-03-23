@@ -13,7 +13,10 @@ export interface ApplicationSettings {
 };
 
 export interface CommandsSettings {
-	rank: {
+	giveaways: {
+		channel: string;
+	};
+	ranks: {
 		channel: string;
 		ignored: string[];
 		points: {
@@ -27,16 +30,18 @@ export interface CommandsSettings {
 	roles: {
 		channel: string;
 	};
-	ticket: {
+	rules: {
 		channel: string;
 	};
-	rules: {
+	tickets: {
 		channel: string;
 	};
 };
 
 export interface PathsSettings {
 	cache: string;
+	giveaway: (guildId: string, giveawayId: string) => string;
+	giveaways: (guildId: string) => string;
 	markdown: {
 		help: string;
 		privacy: string;
@@ -44,7 +49,8 @@ export interface PathsSettings {
 		ticket: string;
 	};
 	leaderboard: (guildId: string) => string;
-	rank: (guildId: string) => string;
+	rank: (guildId: string, memberId: string) => string;
+	ranks: (guildId: string) => string;
 };
 
 export interface DiscordApplicationSecretsSettings {
@@ -122,16 +128,37 @@ export interface CommandOptions {
 
 
 export interface CommandInfo {
-	deploy: import("discord.js").APIApplicationCommand;
 	name: string;
-	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), ...any: any[]) => Promise<void>;
+	deploy: import("discord.js").APIApplicationCommand;
+	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), interaction: import("discord.js").CommandInteraction | import("discord.js").MessageContextMenuCommandInteraction | import("discord.js").UserContextMenuCommandInteraction) => Promise<void>;
+};
+
+
+export interface ComponentInfo {
+	name: string;
+	id: string;
+	type: import("discord.js").ComponentType;
+	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), interaction: import("discord.js").ButtonInteraction, ...args: string[]) => Promise<void>;
+};
+
+
+export interface CronInfo {
+	name: string;
+	condition: (minutes: number, now: Date) => boolean;
+	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), minutes: number, now: Date) => Promise<void>;
 };
 
 
 export interface ListenerInfo {
-	id: string;
 	name: string;
+	event: string;
 	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), ...any: any[]) => Promise<void>;
+};
+
+
+export interface ModalInfo {
+	name: string;
+	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), minutes: number, now: Date) => Promise<void>;
 };
 
 
@@ -141,8 +168,16 @@ export interface HandlerInfo {
 };
 
 
-export interface CronInfo {
+export interface Gift {
 	name: string;
-	condition: (minutes: number, now: Date) => boolean;
-	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), minutes: number, now: Date) => Promise<void>;
+	secret: string;
+};
+
+export interface GiveawayData {
+	gifts: Gift[];
+	participants: string[];
+	startsAt: number?;
+	endsAt: number?;
+	status: number;
+	startsAt: string?;
 };

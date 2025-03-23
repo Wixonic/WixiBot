@@ -7,7 +7,6 @@ const Rank = require("../lib/rank.js");
  */
 const info = {
 	name: "Rank",
-	mode: "guild",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "rank",

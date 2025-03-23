@@ -1,4 +1,4 @@
-const { ApplicationCommandType, ApplicationCommandOptionType, MessageFlags, PermissionFlagsBits } = require("discord.js");
+const { ApplicationCommandType, ApplicationCommandOptionType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
 
 const Rank = require("../lib/rank.js");
 
@@ -7,11 +7,14 @@ const Rank = require("../lib/rank.js");
  */
 const info = {
 	name: "Moderation",
-	mode: "guild",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "moderation",
 		description: "Commands for moderating users",
+		default_member_permissions: PermissionFlagsBits.ManageMessages.toString(),
+		contexts: [
+			InteractionContextType.Guild
+		],
 		options: [
 			{
 				type: ApplicationCommandOptionType.Subcommand,
@@ -37,8 +40,7 @@ const info = {
 					}
 				]
 			}
-		],
-		default_member_permissions: PermissionFlagsBits.ManageMessages.toString()
+		]
 	},
 
 	/**

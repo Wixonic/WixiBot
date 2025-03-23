@@ -5,15 +5,11 @@ const { ApplicationCommandType, ApplicationCommandOptionType, ChannelType, Inter
  */
 const info = {
 	name: "Message As",
-	mode: "global",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "message-as",
 		description: "Sends a message as the bot in the specified channel",
 		default_member_permissions: PermissionFlagsBits.ManageMessages.toString(),
-		contexts: [
-			InteractionContextType.Guild
-		],
 		options: [
 			{
 				type: ApplicationCommandOptionType.String,

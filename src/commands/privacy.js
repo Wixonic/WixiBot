@@ -6,7 +6,6 @@ const fs = require("fs");
  */
 const info = {
 	name: "Privacy",
-	mode: "global",
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "privacy",

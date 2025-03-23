@@ -69,7 +69,6 @@ class CronHandler {
 					try {
 						cronLogger.info(`Launched at ${now.toLocaleDateString("fr", { day: "2-digit", month: "2-digit", year: "numeric" })} ${now.toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit" })}`);
 						await cron.run(cronLogger, bot, minutes, now);
-						cronLogger.debug("Finished");
 					} catch (e) {
 						cronLogger.error(e);
 					}

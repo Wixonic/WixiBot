@@ -10,11 +10,11 @@ const cron = {
 	run: async (logger, bot, minutes, now) => {
 		const guild = await bot.guilds.fetch(bot.settings.application.guildId);
 		const previousLeaderboard = Rank.getLeaderboard(logger, bot);
-		const role = await guild.roles.fetch(bot.settings.application.commands.rank.firstOfTheMonthRole);
+		const role = await guild.roles.fetch(bot.settings.application.commands.ranks.firstOfTheMonthRole);
 
 		if (role) {
 			if (role.members) for (const member of role.members.values()) await member.roles.remove(role);
-			const channel = await guild.channels.fetch(bot.settings.application.commands.rank.channel);
+			const channel = await guild.channels.fetch(bot.settings.application.commands.ranks.channel);
 
 			if (previousLeaderboard.firstOfTheMonth) {
 				try {
@@ -24,15 +24,15 @@ const cron = {
 					if (channel && channel.isSendable()) {
 						try {
 							await channel.send({
-								content: `# New <@&${bot.settings.application.commands.rank.firstOfTheMonthRole}>!\n<@${previousLeaderboard.firstOfTheMonth.id}> was first of the monthly leaderboard and got the <@&${bot.settings.application.commands.rank.firstOfTheMonthRole}> role!\n\n**Send some love to <@${previousLeaderboard.firstOfTheMonth.id}> in <#${bot.settings.application.commands.rank.defaultTextChannel}>!**\n-# <@${previousLeaderboard.firstOfTheMonth.id}> won with ${previousLeaderboard.firstOfTheMonth.points.toFixed(2)} points this month.`,
+								content: `# New <@&${bot.settings.application.commands.ranks.firstOfTheMonthRole}>!\n<@${previousLeaderboard.firstOfTheMonth.id}> was first of the monthly leaderboard and got the <@&${bot.settings.application.commands.ranks.firstOfTheMonthRole}> role!\n\n**Send some love to <@${previousLeaderboard.firstOfTheMonth.id}> in <#${bot.settings.application.commands.ranks.defaultTextChannel}>!**\n-# <@${previousLeaderboard.firstOfTheMonth.id}> won with ${previousLeaderboard.firstOfTheMonth.points.toFixed(2)} points this month.`,
 								allowedMentions: {
 									users: [previousLeaderboard.firstOfTheMonth.id]
 								}
 							});
 						} catch (e) {
-							logger.warn("Failed to ping new Elite of the Month:", e);
+							logger.warn(e);
 						}
-					} else logger.error("Failed to ping new Elite of the Month: invalid channel");
+					} else logger.error("Invalid channel");
 				} catch (e) {
 					logger.error(`Failed to add ${role.name} (${role.id}):`, e);
 				}

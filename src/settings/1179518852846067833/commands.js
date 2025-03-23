@@ -2,7 +2,10 @@
  * @type {import("../../types.d.ts").CommandsSettings}
  */
 const commandsSettings = {
-	rank: {
+	giveaways: {
+		channel: "1333864397931675740"
+	},
+	ranks: {
 		channel: "1333782941095956541",
 		ignored: [
 			"1020454688467980308" // wixonic
@@ -26,7 +29,7 @@ const commandsSettings = {
 	rules: {
 		channel: "1020684346098733138"
 	},
-	ticket: {
+	tickets: {
 		channel: "1247276648366080144"
 	}
 };
