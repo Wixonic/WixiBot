@@ -51,6 +51,7 @@ export interface PathsSettings {
 	leaderboard: (guildId: string) => string;
 	rank: (guildId: string, memberId: string) => string;
 	ranks: (guildId: string) => string;
+	roles: string;
 };
 
 export interface DiscordApplicationSecretsSettings {

@@ -1,4 +1,4 @@
-const { ApplicationCommandType, MessageFlags } = require("discord.js");
+const { ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const fs = require("fs");
 
 /**
@@ -9,7 +9,7 @@ const info = {
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "roles",
-		description: "",
+		description: "Publishes the server roles",
 		default_member_permissions: PermissionFlagsBits.Administrator.toString(),
 		contexts: [
 			InteractionContextType.Guild
@@ -24,7 +24,9 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		await interaction.followUp();
+		// TODO: Update roles select message
+
+		await interaction.followUp("Roles select message updated");
 	}
 };
 
