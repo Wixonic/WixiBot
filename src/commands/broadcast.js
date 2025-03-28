@@ -1,4 +1,4 @@
-const { ApplicationCommandType, ApplicationCommandOptionType, ChannelType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
+const { ApplicationCommandType, ApplicationCommandOptionType, ChannelType, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, VoiceConnectionStatus, StreamType } = require("@discordjs/voice");
 const { Readable } = require("stream");
 
@@ -115,11 +115,11 @@ const info = {
 				}
 			});
 
-			let membersCount = channel.members.filter(member => !member.user.bot).size;
+			let membersCount = channel.members.filter((member) => !member.user.bot).size;
 
 			/**
-			 * @param {import("discord.js").VoiceState} oldState 
-			 * @param {import("discord.js").VoiceState} newState 
+			 * @param {import("discord.js").VoiceState} oldState
+			 * @param {import("discord.js").VoiceState} newState
 			 */
 			const handleVoiceStateUpdate = (oldState, newState) => {
 				if (!newState.member.user.bot && !oldState.channel && newState.channelId == channel.id) {

@@ -87,7 +87,7 @@ class Server {
 			this.ws.on("close", () => this.logger.warn("[WebSocket]", "Server closed"));
 
 			this.ws.on("connection", (ws) => {
-				this.logger.debug("[WebSocket]", "Connection open")
+				this.logger.debug("[WebSocket]", "Connection open");
 
 				ws.on("close", () => this.logger.debug("[WebSocket]", "Connection closed"));
 				ws.on("error", (e) => this.logger.warn("[WebSocket]", "Client error:", e));
