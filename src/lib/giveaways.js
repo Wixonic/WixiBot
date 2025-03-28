@@ -1,7 +1,5 @@
 const fs = require("fs");
 
-const { randomInt } = require("../lib/utils.js");
-
 class Giveaway {
 	static status = {
 		planned: 0,

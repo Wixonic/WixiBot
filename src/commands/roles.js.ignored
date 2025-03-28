@@ -1,0 +1,31 @@
+const { ApplicationCommandType, MessageFlags } = require("discord.js");
+const fs = require("fs");
+
+/**
+ * @type {import("../types").CommandInfo}
+ */
+const info = {
+	name: "Roles",
+	deploy: {
+		type: ApplicationCommandType.ChatInput,
+		name: "roles",
+		description: "",
+		default_member_permissions: PermissionFlagsBits.Administrator.toString(),
+		contexts: [
+			InteractionContextType.Guild
+		]
+	},
+
+	/**
+	 * @param {import("discord.js").CommandInteraction} interaction
+	 */
+	run: async (logger, bot, interaction) => {
+		await interaction.deferReply({
+			flags: MessageFlags.Ephemeral
+		});
+
+		await interaction.followUp();
+	}
+};
+
+module.exports = info;
