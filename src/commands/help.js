@@ -50,7 +50,7 @@ const info = {
 				.replaceAll("{{GUILDNAME}}", guild.name)
 				.replaceAll("{{DEFAULTTEXTCHANNEL}}", bot.settings.application.defaultTextChannel)
 				.replaceAll("{{ROLESCHANNEL}}", bot.settings.application.commands.roles.channel)
-				.replaceAll("{{TICKETCHANNEL}}", bot.settings.application.commands.ticket.channel)
+				.replaceAll("{{TICKETSCHANNEL}}", bot.settings.application.commands.tickets.channel)
 			);
 		} else logger.error("Help file missing");
 	}

@@ -24,7 +24,10 @@ const commandsSettings = {
 		}
 	},
 	roles: {
-		channel: "1352217400379969576"
+		channel: "1352217400379969576",
+		cosmeticMarkerRole: "1324676103473860679",
+		oldMarkerRole: "1324676172537135145",
+		mentionRole: "1355256781768491018"
 	},
 	rules: {
 		channel: "1243991489575522374"

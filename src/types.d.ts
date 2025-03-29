@@ -29,6 +29,9 @@ export interface CommandsSettings {
 	};
 	roles: {
 		channel: string;
+		cosmeticMarkerRole: string;
+		oldMarkerRole: string;
+		mentionRole: string;
 	};
 	rules: {
 		channel: string;
@@ -49,6 +52,7 @@ export interface PathsSettings {
 		ticket: string;
 	};
 	leaderboard: (guildId: string) => string;
+	recurrentRoles: (guildId: string) => string;
 	rank: (guildId: string, memberId: string) => string;
 	ranks: (guildId: string) => string;
 	roles: string;

@@ -47,48 +47,42 @@ module.exports = {
 			requirements: "To get access to this role, you need to [boost this server](<https://support.discord.com/hc/articles/360028038352>)."
 		}
 	],
-	recurrentRoles: {
-		announcementChannel: "1243950230899134596",
-		cosmeticMarkerRole: "1324669613480349729",
-		oldMarkerRole: "1324669679532380190",
-		mentionRole: "1307298359651991583",
-		roles: [
-			{
-				name: "New Year",
-				color: "#D7B030",
-				from: "01-01T00:00:00",
-				to: "01-31T23:59:59"
-			},
-			{
-				name: "Valentine's Day",
-				color: "#E06287",
-				from: "02-14T00:00:00",
-				to: "02-21T23:59:59"
-			},
-			{
-				name: "Easter",
-				color: "#C5EBD5",
-				from: "03-23T00:00:00",
-				to: "04-25T23:59:59"
-			},
-			{
-				name: "Summer",
-				color: "#47927E",
-				from: "06-01T00:00:00",
-				to: "08-31T23:59:59"
-			},
-			{
-				name: "Halloween",
-				color: "#EB5A1C",
-				from: "10-30T00:00:00",
-				to: "11-06T23:59:59"
-			},
-			{
-				name: "Christmas",
-				color: "#B43B2B",
-				from: "12-24T00:00:00",
-				to: "12-31T23:59:59"
-			}
-		]
-	}
+	recurrentRoles: [
+		{
+			name: "New Year",
+			color: "#D7B030",
+			from: "01-01T00:00:00",
+			to: "01-31T23:59:59"
+		},
+		{
+			name: "Valentine's Day",
+			color: "#E06287",
+			from: "02-14T00:00:00",
+			to: "02-21T23:59:59"
+		},
+		{
+			name: "Easter",
+			color: "#C5EBD5",
+			from: "03-23T00:00:00",
+			to: "04-25T23:59:59"
+		},
+		{
+			name: "Summer",
+			color: "#47927E",
+			from: "06-01T00:00:00",
+			to: "08-31T23:59:59"
+		},
+		{
+			name: "Halloween",
+			color: "#EB5A1C",
+			from: "10-30T00:00:00",
+			to: "11-06T23:59:59"
+		},
+		{
+			name: "Christmas",
+			color: "#B43B2B",
+			from: "12-24T00:00:00",
+			to: "12-31T23:59:59"
+		}
+	]
 };

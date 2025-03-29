@@ -7,7 +7,7 @@ const Rank = require("../lib/rank.js");
 const cron = {
 	name: "Leaderboard Update",
 	priority: 2,
-	condition: (minutes, now) => minutes % 30 == 0, // Every half hour
+	condition: (minutes, now) => minutes % 30 == 0, // Every 30 minutes
 	run: async (logger, bot, minutes, now) => {
 		const guild = await bot.guilds.fetch(bot.settings.application.guildId);
 		const previousLeaderboard = Rank.getLeaderboard(logger, bot);

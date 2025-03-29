@@ -10,7 +10,7 @@ const { randomInt } = require("../lib/utils.js");
 const cron = {
 	name: "Giveaways Update",
 	priority: 0,
-	condition: (minutes, now) => true, // Every minute
+	condition: (minutes, now) => minutes % 30 == 0, // Every 30 minutes
 	run: async (logger, bot, minutes, now) => {
 		const giveawaysSettings = bot.settings.application.commands.giveaways;
 		const guild = await bot.guilds.fetch(bot.settings.application.guildId);

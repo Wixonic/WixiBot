@@ -1,3 +1,6 @@
+const { ButtonStyle, ComponentType } = require("discord.js");
+const fs = require("fs");
+
 class Role {
 	/**
 	 * @param {import("@wixonic/logger").Logger} logger
@@ -11,6 +14,7 @@ class Role {
 				const content = require(file);
 
 				const data = {
+					categories: [],
 					roles: {
 						all: [],
 						available: [],
@@ -22,9 +26,23 @@ class Role {
 					}
 				};
 
-				for (const role of content.roles) data.roles.all.push(new Role(logger, bot, role.id, role));
+				const now = new Date();
 
-				// TODO: Parse all type of roles
+				for (const category of content.categories) data.categories.push(category);
+
+				for (const role of content.roles) {
+					data.roles.all.push(role);
+					if (role.requirements) data.roles.locked.push(role);
+					else data.roles.available.push(role);
+				}
+
+				for (const role of content.recurrentRoles) {
+					data.recurrentRoles.all.push(role);
+
+					const from = new Date(`${now.getUTCFullYear()}-${role.from}`);
+					const to = new Date(`${now.getUTCFullYear()}-${role.to}`);
+					if (now.getTime() >= from.getTime() && now.getTime() <= to.getTime()) data.recurrentRoles.active.push(role);
+				}
 
 				return data;
 			} catch (e) {
@@ -33,6 +51,7 @@ class Role {
 		}
 
 		return {
+			categories: [],
 			roles: {
 				all: [],
 				available: [],
@@ -43,6 +62,65 @@ class Role {
 				all: []
 			}
 		};
+	};
+
+	/**
+	 * @param {import("@wixonic/logger").Logger} logger
+	 * @param {import("./bot.js")} bot
+	 */
+	static async update(logger, bot) {
+		const settings = bot.settings.application.commands.roles;
+
+		const guild = await bot.guilds.fetch(bot.settings.application.guildId);
+		const channel = await guild.channels.fetch(settings.channel);
+
+		if (channel && channel.isSendable()) {
+			await channel.send({
+				allowedMentions: {},
+				content: "## Roles\nYou can claim any role by pressing a role button below.",
+			});
+
+			const list = this.list(logger, bot);
+
+			for (const category of list.categories) {
+				const categoryRoles = list.roles.all.filter((role) => role.category == category.id);
+
+				if (categoryRoles.length > 0) {
+					const roles = [];
+					const buttons = [];
+
+					for (const role of categoryRoles) {
+						const guildRole = await guild.roles.fetch(role.id);
+
+						if (guildRole) {
+							roles.push(`- <@&${role.id}>: ${role.description}`);
+							buttons.push({
+								type: ComponentType.Button,
+								custom_id: `claimRole_${role.id}`,
+								label: guildRole.name ?? "Unknown role",
+								style: ButtonStyle.Primary
+							});
+						}
+					}
+
+					const components = [];
+					for (let i = 0; i < buttons.length; i += 5) {
+						components.push({
+							type: ComponentType.ActionRow,
+							components: buttons.slice(i, i + 5)
+						});
+					}
+
+					if (buttons.length > 0) {
+						await channel.send({
+							allowedMentions: {},
+							content: `### ${category.name}\n> ${category.description}\n${roles.join("\n")}`,
+							components
+						});
+					}
+				} else logger.warn("Empty category");
+			}
+		} else logger.error("Invalid channel:", settings.channel);
 	};
 
 	/**

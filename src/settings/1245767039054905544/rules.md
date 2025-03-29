@@ -5,10 +5,10 @@
 1. Treat **everyone** with respect—no exceptions.
 2. Adhere to Discord’s [Community Guidelines](<https://discord.com/guidelines>) and [Terms of Service](<https://discord.com/terms>).
 3. Avoid spamming mentions (\@mention spam is prohibited).
-4. If you notice any suspicious activity on the server, in direct messages, or across Discord, please report it immediately by opening a ticket in <#{{TICKETCHANNEL}}>.
+4. If you notice any suspicious activity on the server, in direct messages, or across Discord, please report it immediately by opening a ticket in <#{{TICKETSCHANNEL}}>.
 
 ### Helpful Tips
-- For assistance, open a ticket in <#{{TICKETCHANNEL}}>.
+- For assistance, open a ticket in <#{{TICKETSCHANNEL}}>.
 - If you need to discuss something privately, send a direct message to any <@&{{ADMINROLE}}>.
 - To customize your server profile, head over to <#{{ROLESCHANNEL}}> for options.
 

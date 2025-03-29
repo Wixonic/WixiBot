@@ -24,10 +24,12 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
+		const settings = bot.settings.application.commands.tickets;
+
 		const ticketMessage = fs.existsSync(bot.settings.paths.markdown.ticket) ? fs.readFileSync(bot.settings.paths.markdown.ticket, "utf-8") : null;
 
 		if (ticketMessage) {
-			const channel = await bot.channels.fetch(bot.settings.application.commands.tickets.channel);
+			const channel = await bot.channels.fetch(settings.channel);
 
 			if (channel && channel.isTextBased() && channel.isSendable()) {
 				const rolesText = [];
@@ -54,8 +56,8 @@ const info = {
 					]
 				});
 
-				await interaction.followUp("Ticket prompt updated");
-			} else logger.error("Invalid channel");
+				await interaction.followUp(`Ticket prompt updated at <#${channel.id}>.`);
+			} else logger.error("Invalid channel:", settings.channel);
 		} else logger.error("Ticket prompt file missing");
 	}
 };

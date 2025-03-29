@@ -16,6 +16,7 @@ const pathsSettings = {
 		ticket: path.join(__dirname, "ticket.md")
 	},
 	leaderboard: (guildId) => path.join(secrets.paths.root, "ranks", "leaderboards", guildId + ".json"),
+	recurrentRoles: (guildId) => path.join(secrets.paths.root, guildId, "recurrentRoles.json"),
 	rank: (guildId, memberId) => path.join(secrets.paths.root, "ranks", guildId, memberId + ".json"),
 	ranks: (guildId) => path.join(secrets.paths.root, "ranks", guildId),
 	roles: path.join(__dirname, "roles.js")

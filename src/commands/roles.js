@@ -1,5 +1,6 @@
 const { ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits } = require("discord.js");
-const fs = require("fs");
+
+const Roles = require("../lib/roles.js");
 
 /**
  * @type {import("../types").CommandInfo}
@@ -24,9 +25,8 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		// TODO: Update roles select message
-
-		await interaction.followUp("Roles select message updated");
+		await Roles.update(logger, bot);
+		await interaction.followUp(`Roles prompt updated at <#${bot.settings.application.commands.roles.channel}>.`);
 	}
 };
 
