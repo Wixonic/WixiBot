@@ -25,17 +25,12 @@ class Rank {
 		"2": (data) => {
 			return {
 				version: "3",
-				firstOfTheMonth: [],
+				eliteOfTheMonth: [],
 				messages: {
 					global: data.messages?.global ?? 0,
 					month: data.messages?.month ?? 0
 				},
 				roles: data.roles ?? [],
-				streak: {
-					best: 0,
-					count: 0,
-					last: null
-				},
 				voice: {
 					global: 0,
 					month: 0,
@@ -173,8 +168,7 @@ class Rank {
 						const rank = this.get(logger, bot, file.replace(".json", ""));
 
 						rank.messages.month = 0;
-						rank.voice.count.month = 0;
-						rank.voice.time.month = 0;
+						rank.voice.month = 0;
 
 						await rank.save();
 					} catch (e) {
@@ -216,10 +210,9 @@ class Rank {
 
 			this.memberId = memberId;
 
-			this.firstOfTheMonth = data.firstOfTheMonth;
+			this.eliteOfTheMonth = data.eliteOfTheMonth;
 			this.messages = data.messages;
 			this.roles = data.roles;
-			this.streak = data.streak;
 			this.voice = data.voice;
 			this.penalty = data.penalty;
 
@@ -227,17 +220,12 @@ class Rank {
 		} else {
 			this.memberId = memberId;
 
-			this.firstOfTheMonth = [];
+			this.eliteOfTheMonth = [];
 			this.messages = {
 				global: 0,
 				month: 0
 			};
 			this.roles = [];
-			this.streak = {
-				best: 0,
-				count: 0,
-				last: 0
-			};
 			this.voice = {
 				global: 0,
 				month: 0,
@@ -320,9 +308,18 @@ class Rank {
 		await this.save();
 	};
 
+	/**
+	 * @param {Date} date
+	 */
+	async addElite(date) {
+		this.eliteOfTheMonth.push(Math.floor(date.getTime() / 1000));
+		this.logger.debug("Won monthly leaderboard");
+		await this.save();
+	};
+
 	get description() {
 		const rank = this.rank;
-		return `## <@${this.memberId}>\n### Ranks\n- Global: ${Rank.getRankText(rank.global)} (${Math.ceil(this.points.global)} points)\n- Monthly: ${Rank.getRankText(rank.month)} (${Math.ceil(this.points.month)} points)\n-# Last updated: <t:${Math.floor(rank.updatedAt / 1000)}:R>\n### Stats\n- Messages sent: ${this.messages.global} (${this.messages.month} this month)\n- Time spent in voice channels: ${displayTime(this.voice.global)} (${displayTime(this.voice.month)} this month)`;
+		return `## <@${this.memberId}>\n### Ranks\n- Global: ${Rank.getRankText(rank.global)} (${Math.ceil(this.points.global)} points)\n- Monthly: ${Rank.getRankText(rank.month)} (${Math.ceil(this.points.month)} points)\n-# Last updated: <t:${Math.floor(rank.updatedAt / 1000)}:R>\n### Stats\n- Messages sent: ${this.messages.global} (${this.messages.month} this month)\n- Time spent in voice channels: ${displayTime(this.voice.global)} (${displayTime(this.voice.month)} this month)` + (this.eliteOfTheMonth.length > 0 ? `\n### Elite of the Month\n- <t:${this.eliteOfTheMonth.join(":D>\n- <t:")}:D>` : "");
 	};
 
 	get rank() {
@@ -403,10 +400,9 @@ class Rank {
 		if (!fs.existsSync(path.dirname(memberPath))) fs.mkdirSync(path.dirname(memberPath), { recursive: true });
 		fs.writeFileSync(memberPath, JSON.stringify({
 			version: "3",
-			firstOfTheMonth: this.firstOfTheMonth,
+			eliteOfTheMonth: this.eliteOfTheMonth,
 			messages: this.messages,
 			roles: this.roles,
-			streak: this.streak,
 			voice: this.voice,
 			penalty: this.penalty
 		}), "utf-8");

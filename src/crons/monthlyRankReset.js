@@ -23,6 +23,8 @@ const cron = {
 
 					if (channel && channel.isSendable()) {
 						try {
+							const rank = Rank.get(logger, bot, firstMember.id);
+							await rank.addElite(now);
 							await channel.send({
 								content: `# New <@&${bot.settings.application.commands.ranks.firstOfTheMonthRole}>!\n<@${previousLeaderboard.firstOfTheMonth.id}> was first of the monthly leaderboard and got the <@&${bot.settings.application.commands.ranks.firstOfTheMonthRole}> role!\n\n**Send some love to <@${previousLeaderboard.firstOfTheMonth.id}> in <#${bot.settings.application.commands.ranks.defaultTextChannel}>!**\n-# <@${previousLeaderboard.firstOfTheMonth.id}> won with ${previousLeaderboard.firstOfTheMonth.points.toFixed(2)} points this month.`,
 								allowedMentions: {
