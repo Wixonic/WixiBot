@@ -31,6 +31,7 @@ export interface CommandsSettings {
 		channel: string;
 		cosmeticMarkerRole: string;
 		oldMarkerRole: string;
+		mentionChannel: string;
 		mentionRole: string;
 	};
 	rules: {

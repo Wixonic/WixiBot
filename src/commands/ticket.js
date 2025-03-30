@@ -31,7 +31,13 @@ const info = {
 		if (ticketMessage) {
 			const channel = await bot.channels.fetch(settings.channel);
 
-			if (channel && channel.isTextBased() && channel.isSendable()) {
+			if (channel && channel.isSendable()) {
+				const messages = await channel.messages.fetch({
+					limit: 10
+				});
+
+				for (const message of messages.values()) await channel.messages.delete(message);
+
 				const rolesText = [];
 				const roles = await interaction.guild.roles.fetch();
 

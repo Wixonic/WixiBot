@@ -22,19 +22,21 @@ const component = {
 		const role = await guild.roles.fetch(roleId);
 
 		const claimRole = async (id) => {
-			if (interaction.member.roles.cache.has(id)) {
-				try {
-					await interaction.member.roles.remove(id);
-					return await interaction.followUp(`<@&${id}> successfully removed from your account.`);
-				} catch (e) {
-					logger.warn(`Failed to remove role "${id}":`, e);
-				}
-			} else {
-				try {
-					await interaction.member.roles.add(id);
-					return await interaction.followUp(`<@&${id}> successfully added to your account.`);
-				} catch (e) {
-					logger.warn(`Failed to add role "${id}":`, e);
+			if (id) {
+				if (interaction.member.roles.cache.has(id)) {
+					try {
+						await interaction.member.roles.remove(id);
+						return await interaction.followUp(`<@&${id}> successfully removed from your account.`);
+					} catch (e) {
+						logger.warn(`Failed to remove role "${id}":`, e);
+					}
+				} else {
+					try {
+						await interaction.member.roles.add(id);
+						return await interaction.followUp(`<@&${id}> successfully added to your account.`);
+					} catch (e) {
+						logger.warn(`Failed to add role "${id}":`, e);
+					}
 				}
 			}
 
@@ -44,13 +46,15 @@ const component = {
 		if (role) {
 			const list = Roles.list(logger, bot);
 
-			if (recurrent) {
-				if (list.recurrentRoles.active.includes(role.name.replace(` ${new Date().getUTCFullYear()}`, ""))) return await claimRole(role.id);
+			if (recurrent == "true") {
+				if (list.recurrentRoles.active.findIndex((r) => r.name == role.name.replace(` ${new Date().getUTCFullYear()}`, "")) > -1) return await claimRole(role.id);
 			} else {
 				const roleSettings = list.roles.all.find((r) => r.id == role.id);
 
-				if (roleSettings.requirements) return await interaction.followUp(roleSettings.requirements);
-				else return await claimRole(role.id);
+				if (roleSettings) {
+					if (roleSettings.requirements) return await interaction.followUp(roleSettings.requirements);
+					else return await claimRole(role.id);
+				}
 			}
 		}
 
