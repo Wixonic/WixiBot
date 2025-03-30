@@ -26,7 +26,7 @@ const cron = {
 							}
 						});
 					} catch (e) {
-						logger.warn(e);
+						logger.warn("Failed to send message:", e);
 					}
 				} else logger.error("Invalid channel");
 			}

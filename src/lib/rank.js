@@ -118,12 +118,12 @@ class Rank {
 						const rank = this.get(logger, bot, file.replace(".json", ""));
 
 						if (rank) {
-							leaderboard.global.push({
+							if (rank.points.global > 0) leaderboard.global.push({
 								id: rank.memberId,
 								points: rank.points.global
 							});
 
-							leaderboard.month.push({
+							if (rank.points.month > 0) leaderboard.month.push({
 								id: rank.memberId,
 								points: rank.points.month
 							});
@@ -397,7 +397,7 @@ class Rank {
 						voice: this.voice,
 						penalty: this.penalty
 					}), "utf-8");
-					this.logger.error("Member not found:", this.memberId);
+					return this.logger.warn("Member not found:", this.memberId);
 				}
 			} catch {
 				this.logger.warn("Guild not found:", this.bot.settings.application.guildId);

@@ -34,7 +34,7 @@ const info = {
 
 		await interaction.followUp({
 			allowedMentions: {},
-			content: `# Leaderboard\n> The top member of each month's leaderboard will receive a unique <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}> role!\n## Monthly Leaderboard\n${monthlyLeaderboard.join("\n")}\n## Global Leaderboard\n${globalLeaderboard.join("\n")}\n\n-# Last updated: <t:${Math.floor(leaderboard.updatedAt / 1000)}:R>`
+			content: `# Leaderboard\n> The top member of each month's leaderboard will receive a unique <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}> role!\n## Monthly Leaderboard\n${monthlyLeaderboard.length > 0 ? monthlyLeaderboard.join("\n") : `_No one is ranked this month yet. Be the first to join the leaderboard: send a message in <#${bot.settings.application.defaultTextChannel}>!_`}\n## Global Leaderboard\n${globalLeaderboard.length > 0 ? globalLeaderboard.join("\n") : `_No one is ranked yet. Be the first to join the leaderboard: send a message in <#${bot.settings.application.defaultTextChannel}>!_`}\n\n-# Last updated: <t:${Math.floor(leaderboard.updatedAt / 1000)}:R>`
 		});
 	}
 };
