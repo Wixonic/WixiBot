@@ -13,16 +13,16 @@ const cron = {
 		const previousLeaderboard = Rank.getLeaderboard(logger, bot);
 		const leaderboard = Rank.updateLeaderboard(logger, bot);
 
-		if (previousLeaderboard.firstOfTheMonth?.id != leaderboard.firstOfTheMonth?.id && leaderboard.firstOfTheMonth?.id) {
+		if (leaderboard.eliteOfTheMonth && previousLeaderboard.eliteOfTheMonth?.id != leaderboard.eliteOfTheMonth.id) {
 			const channel = await guild.channels.fetch(bot.settings.application.commands.ranks.channel);
 
 			if (!monthlyRankResetCron.condition(minutes, now)) {
 				if (channel && channel.isSendable()) {
 					try {
 						await channel.send({
-							content: `<@${leaderboard.firstOfTheMonth.id}> is now first on the monthly leaderboard and the next candidate for the <@&${bot.settings.application.commands.ranks.firstOfTheMonthRole}> role!`,
+							content: `<@${leaderboard.eliteOfTheMonth.id}> is now first on the monthly leaderboard and the next candidate for the <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}> role!`,
 							allowedMentions: {
-								users: [leaderboard.firstOfTheMonth.id]
+								users: [leaderboard.eliteOfTheMonth.id]
 							}
 						});
 					} catch (e) {

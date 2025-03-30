@@ -16,6 +16,9 @@ class CronHandler {
 			warn: (...any) => logger.warn("[Crons]", ...any)
 		};
 
+		/**
+		 * @type {import("../types.d.ts").CronInfo[]}
+		 */
 		this.crons = [];
 		this.destroyed = false;
 	};
@@ -27,6 +30,9 @@ class CronHandler {
 		for (const file of files) {
 			const modulePath = path.join(cronsPath, file);
 			delete require.cache[require.resolve(modulePath)];
+			/**
+			 * @type {import("../types.d.ts").CronInfo}
+			 */
 			const cron = require(modulePath);
 
 			if (!cron) {

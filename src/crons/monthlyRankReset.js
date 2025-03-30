@@ -10,15 +10,15 @@ const cron = {
 	run: async (logger, bot, minutes, now) => {
 		const guild = await bot.guilds.fetch(bot.settings.application.guildId);
 		const previousLeaderboard = Rank.getLeaderboard(logger, bot);
-		const role = await guild.roles.fetch(bot.settings.application.commands.ranks.firstOfTheMonthRole);
+		const role = await guild.roles.fetch(bot.settings.application.commands.ranks.eliteOfTheMonthRole);
 
 		if (role) {
 			if (role.members) for (const member of role.members.values()) await member.roles.remove(role);
 			const channel = await guild.channels.fetch(bot.settings.application.commands.ranks.channel);
 
-			if (previousLeaderboard.firstOfTheMonth) {
+			if (previousLeaderboard.eliteOfTheMonth) {
 				try {
-					const firstMember = await guild.members.fetch(previousLeaderboard.firstOfTheMonth.id);
+					const firstMember = await guild.members.fetch(previousLeaderboard.eliteOfTheMonth.id);
 					await firstMember.roles.add(role);
 
 					if (channel && channel.isSendable()) {
@@ -26,9 +26,9 @@ const cron = {
 							const rank = Rank.get(logger, bot, firstMember.id);
 							await rank.addElite(now);
 							await channel.send({
-								content: `# New <@&${bot.settings.application.commands.ranks.firstOfTheMonthRole}>!\n<@${previousLeaderboard.firstOfTheMonth.id}> was first of the monthly leaderboard and got the <@&${bot.settings.application.commands.ranks.firstOfTheMonthRole}> role!\n\n**Send some love to <@${previousLeaderboard.firstOfTheMonth.id}> in <#${bot.settings.application.commands.ranks.defaultTextChannel}>!**\n-# <@${previousLeaderboard.firstOfTheMonth.id}> won with ${previousLeaderboard.firstOfTheMonth.points.toFixed(2)} points this month.`,
+								content: `# New <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}>!\n<@${previousLeaderboard.eliteOfTheMonth.id}> was first of the monthly leaderboard and got the <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}> role!\n\n**Send some love to <@${previousLeaderboard.eliteOfTheMonth.id}> in <#${bot.settings.application.defaultTextChannel}>!**\n-# <@${previousLeaderboard.eliteOfTheMonth.id}> won with ${previousLeaderboard.eliteOfTheMonth.points.toFixed(2)} points this month.`,
 								allowedMentions: {
-									users: [previousLeaderboard.firstOfTheMonth.id]
+									users: [previousLeaderboard.eliteOfTheMonth.id]
 								}
 							});
 						} catch (e) {

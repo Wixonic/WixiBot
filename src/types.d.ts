@@ -24,7 +24,7 @@ export interface CommandsSettings {
 			voice: number;
 			stream: number;
 		};
-		firstOfTheMonthRole: string;
+		eliteOfTheMonthRole: string;
 		roles: { [id: string]: number };
 	};
 	roles: {
@@ -108,7 +108,7 @@ export interface Leaderboard {
 	global: LeaderboardUser[];
 	month: LeaderboardUser[];
 	updatedAt: number;
-	firstOfTheMonth: LeaderboardUser | null;
+	eliteOfTheMonth: LeaderboardUser | null;
 };
 
 

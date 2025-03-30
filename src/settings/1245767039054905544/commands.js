@@ -14,7 +14,7 @@ const commandsSettings = {
 			messages: 5,
 			voice: 3 / 60
 		},
-		firstOfTheMonthRole: "1351231320721723476",
+		eliteOfTheMonthRole: "1351231320721723476",
 		roles: {
 			"1351231617045233704": 25000,
 			"1351231916560355523": 15000,

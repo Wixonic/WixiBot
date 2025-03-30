@@ -78,7 +78,7 @@ class Rank {
 			global: [],
 			month: [],
 			updatedAt: Date.now(),
-			firstOfTheMonth: null
+			eliteOfTheMonth: null
 		};
 
 		const leaderboardPath = bot.settings.paths.leaderboard(bot.settings.application.guildId);
@@ -98,7 +98,7 @@ class Rank {
 	 * @returns {import("../types.d.ts").Leaderboard}
 	 */
 	static updateLeaderboard(logger, bot) {
-		const guildPath = bot.settings.paths.rank(bot.settings.application.guildId);
+		const guildPath = bot.settings.paths.ranks(bot.settings.application.guildId);
 		const leaderboardPath = bot.settings.paths.leaderboard(bot.settings.application.guildId);
 
 		/**
@@ -108,12 +108,12 @@ class Rank {
 			global: [],
 			month: [],
 			updatedAt: Date.now(),
-			firstOfTheMonth: null
+			eliteOfTheMonth: null
 		};
 
 		if (fs.existsSync(guildPath)) {
 			for (const file of fs.readdirSync(guildPath)) {
-				if (![".DS_Store"].includes(file)) {
+				if (file.endsWith(".json")) {
 					try {
 						const rank = this.get(logger, bot, file.replace(".json", ""));
 
@@ -139,11 +139,11 @@ class Rank {
 
 			for (const user of leaderboard.month) {
 				if (user.points > 0) {
-					if (!bot.settings.application.commands.ranks.ignored.includes(user.id) && user.points > 0) {
-						leaderboard.firstOfTheMonth = user;
+					if (!bot.settings.application.commands.ranks.ignored.includes(user.id)) {
+						leaderboard.eliteOfTheMonth = user;
 						break;
 					} else logger.debug(`Ignoring user "${user.id}"`);
-				}
+				} else break;
 			}
 		}
 
@@ -388,7 +388,16 @@ class Rank {
 
 					this.roles = roles;
 				} catch {
-					this.logger.warn("Member not found:", this.memberId);
+					fs.rmSync(memberPath, "utf-8");
+					fs.writeFileSync(memberPath + ".old", JSON.stringify({
+						version: "3",
+						eliteOfTheMonth: this.eliteOfTheMonth,
+						messages: this.messages,
+						roles: this.roles,
+						voice: this.voice,
+						penalty: this.penalty
+					}), "utf-8");
+					this.logger.error("Member not found:", this.memberId);
 				}
 			} catch {
 				this.logger.warn("Guild not found:", this.bot.settings.application.guildId);
