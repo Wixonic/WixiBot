@@ -10,7 +10,7 @@ const { hexToIntColor } = require("../lib/utils.js");
 const cron = {
 	name: "Recurrent Roles",
 	priority: 0,
-	condition: (minutes, now) => minutes % 30, // Every 30 minutes
+	condition: (minutes, now) => minutes % 30 == 0, // Every 30 minutes
 	run: async (logger, bot, minutes, now) => {
 		const recurrentRolesFile = bot.settings.paths.recurrentRoles(bot.settings.application.guildId);
 		const guild = await bot.guilds.fetch(bot.settings.application.guildId);
