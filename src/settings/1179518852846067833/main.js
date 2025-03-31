@@ -2,7 +2,7 @@
  * @type {import("../../types.d.ts").MainSettings}
  */
 const mainSettings = {
-	active: false,
+	active: true,
 
 	port: 1000,
 
