@@ -90,7 +90,7 @@ const info = {
 			let currentWs = null;
 			bot.server.ws.on("connection", (ws) => {
 				ws.once("message", (data) => {
-					if (data[0] == 0x01) {
+					if (data[0] == 0x01 && data.slice(1).toString() == bot.settings.secrets.wixkey) {
 						logger.debug("Broadcasting started");
 						currentWs = ws;
 						reset();
