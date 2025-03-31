@@ -1,3 +1,4 @@
+const { MessageFlags } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
@@ -301,7 +302,8 @@ class Rank {
 						value: reason ?? "Unknown reason"
 					}]
 				}
-			]
+			],
+			flags: process.env.silent == "true" ? MessageFlags.SuppressNotifications : null
 		});
 		else logger.warn("Invalid moderation channel:", this.bot.settings.application.moderationChannel);
 
@@ -375,7 +377,8 @@ class Rank {
 										title: role.name,
 										description: `Reached ${rankSettings?.roles[role.id] ?? 0} point${(rankSettings?.roles[role.id] ?? 0) == 1 ? "" : "s"}`,
 										color: role.color
-									}]
+									}],
+									flags: process.env.silent == "true" ? MessageFlags.SuppressNotifications : null
 								});
 
 								await member.roles.add(role);

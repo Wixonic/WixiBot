@@ -15,6 +15,7 @@ export interface ApplicationSettings {
 export interface CommandsSettings {
 	giveaways: {
 		channel: string;
+		role: string;
 	};
 	ranks: {
 		channel: string;

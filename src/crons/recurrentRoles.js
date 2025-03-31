@@ -1,3 +1,4 @@
+const { MessageFlags } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
@@ -69,8 +70,10 @@ const cron = {
 						allowedMentions: settings.mentionRole ? {
 							roles: [settings.mentionRole]
 						} : {},
-						content: `Claim your <@&${newRole.id}> role now at <#${settings.channel}>!\nThis role will be available until <t:${Math.floor(to.getTime() / 1000)}:f>.${settings.mentionRole ? `\n<@&${settings.mentionRole}>` : ""}`
+						content: `Claim your <@&${newRole.id}> role now at <#${settings.channel}>!\nThis role will be available until <t:${Math.floor(to.getTime() / 1000)}:f>.${settings.mentionRole ? `\n<@&${settings.mentionRole}>` : ""}`,
+						flags: process.env.silent == "true" ? MessageFlags.SuppressNotifications : null
 					});
+
 					logger.debug(`Announcing role ${newRole.name} ${now.getUTCFullYear()}`);
 				}
 			}
@@ -78,6 +81,7 @@ const cron = {
 
 		if (newRoles.length > 0 || oldRoles.length > 0) {
 			logger.debug("Updating recurrent roles...");
+
 			await Roles.update(logger, bot);
 			if (!fs.existsSync(path.dirname(recurrentRolesFile))) fs.mkdirSync(path.dirname(recurrentRolesFile), { recursive: true });
 			fs.writeFileSync(recurrentRolesFile, JSON.stringify(list.recurrentRoles.active), "utf-8");

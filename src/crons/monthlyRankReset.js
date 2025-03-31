@@ -1,3 +1,5 @@
+const { MessageFlags } = require("discord.js");
+
 const Rank = require("../lib/rank.js");
 
 /**
@@ -26,10 +28,11 @@ const cron = {
 							const rank = Rank.get(logger, bot, firstMember.id);
 							await rank.addElite(now);
 							await channel.send({
-								content: `# New <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}>!\n<@${previousLeaderboard.eliteOfTheMonth.id}> was first of the monthly leaderboard and got the <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}> role!\n\n**Send some love to <@${previousLeaderboard.eliteOfTheMonth.id}> in <#${bot.settings.application.defaultTextChannel}>!**\n-# <@${previousLeaderboard.eliteOfTheMonth.id}> won with ${previousLeaderboard.eliteOfTheMonth.points.toFixed(2)} points this month.`,
 								allowedMentions: {
 									users: [previousLeaderboard.eliteOfTheMonth.id]
-								}
+								},
+								content: `# New <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}>!\n<@${previousLeaderboard.eliteOfTheMonth.id}> was first of the monthly leaderboard and got the <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}> role!\n\n**Send some love to <@${previousLeaderboard.eliteOfTheMonth.id}> in <#${bot.settings.application.defaultTextChannel}>!**\n-# <@${previousLeaderboard.eliteOfTheMonth.id}> won with ${previousLeaderboard.eliteOfTheMonth.points.toFixed(2)} points this month.`,
+								flags: process.env.silent == "true" ? MessageFlags.SuppressNotifications : null
 							});
 						} catch (e) {
 							logger.warn(e);

@@ -3,7 +3,8 @@
  */
 const commandsSettings = {
 	giveaways: {
-		channel: "1332713470193434635"
+		channel: "1332713470193434635",
+		role: "1355256813582553253"
 	},
 	ranks: {
 		channel: "1332713470193434635",

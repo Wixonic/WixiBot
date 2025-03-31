@@ -26,6 +26,9 @@ const cron = {
 					for (const gift of giveaway.gifts) gifts.push(gift.name);
 
 					const message = await channel.send({
+						allowedMentions: {
+							roles: [giveawaysSettings.role]
+						},
 						content: `## Giveaway\n\n- Ends: <t:${Math.floor(giveaway.endsAt / 1000)}:f>\n- Entries: **${giveaway.participants.length}**\n### Gifts\n${gifts.length > 0 ? "- " + gifts.join("\n- ") : "_No gift available right now._"}\n\n-# Giveaway #${giveaway.giveawayId} - <@&${giveawaysSettings.role}>`,
 						components: [
 							{
@@ -33,13 +36,14 @@ const cron = {
 								components: [
 									{
 										type: ComponentType.Button,
-										custom_id: `joinGiveawat${giveaway.giveawayId}`,
+										custom_id: `joinGiveaway_${giveaway.giveawayId}`,
 										label: "Join",
 										style: ButtonStyle.Primary
 									}
 								]
 							}
-						]
+						],
+						flags: process.env.silent == "true" ? MessageFlags.SuppressNotifications : null
 					});
 
 					giveaway.message = message.id;

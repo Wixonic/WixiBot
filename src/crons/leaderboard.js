@@ -1,5 +1,8 @@
-const monthlyRankResetCron = require("./monthlyRankReset.js");
+const { MessageFlags } = require("discord.js");
+
 const Rank = require("../lib/rank.js");
+
+const monthlyRankResetCron = require("./monthlyRankReset.js");
 
 /**
  * @type {import("../types.d.ts").CronInfo}
@@ -20,10 +23,11 @@ const cron = {
 				if (channel && channel.isSendable()) {
 					try {
 						await channel.send({
-							content: `<@${leaderboard.eliteOfTheMonth.id}> is now first on the monthly leaderboard and the next candidate for the <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}> role!`,
 							allowedMentions: {
 								users: [leaderboard.eliteOfTheMonth.id]
-							}
+							},
+							content: `<@${leaderboard.eliteOfTheMonth.id}> is now first on the monthly leaderboard and the next candidate for the <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}> role!`,
+							flags: process.env.silent == "true" ? MessageFlags.SuppressNotifications : null
 						});
 					} catch (e) {
 						logger.warn("Failed to send message:", e);
