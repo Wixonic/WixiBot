@@ -22,31 +22,13 @@ const listener = {
 
 				if (isTrackedGuild) {
 					/**
-					 * @param {import("discord.js").GuildMember} member
-					 * @param {import("discord.js").VoiceBasedChannel} channel
-					 */
-					const canGetPoint = (member, channel) => {
-						let count = 0;
-						let muted = 0;
-						let deafen = 0;
-						for (const channelMember of channel.members.values()) {
-							if (!channelMember.user.bot) count++;
-							if (!channelMember.user.bot && channelMember.voice.mute && !channelMember.voice.suppress) muted++;
-							if (!channelMember.user.bot && channelMember.voice.deaf) deafen++;
-						}
-
-						const valid = !member.user.bot && count > 1 && !member.voice.mute && !member.voice.deaf && (count - muted) > 1 && (count - deafen) > 1;
-						return valid;
-					};
-
-					/**
 					 * @param {import("discord.js").VoiceBasedChannel} channel
 					 */
 					const checkChannel = async (channel) => {
 						for (const member of channel.members.values()) {
 							const userRank = Rank.get(logger, bot, member.id);
 
-							if (canGetPoint(member, channel)) await userRank.voiceStart();
+							if (Rank.canGetPoint(member, channel)) await userRank.voiceStart();
 							else await userRank.voiceStop();
 						}
 					};

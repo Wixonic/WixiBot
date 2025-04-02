@@ -183,6 +183,24 @@ class Rank {
 	};
 
 	/**
+	 * @param {import("discord.js").GuildMember} member
+	 * @param {import("discord.js").VoiceBasedChannel} channel
+	 */
+	static canGetPoint(member, channel) {
+		let count = 0;
+		let muted = 0;
+		let deafen = 0;
+		for (const channelMember of channel.members.values()) {
+			if (!channelMember.user.bot) count++;
+			if (!channelMember.user.bot && channelMember.voice.mute && !channelMember.voice.suppress) muted++;
+			if (!channelMember.user.bot && channelMember.voice.deaf) deafen++;
+		}
+
+		const valid = !member.user.bot && count > 1 && !member.voice.mute && !member.voice.deaf && (count - muted) > 1 && (count - deafen) > 1;
+		return valid;
+	};
+
+	/**
 	 * @param {import("@wixonic/logger").Logger} logger
 	 * @param {import("./bot.js")} bot
 	 * @param {string} memberId
@@ -253,14 +271,13 @@ class Rank {
 	};
 
 	async voiceStart() {
-		if (this.voice.startedAt) await this.voiceStop();
 		this.voice.startedAt = Date.now();
 		this.logger.debug("Started recording voice time");
 		await this.save();
 	};
 
 	async voiceStop() {
-		if (this.voice.startedAt) {
+		if (this.voice.startedAt != null) {
 			this.voice.global += Math.ceil((Date.now() - this.voice.startedAt) / 1000);
 			this.voice.month += Math.ceil((Date.now() - this.voice.startedAt) / 1000);
 			this.voice.startedAt = null;
