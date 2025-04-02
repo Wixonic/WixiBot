@@ -23,7 +23,7 @@ const cron = {
 							try {
 								const member = await guild.members.fetch(rank.memberId);
 
-								if (rank.voice.startedAt != null && member.voice.channel && !Rank.canGetPoint(member, member.voice.channel)) {
+								if (rank.voice.startedAt != null && (!member.voice.channel || !Rank.canGetPoint(member, member.voice.channel))) {
 									logger.debug(`Voice force-stopped for "${member.displayName}" (${member.id})`);
 									await rank.voiceStop();
 								}
