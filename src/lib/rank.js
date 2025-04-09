@@ -271,7 +271,7 @@ class Rank {
 	};
 
 	async voiceStart() {
-		if (this.voice.startedAt != null) {
+		if (this.voice.startedAt == null) {
 			this.voice.startedAt = Date.now();
 			this.logger.debug("Started recording voice time");
 			await this.save();
