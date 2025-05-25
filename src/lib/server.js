@@ -45,7 +45,13 @@ class Server {
 
 		return new Promise((resolve) => {
 			this.app.use((req, res, next) => {
-				this.logger.debug(`Request: ${req.method} ${req.url}`);
+				const origin = req.headers.origin;
+				this.logger.debug(`Request: ${req.method} ${origin} | ${req.url}`);
+
+				res.setHeader("Access-Control-Allow-Origin", origin);
+				res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
+				res.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type");
+				res.setHeader("Access-Control-Allow-Credentials", "true");
 				next();
 			});
 

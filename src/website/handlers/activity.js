@@ -26,7 +26,7 @@ const info = {
 			}
 
 			if (!fs.existsSync(settings.paths.cache)) fs.mkdirSync(settings.paths.cache, { recursive: true });
-			fs.writeFileSync(path.join(settings.paths.cache, "activity.json"), Buffer.from(req.body, "base64url"));
+			fs.writeFileSync(path.join(settings.paths.cache, "activity.json"), Buffer.from(req.body, "utf-8"));
 			logger.debug("[Activity]", "Uploaded successfully");
 			res.status(204).end();
 		}
