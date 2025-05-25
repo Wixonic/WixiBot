@@ -9,7 +9,7 @@ const info = {
 	deploy: {
 		type: ApplicationCommandType.ChatInput,
 		name: "ticket",
-		description: "Publishes the ticket",
+		description: "Publishes the ticket's message",
 		default_member_permissions: PermissionFlagsBits.Administrator.toString(),
 		contexts: [
 			InteractionContextType.Guild
