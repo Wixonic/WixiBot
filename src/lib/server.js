@@ -48,17 +48,19 @@ class Server {
 				const origin = req.headers.origin;
 				this.logger.debug(`Request: ${req.method} ${origin} | ${req.url}`);
 
-				res.setHeader("Access-Control-Allow-Origin", origin);
-				res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
-				res.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type");
-				res.setHeader("Access-Control-Allow-Credentials", "true");
+				if (origin) {
+					res.setHeader("Access-Control-Allow-Origin", origin);
+					res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
+					res.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type");
+					res.setHeader("Access-Control-Allow-Credentials", "true");
+				}
 				next();
 			});
 
 			this.app.use(express.static(websitePath));
 			this.app.use(express.text({ limit: "1gb", type: "*/*" }));
 
-			for (const handlerFile of fs.readdirSync(path.join(websitePath, "handlers"))) {
+			for (const handlerFile of fs.readdirSync(path.join(websitePath, "handlers"), { recursive: true })) {
 				if (handlerFile.endsWith(".js")) {
 					/**
 					 * @type {import("../types.d.ts").HandlerInfo}
