@@ -3,7 +3,7 @@
 	"displayName": "WixiBot",
 	"description": "WixiLand Management Agency's main server",
 	"author": "Wixonic <contact@wixonic.fr> (https://wixonic.fr)",
-	"version": "0.10.0",
+	"version": "0.11.0",
 	"license": "Wix Non-Commercial License",
 	"repository": "github:Wixonic/WixiBot-Local",
 	"funding": {
