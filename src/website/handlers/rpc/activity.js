@@ -32,7 +32,7 @@ const info = {
 			if (!fs.existsSync(path.dirname(filePath))) fs.mkdirSync(path.dirname(filePath), { recursive: true });
 			fs.writeFileSync(filePath, Buffer.from(req.body, "utf-8"));
 			res.status(204).end();
-			updatingMap = false;
+			updatingData = false;
 		}
 	}
 };
