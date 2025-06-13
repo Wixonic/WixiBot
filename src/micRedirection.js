@@ -3,7 +3,7 @@ const childProcess = require("child_process");
 /**
  * @type {string[]}
  */
-const deviceList = [];
+let deviceList = [];
 
 const trimName = (name) => name.split("(")[0].replace(/\s\n\t/, " ").trim();
 
