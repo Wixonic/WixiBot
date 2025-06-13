@@ -13,14 +13,15 @@ const updateDeviceList = () => {
 		"-i", "anullsrc",
 		"-t", "0.1",
 		"-f", "audiotoolbox",
-		"-list_devices", "true",
-		""
+		"-list_devices", "true"
 	], { encoding: "utf8", stderr: "pipe" });
 
 	deviceList = [];
 	const output = result.stderr || result.stdout;
 
 	for (const match of output.matchAll(/\.*\] \[(\d+)\] (.+)/g)) deviceList[Number(match[1])] = trimName(match[2]);
+
+	console.log(output);
 };
 
 module.exports = () => {
