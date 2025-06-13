@@ -14,7 +14,7 @@ const updateDeviceList = () => {
 		"-t", "0.1",
 		"-f", "audiotoolbox",
 		"-list_devices", "true",
-		"-i", ""
+		""
 	], { encoding: "utf8", stderr: "pipe" });
 
 	deviceList = [];
