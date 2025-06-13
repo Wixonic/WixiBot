@@ -9,6 +9,9 @@ const trimName = (name) => name.split("(")[0].replace(/\s\n\t/, " ").trim();
 
 const updateDeviceList = () => {
 	const result = childProcess.spawnSync("ffmpeg", [
+		"-f", "lavfi",
+		"-i", "anullsrc",
+		"-t", "0.1",
 		"-f", "audiotoolbox",
 		"-list_devices", "true",
 		"-i", ""
