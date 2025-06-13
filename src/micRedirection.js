@@ -32,6 +32,6 @@ module.exports = () => {
 		"-loglevel", "error",
 		"-i", "udp://@:5001",
 		"-f", "coreaudio",
-		"BlackHole Microphone"
+		"-device", "BlackHole Microphone"
 	], { stdio: "inherit" });
 };
