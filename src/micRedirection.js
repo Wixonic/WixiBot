@@ -29,6 +29,10 @@ module.exports = {
 
 		childProcess.spawn("ffmpeg", [
 			"-loglevel", "error",
+			"-fflags", "+genpts+discardcorrupt+nobuffer",
+			"-flags", "low_delay",
+			"-use_wallclock_as_timestamps", "1",
+			"-avoid_negative_ts", "make_zero",
 			"-i", "udp://@:5001",
 			"-f", "audiotoolbox",
 			"-audio_device_index", deviceList.findIndex((value) => value.startsWith("BlackHole Microphone")),
