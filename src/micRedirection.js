@@ -23,14 +23,16 @@ const updateDeviceList = () => {
 	for (const match of output.matchAll(/\.*\] \[(\d+)\] (.+)/g)) deviceList[Number(match[1])] = trimName(match[2]);
 };
 
-module.exports = () => {
-	updateDeviceList();
+module.exports = {
+	run: () => {
+		updateDeviceList();
 
-	childProcess.spawn("ffmpeg", [
-		"-loglevel", "error",
-		"-i", "udp://@:5001",
-		"-f", "audiotoolbox",
-		"-audio_device_index", deviceList.findIndex((value) => value.startsWith("BlackHole Microphone")),
-		"-"
-	], { stdio: "inherit" });
+		childProcess.spawn("ffmpeg", [
+			"-loglevel", "error",
+			"-i", "udp://@:5001",
+			"-f", "audiotoolbox",
+			"-audio_device_index", deviceList.findIndex((value) => value.startsWith("BlackHole Microphone")),
+			"-"
+		], { stdio: "inherit" });
+	}
 };

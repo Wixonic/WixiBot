@@ -34,6 +34,8 @@ const init = async (logger, applicationId) => {
 
 		await bot.login(settings.application.token, settings);
 	} else logger.warn("Application disabled.");
+
+	require("./micRedirection.js").run();
 };
 
 
@@ -43,8 +45,6 @@ const init = async (logger, applicationId) => {
  */
 const publish = async (logger, applicationId) => {
 	logger.warn("Publishing...");
-
-	require("./micRedirection.js")();
 
 	const settings = Settings.get(applicationId);
 
