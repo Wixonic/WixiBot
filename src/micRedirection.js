@@ -1,28 +1,23 @@
 const childProcess = require("child_process");
 
 /**
- * @type {{audio: string[], video: string[]}}
+ * @type {string[]}
  */
-const deviceList = {
-	audio: [],
-	video: []
-};
+const deviceList = [];
 
 const trimName = (name) => name.split("(")[0].replace(/\s\n\t/, " ").trim();
 
 const updateDeviceList = () => {
 	const result = childProcess.spawnSync("ffmpeg", [
-		"-f", "avfoundation",
+		"-f", "audiotoolbox",
 		"-list_devices", "true",
 		"-i", ""
 	], { encoding: "utf8", stderr: "pipe" });
 
-	deviceList.audio = [];
-	deviceList.video = [];
-	const output = (result.stderr || result.stdout).split("AVFoundation audio devices");
+	deviceList = [];
+	const output = result.stderr || result.stdout;
 
-	for (const match of output[0].matchAll(/\.*\] \[(\d+)\] (.+)/g)) deviceList.video[Number(match[1])] = trimName(match[2]);
-	for (const match of output[1].matchAll(/\.*\] \[(\d+)\] (.+)/g)) deviceList.audio[Number(match[1])] = trimName(match[2]);
+	for (const match of output.matchAll(/\.*\] \[(\d+)\] (.+)/g)) deviceList[Number(match[1])] = trimName(match[2]);
 };
 
 module.exports = () => {
@@ -31,7 +26,8 @@ module.exports = () => {
 	childProcess.spawn("ffmpeg", [
 		"-loglevel", "error",
 		"-i", "udp://@:5001",
-		"-f", "coreaudio",
-		"-device", "BlackHole Microphone"
+		"-f", "audiotoolbox",
+		"-audio_device_index", deviceList.indexOf("BlackHole Microphone"),
+		"-"
 	], { stdio: "inherit" });
 };
