@@ -34,8 +34,6 @@ const init = async (logger, applicationId) => {
 
 		await bot.login(settings.application.token, settings);
 	} else logger.warn("Application disabled.");
-
-	require("./micRedirection.js").run();
 };
 
 
