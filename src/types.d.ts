@@ -171,7 +171,7 @@ export interface ModalInfo {
 
 export interface HandlerInfo {
 	path: string;
-	handlers: Record<string, (logger: import("@wixonic/logger").Logger, settings: MainSettings, req: Express.Request, res: Express.Response) => void>
+	handlers: Record<string, (logger: import("@wixonic/logger").Logger, settings: MainSettings, req: Express.Request, res: Express.Response, bot: import("./lib/bot.js")) => void>
 };
 
 

@@ -2,8 +2,11 @@
  * @type {import("../../../types.d.ts").HandlerInfo}
  */
 const info = {
-	path: "/discord/verify/",
+	path: "/discord/leaderboard/",
 	handlers: {
+		get: async (logger, settings, req, res) => {
+
+		}
 	}
 };
 

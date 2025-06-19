@@ -91,7 +91,7 @@ class Bot extends Client {
 			this.listenerHandler.loadListeners(this);
 
 			this.cronHandler.init(this);
-			await this.server.init(settings);
+			await this.server.init(settings, this);
 		} catch (e) {
 			this.logger.error("Failed to login:", e);
 		}

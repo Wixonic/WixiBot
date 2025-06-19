@@ -38,9 +38,10 @@ class Server {
 
 	/**
 	 * @param {import("../types.d.ts").MainSettings} settings
+	 * @param {import("./bot.js")} bot
 	 * @returns {Promise<void>}
 	 */
-	init(settings) {
+	init(settings, bot) {
 		const websitePath = path.join(__dirname, "..", "website");
 
 		return new Promise((resolve) => {
@@ -50,7 +51,7 @@ class Server {
 
 				if (origin) {
 					res.setHeader("Access-Control-Allow-Origin", origin);
-					res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
+					res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
 					res.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type");
 					res.setHeader("Access-Control-Allow-Credentials", "true");
 				}
@@ -68,7 +69,7 @@ class Server {
 					const handler = require(path.join(websitePath, "handlers", handlerFile));
 
 					for (const method in handler.handlers) {
-						this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, settings, req, res));
+						this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, settings, req, res, bot));
 						this.logger.debug("Added handler for", handlerFile.replace(".js", ""), "with method", method);
 					}
 				}

@@ -41,7 +41,7 @@ const info = {
 		const userRank = Rank.get(logger, bot, targetUser.id);
 		await interaction.followUp({
 			allowedMentions: {},
-			content: userRank.description
+			content: userRank.description + `\n-# [See more](https://server.wixonic.fr/discord/rank/?id=${targetUser.id}/)`
 		});
 	}
 };
