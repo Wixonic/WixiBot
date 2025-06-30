@@ -7,11 +7,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var backgroundTaskPID: Int32?
 
     var microphoneEnabled: Bool = true
-	var cameraEnabled: Bool = false
-    var screenEnabled: Bool = false
 	var microphoneMenuItem: NSMenuItem!
-    var cameraMenuItem: NSMenuItem!
-	var screenMenuItem: NSMenuItem!
 
 	func applicationDidFinishLaunching(_ notification: Notification) {
 		statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -22,7 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 		let menu = NSMenu()
 
-        microphoneMenuItem = NSMenuItem(title: "Microphone", action: #selector(togglemicrophone(_:)), keyEquivalent: "m")
+        microphoneMenuItem = NSMenuItem(title: "Microphone", action: #selector(toggleMicrophone(_:)), keyEquivalent: "m")
 		microphoneMenuItem.state = microphoneEnabled ? .on : .off
 		microphoneMenuItem.target = self
 		menu.addItem(microphoneMenuItem)
