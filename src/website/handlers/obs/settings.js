@@ -1,4 +1,5 @@
 const childProcess = require("child_process");
+const { log } = require("@wixonic/logger");
 
 /**
  * @type {{audio: string[], video: string[]}}
@@ -26,13 +27,13 @@ const updateDeviceList = () => {
 };
 
 /**
- * @type {{[name: string]: {spawn: (logger: import("@wixonic/logger").Logger, config: import("../types.d.ts").Config) => childProcess.ChildProcess, process: childProcess.ChildProcess?, active: boolean, name: string}}}
+ * @type {{[name: string]: {spawn: (logger: import("@wixonic/logger").Logger) => childProcess.ChildProcess, process: childProcess.ChildProcess?, active: boolean, name: string}}}
  */
 const captureProcess = {
 	microphone: {
 		active: true,
 		name: "Microphone capture",
-		spawn: (logger, config) => {
+		spawn: (logger) => {
 			logger.info("Starting process:", captureProcess.microphone.name);
 			return childProcess.spawn("ffmpeg", [
 				"-hide_banner",
@@ -66,7 +67,7 @@ const update = () => {
 	for (const cp of Object.values(captureProcess)) {
 		if (!cp.process || cp.process.killed) {
 			if (cp.active) {
-				cp.process = cp.spawn(logger, settings);
+				cp.process = cp.spawn(log);
 
 				for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
 					process.once(signal, async (reason, code) => {
