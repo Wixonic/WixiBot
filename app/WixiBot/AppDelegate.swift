@@ -6,6 +6,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var backgroundTaskProcess: Process?
     var backgroundTaskPID: Int32?
 
+    var microphoneEnabled: Bool = true
+	var cameraEnabled: Bool = false
+    var screenEnabled: Bool = false
+	var microphoneMenuItem: NSMenuItem!
+    var cameraMenuItem: NSMenuItem!
+	var screenMenuItem: NSMenuItem!
+
 	func applicationDidFinishLaunching(_ notification: Notification) {
 		statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
@@ -14,11 +21,40 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		}
 
 		let menu = NSMenu()
+
+        microphoneMenuItem = NSMenuItem(title: "Microphone", action: #selector(togglemicrophone(_:)), keyEquivalent: "m")
+		microphoneMenuItem.state = microphoneEnabled ? .on : .off
+		microphoneMenuItem.target = self
+		menu.addItem(microphoneMenuItem)
+
 		menu.addItem(NSMenuItem(title: "Quit", action: #selector(terminate), keyEquivalent: "q"))
 		statusItem.menu = menu
 
 		runZshScript()
 	}
+
+    @objc func toggleMicrophone(_ sender: NSMenuItem) {
+		microphoneEnabled.toggle()
+		microphoneMenuItem.state = microphoneEnabled ? .on : .off
+		sendToggleRequest(id: "microphone", status: microphoneEnabled)
+	}
+
+    func sendToggleRequest(id: String, status: Bool) {
+        guard let url = URL(string: "http://localhost:1000/obs/settings/?id=\(id)") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: [String: Bool] = ["status": status]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error sending toggle request for \(id):", error)
+            } else {
+                print("Sent toggle request for \(id) with status: \(status)")
+            }
+        }
+        task.resume()
+    }
 
 	@objc func terminate() {
         if let pid = backgroundTaskPID {
