@@ -31,7 +31,7 @@ const updateDeviceList = () => {
  */
 const captureProcess = {
 	microphone: {
-		active: true,
+		active: false,
 		name: "Microphone capture",
 		spawn: (logger) => {
 			logger.info("Starting process:", captureProcess.microphone.name);
