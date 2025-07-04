@@ -1,11 +1,18 @@
-## Welcome to {{GUILDNAME}}!
+# Welcome to {{GUILDNAME}}!
 
 **To keep our community thriving, please follow these guidelines:**
 
+## General Guidelines
 1. Treat **everyone** with respect—no exceptions.
 2. Adhere to Discord’s [Community Guidelines](<https://discord.com/guidelines>) and [Terms of Service](<https://discord.com/terms>).
 3. Avoid spamming mentions (\@mention spam is prohibited).
 4. If you notice any suspicious activity on the server, in direct messages, or across Discord, please report it immediately by opening a ticket in <#{{TICKETSCHANNEL}}>.
+
+## Private Channels Guidelines
+1. 
+
+## Activity Guidelines
+1. 
 
 ### Helpful Tips
 - For assistance, open a ticket in <#{{TICKETSCHANNEL}}>.

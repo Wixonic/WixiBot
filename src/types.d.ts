@@ -17,6 +17,11 @@ export interface CommandsSettings {
 		channel: string;
 		role: string;
 	};
+	privateChannels: {
+		channels: {
+			[id: string]: string
+		}
+	};
 	ranks: {
 		channel: string;
 		ignored: string[];
@@ -54,6 +59,7 @@ export interface PathsSettings {
 		ticket: string;
 	};
 	leaderboard: (guildId: string) => string;
+	privateChannel: (guildId: string, memberId: string) => string;
 	recurrentRoles: (guildId: string) => string;
 	rank: (guildId: string, memberId: string) => string;
 	ranks: (guildId: string) => string;

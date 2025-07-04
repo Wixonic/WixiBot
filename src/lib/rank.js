@@ -217,6 +217,7 @@ class Rank {
 		};
 
 		this.bot = bot;
+		this.memberId = memberId;
 
 		if (data) {
 			let converted = false;
@@ -227,8 +228,6 @@ class Rank {
 				this.logger.info(`Converting rank data for member "${memberId}"`);
 			}
 
-			this.memberId = memberId;
-
 			this.eliteOfTheMonth = data.eliteOfTheMonth;
 			this.messages = data.messages;
 			this.roles = data.roles;
@@ -237,8 +236,6 @@ class Rank {
 
 			if (converted) this.save();
 		} else {
-			this.memberId = memberId;
-
 			this.eliteOfTheMonth = [];
 			this.messages = {
 				global: 0,

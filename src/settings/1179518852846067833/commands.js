@@ -6,6 +6,11 @@ const commandsSettings = {
 		channel: "1333864397931675740",
 		role: "1334918862822576159"
 	},
+	privateChannels: {
+		channels: {
+			"1390664190137733142": "1390667206861389935"
+		}
+	},
 	ranks: {
 		channel: "1333782941095956541",
 		ignored: [
