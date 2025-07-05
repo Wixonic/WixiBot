@@ -8,11 +8,11 @@
 3. Avoid spamming mentions (\@mention spam is prohibited).
 4. If you notice any suspicious activity on the server, in direct messages, or across Discord, please report it immediately by opening a ticket in <#{{TICKETSCHANNEL}}>.
 
-## Private Channels Guidelines
-1. 
-
 ## Activity Guidelines
-1. 
+1. Do not AFK in channels to accumulate points.
+2. Do not spam messages to accumulate points.
+
+Any violation of these rules will result in the permanent removal of points.
 
 ### Helpful Tips
 - For assistance, open a ticket in <#{{TICKETSCHANNEL}}>.
