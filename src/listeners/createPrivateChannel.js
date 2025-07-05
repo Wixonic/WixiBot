@@ -31,6 +31,9 @@ const listener = {
 								parent: channels[creationChannel.id],
 								permissionOverwrites: [{
 									id: newState.guild.roles.everyone.id,
+									deny: [
+										PermissionFlagsBits.ViewChannel
+									],
 									allow: [
 										PermissionFlagsBits.ManageWebhooks,
 
@@ -51,10 +54,8 @@ const listener = {
 										PermissionFlagsBits.AddReactions,
 										PermissionFlagsBits.UseExternalEmojis,
 										PermissionFlagsBits.UseExternalStickers,
-										PermissionFlagsBits.MentionEveryone,
 										PermissionFlagsBits.ManageMessages,
 										PermissionFlagsBits.ReadMessageHistory,
-										PermissionFlagsBits.SendTTSMessages,
 										PermissionFlagsBits.SendVoiceMessages,
 										PermissionFlagsBits.SendPolls,
 
@@ -64,9 +65,6 @@ const listener = {
 										PermissionFlagsBits.UseApplicationCommands,
 										PermissionFlagsBits.UseEmbeddedActivities,
 										PermissionFlagsBits.UseExternalApps
-									],
-									deny: [
-										PermissionFlagsBits.ViewChannel
 									]
 								}, {
 									id: member.id,
