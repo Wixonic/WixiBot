@@ -1,4 +1,4 @@
-const { PermissionFlagsBits } = require("discord.js");
+const { PermissionFlagsBits, OverwriteType } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
@@ -60,14 +60,29 @@ class PrivateChannel {
 			.allow.has(PermissionFlagsBits.ViewChannel);
 	}
 
+	async getRoles() {
+		const guild = await this.bot.guilds.fetch(this.bot.settings.application.guildId);
+		const channel = await guild.channels.fetch(this.id);
+		if (!channel) return [];
+
+		return channel.permissionOverwrites.cache
+			.filter((overwrite) =>
+				overwrite.type == OverwriteType.Role &&
+				overwrite.id != guild.roles.everyone.id &&
+				overwrite.allow.has(PermissionFlagsBits.ViewChannel)
+			).map((overwrite) => overwrite.id);
+	}
+
 	async getMembers() {
 		const guild = await this.bot.guilds.fetch(this.bot.settings.application.guildId);
 		const channel = await guild.channels.fetch(this.id);
 		if (!channel) return [];
 
 		return channel.permissionOverwrites.cache
-			.filter((overwrite) => overwrite.id != guild.roles.everyone.id && overwrite.allow.has(PermissionFlagsBits.ViewChannel))
-			.map((overwrite) => overwrite.id);
+			.filter((overwrite) =>
+				overwrite.type == OverwriteType.Member &&
+				overwrite.allow.has(PermissionFlagsBits.ViewChannel)
+			).map(overwrite => overwrite.id);
 	}
 
 	async addMember(memberId) {
@@ -83,6 +98,23 @@ class PrivateChannel {
 		if (channel) {
 			await channel.permissionOverwrites.delete(memberId);
 			if (member.voice.channel?.id == channel.id) await member.voice.disconnect("Permission removed");
+		}
+	}
+
+	async addRole(roleId) {
+		const channel = await this.bot.channels.fetch(this.id);
+		if (channel) await channel.permissionOverwrites.create(roleId, { ViewChannel: true });
+	}
+
+	async removeRole(roleId) {
+		const guild = await this.bot.guilds.fetch(this.bot.settings.application.guildId);
+		const role = await guild.roles.fetch(roleId);
+		const channel = await guild.channels.fetch(this.id);
+
+		if (channel) {
+			await channel.permissionOverwrites.delete(roleId);
+
+			for (const member of role.members.values()) if (member.voice.channel?.id == channel.id) await member.voice.disconnect("Permission removed");
 		}
 	}
 

@@ -17,27 +17,65 @@ const info = {
 				name: "info",
 				description: "View details of your current private channel"
 			}, {
-				type: ApplicationCommandOptionType.Subcommand,
+				type: ApplicationCommandOptionType.SubcommandGroup,
 				name: "add",
-				description: "Invite a member to your private channel",
+				description: "Invite members to your private channel",
 				options: [
 					{
-						type: ApplicationCommandOptionType.User,
+						type: ApplicationCommandOptionType.Subcommand,
+						name: "role",
+						description: "Invite a role to your private channel",
+						options: [
+							{
+								type: ApplicationCommandOptionType.Role,
+								name: "role",
+								description: "Select the role you want to invite",
+								required: true
+							}
+						]
+					}, {
+						type: ApplicationCommandOptionType.Subcommand,
 						name: "member",
-						description: "Select the user you want to invite",
-						required: true
+						description: "Invite a member to your private channel",
+						options: [
+							{
+								type: ApplicationCommandOptionType.User,
+								name: "member",
+								description: "Select the user you want to invite",
+								required: true
+							}
+						]
 					}
 				]
 			}, {
-				type: ApplicationCommandOptionType.Subcommand,
+				type: ApplicationCommandOptionType.SubcommandGroup,
 				name: "remove",
-				description: "Revoke a member's access from your private channel",
+				description: "Revoke members' access to your private channel",
 				options: [
 					{
-						type: ApplicationCommandOptionType.User,
+						type: ApplicationCommandOptionType.Subcommand,
+						name: "role",
+						description: "Revoke a role's access to your private channel",
+						options: [
+							{
+								type: ApplicationCommandOptionType.Role,
+								name: "role",
+								description: "Select the role you want to remove",
+								required: true
+							}
+						]
+					}, {
+						type: ApplicationCommandOptionType.Subcommand,
 						name: "member",
-						description: "Select the user you want to remove",
-						required: true
+						description: "Revoke a member's access to your private channel",
+						options: [
+							{
+								type: ApplicationCommandOptionType.User,
+								name: "member",
+								description: "Select the user you want to remove",
+								required: true
+							}
+						]
 					}
 				]
 			}, {
@@ -62,55 +100,93 @@ const info = {
 
 		const privateChannel = await PrivateChannel.get(logger, bot, interaction.member.id);
 		if (privateChannel) {
+			const subcommandGroup = interaction.options.getSubcommandGroup();
 			const subcommand = interaction.options.getSubcommand();
+			const targetRole = interaction.options.getRole("role");
 			const targetUser = interaction.options.getUser("member");
 
 			const isPublic = await privateChannel.isPublic();
+			const roles = await privateChannel.getRoles();
 			const members = await privateChannel.getMembers();
 
-			switch (subcommand) {
-				case "info":
-					await interaction.followUp({
-						allowedMentions: {},
-						content: `Private channel: <#${privateChannel.id}>\nOwner: <@${privateChannel.memberId}>\nStatus: ${isPublic ? "Public" : "Restricted"}\nAllowed members:\n${members.length > 0 ? `- <@${members.join(">\n- <@")}>` : "_No members have access yet._"}`
-					});
-					break;
-
+			switch (subcommandGroup) {
 				case "add":
-					await privateChannel.addMember(targetUser);
-					await interaction.followUp({
-						allowedMentions: {},
-						content: `<@${targetUser.id}> has been added to <#${privateChannel.id}>.${isPublic ? "\n\nThis channel is currently public, so anyone can join without an invite until this channel is restricted." : ""}`
-					});
+					switch (subcommand) {
+						case "role":
+							await privateChannel.addRole(targetRole.id);
+							await interaction.followUp({
+								allowedMentions: {},
+								content: `<@&${targetRole.id}> has been added to <#${privateChannel.id}>.${isPublic ? "\n\nThis channel is currently public, so anyone can join without being added until this channel is restricted." : ""}`
+							});
+							break;
+
+						case "member":
+							await privateChannel.addMember(targetUser.id);
+							await interaction.followUp({
+								allowedMentions: {},
+								content: `<@${targetUser.id}> has been added to <#${privateChannel.id}>.${isPublic ? "\n\nThis channel is currently public, so anyone can join without being added until this channel is restricted." : ""}`
+							});
+							break;
+
+						default:
+							logger.error("Invalid subcommand:", subcommandGroup, subcommand);
+							break;
+					}
 					break;
 
 				case "remove":
-					await privateChannel.removeMember(targetUser);
-					await interaction.followUp({
-						allowedMentions: {},
-						content: `<@${targetUser.id}> has been removed from <#${privateChannel.id}>.${isPublic ? "\n\nThis channel remains public, so members can still join freely until this channel is restricted" : ""}`
-					});
-					break;
+					switch (subcommand) {
+						case "role":
+							await privateChannel.removeRole(targetRole.id);
+							await interaction.followUp({
+								allowedMentions: {},
+								content: `<@&${targetRole.id}> has been removed from <#${privateChannel.id}>.${isPublic ? "\n\nThis channel remains public, so members can still join freely until this channel is restricted" : ""}`
+							});
+							break;
 
-				case "open":
-					await privateChannel.setPublic();
-					await interaction.followUp({
-						allowedMentions: {},
-						content: `<#${privateChannel.id}> is now public. Everyone can view and join this channel.`
-					});
-					break;
+						case "member":
+							await privateChannel.removeMember(targetUser.id);
+							await interaction.followUp({
+								allowedMentions: {},
+								content: `<@${targetUser.id}> has been removed from <#${privateChannel.id}>.${isPublic ? "\n\nThis channel remains public, so members can still join freely until this channel is restricted" : ""}`
+							});
+							break;
 
-				case "restrict":
-					await privateChannel.setPrivate();
-					await interaction.followUp({
-						allowedMentions: {},
-						content: `<#${privateChannel.id}> is now restricted. Only invited members may access it.`
-					});
+						default:
+							logger.error("Invalid subcommand:", subcommandGroup, subcommand);
+							break;
+					}
 					break;
 
 				default:
-					logger.error("Invalid subcommand:", subcommand);
-					break;
+					switch (subcommand) {
+						case "info":
+							await interaction.followUp({
+								allowedMentions: {},
+								content: `### Private channel: <#${privateChannel.id}>\n- Owner: <@${privateChannel.memberId}>\n- Status: ${isPublic ? "Public" : "Restricted"}\n- Allowed roles:${roles.length > 0 ? `\n  - <@&${roles.join(">\n  - <@&")}>` : " _No roles have access yet._"}\n- Allowed members:${members.length > 0 ? `\n  - <@${members.join(">\n  - <@")}>` : " _No members have access yet._"}`
+							});
+							break;
+
+						case "open":
+							await privateChannel.setPublic();
+							await interaction.followUp({
+								allowedMentions: {},
+								content: `<#${privateChannel.id}> is now public. Everyone can view and join this channel.`
+							});
+							break;
+
+						case "restrict":
+							await privateChannel.setPrivate();
+							await interaction.followUp({
+								allowedMentions: {},
+								content: `<#${privateChannel.id}> is now restricted. Only invited members may access it.`
+							});
+							break;
+
+						default:
+							logger.error("Invalid subcommand:", subcommand);
+							break;
+					}
 			}
 		} else await interaction.followUp({
 			allowedMentions: {},
