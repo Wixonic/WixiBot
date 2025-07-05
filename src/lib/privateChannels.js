@@ -82,7 +82,7 @@ class PrivateChannel {
 			.filter((overwrite) =>
 				overwrite.type == OverwriteType.Member &&
 				overwrite.allow.has(PermissionFlagsBits.ViewChannel)
-			).map(overwrite => overwrite.id);
+			).map((overwrite) => overwrite.id);
 	}
 
 	async addMember(memberId) {
