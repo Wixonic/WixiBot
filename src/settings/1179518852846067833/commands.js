@@ -8,7 +8,7 @@ const commandsSettings = {
 	},
 	privateChannels: {
 		channels: {
-			"1390664190137733142": "1390667206861389935"
+			"1391111618145812600": "1390667206861389935"
 		}
 	},
 	ranks: {
