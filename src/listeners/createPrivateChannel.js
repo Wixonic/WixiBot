@@ -43,10 +43,6 @@ const listener = {
 										PermissionFlagsBits.UseSoundboard,
 										PermissionFlagsBits.UseExternalSounds,
 										PermissionFlagsBits.UseVAD,
-										PermissionFlagsBits.PrioritySpeaker,
-										PermissionFlagsBits.MuteMembers,
-										PermissionFlagsBits.DeafenMembers,
-										PermissionFlagsBits.MoveMembers,
 
 										PermissionFlagsBits.SendMessages,
 										PermissionFlagsBits.EmbedLinks,
@@ -54,13 +50,9 @@ const listener = {
 										PermissionFlagsBits.AddReactions,
 										PermissionFlagsBits.UseExternalEmojis,
 										PermissionFlagsBits.UseExternalStickers,
-										PermissionFlagsBits.ManageMessages,
 										PermissionFlagsBits.ReadMessageHistory,
 										PermissionFlagsBits.SendVoiceMessages,
 										PermissionFlagsBits.SendPolls,
-
-										PermissionFlagsBits.CreateEvents,
-										PermissionFlagsBits.ManageEvents,
 
 										PermissionFlagsBits.UseApplicationCommands,
 										PermissionFlagsBits.UseEmbeddedActivities,
@@ -69,7 +61,17 @@ const listener = {
 								}, {
 									id: member.id,
 									allow: [
-										PermissionFlagsBits.ViewChannel
+										PermissionFlagsBits.ViewChannel,
+										PermissionFlagsBits.PrioritySpeaker,
+
+										PermissionFlagsBits.ManageMessages,
+
+										PermissionFlagsBits.MuteMembers,
+										PermissionFlagsBits.DeafenMembers,
+										PermissionFlagsBits.MoveMembers,
+
+										PermissionFlagsBits.CreateEvents,
+										PermissionFlagsBits.ManageEvents,
 									]
 								}],
 								type: ChannelType.GuildVoice
