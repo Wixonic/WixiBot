@@ -7,7 +7,7 @@ const capture = () => {
 		"-hide_banner",
 		"-loglevel", "error",
 
-		"-fflags", "nobuffer+discardcorrupnobuffer",
+		"-fflags", "noparse+nobuffer+discardcorrup",
 		"-flags", "low_delay",
 		"-probesize", "32",
 		"-analyzeduration", "0",
