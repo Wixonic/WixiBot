@@ -7,16 +7,12 @@ const capture = () => {
 		"-hide_banner",
 		"-loglevel", "error",
 
-		"-fflags", "noparse+nobuffer+discardcorrupt",
 		"-flags", "low_delay",
+		"-fflags", "nobuffer",
 		"-flush_packets", "1",
 
 		"-f", "mpegts",
 		"-i", "udp://@:2002",
-
-		"-c:v", "mpeg2video",
-		"-skip_loop_filter", "all",
-		"-skip_frame", "nokey",
 
 		"-c:v", "libx264",
 		"-preset", "ultrafast",
