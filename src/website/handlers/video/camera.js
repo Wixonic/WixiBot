@@ -7,10 +7,12 @@ const capture = () => {
 		"-hide_banner",
 		"-loglevel", "error",
 
-		"-fflags", "nobuffer+discardcorrupt",
+		"-fflags", "nobuffer+discardcorrupnobuffer",
 		"-flags", "low_delay",
 		"-probesize", "32",
 		"-analyzeduration", "0",
+		"-flush_packets", "1",
+
 		"-i", "udp://@:2002",
 
 		"-c:v", "libx264",
@@ -20,7 +22,7 @@ const capture = () => {
 		"-pix_fmt", "yuv420p",
 
 		"-f", "mp4",
-		"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart+delay_moov",
+		"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart",
 		"pipe:1"
 	]);
 };
