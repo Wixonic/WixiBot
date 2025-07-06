@@ -1,5 +1,3 @@
-
-
 const { ComponentType, ButtonStyle } = require("discord.js");
 const Giveaway = require("../lib/giveaways.js");
 const { randomInt } = require("../lib/utils.js");

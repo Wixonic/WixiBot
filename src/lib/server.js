@@ -33,6 +33,8 @@ class Server {
 			noServer: true
 		});
 
+		this.wsHandlers = [];
+
 		this.port = settings.port;
 	};
 
@@ -69,7 +71,8 @@ class Server {
 					const handler = require(path.join(websitePath, "handlers", handlerFile));
 
 					for (const method in handler.handlers) {
-						this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, settings, req, res, bot));
+						if (method != "ws") this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, settings, req, res, bot));
+						else this.wsHandlers[handler.path] = handler.handlers.ws;
 						this.logger.debug("Added handler for", handlerFile.replace(".js", ""), "with method", method);
 					}
 				}
@@ -89,7 +92,11 @@ class Server {
 
 			this.http.on("upgrade", (req, socket, head) => {
 				this.logger.debug("Upgrading to WebSocket");
-				this.ws.handleUpgrade(req, socket, head, (ws) => this.ws.emit("connection", ws, req));
+				this.ws.handleUpgrade(req, socket, head, (ws) => {
+					this.ws.emit("connection", ws, req);
+					const handler = this.wsHandlers[req.url];
+					if (handler) handler(this.logger, settings, ws);
+				});
 			});
 
 

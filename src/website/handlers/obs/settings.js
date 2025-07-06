@@ -37,10 +37,10 @@ const captureProcess = {
 			logger.info("Starting process:", captureProcess.microphone.name);
 			return childProcess.spawn("/usr/local/ffmpeg-4.1/bin/ffmpeg", [
 				"-hide_banner",
-				"-loglevel", "info",
+				"-loglevel", "warning",
 				"-f", "avfoundation",
 				"-framerate", "60",
-				"-i", `:${deviceList.audio.indexOf("Wave Link MicrophoneFX")}`,
+				"-i", `:${deviceList.audio.indexOf("Wave Link Stream")}`,
 
 				"-filter_complex", "volume=0.5",
 				"-c:a", "aac",
@@ -86,6 +86,9 @@ const update = () => {
 
 update();
 
+/**
+ * @type {import("../../../types.d.ts").HandlerInfo}
+ */
 const info = {
 	path: "/obs/settings/",
 	handlers: {

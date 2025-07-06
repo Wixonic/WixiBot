@@ -175,9 +175,25 @@ export interface ModalInfo {
 };
 
 
+type HttpHandler = (
+	logger: Logger,
+	settings: MainSettings,
+	req: Request,
+	res: Response,
+	bot: Bot
+) => void;
+
+type WSHandler = (
+	logger: Logger,
+	settings: MainSettings,
+	ws: import("ws").WebSocket
+) => void;
+
 export interface HandlerInfo {
 	path: string;
-	handlers: Record<string, (logger: import("@wixonic/logger").Logger, settings: MainSettings, req: Express.Request, res: Express.Response, bot: import("./lib/bot.js")) => void>
+	handlers: Record<string, HttpHandler> & {
+		ws: WSHandler;
+	};
 };
 
 
