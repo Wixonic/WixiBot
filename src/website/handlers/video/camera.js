@@ -8,8 +8,10 @@ const capture = () => {
 		"-loglevel", "error",
 
 		"-flags", "low_delay",
-		"-fflags", "nobuffer",
-		"-flush_packets", "1",
+		"-fflags", "+genpts+discardcorrupt",
+		"-avioflags", "direct",
+		"-probesize", "32",
+		"-analyzeduration", "0",
 
 		"-f", "mpegts",
 		"-i", "udp://@:2002",
