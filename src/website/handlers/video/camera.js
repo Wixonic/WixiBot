@@ -1,22 +1,23 @@
 const { spawn } = require("child_process");
 
-let deviceList = [];
 let captureProcess = null;
 
 const capture = () => {
 	captureProcess = spawn("/usr/local/ffmpeg-4.1/bin/ffmpeg", [
 		"-hide_banner",
-		"-loglevel", "warning",
+		"-loglevel", "error",
+
+		"-fflags", "nobuffer+discardcorrupt",
+		"-flags", "low_delay",
+		"-probesize", "32",
+		"-analyzeduration", "0",
+
 		"-f", "mpegts",
 		"-i", "udp://@:2002",
 
-		"-flags", "low_delay",
-		"-fflags", "nobuffer",
-		"-flush_packets", "1",
-		"-muxdelay", "0",
-		"-muxpreload", "0",
+		"-c:v", "copy",
 		"-f", "mp4",
-		"-movflags", "frag_keyframe+empty_moov+default_base_moof",
+		"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart",
 		"pipe:1"
 	]);
 };
