@@ -3,19 +3,17 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 90;
 	objects = {
 
 /* Begin PBXCopyFilesBuildPhase section */
 		4B46E5402D7132B80097C0C0 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 13;
+			dstSubfolder = PlugIns;
 			files = (
 			);
 			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -34,10 +32,8 @@
 /* Begin PBXFrameworksBuildPhase section */
 		4B46E5012D7132B70097C0C0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -72,14 +68,10 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				4B46E5062D7132B70097C0C0 /* WixiBot */,
 			);
 			name = WixiBot;
-			packageProductDependencies = (
-			);
 			productName = WixiBot;
 			productReference = 4B46E5042D7132B70097C0C0 /* WixiBot.app */;
 			productType = "com.apple.product-type.application";
@@ -108,7 +100,7 @@
 			);
 			mainGroup = 4B46E4FB2D7132B70097C0C0;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 90;
 			productRefGroup = 4B46E5052D7132B70097C0C0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -121,25 +113,21 @@
 /* Begin PBXResourcesBuildPhase section */
 		4B46E5022D7132B70097C0C0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4B46E5002D7132B70097C0C0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		4B46E53E2D7132B80097C0C0 /* Debug */ = {
+		4B46E53E2D7132B80097C0C0 /* Debug configuration for PBXProject "WixiBot" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -204,7 +192,7 @@
 			};
 			name = Debug;
 		};
-		4B46E53F2D7132B80097C0C0 /* Release */ = {
+		4B46E53F2D7132B80097C0C0 /* Release configuration for PBXProject "WixiBot" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -261,17 +249,18 @@
 			};
 			name = Release;
 		};
-		4B46E5422D7132B80097C0C0 /* Debug */ = {
+		4B46E5422D7132B80097C0C0 /* Debug configuration for PBXNativeTarget "WixiBot" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_ENTITLEMENTS = WixiBot/WixiBot.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 27;
+				CURRENT_PROJECT_VERSION = 28;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 9BJ4P53PFJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -296,7 +285,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.12.3;
+				MARKETING_VERSION = 0.12.4;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -316,17 +305,18 @@
 			};
 			name = Debug;
 		};
-		4B46E5432D7132B80097C0C0 /* Release */ = {
+		4B46E5432D7132B80097C0C0 /* Release configuration for PBXNativeTarget "WixiBot" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_ENTITLEMENTS = WixiBot/WixiBot.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 27;
+				CURRENT_PROJECT_VERSION = 28;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 9BJ4P53PFJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -351,7 +341,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.12.3;
+				MARKETING_VERSION = 0.12.4;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -377,19 +367,17 @@
 		4B46E4FF2D7132B70097C0C0 /* Build configuration list for PBXProject "WixiBot" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4B46E53E2D7132B80097C0C0 /* Debug */,
-				4B46E53F2D7132B80097C0C0 /* Release */,
+				4B46E53E2D7132B80097C0C0 /* Debug configuration for PBXProject "WixiBot" */,
+				4B46E53F2D7132B80097C0C0 /* Release configuration for PBXProject "WixiBot" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		4B46E5412D7132B80097C0C0 /* Build configuration list for PBXNativeTarget "WixiBot" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4B46E5422D7132B80097C0C0 /* Debug */,
-				4B46E5432D7132B80097C0C0 /* Release */,
+				4B46E5422D7132B80097C0C0 /* Debug configuration for PBXNativeTarget "WixiBot" */,
+				4B46E5432D7132B80097C0C0 /* Release configuration for PBXNativeTarget "WixiBot" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
