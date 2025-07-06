@@ -14,7 +14,6 @@ const capture = () => {
 		"-flush_packets", "1",
 
 		"-f", "mpegts",
-		"-s", "1920x1080",
 		"-i", "udp://@:2002",
 
 		"-c:v", "libx264",
