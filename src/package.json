@@ -18,7 +18,7 @@
 		"start": "client=1179518852846067833 node --no-warnings ./main.js"
 	},
 	"engines": {
-		"node": "20"
+		"node": "24"
 	},
 	"dependencies": {
 		"@discordjs/opus": "0.10.0",
