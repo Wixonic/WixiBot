@@ -11,7 +11,7 @@ const capture = () => {
 		"-framerate", "30",
 		"-video_size", "1920x1080",
 		"-pix_fmt", "uyvy422",
-		"-i", "upd://@:2002",
+		"-i", "udp://@:2002",
 
 		"-preset", "ultrafast",
 		"-tune", "zerolatency",
@@ -50,7 +50,7 @@ const info = {
 			};
 
 			cleanup();
-			logger.info("Starting with input:", deviceList[index] ?? "unknown");
+			logger.info("Starting stream");
 			capture();
 			captureProcess.stdout.on("data", (frame) => ws.send(frame));
 			captureProcess.stderr.on("data", (e) => logger.warn(`ffmpeg: ${String(e).trim()}`));
