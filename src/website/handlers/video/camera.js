@@ -5,7 +5,7 @@ let captureProcess = null;
 const capture = () => {
 	captureProcess = spawn("/usr/local/ffmpeg-4.1/bin/ffmpeg", [
 		"-hide_banner",
-		"-loglevel", "error",
+		"-loglevel", "verbose",
 
 		"-flags", "low_delay",
 		"-fflags", "+genpts+discardcorrupt",
@@ -16,10 +16,18 @@ const capture = () => {
 		"-f", "mpegts",
 		"-i", "udp://@:2002",
 
+		"-c:v", "mpeg2video",
+		"-pixel_format", "uyvy422",
+		"-video_size", "1920x1080",
+		"-framerate", "30",
+
+		"-vsync", "0",
+		"-max_error_rate", "1.0",
+		"-err_detect", "ignore_err",
+
 		"-c:v", "libx264",
 		"-preset", "ultrafast",
 		"-tune", "zerolatency",
-		"-crf", "25",
 		"-pix_fmt", "yuv420p",
 
 		"-f", "mp4",
