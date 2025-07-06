@@ -89,41 +89,37 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	}
 
 	func runZshScript() {
-        let shellCommand = """
-        source ~/.zprofile
-        cd ~/Documents/GitHub/WixiBot/src
-        mkdir -p ~/WixiBot/logs/
-        touch ~/WixiBot/logs/server.log
-        nohup npm run test >> ~/WixiBot/logs/server.log 2>&1 &
-        echo $! # Output the PID of the background process
-        """
-
         let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        task.arguments = ["-c", shellCommand]
-        task.currentDirectoryURL = URL(fileURLWithPath: "/Users/\(NSUserName())")
+        task.executableURL = URL(fileURLWithPath: "/opt/homebrew/bin/npm")
+        task.arguments = ["run", "test"]
+        task.currentDirectoryURL = URL(fileURLWithPath: "/Users/\(NSUserName())/Documents/GitHub/WixiBot/src")
 
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        task.standardError = pipe
+        var currentEnv = ProcessInfo.processInfo.environment
+        let customPaths = "/usr/local/ffmpeg-4.1/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin"
 
+        if let userPath = currentEnv["PATH"] {
+            currentEnv["PATH"] = userPath + ":" + customPaths
+        }
+
+        task.environment = currentEnv
+
+        let logURL = URL(fileURLWithPath: "/Users/\(NSUserName())/WixiBot/logs/server.log")
+        FileManager.default.createFile(atPath: logURL.path, contents: nil, attributes: nil)
+
+        if let fileHandle = try? FileHandle(forWritingTo: logURL) {
+            task.standardOutput = fileHandle
+            task.standardError = fileHandle
+        }
+		
         do {
             try task.run()
+            backgroundTaskPID = task.processIdentifier
+            backgroundTaskProcess = task
+            print("Started npm run start with PID: \(task.processIdentifier)")
         } catch {
-            print("Failed to run background script:", error)
-            return
+            print("Failed to run npm:", error)
         }
-
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        if let pidString = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
-           let pid = Int32(pidString) {
-            print("Started background process with PID: \(pid)")
-            backgroundTaskPID = pid
-        } else {
-            print("Could not obtain PID of background process.")
-        }
-        backgroundTaskProcess = task
-	}
+    }
 
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
 		return false
