@@ -6,13 +6,14 @@ const capture = () => {
 	captureProcess = spawn("/usr/local/ffmpeg-4.1/bin/ffmpeg", [
 		"-hide_banner",
 		"-loglevel", "warning",
+		"-i", "udp://@:2002",
 
 		"-c", "copy",
 
 		"-f", "mp4",
 		"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart",
 		"pipe:1"
-	]);
+	], { stdio: "inherit" });
 };
 
 /**
