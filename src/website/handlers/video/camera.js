@@ -7,7 +7,7 @@ const capture = () => {
 		"-hide_banner",
 		"-loglevel", "warning",
 
-		"-f", "h264",
+		"-f", "mpegts",
 		"-i", "udp://@:2002",
 
 		"-c", "copy",
