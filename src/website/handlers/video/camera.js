@@ -1,24 +1,9 @@
-const { spawn, spawnSync } = require("child_process");
+const { spawn } = require("child_process");
 
 let deviceList = [];
 let captureProcess = null;
 
-const trimName = (name) => name.split("(")[0].replace(/\s\n\t/, " ").trim();
-
-const updateDeviceList = () => {
-	const result = spawnSync("/usr/local/ffmpeg-4.1/bin/ffmpeg", [
-		"-f", "avfoundation",
-		"-list_devices", "true",
-		"-i", ""
-	], { encoding: "utf8", stderr: "pipe" });
-
-	deviceList = [];
-	const output = result.stderr || result.stdout;
-
-	for (const match of output.split("AVFoundation audio devices")[0].matchAll(/\.*\] \[(\d+)\] (.+)/g)) deviceList[Number(match[1])] = trimName(match[2]);
-};
-
-const capture = (index) => {
+const capture = () => {
 	captureProcess = spawn("/usr/local/ffmpeg-4.1/bin/ffmpeg", [
 		"-hide_banner",
 		"-loglevel", "warning",
@@ -64,27 +49,13 @@ const info = {
 				}
 			};
 
-			ws.once("message", (nameData) => {
-				updateDeviceList();
-
-				const name = trimName(nameData.toString());
-
-				let index = 0;
-				for (const id in deviceList) {
-					if (deviceList[id] == name) {
-						index = id;
-						break;
-					}
-				}
-
-				cleanup();
-				logger.info("Starting with input:", deviceList[index] ?? "unknown");
-				capture(`${index}:`);
-				captureProcess.stdout.on("data", (frame) => ws.send(frame));
-				captureProcess.stderr.on("data", (e) => logger.warn(`ffmpeg: ${String(e).trim()}`));
-				captureProcess.on("error", (e) => logger.error(`ffmpeg error: ${e.message}`));
-				captureProcess.on("exit", () => cleanup());
-			});
+			cleanup();
+			logger.info("Starting with input:", deviceList[index] ?? "unknown");
+			capture();
+			captureProcess.stdout.on("data", (frame) => ws.send(frame));
+			captureProcess.stderr.on("data", (e) => logger.warn(`ffmpeg: ${String(e).trim()}`));
+			captureProcess.on("error", (e) => logger.error(`ffmpeg error: ${e.message}`));
+			captureProcess.on("exit", () => cleanup());
 
 			ws.on("error", (e) => {
 				logger.warn(`WebSocket error: ${e.message}`);
