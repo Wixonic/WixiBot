@@ -91,7 +91,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	func runZshScript() {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/opt/homebrew/bin/npm")
-        task.arguments = ["run", "test"]
+        task.arguments = ["run", "start"]
         task.currentDirectoryURL = URL(fileURLWithPath: "/Users/\(NSUserName())/Documents/GitHub/WixiBot/src")
 
         var currentEnv = ProcessInfo.processInfo.environment
