@@ -7,23 +7,7 @@ const capture = () => {
 		"-hide_banner",
 		"-loglevel", "verbose",
 
-		"-flags", "low_delay",
-		"-fflags", "+genpts+discardcorrupt",
-		"-avioflags", "direct",
-		"-probesize", "32",
-		"-analyzeduration", "0",
-
-		"-f", "mpegts",
 		"-i", "udp://@:2002",
-
-		"-c:v", "mpeg2video",
-		"-pixel_format", "uyvy422",
-		"-video_size", "1920x1080",
-		"-framerate", "30",
-
-		"-vsync", "0",
-		"-max_error_rate", "1.0",
-		"-err_detect", "ignore_err",
 
 		"-c:v", "libx264",
 		"-preset", "ultrafast",
