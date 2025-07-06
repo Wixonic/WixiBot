@@ -91,7 +91,7 @@ class Server {
 			this.http.on("request", this.app);
 
 			this.http.on("upgrade", (req, socket, head) => {
-				this.logger.debug("Upgrading to WebSocket");
+				this.logger.debug("Upgrading to WebSocket at:", req.url ?? "unknown URL");
 				this.ws.handleUpgrade(req, socket, head, (ws) => {
 					this.ws.emit("connection", ws, req);
 					const handler = this.wsHandlers[req.url];

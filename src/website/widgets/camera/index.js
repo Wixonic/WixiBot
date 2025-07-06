@@ -161,7 +161,7 @@ const loop = async () => {
 		ctx2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
 		ctx2D.save();
 		ctx2D.scale(-1, 1);
-		// ctx2D.drawImage(video, 0, 0, -canvas2D.width, canvas2D.height);
+		ctx2D.drawImage(video, 0, 0, -canvas2D.width, canvas2D.height);
 		ctx2D.restore();
 
 		if (now - lastDetect >= 1000 / FACE_DETECTION_FPS) {
