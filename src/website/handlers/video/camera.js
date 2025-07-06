@@ -6,6 +6,8 @@ const capture = () => {
 	captureProcess = spawn("/usr/local/ffmpeg-4.1/bin/ffmpeg", [
 		"-hide_banner",
 		"-loglevel", "warning",
+
+		"-f", "h264",
 		"-i", "udp://@:2002",
 
 		"-c", "copy",
