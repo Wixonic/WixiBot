@@ -5,9 +5,10 @@ let captureProcess = null;
 const capture = () => {
 	captureProcess = spawn("/usr/local/ffmpeg-4.1/bin/ffmpeg", [
 		"-hide_banner",
-		"-loglevel", "verbose",
+		"-loglevel", "debug",
 
-		"-framerate", "30",
+		"-f", "mpegts",
+		"-r", "30",
 		"-i", "udp://@:2002",
 
 		"-c:v", "libx264",
