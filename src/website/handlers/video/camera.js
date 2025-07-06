@@ -9,12 +9,14 @@ const capture = () => {
 
 		"-fflags", "noparse+nobuffer+discardcorrupt",
 		"-flags", "low_delay",
-		"-probesize", "32",
-		"-analyzeduration", "0",
 		"-flush_packets", "1",
 
 		"-f", "mpegts",
 		"-i", "udp://@:2002",
+
+		"-c:v", "mpeg2video",
+		"-skip_loop_filter", "all",
+		"-skip_frame", "nokey",
 
 		"-c:v", "libx264",
 		"-preset", "ultrafast",
