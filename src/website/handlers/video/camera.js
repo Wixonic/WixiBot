@@ -11,13 +11,16 @@ const capture = () => {
 		"-flags", "low_delay",
 		"-probesize", "32",
 		"-analyzeduration", "0",
-
-		"-f", "mpegts",
 		"-i", "udp://@:2002",
 
-		"-c:v", "copy",
+		"-c:v", "libx264",
+		"-preset", "ultrafast",
+		"-tune", "zerolatency",
+		"-crf", "25",
+		"-pix_fmt", "yuv420p",
+
 		"-f", "mp4",
-		"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart",
+		"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart+delay_moov",
 		"pipe:1"
 	]);
 };
