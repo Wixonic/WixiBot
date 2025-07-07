@@ -1,4 +1,4 @@
-const { ApplicationCommandType, MessageFlags, ApplicationCommandOptionType } = require("discord.js");
+const { ApplicationCommandType, ApplicationCommandOptionType, InteractionContextType, MessageFlags } = require("discord.js");
 
 const PrivateChannel = require("../lib/privateChannels.js");
 
@@ -11,6 +11,9 @@ const info = {
 		type: ApplicationCommandType.ChatInput,
 		name: "private-channels",
 		description: "Manage your private channel in the server",
+		contexts: [
+			InteractionContextType.Guild
+		],
 		options: [
 			{
 				type: ApplicationCommandOptionType.Subcommand,
