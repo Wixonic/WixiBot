@@ -9,9 +9,7 @@ const FACE_DETECTION_FPS = 30;
 let canvas2D, ctx2D;
 let canvas3D;
 
-let video, mediaSource, sourceBuffer;
-
-let ws;
+let ws, decoder, currentFrame;
 
 let scene, camera, renderer;
 let ambientLight, primaryDirectionalLight, secondaryDirectionalLight;
@@ -92,55 +90,76 @@ const initCanvas = async () => {
 		canvas3D.height = canvas2D.height = height * devicePixelRatio;
 	};
 
-	video = document.querySelector("video");
-	video.addEventListener("loadedmetadata", async () => {
-		await video.play();
-		resize();
-	});
-
 	resize();
 	window.addEventListener("resize", resize);
+};
+
+const initModels = async () => {
+	try {
+		const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm");
+
+		models.faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+			baseOptions: {
+				modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task",
+				delegate: "CPU"
+			},
+			numFaces: 1,
+			runningMode: "VIDEO",
+			outputFaceBlendshapes: true,
+			outputFacialTransformationMatrixes: true
+		});
+	} catch (e) {
+		console.error("Models initialization failed:", e);
+		setTimeout(initModels, 3000);
+	}
+};
+
+const initEncoder = () => {
+	if (decoder) decoder.close();
+
+	decoder = new VideoDecoder({
+		output: (frame) => {
+			if (currentFrame instanceof VideoFrame) currentFrame.close();
+			currentFrame = frame;
+		},
+		error: (e) => {
+			console.error("Decoder error:", e);
+			initEncoder();
+		}
+	});
+
+	decoder.configure({
+		codec: "avc1.64001f",
+		optimizeForLatency: true,
+		hardwareAcceleration: "prefer-hardware"
+	});
 };
 
 const connect = async () => {
 	ws = new WebSocket(SERVER_URL);
 	ws.binaryType = "arraybuffer";
 
-	ws.addEventListener("open", () => {
-		console.log("Initializing media source...");
+	ws.addEventListener("message", (event) => {
+		const data = new Uint8Array(event.data);
 
-		mediaSource = new MediaSource();
-
-		mediaSource.addEventListener("sourceopen", () => {
-			console.log("Initializing source buffer...");
-
-			sourceBuffer = mediaSource.addSourceBuffer(`video/mp4; codecs="mp4a.40.2"`);
-
-			mediaSource.duration = Infinity;
-			sourceBuffer.mode = "sequence";
-
-			let queue = [];
-			let updating = false;
-
-			sourceBuffer.addEventListener("updateend", () => {
-				updating = false;
-				if (queue.length > 0) {
-					updating = true;
-					sourceBuffer.appendBuffer(queue.shift());
+		let isKeyFrame = false;
+		if (data.length > 4) {
+			for (let i = 0; i < data.length - 4; i++) {
+				if (data[i] === 0x00 && data[i + 1] === 0x00 && data[i + 2] === 0x00 && data[i + 3] === 0x01) {
+					const nalType = data[i + 4] & 0x1F;
+					isKeyFrame = (nalType === 5 || nalType === 7);
+					break;
 				}
-			});
+			}
+		}
 
-			ws.addEventListener("message", (event) => {
-				const chunk = new Uint8Array(event.data);
-				if (updating || sourceBuffer.updating || mediaSource.readyState != "open") queue.push(chunk);
-				else {
-					updating = true;
-					sourceBuffer.appendBuffer(chunk);
-				}
-			});
+		const chunk = new EncodedVideoChunk({
+			type: isKeyFrame ? "key" : "delta",
+			timestamp: performance.now(),
+			data
 		});
 
-		video.src = URL.createObjectURL(mediaSource);
+		decoder.decode(chunk);
 	});
 
 	ws.addEventListener("close", reconnect);
@@ -157,18 +176,18 @@ const loop = async () => {
 	const delta = (now - lastFrame) / 1000;
 	lastFrame = now;
 
-	if (video.readyState >= 2) {
-		ctx2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+	ctx2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+	if (currentFrame instanceof VideoFrame) {
 		ctx2D.save();
 		ctx2D.scale(-1, 1);
-		ctx2D.drawImage(video, 0, 0, -canvas2D.width, canvas2D.height);
+		ctx2D.drawImage(currentFrame, 0, 0, canvas2D.width, canvas2D.height);
 		ctx2D.restore();
 
 		if (now - lastDetect >= 1000 / FACE_DETECTION_FPS) {
 			lastDetect = now;
 
 			try {
-				models.faceLandmarker.result = await models.faceLandmarker.detectForVideo(video, performance.now());
+				models.faceLandmarker.result = await models.faceLandmarker.detect(currentFrame);
 			} catch (e) {
 				console.warn("Face landmarker error:", e);
 			}
@@ -270,7 +289,7 @@ const loop = async () => {
 				for (const landmark of [
 					{ x: leftEyeRange.leftAndRightMiddle.x, y: leftEyeRange.topAndBottomMiddle.y },
 					leftEyeRange.top, leftEyeRange.left, leftEyeRange.bottom, leftEyeRange.right,
-	
+		
 					{ x: rightEyeRange.leftAndRightMiddle.x, y: rightEyeRange.topAndBottomMiddle.y },
 					rightEyeRange.top, rightEyeRange.left, rightEyeRange.bottom, rightEyeRange.right,
 				]) {
@@ -327,7 +346,7 @@ const loop = async () => {
 		ctx2D.fillStyle = "white";
 		ctx2D.font = `${4 * scale}px Arial`;
 		ctx2D.fillText(log.join(" · "), 0, 5 * scale);
-	};
+	}
 
 	const eyeBaseCoeff = 0.1;
 	const headPositionBaseCoeff = 0.05;
@@ -347,29 +366,10 @@ const loop = async () => {
 	requestAnimationFrame(loop);
 };
 
-const initModels = async () => {
-	try {
-		const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm");
-
-		models.faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-			baseOptions: {
-				modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task",
-				delegate: "CPU"
-			},
-			numFaces: 1,
-			runningMode: "VIDEO",
-			outputFaceBlendshapes: true,
-			outputFacialTransformationMatrixes: true
-		});
-	} catch (e) {
-		console.error("Models initialization failed:", e);
-		setTimeout(initModels, 3000);
-	}
-};
-
 addEventListener("DOMContentLoaded", async () => {
 	await initCanvas();
+	await initModels();
+	initEncoder();
 	await connect();
-	initModels();
 	loop();
 });

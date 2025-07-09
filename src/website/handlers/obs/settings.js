@@ -54,7 +54,7 @@ const captureProcess = {
 				"-muxdelay", "0",
 				"-muxpreload", "0",
 				"-f", "mpegts",
-				`udp://192.168.1.43:2003`
+				`udp://10.0.0.2:2003`
 			], { stdio: "inherit" });
 		},
 		process: null

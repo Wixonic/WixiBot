@@ -7,13 +7,16 @@ const capture = () => {
 		"-hide_banner",
 		"-loglevel", "warning",
 
+		"-fflags", "nobuffer+genpts",
+		"-flags", "low_delay",
+
 		"-f", "mpegts",
-		"-i", "udp://@:2002",
+		"-i", "udp://:2002",
 
-		"-c", "copy",
+		"-c:v", "copy",
+		"-bsf:v", "h264_mp4toannexb",
 
-		"-f", "mp4",
-		"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart",
+		"-f", "h264",
 		"pipe:1"
 	]);
 };
@@ -36,8 +39,8 @@ const info = {
 			cleanup();
 			logger.info("Starting stream");
 			capture();
-			captureProcess.stdout.on("data", (frame) => ws.send(frame));
-			captureProcess.stderr.on("data", (e) => logger.warn(`ffmpeg: ${String(e).trim()}`));
+			captureProcess.stdout.on("data", (data) => ws.send(data));
+			captureProcess.stderr.on("data", (data) => logger.warn(`ffmpeg: ${data.toString().trim()}`));
 			captureProcess.on("error", (e) => logger.error(`ffmpeg error: ${e.message}`));
 			captureProcess.on("exit", () => cleanup());
 
