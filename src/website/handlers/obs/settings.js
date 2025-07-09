@@ -31,7 +31,7 @@ const updateDeviceList = () => {
  */
 const captureProcess = {
 	microphone: {
-		active: false,
+		active: true,
 		name: "Microphone capture",
 		spawn: (logger) => {
 			logger.info("Starting process:", captureProcess.microphone.name);
@@ -41,6 +41,8 @@ const captureProcess = {
 				"-f", "avfoundation",
 				"-framerate", "60",
 				"-i", `:${deviceList.audio.indexOf("Wave Link Stream")}`,
+
+				"-vn",
 
 				"-filter_complex", "volume=0.5",
 				"-c:a", "aac",
