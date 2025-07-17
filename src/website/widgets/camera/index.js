@@ -124,12 +124,13 @@ const initEncoder = () => {
 		},
 		error: (e) => {
 			console.error("Decoder error:", e);
+			if (decoder.state != "closed") decoder.close();
 			initEncoder();
 		}
 	});
 
 	decoder.configure({
-		codec: "avc1.64001f",
+		codec: "avc1.64001F",
 		optimizeForLatency: true,
 		hardwareAcceleration: "prefer-hardware"
 	});
