@@ -9,12 +9,14 @@ const FACE_DETECTION_FPS = 30;
 let canvas2D, ctx2D;
 let canvas3D;
 
-let ws, decoder, currentFrame;
+let ws, video, mediaSource, sourceBuffer;
+const bufferQueue = [];
+let isAppending = false;
 
 let scene, camera, renderer;
 let ambientLight, primaryDirectionalLight, secondaryDirectionalLight;
 
-let head, leftEye, rightEye, body, leftArm, rightArm;
+let head, leftEye, rightEye;
 const eyeMaterials = [];
 let headTargetPosition, headTargetQuaternion, leftEyeTargetPosition, rightEyeTargetPosition;
 
@@ -25,6 +27,10 @@ const initCanvas = async () => {
 	canvas2D = document.querySelector("#canvas2D");
 	ctx2D = canvas2D.getContext("2d");
 	canvas3D = document.querySelector("#canvas3D");
+
+	video = document.querySelector("video");
+	video.addEventListener("loadedmetadata", () => video.play());
+	video.addEventListener("error", (event) => console.error(event.error));
 
 	scene = new THREE.Scene();
 	renderer = new THREE.WebGLRenderer({ canvas: canvas3D, antialias: true });
@@ -114,25 +120,61 @@ const initModels = async () => {
 	}
 };
 
-const initEncoder = () => {
-	if (decoder) decoder.close();
+const MAX_QUEUE_SIZE = 50;
+const processBufferQueue = () => {
+	if (!sourceBuffer || sourceBuffer.updating || isAppending || bufferQueue.length == 0 || mediaSource.readyState != "open") return;
 
-	decoder = new VideoDecoder({
-		output: (frame) => {
-			if (currentFrame instanceof VideoFrame) currentFrame.close();
-			currentFrame = frame;
-		},
-		error: (e) => {
-			console.error("Decoder error:", e);
-			if (decoder.state != "closed") decoder.close();
-			initEncoder();
+	isAppending = true;
+
+	try {
+		const data = bufferQueue.shift();
+		sourceBuffer.appendBuffer(data);
+	} catch (e) {
+		console.error("AppendBuffer error - resetting:", e);
+		isAppending = false;
+		mediaSource.endOfStream();
+		initEncoder();
+	}
+};
+
+const initEncoder = () => {
+	if (mediaSource && mediaSource.readyState === "open") {
+		mediaSource.endOfStream();
+		mediaSource = null;
+	}
+
+	mediaSource = new MediaSource();
+	video.src = URL.createObjectURL(mediaSource);
+	video.load();
+
+	mediaSource.addEventListener("sourceopen", async () => {
+		console.log("MediaSource opened");
+
+		try {
+			sourceBuffer = mediaSource.addSourceBuffer(`video/mp2t; codecs="avc1.42E01E"`);
+			sourceBuffer.mode = "sequence";
+
+			sourceBuffer.addEventListener("updateend", () => {
+				isAppending = false;
+				if (bufferQueue.length > 0) processBufferQueue();
+			});
+
+			sourceBuffer.addEventListener("error", (error) => {
+				console.error("SourceBuffer fatal error:", error);
+				mediaSource.endOfStream();
+				reconnect();
+			});
+
+			await connect();
+		} catch (e) {
+			console.error("SourceBuffer creation failed:", e);
+			reconnect();
 		}
 	});
 
-	decoder.configure({
-		codec: "avc1.64001F",
-		optimizeForLatency: true,
-		hardwareAcceleration: "prefer-hardware"
+	mediaSource.addEventListener("sourceended", () => {
+		console.warn("MediaSource ended - reinitializing");
+		reconnect();
 	});
 };
 
@@ -141,34 +183,21 @@ const connect = async () => {
 	ws.binaryType = "arraybuffer";
 
 	ws.addEventListener("message", (event) => {
-		const data = new Uint8Array(event.data);
-
-		let isKeyFrame = false;
-		if (data.length > 4) {
-			for (let i = 0; i < data.length - 4; i++) {
-				if (data[i] === 0x00 && data[i + 1] === 0x00 && data[i + 2] === 0x00 && data[i + 3] === 0x01) {
-					const nalType = data[i + 4] & 0x1F;
-					isKeyFrame = (nalType === 5 || nalType === 7);
-					break;
-				}
-			}
+		if (bufferQueue.length < 50) {
+			bufferQueue.push(new Uint8Array(event.data));
+		} else {
+			console.warn("Buffer overflow - dropping frame");
 		}
 
-		const chunk = new EncodedVideoChunk({
-			type: isKeyFrame ? "key" : "delta",
-			timestamp: performance.now(),
-			data
-		});
-
-		decoder.decode(chunk);
+		if (!isAppending) processBufferQueue();
 	});
 
 	ws.addEventListener("close", reconnect);
 };
 
 const reconnect = async () => {
-	await new Promise(resolve => setTimeout(resolve, 2000));
-	await connect();
+	await new Promise(resolve => setTimeout(resolve, 1000));
+	initEncoder();
 };
 
 let lastFrame = performance.now();
@@ -177,21 +206,21 @@ const loop = async () => {
 	const delta = (now - lastFrame) / 1000;
 	lastFrame = now;
 
-	ctx2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
-	if (currentFrame instanceof VideoFrame) {
+	if (video) {
+		ctx2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
 		ctx2D.save();
 		ctx2D.scale(-1, 1);
-		ctx2D.drawImage(currentFrame, 0, 0, canvas2D.width, canvas2D.height);
+		ctx2D.drawImage(video, 0, 0, canvas2D.width, canvas2D.height);
 		ctx2D.restore();
 
 		if (now - lastDetect >= 1000 / FACE_DETECTION_FPS) {
 			lastDetect = now;
 
-			try {
-				models.faceLandmarker.result = await models.faceLandmarker.detect(currentFrame);
+			/* try {
+				models.faceLandmarker.result = await models.faceLandmarker.detectForVideo(video);
 			} catch (e) {
 				console.warn("Face landmarker error:", e);
-			}
+			} */
 		}
 
 		const scale = Math.min(canvas2D.width, canvas2D.height) / 500 * devicePixelRatio;
@@ -371,6 +400,5 @@ addEventListener("DOMContentLoaded", async () => {
 	await initCanvas();
 	await initModels();
 	initEncoder();
-	await connect();
 	loop();
 });
