@@ -44,7 +44,6 @@ const captureProcess = {
 
 				"-vn",
 
-				"-filter_complex", "volume=0.5",
 				"-c:a", "aac",
 				"-b:a", "320k",
 				"-ac", "2",
@@ -52,9 +51,6 @@ const captureProcess = {
 
 				"-flags", "low_delay",
 				"-fflags", "nobuffer",
-				"-flush_packets", "1",
-				"-muxdelay", "0",
-				"-muxpreload", "0",
 				"-f", "mpegts",
 				`udp://10.0.0.2:2003`
 			], { stdio: "inherit" });
