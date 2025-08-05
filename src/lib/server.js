@@ -1,5 +1,6 @@
 const express = require("express");
 const fs = require("fs");
+const http = require("http");
 const https = require("https");
 const path = require("path");
 const ws = require("ws");
@@ -10,9 +11,7 @@ class Server {
 	 * @param {import("../types.d.ts").MainSettings} settings
 	 */
 	constructor(logger, settings) {
-		/**
-		 * @type {import("@wixonic/logger").Logger}
-		 */
+		/** @type {import("@wixonic/logger").Logger} */
 		this.logger = {
 			debug: (...any) => logger.debug("[Server]", ...any),
 			error: (...any) => logger.error("[Server]", ...any),
@@ -24,7 +23,10 @@ class Server {
 
 		this.app = express();
 
-		this.http = https.createServer({
+		this.logger.debug(`Dev: ${process.env.dev == "true"}`);
+
+		/** @type {https.Server} */
+		this.http = process.env.dev == "true" ? http.createServer() : https.createServer({
 			cert: fs.readFileSync(settings.secrets.server.cert),
 			key: fs.readFileSync(settings.secrets.server.key)
 		});
@@ -65,9 +67,7 @@ class Server {
 
 			for (const handlerFile of fs.readdirSync(path.join(websitePath, "handlers"), { recursive: true })) {
 				if (handlerFile.endsWith(".js")) {
-					/**
-					 * @type {import("../types.d.ts").HandlerInfo}
-					 */
+					/** @type {import("../types.d.ts").HandlerInfo} */
 					const handler = require(path.join(websitePath, "handlers", handlerFile));
 
 					for (const method in handler.handlers) {
@@ -80,7 +80,7 @@ class Server {
 
 			this.app.use((req, res) => {
 				this.logger.warn(`404: ${req.method} ${req.url}`);
-				res.status(404).sendFile(path.join(websitePath, "404.html"));
+				res.status(404).sendFile(path.join(websitePath, "lib", "404.html"));
 			});
 
 
