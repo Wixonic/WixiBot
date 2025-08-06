@@ -80,6 +80,9 @@ const sendLongMessage = async (handler, options) => {
 	});
 };
 
+const packageData = require("../package.json");
+const userAgent = () => `${packageData.displayName} (v${packageData.version})`;
+
 /**
  * @param {number} milliseconds
  * @returns {Promise<void>}
@@ -92,5 +95,6 @@ module.exports = {
 	hexToIntColor,
 	randomInt,
 	sendLongMessage,
+	userAgent,
 	wait
 };
