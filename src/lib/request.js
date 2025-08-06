@@ -26,7 +26,7 @@ const request = (logger, options = {}) => {
 				auth: options.auth,
 				headers: options.headers,
 				method: options.method,
-				rejectUnauthorized: false,
+				rejectUnauthorized: options.rejectUnauthorized ?? false,
 				timeout: 10000
 			});
 
@@ -49,14 +49,15 @@ const request = (logger, options = {}) => {
 					else {
 						const chunks = [];
 
-						const reject = (reason = "Unknown reason") => {
+						const reject = (reason = "Unknown reason", response) => {
 							logger.debug("[Request]", "Rejected while response:", reason);
 
 							res.removeAllListeners();
 							req.removeAllListeners();
 
 							resolve({
-								error: reason
+								error: reason,
+								response
 							});
 						};
 
@@ -65,32 +66,36 @@ const request = (logger, options = {}) => {
 
 						res.on("data", (chunk) => chunks.push(chunk));
 						res.on("end", () => {
-							if (String(res.statusCode).startsWith("2")) {
-								res.removeAllListeners();
-								req.removeAllListeners();
 
-								switch (options.type) {
-									case "json":
-										try {
-											resolve(JSON.parse(chunks.join("")));
-										} catch {
-											reject("Failed to parse JSON");
-										}
-										break;
+							res.removeAllListeners();
+							req.removeAllListeners();
 
-									case "raw":
-										resolve(chunks);
-										break;
+							switch (options.type) {
+								case "json":
+									let json = "";
+									try {
+										json = JSON.parse(chunks.join(""));
+									} catch {
+										reject("Failed to parse JSON", chunks.join(""));
+									}
+									if (String(res.statusCode).startsWith("2")) resolve(json);
+									else reject(`Status: ${res.statusCode}`, json);
+									break;
 
-									case "text":
-										resolve(chunks.join(""));
-										break;
+								case "raw":
+									if (String(res.statusCode).startsWith("2")) resolve(chunks);
+									else reject(`Status: ${res.statusCode}`, chunks);
+									break;
 
-									default:
-										reject(`Invalid type: ${options.type ?? "<empty>"}`);
-										break;
-								}
-							} else reject(`Status: ${res.statusCode}`);
+								case "text":
+									if (String(res.statusCode).startsWith("2")) resolve(chunks.join(""));
+									else reject(`Status: ${res.statusCode}`, chunks.join(""));
+									break;
+
+								default:
+									reject(`Invalid type: ${options.type ?? "<empty>"}`, chunks.join(""));
+									break;
+							}
 						});
 					}
 				});
