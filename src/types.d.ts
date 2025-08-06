@@ -88,6 +88,7 @@ export interface PathsSecretsSettings {
 export interface ServerSecretsSettings {
 	cert: string;
 	key: string;
+	url: string;
 };
 
 export interface SecretsSettings {
@@ -176,7 +177,7 @@ export interface ModalInfo {
 
 
 type HttpHandler = (
-	logger: Logger,
+	logger: import("@wixonic/logger").Logger,
 	settings: MainSettings,
 	req: Request,
 	res: Response,
@@ -184,7 +185,7 @@ type HttpHandler = (
 ) => void;
 
 type WSHandler = (
-	logger: Logger,
+	logger: import("@wixonic/logger").Logger,
 	settings: MainSettings,
 	ws: import("ws").WebSocket
 ) => void;
