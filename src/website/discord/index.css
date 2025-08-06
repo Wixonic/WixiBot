@@ -1,1 +1,20 @@
 @import url("/lib/main.css");
+
+.button.discord {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.button.discord:hover {
+	--current-underline-color: #5865F2;
+}
+
+.button.discord svg {
+	height: 1rem;
+
+	position: relative;
+	top: 0.08em;
+
+	margin-left: 0.5rem;
+}
