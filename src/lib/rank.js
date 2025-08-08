@@ -46,12 +46,13 @@ class Rank {
 	 * @param {import("@wixonic/logger")} logger
 	 * @param {import("./bot.js")} bot
 	 * @param {string} memberId
+	 * @param {boolean} valid
 	 * @returns {Rank}
 	 */
-	static get(logger, bot, memberId) {
+	static get(logger, bot, memberId, valid) {
 		const memberPath = bot.settings.paths.rank(bot.settings.application.guildId, memberId);
 
-		if (!fs.existsSync(memberPath)) return new this(logger, bot, memberId);
+		if (!fs.existsSync(memberPath)) return valid ? null : new this(logger, bot, memberId);
 		else {
 			try {
 				return new this(logger, bot, memberId, JSON.parse(fs.readFileSync(memberPath, "utf-8")));
