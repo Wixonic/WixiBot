@@ -29,12 +29,12 @@ const info = {
 		const monthlyLeaderboard = [];
 		const globalLeaderboard = [];
 
-		for (const member of leaderboard.month.slice(0, 10)) monthlyLeaderboard.push(`- <@${member.id}>: ${Math.ceil(member.points)} points`);
-		for (const member of leaderboard.global.slice(0, 10)) globalLeaderboard.push(`- <@${member.id}>: ${Math.ceil(member.points)} points`);
+		for (const member of leaderboard.month.slice(0, 5)) monthlyLeaderboard.push(`- <@${member.id}>: ${Math.ceil(member.points)} points`);
+		for (const member of leaderboard.global.slice(0, 5)) globalLeaderboard.push(`- <@${member.id}>: ${Math.ceil(member.points)} points`);
 
 		await interaction.followUp({
 			allowedMentions: {},
-			content: `# Leaderboard\n> The top member of each month's leaderboard will receive a unique <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}> role!\n## Monthly Leaderboard\n${monthlyLeaderboard.length > 0 ? monthlyLeaderboard.join("\n") : `_No one is ranked this month yet. Be the first to join the leaderboard: send a message in <#${bot.settings.application.defaultTextChannel}>!_`}\n## Global Leaderboard\n${globalLeaderboard.length > 0 ? globalLeaderboard.join("\n") : `_No one is ranked yet. Be the first to join the leaderboard: send a message in <#${bot.settings.application.defaultTextChannel}>!_`}\n\n-# [See more](https://server.wixonic.fr/discord/leaderboard/)\n-# Last updated: <t:${Math.floor(leaderboard.updatedAt / 1000)}:R>`,
+			content: `# Leaderboard\n> The top member of each month's leaderboard will receive a unique <@&${bot.settings.application.commands.ranks.eliteOfTheMonthRole}> role!\n## Monthly Leaderboard\n[See more](${new URL("/discord/leaderboard/?category=month", bot.settings.secrets.server.url)})\n${monthlyLeaderboard.length > 0 ? monthlyLeaderboard.join("\n") : `_No one is ranked this month yet. Be the first to join the leaderboard: send a message in <#${bot.settings.application.defaultTextChannel}>!_`}\n## Global Leaderboard\n[See more](${new URL("/discord/leaderboard/?category=global", bot.settings.secrets.server.url)})\n${globalLeaderboard.length > 0 ? globalLeaderboard.join("\n") : `_No one is ranked yet. Be the first to join the leaderboard: send a message in <#${bot.settings.application.defaultTextChannel}>!_`}\n\n-# Last updated: <t:${Math.floor(leaderboard.updatedAt / 1000)}:R>`,
 			flags: process.env.silent == "true" ? MessageFlags.SuppressNotifications : null
 		});
 	}
