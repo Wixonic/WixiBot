@@ -1,20 +1,112 @@
 @import url("/lib/main.css");
+@import url("./leaderboard.css");
 
-.button.discord {
+main {
+	background: none;
+
+	width: 100%;
+
+	margin: 0;
+	padding: 0;
+}
+
+section:first-child {
+	padding-top: var(--header-size) !important;
+}
+
+section {
+	display: block;
+
+	width: 100%;
+
+	text-align: center;
+
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+}
+
+section h2 {
+	display: block;
+
+	width: fit-content;
+	height: fit-content;
+
+	font-size: 2.2rem;
+	font-weight: bold;
+
+	margin: auto;
+	padding: 0;
+}
+
+section p {
+	display: block;
+
+	width: fit-content;
+	max-width: min(95%, 30rem);
+
+	font-size: 0.9rem;
+	text-align: left;
+
+	margin: auto;
+	padding: 0.5rem;
+}
+
+section p .button {
+	display: block;
+
+	width: fit-content;
+
+	margin-left: auto;
+	margin-right: auto;
+}
+
+section img {
+	display: block;
+
+	max-width: min(100%, 30rem);
+	max-height: min(100%, 30rem);
+
+	margin: auto;
+}
+
+#discord {
+	padding: 0.5rem;
+}
+
+#discord .banner {
+	text-align: left;
+}
+
+#discord .button.discord {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+
+	margin: auto;
 }
 
-.button.discord:hover {
+#discord .button.discord:hover {
 	--current-underline-color: #5865F2;
 }
 
-.button.discord svg {
+#discord .button.discord svg {
 	height: 1rem;
 
 	position: relative;
 	top: 0.08em;
 
 	margin-left: 0.5rem;
+}
+
+#wixiland {
+	--color: #FFF;
+
+	background: radial-gradient(circle at bottom right, #F600FF, #8B00FF);
+}
+
+#wixiland .button {
+	--secondary-background: transparent;
+	--underline-color: #FFF2;
+
+	border-radius: 0;
 }

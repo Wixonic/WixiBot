@@ -1,0 +1,27 @@
+@import url("/lib/main.css");
+@import url("../leaderboard.css");
+
+main {
+	background: none;
+
+	width: 100%;
+
+	text-align: center;
+}
+
+h2 {
+	display: block;
+
+	width: fit-content;
+	height: fit-content;
+
+	font-size: 2.2rem;
+	font-weight: bold;
+
+	margin: auto;
+	padding: 0;
+}
+
+.banner {
+	text-align: left;
+}
