@@ -1,3 +1,4 @@
+const { execSync } = require("child_process");
 const express = require("express");
 const fs = require("fs");
 const http = require("http");
@@ -22,8 +23,6 @@ class Server {
 		if (!fs.existsSync(settings.secrets.server.cert) || !fs.existsSync(settings.secrets.server.key)) throw new Error("SSL certificate or key are missing.");
 
 		this.app = express();
-
-		this.logger.debug(`Dev: ${process.env.dev == "true"}`);
 
 		/** @type {https.Server} */
 		this.http = process.env.dev == "true" ? http.createServer() : https.createServer({
@@ -116,6 +115,9 @@ class Server {
 
 			this.ws.on("error", (e) => this.logger.error("[WebSocket]", "Server error:", e));
 
+			try {
+				execSync(`kill -9 $(lsof -ti :${this.port})`);
+			} catch { }
 
 			this.http.listen(this.port, () => {
 				this.logger.info(`Running on :${this.port}`);
