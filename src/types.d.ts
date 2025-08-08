@@ -179,9 +179,9 @@ export interface ModalInfo {
 type HttpHandler = (
 	logger: import("@wixonic/logger").Logger,
 	settings: MainSettings,
-	req: Request,
-	res: Response,
-	bot: Bot
+	req: import("express").Request,
+	res: import("express").Response,
+	bot: import("./lib/bot.js")
 ) => void;
 
 type WSHandler = (
