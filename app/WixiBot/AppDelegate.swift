@@ -12,7 +12,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var backgroundTaskProcess: Process?
     var backgroundTaskPID: Int32?
 
-    var microphoneEnabled: Bool = true
+    var microphoneEnabled: Bool = false
 	var microphoneMenuItem: NSMenuItem!
 
 	func applicationDidFinishLaunching(_ notification: Notification) {
