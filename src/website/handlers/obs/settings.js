@@ -40,13 +40,13 @@ const captureProcess = {
 				"-loglevel", "warning",
 				"-f", "avfoundation",
 				"-framerate", "60",
-				"-i", `:${deviceList.audio.indexOf("Wave Link Stream")}`,
+				"-i", `:${deviceList.audio.indexOf("Elgato Wave:3")}`,
 
 				"-vn",
 
 				"-c:a", "aac",
 				"-b:a", "320k",
-				"-ac", "2",
+				"-ac", "1",
 				"-ar", "48000",
 
 				"-flags", "low_delay",
