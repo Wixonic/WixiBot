@@ -31,7 +31,7 @@ const updateDeviceList = () => {
  */
 const captureProcess = {
 	microphone: {
-		active: true,
+		active: false,
 		name: "Microphone capture",
 		spawn: (logger) => {
 			logger.info("Starting process:", captureProcess.microphone.name);
@@ -68,10 +68,10 @@ const update = () => {
 				cp.process = cp.spawn(log);
 
 				for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
-					process.once(signal, async (reason, code) => {
+					cp.process.once(signal, async (reason, code) => {
 						if (!cp.process.killed) {
 							cp.process.removeAllListeners("exit");
-							cp.process.kill(signal);
+							cp.process.kill("SIGTERM");
 						}
 					});
 				}
