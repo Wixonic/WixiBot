@@ -77,7 +77,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 				const name = document.createElement("div");
 				name.classList.add("name");
-				name.innerText = memberData.displayName;
+				name.innerText = memberData.displayName ?? memberData.username;
 				member.append(name);
 			});
 
@@ -88,11 +88,6 @@ addEventListener("DOMContentLoaded", async () => {
 
 		if (leaderboardRequest.status == 200) {
 			const leaderboard = leaderboardRequest.response;
-
-			const leaderboardCount = {
-				month: 0,
-				global: 0
-			};
 
 			await (async () => {
 				const section = document.createElement("section");
@@ -107,8 +102,9 @@ addEventListener("DOMContentLoaded", async () => {
 				const leaderboardContainer = document.createElement("div");
 				leaderboardContainer.classList.add("leaderboard", "fade", "slide");
 
+				let count = 0;
 				for (const rankData of leaderboard.month) {
-					const member = createMemberEntry(leaderboardCount.month++, rankData);
+					const member = createMemberEntry(count++, rankData);
 					leaderboardContainer.append(member);
 				}
 
@@ -116,7 +112,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 				if (leaderboard.total.month > 5) {
 					const button = document.createElement("button");
-					button.classList.add("button");
+					button.classList.add("button", "fade", "slide");
 					button.innerHTML = "View more";
 					button.addEventListener("click", () => {
 						if (!button.disabled) {
@@ -141,8 +137,9 @@ addEventListener("DOMContentLoaded", async () => {
 				const leaderboardContainer = document.createElement("div");
 				leaderboardContainer.classList.add("leaderboard", "fade", "slide");
 
+				let count = 0;
 				for (const rankData of leaderboard.global) {
-					const member = createMemberEntry(leaderboardCount.global++, rankData);
+					const member = createMemberEntry(count++, rankData);
 					leaderboardContainer.append(member);
 				}
 
@@ -150,7 +147,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 				if (leaderboard.total.global > 5) {
 					const button = document.createElement("button");
-					button.classList.add("button");
+					button.classList.add("button", "fade", "slide");
 					button.innerHTML = "View more";
 					button.addEventListener("click", () => {
 						if (!button.disabled) {

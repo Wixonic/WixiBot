@@ -58,7 +58,7 @@ class Rank {
 				return new this(logger, bot, memberId, JSON.parse(fs.readFileSync(memberPath, "utf-8")));
 			} catch (e) {
 				logger.warn(`[Rank] Error reading rank data:`, e);
-				return new this(logger, bot, memberId);
+				return valid ? null : new this(logger, bot, memberId);
 			}
 		}
 	};

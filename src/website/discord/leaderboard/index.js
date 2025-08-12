@@ -1,9 +1,7 @@
 import firebase from "/lib/firebase.js";
-import loader from "/lib/loader.js";
 import { init } from "/lib/main.js";
 import { path } from "/lib/path.js";
 import request from "/lib/request.js";
-import { RichLink } from "/lib/rich.js";
 
 addEventListener("DOMContentLoaded", async () => {
 	await init();
@@ -78,7 +76,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 			const name = document.createElement("div");
 			name.classList.add("name");
-			name.innerText = memberData.displayName;
+			name.innerText = memberData.displayName ?? memberData.username;
 			member.append(name);
 		});
 
@@ -87,6 +85,37 @@ addEventListener("DOMContentLoaded", async () => {
 
 	const params = new URLSearchParams(location.search);
 	const category = params.get("category") ?? "month";
+
+	const nav = document.createElement("nav");
+	nav.classList.add("fade");
+
+	{
+		const monthly = document.createElement("button");
+		monthly.classList.add("button");
+		monthly.disabled = category == "month";
+		monthly.innerHTML = "Monthly";
+		monthly.addEventListener("click", async () => {
+			if (!monthly.disabled) {
+				monthly.disabled = true;
+				location.href = "/discord/leaderboard/?category=month";
+			}
+		});
+		nav.append(monthly);
+
+		const global = document.createElement("button");
+		global.classList.add("button");
+		global.disabled = category == "global";
+		global.innerHTML = "Global";
+		global.addEventListener("click", async () => {
+			if (!global.disabled) {
+				global.disabled = true;
+				location.href = "/discord/leaderboard/?category=global";
+			}
+		});
+		nav.append(global);
+	}
+
+	main.append(nav);
 
 	let part = 0;
 	let count = 0;
@@ -103,7 +132,7 @@ addEventListener("DOMContentLoaded", async () => {
 	main.append(leaderboardContainer);
 
 	const button = document.createElement("button");
-	button.classList.add("button");
+	button.classList.add("button", "fade", "slide");
 	button.disabled = true;
 	button.innerHTML = "View more";
 	button.addEventListener("click", async () => {
