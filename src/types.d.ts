@@ -79,7 +79,11 @@ export interface DiscordSecretsSettings {
 	application: DiscordApplicationSecretsSettings;
 	client: DiscordClientSecretsSettings;
 	webhook: string;
-}
+};
+
+export interface ModerationSecretsSettings {
+	llm: string;
+};
 
 export interface PathsSecretsSettings {
 	root: string;
@@ -93,6 +97,7 @@ export interface ServerSecretsSettings {
 
 export interface SecretsSettings {
 	discord: DiscordSecretsSettings;
+	moderation: ModerationSecretsSettings;
 	paths: PathsSecretsSettings;
 	server: ServerSecretsSettings;
 	wixkey: string;
