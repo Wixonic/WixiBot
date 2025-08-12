@@ -52,7 +52,7 @@ module.exports = {
 			name: "New Year",
 			color: "#D7B030",
 			from: "01-01T00:00:00",
-			to: "01-31T23:59:59"
+			to: "01-14T23:59:59"
 		},
 		{
 			name: "Valentine's Day",
@@ -70,7 +70,7 @@ module.exports = {
 			name: "Summer",
 			color: "#47927E",
 			from: "08-01T00:00:00",
-			to: "08-31T23:59:59"
+			to: "08-14T23:59:59"
 		},
 		{
 			name: "Halloween",

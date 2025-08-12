@@ -34,7 +34,7 @@ module.exports = {
 			name: "New Year",
 			color: "#D7B030",
 			from: "01-01T00:00:00",
-			to: "01-31T23:59:59"
+			to: "01-14T23:59:59"
 		},
 		{
 			name: "Valentine's Day",
@@ -45,14 +45,14 @@ module.exports = {
 		{
 			name: "Easter",
 			color: "#C5EBD5",
-			from: "03-23T00:00:00",
-			to: "04-25T23:59:59"
+			from: "04-01T00:00:00",
+			to: "04-07T23:59:59"
 		},
 		{
 			name: "Summer",
 			color: "#47927E",
-			from: "06-01T00:00:00",
-			to: "08-31T23:59:59"
+			from: "08-01T00:00:00",
+			to: "08-14T23:59:59"
 		},
 		{
 			name: "Halloween",
