@@ -5,6 +5,7 @@ const CommandHandler = require("./commands.js");
 const ComponentHandler = require("./components.js");
 const CronHandler = require("./crons.js");
 const ListenerHandler = require("./listeners.js");
+const ModalHandler = require("./modals.js");
 const Server = require("./server.js");
 
 const request = require("./request.js");
@@ -54,6 +55,7 @@ class Bot extends Client {
 		this.componentHandler = new ComponentHandler(logger);
 		this.cronHandler = new CronHandler(logger);
 		this.listenerHandler = new ListenerHandler(logger);
+		this.modalHandler = new ModalHandler(logger);
 		this.server = new Server(logger, settings);
 
 		const processSignal = async (reason, code) => {
@@ -89,6 +91,7 @@ class Bot extends Client {
 			this.componentHandler.loadComponents();
 			this.cronHandler.loadCrons();
 			this.listenerHandler.loadListeners(this);
+			this.modalHandler.loadModals();
 
 			this.cronHandler.init(this);
 			await this.server.init(settings, this);

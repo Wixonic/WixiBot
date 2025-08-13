@@ -1,4 +1,4 @@
-const { ComponentType, TextInputStyle } = require("discord.js");
+const { ActionRowBuilder, ComponentType, ModalBuilder, TextInputBuilder, TextInputStyle } = require("discord.js");
 
 const Giveaway = require("../lib/giveaways.js");
 
@@ -27,76 +27,60 @@ const component = {
 		const gifts = [];
 		for (const gift of giveaway.gifts) gifts.push(gift.name + " _ " + gift.secret);
 
-		/**
-		 * @type {import("discord.js").APIModalInteractionResponseCallbackData}
-		 */
-		const modal = {
-			custom_id: "editGiveaway",
-			title: `Giveaway ${giveaway.id}`,
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							type: ComponentType.TextInput,
-							custom_id: "id",
-							label: "Giveaway ID",
-							max_length: giveaway.id.length,
-							min_length: giveaway.id.length,
-							placeholder: giveaway.id,
-							required: true,
-							style: TextInputStyle.Short,
-							value: giveaway.id
-						}
-					]
-				}, {
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							type: ComponentType.TextInput,
-							custom_id: "startsAt",
-							label: "Starts at (UTC)",
-							max_length: 16,
-							min_length: 16,
-							placeholder: "YYYY-MM-DD HH:mm",
-							required: true,
-							style: TextInputStyle.Short,
-							value: `${startsAt.getUTCFullYear()}-${String(startsAt.getUTCMonth() + 1).padStart(2, "0")}-${String(startsAt.getUTCDate()).padStart(2, "0")} ${String(startsAt.getUTCHours()).padStart(2, "0")}:${String(startsAt.getUTCMinutes()).padStart(2, "0")}`
-						}
-					]
-				}, {
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							type: ComponentType.TextInput,
-							custom_id: "endsAt",
-							label: "Ends at (UTC)",
-							max_length: 16,
-							min_length: 16,
-							placeholder: "YYYY-MM-DD HH:mm",
-							required: true,
-							style: TextInputStyle.Short,
-							value: `${endsAt.getUTCFullYear()}-${String(endsAt.getUTCMonth() + 1).padStart(2, "0")}-${String(endsAt.getUTCDate()).padStart(2, "0")} ${String(endsAt.getUTCHours()).padStart(2, "0")}:${String(endsAt.getUTCMinutes()).padStart(2, "0")}`
-						}
-					]
-				}, {
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							type: ComponentType.TextInput,
-							custom_id: "gifts",
-							label: "Gifts",
-							placeholder: "name _ secret; name _ secret; ...",
-							required: true,
-							style: TextInputStyle.Paragraph,
-							value: gifts.join("; ")
-						}
-					]
-				}
-			]
-		};
-
-		await interaction.showModal(modal);
+		await interaction.showModal(
+			new ModalBuilder()
+				.setCustomId("editGiveaway")
+				.setTitle(`Giveaway ${giveaway.id}`)
+				.setComponents(
+					new ActionRowBuilder()
+						.setComponents(
+							new TextInputBuilder()
+								.setCustomId("id")
+								.setLabel("Giveaway ID")
+								.setPlaceholder(giveaway.id)
+								.setRequired(true)
+								.setStyle(TextInputStyle.Short)
+								.setMinLength(giveaway.id.length)
+								.setMaxLength(giveaway.id.length)
+								.setValue(giveaway.id)
+						),
+					new ActionRowBuilder()
+						.setComponents(
+							new TextInputBuilder()
+								.setCustomId("startsAt")
+								.setLabel("Starts at (UTC)")
+								.setPlaceholder("YYYY-MM-DD HH:mm")
+								.setRequired(true)
+								.setStyle(TextInputStyle.Short)
+								.setMinLength(16)
+								.setMaxLength(16)
+								.setValue(`${startsAt.getUTCFullYear()}-${String(startsAt.getUTCMonth() + 1).padStart(2, "0")}-${String(startsAt.getUTCDate()).padStart(2, "0")} ${String(startsAt.getUTCHours()).padStart(2, "0")}:${String(startsAt.getUTCMinutes()).padStart(2, "0")}`)
+						),
+					new ActionRowBuilder()
+						.setComponents(
+							new TextInputBuilder()
+								.setCustomId("endsAt")
+								.setLabel("Ends at (UTC)")
+								.setPlaceholder("YYYY-MM-DD HH:mm")
+								.setRequired(true)
+								.setStyle(TextInputStyle.Short)
+								.setMinLength(16)
+								.setMaxLength(16)
+								.setValue(`${endsAt.getUTCFullYear()}-${String(endsAt.getUTCMonth() + 1).padStart(2, "0")}-${String(endsAt.getUTCDate()).padStart(2, "0")} ${String(endsAt.getUTCHours()).padStart(2, "0")}:${String(endsAt.getUTCMinutes()).padStart(2, "0")}`)
+						),
+					new ActionRowBuilder()
+						.setComponents(
+							new TextInputBuilder()
+								.setCustomId("gifts")
+								.setLabel("Gifts")
+								.setPlaceholder("name _ secret; name _ secret; ...")
+								.setRequired(true)
+								.setStyle(TextInputStyle.Paragraph)
+								.setValue(gifts.join("; "))
+						)
+				)
+				.toJSON()
+		);
 	}
 };
 

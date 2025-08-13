@@ -42,6 +42,7 @@ const commandsSettings = {
 		channel: "1020684346098733138"
 	},
 	tickets: {
+		category: "1328283685253943329",
 		channel: "1247276648366080144"
 	}
 };

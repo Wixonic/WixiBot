@@ -1,4 +1,4 @@
-const { ComponentType, MessageFlags } = require("discord.js");
+const { ComponentType, MessageFlags, ButtonStyle } = require("discord.js");
 
 const Giveaway = require("../lib/giveaways.js");
 
@@ -42,8 +42,23 @@ const component = {
 					for (const gift of giveaway.gifts) gifts.push(gift.name);
 
 					await message.edit({
-						content: `## Giveaway\n- Entries: **${giveaway.participants.length}**\n### Gifts${gifts.join("\n- ")}\n\n-# Giveaway #${giveaway.id}`,
-						components: []
+						allowedMentions: {
+							roles: [bot.settings.application.commands.giveaways.role]
+						},
+						content: `## Giveaway\n\n- Ends: <t:${Math.floor(giveaway.endsAt / 1000)}:f>\n- Entries: **${giveaway.participants.length}**\n### Gifts\n${gifts.length > 0 ? "- " + gifts.join("\n- ") : "_No gift available right now._"}\n\n-# Giveaway #${giveaway.id} - <@&${bot.settings.application.commands.giveaways.role}>`,
+						components: [
+							{
+								type: ComponentType.ActionRow,
+								components: [
+									{
+										type: ComponentType.Button,
+										custom_id: `joinGiveaway_${giveaway.id}`,
+										label: "Join",
+										style: ButtonStyle.Primary
+									}
+								]
+							}
+						]
 					});
 				} catch {
 					giveaway.message = null;

@@ -81,7 +81,7 @@ class CronHandler {
 				}
 			}
 
-			setTimeout(() => this.execute(bot), (minutes + 1) * 1000 * 60 - Date.now());
+			setTimeout(() => this.execute(bot), Math.max(0, (minutes + 1) * 1000 * 60 - Date.now()));
 		}
 	};
 

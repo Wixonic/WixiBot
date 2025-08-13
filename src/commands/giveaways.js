@@ -104,10 +104,10 @@ module.exports = {
 				break;
 
 			case "list":
-				const giveaways = Giveaway.list(logger, bot).filter((giveaway) => giveaway.status != Giveaway.status.done);
+				const giveaways = Giveaway.list(logger, bot).filter((giveaway) => giveaway.status < Giveaway.status.done);
 
 				let giveawaysList = [""];
-				for (const giveaway of giveaways) if (giveaway.status != Giveaway.status.done) giveawaysList.push(`Giveaway #${giveaway.id}${typeof giveaway.startsAt == "number" && typeof giveaway.endsAt == "number" ? ` - from <t:${Math.floor(giveaway.startsAt / 1000)}:f> to <t:${Math.floor(giveaway.endsAt / 1000)}:f>` : ""}`);
+				for (const giveaway of giveaways) giveawaysList.push(`Giveaway #${giveaway.id}${typeof giveaway.startsAt == "number" && typeof giveaway.endsAt == "number" ? ` - from <t:${Math.floor(giveaway.startsAt / 1000)}:f> to <t:${Math.floor(giveaway.endsAt / 1000)}:f>` : ""} (${["Planned", "Active"][giveaway.status] ?? "Unknown"})`);
 
 				await interaction.followUp(`All active or planned giveaways: ${giveawaysList.length > 1 ? giveawaysList.join("\n- ") : " _no active or planned giveaway right now._"}`);
 				break;

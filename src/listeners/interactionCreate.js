@@ -2,6 +2,7 @@ const { InteractionType } = require("discord.js");
 
 const CommandHandler = require("../lib/commands.js");
 const ComponentHandler = require("../lib/components.js");
+const ModalHandler = require("../lib/modals.js");
 
 /**
  * @type {import("../types.d.ts").ListenerInfo}
@@ -60,7 +61,28 @@ const listener = {
 
 			logger.warn("Invalid button interaction:", interaction.customId);
 		} else if (interaction.isModalSubmit()) {
+			const id = interaction.customId;
 
+			for (const modal of ModalHandler.modals) {
+				const modalLogger = {
+					debug: (...any) => logger.debug(`[Modal ${modal.name}]`, ...any),
+					error: (...any) => logger.error(`[Modal ${modal.name}]`, ...any),
+					info: (...any) => logger.info(`[Modal ${modal.name}]`, ...any),
+					warn: (...any) => logger.warn(`[Modal ${modal.name}]`, ...any)
+				};
+
+				if (modal.id == id) {
+					try {
+						modalLogger.info(`Launched by "${(interaction.member ?? interaction.user).displayName}" (${interaction.user.id})`);
+						await modal.run(modalLogger, bot, interaction);
+						return;
+					} catch (e) {
+						modalLogger.error(e);
+					}
+				}
+			}
+
+			logger.warn("Invalid modal interaction:", interaction.customId);
 		} else logger.warn("Invalid interaction:", Object.keys(InteractionType).find((key) => InteractionType[key] == interaction.type));
 	}
 };

@@ -20,7 +20,9 @@ const pathsSettings = {
 	rank: (guildId, memberId) => path.join(secrets.paths.root, "ranks", guildId, memberId + ".json"),
 	ranks: (guildId) => path.join(secrets.paths.root, "ranks", guildId),
 	recurrentRoles: (guildId) => path.join(secrets.paths.root, "recurrentRoles", guildId + ".json"),
-	roles: path.join(__dirname, "roles.js")
+	roles: path.join(__dirname, "roles.js"),
+	ticket: (guildId, ticketId) => path.join(secrets.paths.root, "tickets", guildId, ticketId + ".json"),
+	tickets: (guildId) => path.join(secrets.paths.root, "tickets", guildId)
 };
 
 module.exports = pathsSettings;

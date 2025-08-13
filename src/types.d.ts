@@ -44,6 +44,7 @@ export interface CommandsSettings {
 		channel: string;
 	};
 	tickets: {
+		category: string;
 		channel: string;
 	};
 };
@@ -64,6 +65,8 @@ export interface PathsSettings {
 	rank: (guildId: string, memberId: string) => string;
 	ranks: (guildId: string) => string;
 	roles: string;
+	ticket: (guildId: string, ticketId: string) => string;
+	tickets: (guildId: string) => string;
 };
 
 export interface DiscordApplicationSecretsSettings {
@@ -177,7 +180,7 @@ export interface ListenerInfo {
 
 export interface ModalInfo {
 	name: string;
-	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), minutes: number, now: Date) => Promise<void>;
+	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), interaction: import("discord.js").ModalSubmitInteraction) => Promise<void>;
 };
 
 
