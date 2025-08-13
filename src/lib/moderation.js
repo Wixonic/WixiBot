@@ -57,7 +57,7 @@ const moderation = {
 		};
 
 		for (const attachment of attachments) {
-			if (/^image\/(png|jpeg|jpg|gif|webp|apng)$/i.test(attachment.contentType)) {
+			if (/^image\/(png|jpeg|jpg|gif|webp|apng)$/i.test(attachment.contentType) && bot.settings.secrets.moderation.active) {
 				try {
 					const response = await request(logger, {
 						method: "GET",
@@ -80,7 +80,7 @@ const moderation = {
 		const flags = [];
 		const confidenceLevels = [];
 
-		if (results.content) {
+		if (results.content && bot.settings.secrets.moderation.active) {
 			valid &&= results.content.valid;
 			if (results.content.flag && results.content.flag != "none") flags.push(results.content.flag);
 			confidenceLevels.push(results.content.confidence);
@@ -97,11 +97,9 @@ const moderation = {
 
 		results.final = {
 			valid,
-			confidence: Math.min(...confidenceLevels),
+			confidence: Math.min(...confidenceLevels, 1),
 			flags
 		};
-
-		logger.debug(JSON.stringify(results.final));
 
 		return results;
 	},
