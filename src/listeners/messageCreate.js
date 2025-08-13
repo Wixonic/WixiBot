@@ -20,7 +20,7 @@ const listener = {
 				await userRank.addMessage();
 
 				moderation.analyseMessage(logger, bot, message).then(async (results) => {
-					if (!results.final.safe) {
+					if (!results.final.valid) {
 						/** @type {import("discord.js").TextBasedChannel} */
 						const moderationChannel = await bot.channels.fetch(bot.settings.application.moderationChannel);
 

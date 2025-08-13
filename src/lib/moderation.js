@@ -22,7 +22,7 @@ const moderation = {
 	format: {
 		type: "object",
 		properties: {
-			safe: {
+			valid: {
 				type: "boolean"
 			},
 			confidence: {
@@ -33,11 +33,11 @@ const moderation = {
 			}
 		},
 		required: [
-			"safe",
+			"valid",
 			"confidence"
 		]
 	},
-	rules: "Carefully analyze the provided content to determine if it is safe for work. Consider language, imagery, and context to assess appropriateness for a public Discord chat. Emojis in the format <:name:id>, and URLs are allowed.\n\n- safe: boolean indicating if the content is safe for work.\n- confidence: score between 0 and 1 representing the assistant's certainty.\n- flag: single applicable flag describing content issue.",
+	rules: "Carefully analyze the provided content to determine if it is safe for work. Consider language, imagery, and context to assess appropriateness for a public Discord chat. Emojis in the format <:name:id>, and URLs are allowed.\n\n- valid: boolean indicating if the content is safe for work.\n- confidence: score between 0 and 1 representing the assistant's certainty.\n- flag: single applicable flag describing content issue if not valid.",
 
 	/**
 	 * @param {import("@wixonic/logger").Logger} logger 
@@ -65,7 +65,9 @@ const moderation = {
 						url: attachment.url
 					});
 
-					const image = sharp(Buffer.concat(response), { pages: 1 }).jpeg({ quality: 85 });
+					const image = sharp(Buffer.concat(response), { pages: 1 })
+						.resize({ width: 512, height: 512, fit: "inside" })
+						.jpeg({ quality: 85 });
 
 					results.attachments[attachment.id] = await moderation.analyseImage(logger, bot.settings.secrets.moderation.llm, await image.toBuffer());
 				} catch (e) {
@@ -74,12 +76,12 @@ const moderation = {
 			}
 		}
 
-		let safe = true;
+		let valid = true;
 		const flags = [];
 		const confidenceLevels = [];
 
 		if (results.content) {
-			safe &&= results.content.safe;
+			valid &&= results.content.valid;
 			if (results.content.flag && results.content.flag != "none") flags.push(results.content.flag);
 			confidenceLevels.push(results.content.confidence);
 		}
@@ -87,17 +89,19 @@ const moderation = {
 		for (const id in results.attachments) {
 			const attachment = results.attachments[id];
 			if (attachment) {
-				safe &&= attachment.safe;
+				valid &&= attachment.valid;
 				if (attachment.flag && attachment.flag != "none") flags.push(attachment.flag);
 				confidenceLevels.push(attachment.confidence);
 			}
 		}
 
 		results.final = {
-			safe,
+			valid,
 			confidence: Math.min(...confidenceLevels),
 			flags
 		};
+
+		logger.debug(JSON.stringify(results.final));
 
 		return results;
 	},
@@ -125,7 +129,10 @@ const moderation = {
 			],
 			format: moderation.format,
 			keep_alive: 15,
-			stream: false
+			stream: false,
+			options: {
+				num_predict: 100
+			}
 		});
 
 		return JSON.parse(response.message.content);
@@ -152,7 +159,10 @@ const moderation = {
 			],
 			format: moderation.format,
 			keep_alive: 15,
-			stream: false
+			stream: false,
+			options: {
+				num_predict: 100
+			}
 		});
 
 		return JSON.parse(response.message.content);
