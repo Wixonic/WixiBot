@@ -85,6 +85,7 @@ export interface DiscordSecretsSettings {
 };
 
 export interface ModerationSecretsSettings {
+	active: boolean;
 	llm: string;
 };
 

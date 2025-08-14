@@ -12,7 +12,7 @@
 	},
 	"main": "main.js",
 	"scripts": {
-		"pretest": "client=1245767039054905544 dev=true mode=publish node --trace-warnings ./main.js",
+		"testpublish": "client=1245767039054905544 dev=true mode=publish node --trace-warnings ./main.js",
 		"test": "client=1245767039054905544 dev=true node --trace-warnings ./main.js",
 		"publish": "client=1179518852846067833 mode=publish node --no-warnings ./main.js; client=1179518852846067833 silent=true node --no-warnings ./main.js",
 		"start": "client=1179518852846067833 node --no-warnings ./main.js"

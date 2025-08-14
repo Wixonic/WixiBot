@@ -53,7 +53,7 @@ const moderation = {
 		 */
 		const results = {
 			attachments: {},
-			content: message.cleanContent.trim().length > 0 ? await moderation.analyseText(logger, bot.settings.secrets.moderation.llm, message.cleanContent) : null
+			content: message.cleanContent.trim().length > 0 && bot.settings.secrets.moderation.active ? await moderation.analyseText(logger, bot.settings.secrets.moderation.llm, message.cleanContent) : null
 		};
 
 		for (const attachment of attachments) {
@@ -80,7 +80,7 @@ const moderation = {
 		const flags = [];
 		const confidenceLevels = [];
 
-		if (results.content && bot.settings.secrets.moderation.active) {
+		if (results.content) {
 			valid &&= results.content.valid;
 			if (results.content.flag && results.content.flag != "none") flags.push(results.content.flag);
 			confidenceLevels.push(results.content.confidence);
@@ -100,6 +100,8 @@ const moderation = {
 			confidence: Math.min(...confidenceLevels, 1),
 			flags
 		};
+
+		if (bot.settings.secrets.moderation.active) logger.debug("LLM Moderation", JSON.stringify(results.final));
 
 		return results;
 	},
