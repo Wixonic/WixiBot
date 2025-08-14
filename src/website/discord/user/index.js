@@ -55,12 +55,12 @@ addEventListener("DOMContentLoaded", async () => {
 
 		const rank = document.createElement("div");
 		rank.classList.add("rank");
-		rank.innerText = id + 1;
+		rank.innerHTML = id + 1;
 		member.append(rank);
 
 		const points = document.createElement("div");
 		points.classList.add("points");
-		points.innerText = Math.ceil(rankData.points);
+		points.innerHTML = Math.ceil(rankData.points);
 		member.append(points);
 
 		request("GET", new URL(`/discord/api/user?id=${rankData.id}`, localEnvironment ? path.local.server : path.server), "json", "application/json").then(async (data) => {
@@ -94,8 +94,11 @@ addEventListener("DOMContentLoaded", async () => {
 
 		const title = document.createElement("h2");
 		title.classList.add("fade", "slide");
-		title.innerHTML = discordUser.displayName ?? discordUser.username;
+		title.innerText = discordUser.displayName ?? discordUser.username;
 		main.append(title);
+
+		const headTitle = document.head.querySelector("title");
+		headTitle.innerText = headTitle.innerText.replace("User", discordUser.displayName ?? discordUser.username);
 
 		const discordUserRankResponse = await request("GET", new URL(`/discord/api/user/rank?id=${userId}`, localEnvironment ? path.local.server : path.server), "json", "application/json");
 

@@ -52,12 +52,12 @@ addEventListener("DOMContentLoaded", async () => {
 
 			const rank = document.createElement("div");
 			rank.classList.add("rank");
-			rank.innerText = id + 1;
+			rank.innerHTML = id + 1;
 			member.append(rank);
 
 			const points = document.createElement("div");
 			points.classList.add("points");
-			points.innerText = Math.ceil(rankData.points);
+			points.innerHTML = Math.ceil(rankData.points);
 			member.append(points);
 
 			request("GET", new URL(`/discord/api/user?id=${rankData.id}`, localEnvironment ? path.local.server : path.server), "json", "application/json").then(async (data) => {
