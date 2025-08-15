@@ -170,7 +170,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 			const description = document.createElement("p");
 			description.classList.add("fade", "slide");
-			description.innerHTML = "Linking your Discord account unlocks exclusive features and rewards. <b>1,000 points</b> will be credited to your account after linking.";
+			description.innerHTML = "Linking your Discord account unlocks exclusive features and rewards.<b>5,000 points</b> will be credited to your account after linking.";
 			discordSection.append(description);
 
 			const discord = document.createElement("button");

@@ -235,6 +235,8 @@ class Rank {
 			this.voice = data.voice;
 			this.penalty = data.penalty;
 
+			this.linked = data.linked;
+
 			if (converted) this.save();
 		} else {
 			this.eliteOfTheMonth = [];
@@ -250,13 +252,15 @@ class Rank {
 			};
 			this.penalty = 0;
 
+			this.linked = false;
+
 			this.save();
 		}
 	};
 
 	get points() {
 		return {
-			global: this.bot.settings.application.commands.ranks.points.messages * this.messages.global + this.bot.settings.application.commands.ranks.points.voice * this.voice.global - this.penalty,
+			global: this.bot.settings.application.commands.ranks.points.messages * this.messages.global + this.bot.settings.application.commands.ranks.points.voice * this.voice.global - this.penalty + (this.linked ? 5000 : 0),
 			month: this.bot.settings.application.commands.ranks.points.messages * this.messages.month + this.bot.settings.application.commands.ranks.points.voice * this.voice.month - this.penalty
 		};
 	};
@@ -322,7 +326,7 @@ class Rank {
 			],
 			flags: process.env.silent == "true" ? MessageFlags.SuppressNotifications : null
 		});
-		else logger.warn("Invalid moderation channel:", this.bot.settings.application.moderationChannel);
+		else this.logger.warn("Invalid moderation channel:", this.bot.settings.application.moderationChannel);
 
 		await this.save();
 	};
@@ -433,7 +437,8 @@ class Rank {
 			messages: this.messages,
 			roles: this.roles,
 			voice: this.voice,
-			penalty: this.penalty
+			penalty: this.penalty,
+			linked: this.linked
 		}), "utf-8");
 	}
 };

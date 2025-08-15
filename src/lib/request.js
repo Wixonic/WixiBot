@@ -19,7 +19,7 @@ const request = (logger, options = {}) => {
 		};
 
 		if (!("url" in options) || (!(options.url instanceof URL) && !URL.canParse(options.url))) reject("Cannot request an empty url");
-		logger.debug("[Request]", "Request:", options.method, options.url);
+		logger.debug("[Request]", "Request:", options.method, options.url.toString());
 
 		try {
 			const req = (options.secure ? https : http).request(options.url, {

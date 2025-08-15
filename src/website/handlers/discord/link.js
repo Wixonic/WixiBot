@@ -1,13 +1,15 @@
 const request = require("../../../lib/request.js");
 const { userAgent } = require("../../../lib/utils.js");
 
+const Rank = require("../../../lib/rank.js");
+
 /**
  * @type {import("../../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/discord/link/",
 	handlers: {
-		get: async (logger, settings, req, res) => {
+		get: async (logger, settings, req, res, bot) => {
 			let redirect = req.query.redirect;
 			let uid = req.query.uid;
 			if (req.query.state) {
@@ -36,8 +38,6 @@ const info = {
 					body: params.toString()
 				});
 
-				logger.info("Token:", JSON.stringify(token));
-
 				if (!token.error) {
 					const me = await request(logger, {
 						headers: {
@@ -49,10 +49,10 @@ const info = {
 						url: new URL("/api/v10/oauth2/@me", "https://discord.com")
 					});
 
-					logger.info("Me:", JSON.stringify(me));
-
 					if (!me.error) {
-						// Save data
+						const rank = Rank.get(logger, bot, me.user.id);
+						rank.linked = true;
+						await rank.save();
 
 						return res.redirect(new URL(`/discord/link/save/?id=${me.user.id}&username=${me.user.username}&uid=${uid}&redirect=${encodeURIComponent(redirect)}`, settings.secrets.server.url));
 					}

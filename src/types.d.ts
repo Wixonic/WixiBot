@@ -134,7 +134,7 @@ export type RequestResponseType = "headers" | "json" | "raw" | "text";
 
 export interface RequestOptions {
 	auth?: string;
-	body?: object;
+	body?: any;
 	headers?: import("http").OutgoingHttpHeaders;
 	method?: RequestMethod;
 	secure?: boolean;
