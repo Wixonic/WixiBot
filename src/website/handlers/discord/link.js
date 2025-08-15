@@ -25,7 +25,7 @@ const info = {
 				const params = new URLSearchParams();
 				params.append("grant_type", "authorization_code");
 				params.append("code", req.query.code);
-				params.append("redirect_uri", new URL("/discord/link/", settings.secrets.server.url).toString());
+				params.append("redirect_uri", new URL("/discord/link/", settings.website.server).toString());
 				const token = await request(logger, {
 					auth: `${settings.application.clientId}:${settings.application.clientSecret}`,
 					headers: {
@@ -54,15 +54,15 @@ const info = {
 						rank.linked = true;
 						await rank.save();
 
-						return res.redirect(new URL(`/discord/link/save/?id=${me.user.id}&username=${me.user.username}&uid=${uid}&redirect=${encodeURIComponent(redirect)}`, settings.secrets.server.url));
+						return res.redirect(new URL(`/discord/link/save/?id=${me.user.id}&username=${me.user.username}&uid=${uid}&redirect=${encodeURIComponent(redirect)}`, settings.website.server));
 					}
 				}
-			} else return res.redirect(new URL(`/oauth2/authorize?client_id=${settings.application.clientId}&response_type=code&redirect_uri=${encodeURIComponent(new URL("/discord/link/", settings.secrets.server.url).toString())}&scope=identify&consent=none&state=${encodeURIComponent(JSON.stringify({
+			} else return res.redirect(new URL(`/oauth2/authorize?client_id=${settings.application.clientId}&response_type=code&redirect_uri=${encodeURIComponent(new URL("/discord/link/", settings.website.server).toString())}&scope=identify&prompt=none&state=${encodeURIComponent(JSON.stringify({
 				redirect,
 				uid
 			}))}`, "https://discord.com"));
 
-			res.redirect(new URL("/discord/", settings.secrets.server.url));
+			res.redirect(new URL("/discord/", settings.website.server));
 		}
 	}
 };

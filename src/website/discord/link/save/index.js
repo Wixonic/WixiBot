@@ -9,7 +9,6 @@ addEventListener("DOMContentLoaded", async () => {
 	const credentials = await firebase.getUser();
 	if (!credentials.valid) return location.href = new URL(`/login/?redirect=${encodeURIComponent(location.href)}`, localEnvironment ? path.local.accounts : path.accounts);
 	const user = credentials.user;
-	console.log(user);
 
 	const main = document.querySelector("main");
 

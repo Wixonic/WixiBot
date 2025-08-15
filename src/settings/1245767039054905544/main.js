@@ -8,7 +8,8 @@ const mainSettings = {
 
 	application: require("./application.js"),
 	secrets: require("./secrets.js"),
-	paths: require("./paths.js")
+	paths: require("./paths.js"),
+	website: require("./website.js")
 };
 
 module.exports = mainSettings;

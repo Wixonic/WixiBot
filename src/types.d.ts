@@ -96,7 +96,6 @@ export interface PathsSecretsSettings {
 export interface ServerSecretsSettings {
 	cert: string;
 	key: string;
-	url: string;
 };
 
 export interface SecretsSettings {
@@ -107,12 +106,19 @@ export interface SecretsSettings {
 	wixkey: string;
 };
 
+export interface WebsiteSettings {
+	accounts: string;
+	functions: string;
+	server: string;
+};
+
 export interface MainSettings {
 	active: boolean;
 	port: number;
 	application: ApplicationSettings;
 	paths: PathsSettings;
 	secrets: SecretsSettings;
+	website: WebsiteSettings;
 };
 
 

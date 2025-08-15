@@ -1,4 +1,4 @@
-module.exports = {
+const roles = {
 	categories: [
 		{
 			id: "notifications",
@@ -86,3 +86,5 @@ module.exports = {
 		}
 	]
 };
+
+module.exports = roles;
