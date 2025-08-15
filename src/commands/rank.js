@@ -41,7 +41,7 @@ const info = {
 		const userRank = Rank.get(logger, bot, targetUser.id);
 		await interaction.followUp({
 			allowedMentions: {},
-			content: userRank.description + `\n[See more](${new URL(`/discord/user/?id=${targetUser.id}`, bot.settings.secrets.server.url)})`
+			content: userRank.description + `\n[See more](<${new URL(`/discord/user/?id=${targetUser.id}`, bot.settings.secrets.server.url)}>)`
 		});
 	}
 };
