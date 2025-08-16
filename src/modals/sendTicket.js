@@ -13,7 +13,7 @@ const modal = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const channel = await interaction.guild.channels.fetch(bot.settings.application.moderationChannel);
+		const channel = await interaction.guild.channels.fetch(bot.settings.application.commands.tickets.channel);
 
 		if (channel) {
 			const ticketsPath = bot.settings.paths.tickets(interaction.guild.id);
