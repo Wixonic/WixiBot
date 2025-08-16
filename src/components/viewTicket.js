@@ -24,23 +24,25 @@ const component = {
 		if (fs.existsSync(ticketPath)) {
 			try {
 				const initialTicket = JSON.parse(fs.readFileSync(ticketPath, "utf-8"));
-				const ticket = {
-					...initialTicket
-				};
-				ticket.viewers.push({
-					id: viewer.id,
-					name: viewer.user.displayName
-				});
+				if (initialTicket.type == "CLAIMED" || initialTicket.type == "CLOSED") {
+					const ticket = {
+						...initialTicket
+					};
+					ticket.viewers.push({
+						id: viewer.id,
+						name: viewer.user.displayName
+					});
 
-				const channel = await interaction.guild.channels.fetch(ticket.channel);
+					const channel = await interaction.guild.channels.fetch(ticket.channel);
 
-				await channel.permissionOverwrites.edit(viewer.id, {
-					ViewChannel: true
-				});
+					await channel.permissionOverwrites.edit(viewer.id, {
+						ViewChannel: true
+					});
 
-				await interaction.followUp(`Ticket ${ticketId} is now available at <#${channel.id}>.`);
+					await interaction.followUp(`Ticket ${ticketId} is now available at <#${channel.id}>.`);
 
-				fs.writeFileSync(ticketPath, JSON.stringify(ticket));
+					fs.writeFileSync(ticketPath, JSON.stringify(ticket));
+				}
 			} catch (e) {
 				logger.warn(`Failed to read ticket file: ${e}`);
 				await interaction.followUp("An error occured while reading the ticket file.");
