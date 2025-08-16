@@ -54,7 +54,22 @@ const info = {
 						rank.linked = true;
 						await rank.save();
 
-						return res.redirect(new URL(`/discord/link/save/?id=${me.user.id}&username=${me.user.username}&uid=${uid}&redirect=${encodeURIComponent(redirect)}`, settings.website.server));
+						const link = await request(logger, {
+							headers: {
+								"Content-Type": "application/json"
+							},
+							type: "json",
+							method: "POST",
+							body: JSON.stringify({
+								id: me.user.id,
+								username: me.user.username,
+								uid,
+								wixkey: settings.secrets.wixkey
+							}),
+							url: new URL((process.env.dev == "true" ? "/wixonic-website-2/europe-west1/httpServer" : "") + "/auth/link/discord/", settings.website.functions),
+						});
+
+						if (!link.error) return res.redirect(redirect);
 					}
 				}
 			} else return res.redirect(new URL(`/oauth2/authorize?client_id=${settings.application.clientId}&response_type=code&redirect_uri=${encodeURIComponent(new URL("/discord/link/", settings.website.server).toString())}&scope=identify&prompt=none&state=${encodeURIComponent(JSON.stringify({

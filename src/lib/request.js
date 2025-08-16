@@ -45,58 +45,60 @@ const request = (logger, options = {}) => {
 				req.on("timeout", () => reject("Connection got timed out"));
 
 				req.on("response", (res) => {
-					if (options.type == "headers") resolve(res.headers);
+					if (res.statusCode == 204) resolve(null);
 					else {
-						const chunks = [];
+						if (options.type == "headers") resolve(res.headers);
+						else {
+							const chunks = [];
 
-						const reject = (reason = "Unknown reason", response) => {
-							logger.debug("[Request]", "Rejected while response:", reason);
+							const reject = (reason = "Unknown reason", response) => {
+								logger.debug("[Request]", "Rejected while response:", reason);
 
-							res.removeAllListeners();
-							req.removeAllListeners();
+								res.removeAllListeners();
+								req.removeAllListeners();
 
-							resolve({
-								error: reason,
-								response
+								resolve({
+									error: reason,
+									response
+								});
+							};
+
+							res.on("close", () => reject("Connection closed"));
+							res.on("error", (e) => reject(e));
+
+							res.on("data", (chunk) => chunks.push(chunk));
+							res.on("end", () => {
+								res.removeAllListeners();
+								req.removeAllListeners();
+
+								switch (options.type) {
+									case "json":
+										let json = "";
+										try {
+											json = JSON.parse(chunks.join(""));
+										} catch {
+											reject("Failed to parse JSON", chunks.join(""));
+										}
+										if (String(res.statusCode).startsWith("2")) resolve(json);
+										else reject(`Status: ${res.statusCode}`, json);
+										break;
+
+									case "raw":
+										if (String(res.statusCode).startsWith("2")) resolve(chunks);
+										else reject(`Status: ${res.statusCode}`, chunks);
+										break;
+
+									case "text":
+										if (String(res.statusCode).startsWith("2")) resolve(chunks.join(""));
+										else reject(`Status: ${res.statusCode}`, chunks.join(""));
+										break;
+
+									default:
+										reject(`Invalid type: ${options.type ?? "<empty>"}`, chunks.join(""));
+										break;
+								}
 							});
-						};
-
-						res.on("close", () => reject("Connection closed"));
-						res.on("error", (e) => reject(e));
-
-						res.on("data", (chunk) => chunks.push(chunk));
-						res.on("end", () => {
-
-							res.removeAllListeners();
-							req.removeAllListeners();
-
-							switch (options.type) {
-								case "json":
-									let json = "";
-									try {
-										json = JSON.parse(chunks.join(""));
-									} catch {
-										reject("Failed to parse JSON", chunks.join(""));
-									}
-									if (String(res.statusCode).startsWith("2")) resolve(json);
-									else reject(`Status: ${res.statusCode}`, json);
-									break;
-
-								case "raw":
-									if (String(res.statusCode).startsWith("2")) resolve(chunks);
-									else reject(`Status: ${res.statusCode}`, chunks);
-									break;
-
-								case "text":
-									if (String(res.statusCode).startsWith("2")) resolve(chunks.join(""));
-									else reject(`Status: ${res.statusCode}`, chunks.join(""));
-									break;
-
-								default:
-									reject(`Invalid type: ${options.type ?? "<empty>"}`, chunks.join(""));
-									break;
-							}
-						});
+						}
 					}
 				});
 

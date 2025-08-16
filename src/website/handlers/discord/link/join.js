@@ -48,6 +48,8 @@ const info = {
 					});
 					if (me.error) throw me.error ?? "Failed to get user profile from Discord";
 
+					if (!me.email) throw "Failed to get user email from Discord";
+
 					const functionsResponse = await request(logger, {
 						headers: {
 							"Content-Type": "application/json"
@@ -60,7 +62,8 @@ const info = {
 							discord: {
 								id: me.id,
 								displayName: me.global_name,
-								username: me.username
+								username: me.username,
+								email: me.email
 							},
 							wixkey: settings.secrets.wixkey
 						})
@@ -72,17 +75,17 @@ const info = {
 					rank.linked = true;
 					await rank.save();
 
-					const callbackUrl = new URL("/verify/", settings.website.accounts);
-					callbackUrl.searchParams.set("mode", "finalizeDiscord");
-					callbackUrl.searchParams.set("token", functionsResponse.customToken);
-					callbackUrl.searchParams.set("redirect", redirect);
+					const callbackURL = new URL("/verify/", settings.website.accounts);
+					callbackURL.searchParams.set("mode", "finalizeDiscord");
+					callbackURL.searchParams.set("token", functionsResponse.customToken);
+					callbackURL.searchParams.set("redirect", redirect);
 
-					return res.redirect(callbackUrl.toString());
+					return res.redirect(callbackURL.toString());
 				} catch (error) {
 					logger.warn("Discord join process failed:", error);
 					return res.redirect(redirect);
 				}
-			} else return res.redirect(new URL(`/oauth2/authorize?client_id=${settings.application.clientId}&response_type=code&redirect_uri=${encodeURIComponent(new URL("/discord/link/join/", settings.website.server).toString())}&scope=identify&prompt=none&state=${encodeURIComponent(JSON.stringify({
+			} else return res.redirect(new URL(`/oauth2/authorize?client_id=${settings.application.clientId}&response_type=code&redirect_uri=${encodeURIComponent(new URL("/discord/link/join/", settings.website.server).toString())}&scope=identify%20email&prompt=none&state=${encodeURIComponent(JSON.stringify({
 				redirect
 			}))}`, "https://discord.com"));
 		}
