@@ -32,7 +32,7 @@ addEventListener("DOMContentLoaded", async () => {
 		button.addEventListener("click", async () => {
 			if (!button.disabled) {
 				button.disabled = true;
-				await request("POST", new URL(`${localEnvironment ? "/wixonic-website-2/europe-west1/httpServer" : ""}/auth/verify/`, localEnvironment ? path.local.functions : path.functions), "json", "application/json", null, -1, true);
+				await request("POST", new URL("/auth/verify/", localEnvironment ? path.local.functions : path.functions), "json", "application/json", null, -1, true);
 				button.disabled = false;
 			}
 		});
@@ -66,8 +66,8 @@ addEventListener("DOMContentLoaded", async () => {
 
 				try {
 					const image = document.createElement("img");
-					const imageData = await request("GET", memberData.avatar, "blob", "image/*");
-					if (imageData.status != 200) throw `Status: $(imageData.status}`;
+					const imageData = await request("GET", memberData.avatar, "blob");
+					if (imageData.status != 200) throw `Status: ${imageData.status}`;
 					image.src = URL.createObjectURL(imageData.response);
 					image.onload = () => URL.revokeObjectURL(image.src);
 					member.append(image);
@@ -175,7 +175,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 			const discord = document.createElement("button");
 			discord.classList.add("button", "discord", "fade", "slide");
-			discord.innerHTML = `Link your account to ${(await request("GET", new URL("/icon/discord.text.svg", localEnvironment ? path.local.assets : path.assets), "text", "image/svg+xml", null, 3600)).response}`;
+			discord.innerHTML = `Link your account to ${(await request("GET", new URL("/icon/discord.text.svg", localEnvironment ? path.local.assets : path.assets), "text", null, null, 3600)).response}`;
 			discord.addEventListener("click", async () => {
 				if (!discord.disabled) {
 					discord.disabled = true;

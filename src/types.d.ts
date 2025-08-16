@@ -207,8 +207,12 @@ type WSHandler = (
 
 export interface HandlerInfo {
 	path: string;
-	handlers: Record<string, HttpHandler> & {
-		ws: WSHandler;
+	handlers: {
+		get: HttpHandler?;
+		post: HttpHandler?;
+		put: HttpHandler?;
+		delete: HttpHandler?;
+		ws: WSHandler?;
 	};
 };
 

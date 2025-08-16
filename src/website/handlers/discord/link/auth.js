@@ -1,12 +1,13 @@
-const Rank = require("../../../../lib/rank.js");
 const request = require("../../../../lib/request.js");
 const { userAgent } = require("../../../../lib/utils.js");
 
+const Rank = require("../../../../lib/rank.js");
+
 /**
- * @type {import("../../../../types.d.ts").HandlerInfo}
+ * @type {import("../../../../types").HandlerInfo}
  */
 const info = {
-	path: "/discord/link/join/",
+	path: "/discord/link/auth/",
 	handlers: {
 		get: async (logger, settings, req, res, bot) => {
 			let redirect = req.query.redirect;
@@ -23,7 +24,7 @@ const info = {
 					const params = new URLSearchParams();
 					params.append("grant_type", "authorization_code");
 					params.append("code", req.query.code);
-					params.append("redirect_uri", new URL("/discord/link/join/", settings.website.server).toString());
+					params.append("redirect_uri", new URL("/discord/link/auth/", settings.website.server).toString());
 
 					const token = await request(logger, {
 						auth: `${settings.application.clientId}:${settings.application.clientSecret}`,
@@ -57,7 +58,7 @@ const info = {
 						type: "json",
 						method: "POST",
 						secure: process.env.dev != "true",
-						url: new URL((process.env.dev == "true" ? "/wixonic-website-2/europe-west1/httpServer" : "") + "/auth/discord/", settings.website.functions),
+						url: new URL("/auth/discord/", settings.website.functions),
 						body: JSON.stringify({
 							discord: {
 								id: me.id,
@@ -85,7 +86,7 @@ const info = {
 					logger.warn("Discord join process failed:", error);
 					return res.redirect(redirect);
 				}
-			} else return res.redirect(new URL(`/oauth2/authorize?client_id=${settings.application.clientId}&response_type=code&redirect_uri=${encodeURIComponent(new URL("/discord/link/join/", settings.website.server).toString())}&scope=identify%20email&prompt=none&state=${encodeURIComponent(JSON.stringify({
+			} else return res.redirect(new URL(`/oauth2/authorize?client_id=${settings.application.clientId}&response_type=code&redirect_uri=${encodeURIComponent(new URL("/discord/link/auth/", settings.website.server).toString())}&scope=identify%20email&prompt=none&state=${encodeURIComponent(JSON.stringify({
 				redirect
 			}))}`, "https://discord.com"));
 		}

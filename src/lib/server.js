@@ -1,4 +1,5 @@
 const { execSync } = require("child_process");
+const cors = require("cors");
 const express = require("express");
 const fs = require("fs");
 const http = require("http");
@@ -51,15 +52,13 @@ class Server {
 			this.app.use((req, res, next) => {
 				const origin = req.headers.origin;
 				this.logger.debug(`Request: ${req.method + (origin ? " " + origin : "")} | ${req.url}`);
-
-				if (origin) {
-					res.setHeader("Access-Control-Allow-Origin", origin);
-					res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-					res.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type");
-					res.setHeader("Access-Control-Allow-Credentials", "true");
-				}
 				next();
 			});
+
+			this.app.use(cors({
+				credentials: true,
+				origin: (origin, callback) => callback(null, origin ?? true)
+			}));
 
 			this.app.use(express.static(websitePath));
 			this.app.use(express.text({ limit: "1gb", type: "*/*" }));

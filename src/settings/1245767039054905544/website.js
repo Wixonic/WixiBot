@@ -3,7 +3,7 @@
  */
 const website = {
 	accounts: "http://localhost:2010",
-	functions: "http://localhost:2004",
+	functions: "http://localhost:2014",
 	server: "http://localhost:999"
 };
 
