@@ -27,14 +27,15 @@ const info = {
 		const ticketMessage = fs.existsSync(bot.settings.paths.markdown.ticket) ? fs.readFileSync(bot.settings.paths.markdown.ticket, "utf-8") : null;
 
 		if (ticketMessage) {
+			const buttonChannel = await bot.channels.fetch(bot.settings.application.commands.tickets.buttonChannel);
 			const channel = await bot.channels.fetch(bot.settings.application.commands.tickets.channel);
 
-			if (channel && channel.isSendable()) {
-				const messages = await channel.messages.fetch({
+			if (buttonChannel && buttonChannel.isSendable() && channel && channel.isSendable()) {
+				const messages = await buttonChannel.messages.fetch({
 					limit: 10
 				});
 
-				for (const message of messages.values()) await channel.messages.delete(message);
+				for (const message of messages.values()) await buttonChannel.messages.delete(message);
 
 				const rolesText = [];
 				const roles = await interaction.guild.roles.fetch();
@@ -44,7 +45,7 @@ const info = {
 					if (role.id != interaction.guild.roles.everyone.id && (permissions.has(PermissionFlagsBits.ViewChannel) || permissions.has(PermissionFlagsBits.Administrator))) rolesText.push(`<@&${role.id}>`);
 				}
 
-				await channel.send({
+				await buttonChannel.send({
 					allowedMentions: {},
 					content: ticketMessage.replace("{{PERMISSIONS}}", rolesText.join(", ")),
 					components: [
@@ -60,8 +61,8 @@ const info = {
 					]
 				});
 
-				await interaction.followUp(`Ticket prompt updated at <#${channel.id}>.`);
-			} else logger.error("Invalid channel:", bot.settings.application.commands.tickets.channel);
+				await interaction.followUp(`Ticket prompt updated at <#${buttonChannel.id}>.`);
+			} else logger.error("Invalid channels:", bot.settings.application.commands.tickets.buttonChannel, "or", bot.settings.application.commands.tickets.channel);
 		} else logger.error("Ticket prompt file missing");
 	}
 };
