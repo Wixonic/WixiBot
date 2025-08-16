@@ -24,12 +24,10 @@ const info = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const settings = bot.settings.application.commands.tickets;
-
 		const ticketMessage = fs.existsSync(bot.settings.paths.markdown.ticket) ? fs.readFileSync(bot.settings.paths.markdown.ticket, "utf-8") : null;
 
 		if (ticketMessage) {
-			const channel = await bot.channels.fetch(settings.channel);
+			const channel = await bot.channels.fetch(bot.settings.application.commands.tickets.channel);
 
 			if (channel && channel.isSendable()) {
 				const messages = await channel.messages.fetch({
@@ -63,7 +61,7 @@ const info = {
 				});
 
 				await interaction.followUp(`Ticket prompt updated at <#${channel.id}>.`);
-			} else logger.error("Invalid channel:", settings.channel);
+			} else logger.error("Invalid channel:", bot.settings.application.commands.tickets.channel);
 		} else logger.error("Ticket prompt file missing");
 	}
 };
