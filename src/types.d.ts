@@ -44,6 +44,7 @@ export interface CommandsSettings {
 		channel: string;
 	};
 	tickets: {
+		buttonChannel: string;
 		category: string;
 		channel: string;
 	};
