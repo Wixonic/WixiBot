@@ -33,7 +33,7 @@ const info = {
 						};
 					}
 
-					res.status(200).end();
+					res.status(204).end();
 				} catch (e) {
 					youtubeData = null;
 					res.status(400).end();
