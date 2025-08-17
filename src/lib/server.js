@@ -21,14 +21,16 @@ class Server {
 			warn: (...any) => logger.warn("[Server]", ...any)
 		};
 
-		if (!fs.existsSync(settings.secrets.server.cert) || !fs.existsSync(settings.secrets.server.key)) throw new Error("SSL certificate or key are missing.");
+		this.settings = settings;
+
+		if (!fs.existsSync(this.settings.secrets.server.cert) || !fs.existsSync(this.settings.secrets.server.key)) throw new Error("SSL certificate or key are missing.");
 
 		this.app = express();
 
 		/** @type {https.Server} */
 		this.http = process.env.dev == "true" ? http.createServer() : https.createServer({
-			cert: fs.readFileSync(settings.secrets.server.cert),
-			key: fs.readFileSync(settings.secrets.server.key)
+			cert: fs.readFileSync(this.settings.secrets.server.cert),
+			key: fs.readFileSync(this.settings.secrets.server.key)
 		});
 
 		this.ws = new ws.Server({
@@ -36,45 +38,97 @@ class Server {
 		});
 
 		this.wsHandlers = [];
+		this.loopHandlers = [];
 
-		this.port = settings.port;
+		this.port = this.settings.port;
 	};
 
 	/**
-	 * @param {import("../types.d.ts").MainSettings} settings
 	 * @param {import("./bot.js")} bot
+	 * @param {import("./rpc.js")} rpc
 	 * @returns {Promise<void>}
 	 */
-	init(settings, bot) {
+	init(bot, rpc) {
 		const websitePath = path.join(__dirname, "..", "website");
 
-		return new Promise((resolve) => {
+		return new Promise(async (resolve) => {
+			this.app.use(cors({
+				credentials: true,
+				origin: (origin, callback) => callback(null, origin ?? true)
+			}));
+
 			this.app.use((req, res, next) => {
 				const origin = req.headers.origin;
 				this.logger.debug(`Request: ${req.method + (origin ? " " + origin : "")} | ${req.url}`);
 				next();
 			});
 
-			this.app.use(cors({
-				credentials: true,
-				origin: (origin, callback) => callback(null, origin ?? true)
-			}));
-
 			this.app.use(express.static(websitePath));
 			this.app.use(express.text({ limit: "1gb", type: "*/*" }));
 
-			for (const handlerFile of fs.readdirSync(path.join(websitePath, "handlers"), { recursive: true })) {
+			const handlers = fs.readdirSync(path.join(websitePath, "handlers"), { recursive: true });
+			for (const handlerFile of handlers) {
 				if (handlerFile.endsWith(".js")) {
 					/** @type {import("../types.d.ts").HandlerInfo} */
 					const handler = require(path.join(websitePath, "handlers", handlerFile));
+					const handlerName = handlerFile.replace(".js", "");
 
 					for (const method in handler.handlers) {
-						if (method != "ws") this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, settings, req, res, bot));
+						if (method != "ws") this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, this.settings, req, res, bot, rpc));
 						else this.wsHandlers[handler.path] = handler.handlers.ws;
-						this.logger.debug("Added handler for", handlerFile.replace(".js", ""), "with method", method);
+						this.logger.debug("Added handler for", handlerName, "at", handler.path, "with method", method);
+					}
+
+					if (handler.loop) {
+						this.loopHandlers[handler.path] = {
+							delay: handler.loop.delay,
+							idle: true,
+							lastUpdated: 0,
+							name: handlerName,
+							process: handler.loop.process
+						};
+
+						this.logger.debug("Added loop handler for", handlerName);
 					}
 				}
 			}
+
+			const loopUpdate = async () => {
+				const now = Date.now();
+				const promises = [];
+
+				for (const path in this.loopHandlers) {
+					const loop = this.loopHandlers[path];
+					if (typeof loop.process == "function" && loop.lastUpdated + (loop.idle ? 60 * 1000 : loop.delay) <= now) {
+						this.loopHandlers[path].lastUpdated = now;
+
+						const handlerLogger = {
+							debug: (...args) => this.logger.debug(`[${loop.name} init]`, ...args),
+							error: (...args) => this.logger.error(`[${loop.name} init]`, ...args),
+							info: (...args) => this.logger.info(`[${loop.name} init]`, ...args),
+							warn: (...args) => this.logger.warn(`[${loop.name} init]`, ...args)
+						};
+
+						promises.push((async () => {
+							try {
+								const status = await loop.process(handlerLogger, this.settings, bot, rpc);
+								if (status != loop.idle) {
+									handlerLogger.debug(`Now ${status ? "idle" : "active"}`);
+									this.loopHandlers[path].idle = status;
+								}
+							} catch (e) {
+								handlerLogger.warn("Failed to process:", e);
+								handlerLogger.debug("Now idle");
+								this.loopHandlers[path].idle = true;
+							}
+						})());
+					}
+				}
+
+				if (promises.length > 0) await Promise.all(promises);
+
+				setTimeout(loopUpdate, Math.max(0, 500 - (Date.now() - now)));
+			};
 
 			this.app.use((req, res) => {
 				this.logger.warn(`404: ${req.method} ${req.url}`);
@@ -93,7 +147,7 @@ class Server {
 				this.ws.handleUpgrade(req, socket, head, (ws) => {
 					this.ws.emit("connection", ws, req);
 					const handler = this.wsHandlers[req.url];
-					if (handler) handler(this.logger, settings, ws);
+					if (handler) handler(this.logger, this.settings, ws, bot, rpc);
 				});
 			});
 
@@ -115,11 +169,16 @@ class Server {
 			this.ws.on("error", (e) => this.logger.error("[WebSocket]", "Server error:", e));
 
 			try {
-				execSync(`kill -9 $(lsof -ti :${this.port})`);
+				execSync(`kill -9 $(lsof -ti :${this.port})`, {
+					stdio: "ignore"
+				});
 			} catch { }
 
 			this.http.listen(this.port, () => {
 				this.logger.info(`Running on :${this.port}`);
+
+				loopUpdate();
+
 				resolve();
 			});
 		});

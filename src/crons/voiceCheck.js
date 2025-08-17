@@ -28,8 +28,7 @@ const cron = {
 									await rank.voiceStop();
 								}
 							} catch (e) {
-								logger.warn(`[Rank] Error fetching member "${rank.memberId}":`, e);
-								await rank.save();
+								logger.debug(`[Rank] Error fetching member "${rank.memberId}":`, e);
 							}
 						} else logger.warn(`[Rank] Error reading rank data for file ${file}`);
 					} catch (e) {

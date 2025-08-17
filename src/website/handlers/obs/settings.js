@@ -56,6 +56,27 @@ const captureProcess = {
 			], { stdio: "inherit" });
 		},
 		process: null
+	},
+	audio: {
+		active: false,
+		name: "Audio",
+		spawn: (logger) => {
+			logger.info("Starting process:", captureProcess.audio.name);
+			return childProcess.spawn("ffplay", [
+				"-hide_banner",
+				"-loglevel", "warning",
+
+				"-flags", "low_delay",
+				"-fflags", "nobuffer",
+
+				"-nodisp",
+				"-vn",
+
+				"-f", "mpegts",
+				"udp://@:2000"
+			], { stdio: "inherit" });
+		},
+		process: null
 	}
 };
 
@@ -90,7 +111,7 @@ update();
 const info = {
 	path: "/obs/settings/",
 	handlers: {
-		get: async (logger, settings, req, res) => {
+		get: async (logger, settings, req, res, bot, rpc) => {
 			const { id } = req.query;
 			const processId = id;
 
@@ -98,7 +119,7 @@ const info = {
 
 			res.json({ id: processId, active: captureProcess[processId].active });
 		},
-		post: (logger, settings, req, res) => {
+		post: async (logger, settings, req, res, bot, rpc) => {
 			let body = "";
 			req.on("data", (chunk) => body += chunk.toString());
 

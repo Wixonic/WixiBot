@@ -15,6 +15,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var microphoneEnabled: Bool = false
 	var microphoneMenuItem: NSMenuItem!
 
+	var audioEnabled: Bool = false
+	var audioMenuItem: NSMenuItem!
+
 	func applicationDidFinishLaunching(_ notification: Notification) {
 		statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
@@ -29,6 +32,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		microphoneMenuItem.target = self
 		menu.addItem(microphoneMenuItem)
 
+		audioMenuItem = NSMenuItem(title: "Audio", action: #selector(toggleAudio(_:)), keyEquivalent: "m")
+		audioMenuItem.state = audioEnabled ? .on : .off
+		audioMenuItem.target = self
+		menu.addItem(audioMenuItem)
+
 		menu.addItem(NSMenuItem(title: "Quit", action: #selector(terminate), keyEquivalent: "q"))
 		statusItem.menu = menu
 
@@ -41,8 +49,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		sendToggleRequest(id: "microphone", status: microphoneEnabled)
 	}
 
+	@objc func toggleAudio(_ sender: NSMenuItem) {
+		audioEnabled.toggle()
+		audioMenuItem.state = audioEnabled ? .on : .off
+		sendToggleRequest(id: "audio", status: audioEnabled)
+	}
+
     func sendToggleRequest(id: String, status: Bool) {
-		guard let url = URL(string: "https://localhost:1000/obs/settings/?id=\(id)") else { return }
+		guard let url = URL(string: "https://server.wixonic.fr/obs/settings/?id=\(id)") else { return }
 		
 		var request = URLRequest(url: url)
 		request.httpMethod = "POST"

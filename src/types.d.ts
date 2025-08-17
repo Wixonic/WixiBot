@@ -1,3 +1,6 @@
+import { ActivitiesOptions, CustomStatus, RichPresence, SpotifyRPC } from "discord.js-selfbot-v13";
+
+// Server
 export interface ApplicationSettings {
 	clientId: string;
 	clientSecret: DiscordApplicationSecretsSettings["secret"];
@@ -70,18 +73,14 @@ export interface PathsSettings {
 	tickets: (guildId: string) => string;
 };
 
-export interface DiscordApplicationSecretsSettings {
-	secret: string;
-	token: string;
-};
-
-export interface DiscordClientSecretsSettings {
-	token: string;
-};
-
 export interface DiscordSecretsSettings {
-	application: DiscordApplicationSecretsSettings;
-	client: DiscordClientSecretsSettings;
+	application: {
+		secret: string;
+		token: string;
+	};
+	client: {
+		token: string;
+	};
 	webhook: string;
 };
 
@@ -103,6 +102,7 @@ export interface SecretsSettings {
 	discord: DiscordSecretsSettings;
 	moderation: ModerationSecretsSettings;
 	paths: PathsSecretsSettings;
+	rpc: RPCSecretsSettings;
 	server: ServerSecretsSettings;
 	wixkey: string;
 };
@@ -119,6 +119,7 @@ export interface MainSettings {
 	application: ApplicationSettings;
 	paths: PathsSettings;
 	secrets: SecretsSettings;
+	rpc: RPCSettings;
 	website: WebsiteSettings;
 };
 
@@ -197,14 +198,24 @@ type HttpHandler = (
 	settings: MainSettings,
 	req: import("express").Request,
 	res: import("express").Response,
-	bot: import("./lib/bot.js")
-) => void;
+	bot: import("./lib/bot.js"),
+	rpc: import("./lib/rpc.js")
+) => Promise<void>;
 
 type WSHandler = (
 	logger: import("@wixonic/logger").Logger,
 	settings: MainSettings,
-	ws: import("ws").WebSocket
-) => void;
+	ws: import("ws").WebSocket,
+	bot: import("./lib/bot.js"),
+	rpc: import("./lib/rpc.js")
+) => Promise<void>;
+
+type LoopHandler = (
+	logger: import("@wixonic/logger").Logger,
+	settings: MainSettings,
+	bot: import("./lib/bot.js"),
+	rpc: import("./lib/rpc.js")
+) => Promise<boolean>;
 
 export interface HandlerInfo {
 	path: string;
@@ -212,9 +223,15 @@ export interface HandlerInfo {
 		get: HttpHandler?;
 		post: HttpHandler?;
 		put: HttpHandler?;
+		patch: HttpHandler?;
 		delete: HttpHandler?;
+		options: HttpHandler?;
 		ws: WSHandler?;
 	};
+	loop: {
+		delay: number;
+		process: LoopHandler;
+	}
 };
 
 
@@ -230,4 +247,56 @@ export interface GiveawayData {
 	endsAt: number?;
 	status: number;
 	startsAt: string?;
+};
+
+// RPC
+export type Activity = ActivitiesOptions | RichPresence | SpotifyRPC | CustomStatus;
+
+export interface Song {
+	state: "PLAYING" | "PAUSED" | "STOPPED";
+	track: string;
+	artist: string;
+	album: string;
+	startedAt?: number;
+	pausedAt?: number;
+	duration: number;
+	spotifyArtwork?: string;
+	spotifyArtworkURL?: string;
+	spotifyArtistIconURL?: string;
+	spotifyId?: string;
+	color?: string;
+	path?: string;
+};
+
+export interface RPCSettings {
+	discord: {
+		application: {
+			clients: Record<string, {
+				id: string;
+				assets: Record<string, string>;
+			}>;
+		};
+
+		token: string;
+	};
+	spotify: {
+		id: string;
+		secret: string;
+	};
+};
+
+export interface RPCSecretsSettings {
+	discord: string;
+	roblox: {
+		id: string;
+		token: string;
+	};
+	spotify: {
+		id: string;
+		secret: string;
+	};
+	steam: {
+		id: string;
+		token: string;
+	};
 };

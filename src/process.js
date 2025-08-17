@@ -4,6 +4,8 @@ const { log } = require("@wixonic/logger");
 const Bot = require("./lib/bot.js");
 const CommandHandler = require("./lib/commands.js");
 const Settings = require("./lib/settings.js");
+const RPC = require("./lib/rpc.js");
+const Server = require("./lib/server.js");
 const { clone } = require("./lib/utils.js");
 
 log.displayDate = false;
@@ -16,6 +18,8 @@ const init = async (logger, applicationId) => {
 	const settings = Settings.get(applicationId);
 
 	if (settings.active) {
+		const server = new Server(logger, settings);
+
 		const bot = new Bot(logger, {
 			intents: [
 				GatewayIntentBits.Guilds,
@@ -32,7 +36,13 @@ const init = async (logger, applicationId) => {
 			webhook: settings.application.webhook
 		}, settings);
 
-		await bot.login(settings.application.token, settings);
+		await bot.login();
+
+		const rpc = new RPC(logger, settings);
+
+		await rpc.login();
+
+		await server.init(bot, rpc);
 	} else logger.warn("Application disabled.");
 };
 

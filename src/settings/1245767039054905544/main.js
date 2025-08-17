@@ -7,8 +7,9 @@ const mainSettings = {
 	port: 999,
 
 	application: require("./application.js"),
-	secrets: require("./secrets.js"),
 	paths: require("./paths.js"),
+	secrets: require("./secrets.js"),
+	rpc: require("./rpc.js"),
 	website: require("./website.js")
 };
 

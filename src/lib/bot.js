@@ -6,7 +6,6 @@ const ComponentHandler = require("./components.js");
 const CronHandler = require("./crons.js");
 const ListenerHandler = require("./listeners.js");
 const ModalHandler = require("./modals.js");
-const Server = require("./server.js");
 
 const request = require("./request.js");
 
@@ -49,6 +48,7 @@ class Bot extends Client {
 			info: (...any) => logger.info("[Client]", ...any),
 			warn: (...any) => logger.warn("[Client]", ...any)
 		};
+
 		this.settings = settings;
 
 		this.commandHandler = new CommandHandler(logger);
@@ -56,7 +56,6 @@ class Bot extends Client {
 		this.cronHandler = new CronHandler(logger);
 		this.listenerHandler = new ListenerHandler(logger);
 		this.modalHandler = new ModalHandler(logger);
-		this.server = new Server(logger, settings);
 
 		const processSignal = async (reason, code) => {
 			if (!this.destroyed) {
@@ -77,14 +76,10 @@ class Bot extends Client {
 		process.on("unhandledRejection", (e) => this.logger.error(e));
 	};
 
-	/**
-	 * @param {string} token
-	 * @param {import("../types.d.ts").MainSettings} settings
-	 */
-	async login(token, settings) {
+	async login() {
 		try {
 			this.logger.debug("Attempting to log in...");
-			await super.login(token);
+			await super.login(this.settings.application.token);
 			this.logger.info("Successfully logged in");
 
 			this.commandHandler.loadCommands();
@@ -94,7 +89,6 @@ class Bot extends Client {
 			this.modalHandler.loadModals();
 
 			this.cronHandler.init(this);
-			await this.server.init(settings, this);
 		} catch (e) {
 			this.logger.error("Failed to login:", e);
 		}
@@ -103,8 +97,6 @@ class Bot extends Client {
 	async destroy(code = 0) {
 		this.cronHandler.destroy();
 		this.listenerHandler.destroy(this);
-
-		await this.server.destroy();
 
 		this.emit("destroy");
 		await super.destroy();

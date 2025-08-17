@@ -6,7 +6,7 @@ const Rank = require("../../../../lib/rank.js");
 const info = {
 	path: "/discord/api/leaderboard",
 	handlers: {
-		get: async (logger, settings, req, res, bot) => {
+		get: async (logger, settings, req, res, bot, rpc) => {
 			const start = req.query.start ?? 0;
 			const end = req.query.end;
 			const category = req.query.category ?? "all";

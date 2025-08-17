@@ -11,26 +11,38 @@ let updatingMap = false;
 const info = {
 	path: "/rpc/warthunder/map.png",
 	handlers: {
-		get: async (logger, settings, req, res) => {
+		get: async (logger, settings, req, res, bot, rpc) => {
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/map.png");
-			if (fs.existsSync(filePath)) {
-				while (updatingMap) await wait(50);
-				res.status(200).sendFile(filePath);
-			} else res.status(404).send("Map not found");
+			while (updatingMap) await wait(50);
+			if (fs.existsSync(filePath)) res.status(200).sendFile(filePath);
+			else res.status(404).end();
 		},
-		post: (logger, settings, req, res) => {
+		post: (logger, settings, req, res, bot, rpc) => {
 			updatingMap = true;
-			const authHeader = req.headers.authorization;
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/map.png");
 
-			if (!authHeader || authHeader !== `WixKey ${settings.secrets.wixkey}`) {
-				logger.warn("[War Thunder]", "Unauthorized access attempt");
+			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+				logger.warn("[rpc/warthunder]", "Unauthorized access attempt");
 				updatingMap = false;
-				return res.status(401).send("Unauthorized: Invalid API key");
+				return res.status(401).end();
 			}
 
 			if (!fs.existsSync(path.dirname(filePath))) fs.mkdirSync(path.dirname(filePath), { recursive: true });
 			fs.writeFileSync(filePath, Buffer.from(req.body, "base64url"));
+			res.status(204).end();
+			updatingMap = false;
+		},
+		delete: (logger, settings, req, res, bot, rpc) => {
+			updatingMap = true;
+			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/map.png");
+
+			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+				logger.warn("[rpc/warthunder]", "Unauthorized access attempt");
+				updatingMap = false;
+				return res.status(401).end();
+			}
+
+			if (fs.existsSync(filePath)) fs.rmSync(filePath);
 			res.status(204).end();
 			updatingMap = false;
 		}

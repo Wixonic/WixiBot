@@ -11,26 +11,44 @@ let updatingData = false;
 const info = {
 	path: "/rpc/warthunder/data.json",
 	handlers: {
-		get: async (logger, settings, req, res) => {
-			const filePath = path.join(settings.paths.cache, "/rpc//warthunder/data.json");
-			if (fs.existsSync(filePath)) {
-				while (updatingData) await wait(50);
-				res.status(200).sendFile(filePath);
-			} else res.status(404).send("Data not found");
+		get: async (logger, settings, req, res, bot, rpc) => {
+			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/data.json");
+			while (updatingData) await wait(50);
+			if (fs.existsSync(filePath)) res.status(200).sendFile(filePath);
+			else res.status(404).json({
+				error: "Not Found"
+			});
 		},
-		post: (logger, settings, req, res) => {
+		post: (logger, settings, req, res, bot, rpc) => {
 			updatingData = true;
-			const authHeader = req.headers.authorization;
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/data.json");
 
-			if (!authHeader || authHeader !== `WixKey ${settings.secrets.wixkey}`) {
-				logger.warn("[War Thunder]", "Unauthorized access attempt");
+			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+				logger.warn("[rpc/warthunder]", "Unauthorized access attempt");
 				updatingData = false;
-				return res.status(401).send("Unauthorized: Invalid API key");
+				return res.status(401).json({
+					error: "Unauthorized"
+				});
 			}
 
 			if (!fs.existsSync(path.dirname(filePath))) fs.mkdirSync(path.dirname(filePath), { recursive: true });
 			fs.writeFileSync(filePath, Buffer.from(req.body, "utf-8"));
+			res.status(204).end();
+			updatingData = false;
+		},
+		delete: (logger, settings, req, res, bot, rpc) => {
+			updatingData = true;
+			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/data.json");
+
+			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+				logger.warn("[rpc/warthunder]", "Unauthorized access attempt");
+				updatingData = false;
+				return res.status(401).json({
+					error: "Unauthorized"
+				});
+			}
+
+			if (fs.existsSync(filePath)) fs.rmSync(filePath);
 			res.status(204).end();
 			updatingData = false;
 		}
