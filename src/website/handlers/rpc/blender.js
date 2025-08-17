@@ -14,23 +14,15 @@ const info = {
 				});
 			}
 
-			let body = "";
-
-			req.on("data", (chunk) => {
-				body += chunk.toString();
-			});
-
-			req.on("end", () => {
-				try {
-					blenderData = JSON.parse(body);
-					blenderData.date = Date.now();
-					res.status(200).end();
-				} catch (e) {
-					logger.warn("[rpc/blender]", e);
-					blenderData = null;
-					res.status(400).end();
-				}
-			});
+			try {
+				blenderData = req.body;
+				blenderData.date = Date.now();
+				res.status(200).end();
+			} catch (e) {
+				logger.warn("[rpc/blender]", e);
+				blenderData = null;
+				res.status(400).end();
+			}
 		}
 	},
 	loop: {

@@ -14,51 +14,45 @@ const info = {
 				});
 			}
 
-			let body = "";
+			try {
+				const githubResponse = req.body;
+				let conditions = githubResponse.type != githubData?.type;
+				switch (githubResponse.type) {
+					case "repository":
+						conditions ||= githubResponse.repository != githubData?.repository || githubResponse.owner != githubData?.owner;
+						break;
 
-			req.on("data", (chunk) => body += chunk.toString());
+					case "profile":
+						conditions ||= githubResponse.profile != githubData?.profile;
+						break;
+				};
 
-			req.on("end", async () => {
-				try {
-					const githubResponse = JSON.parse(body);
-					let conditions = githubResponse.type != githubData?.type;
+				if (conditions) {
+					githubData = githubResponse;
+					githubData.startedAt = Date.now();
+					githubData.updatedAt = Date.now();
+
 					switch (githubResponse.type) {
 						case "repository":
-							conditions ||= githubResponse.repository != githubData?.repository || githubResponse.owner != githubData?.owner;
+							githubData.large_image = await rpc.getExternalAsset(settings.rpc.discord.application.clients.github.id, `https://github.com/${githubData.owner}.png`);
 							break;
 
 						case "profile":
-							conditions ||= githubResponse.profile != githubData?.profile;
+							githubData.large_image = await rpc.getExternalAsset(settings.rpc.discord.application.clients.github.id, `https://github.com/${githubData.profile}.png`);
 							break;
-					};
-
-					if (conditions) {
-						githubData = githubResponse;
-						githubData.startedAt = Date.now();
-						githubData.updatedAt = Date.now();
-
-						switch (githubResponse.type) {
-							case "repository":
-								githubData.large_image = await rpc.getExternalAsset(settings.rpc.discord.application.clients.github.id, `https://github.com/${githubData.owner}.png`);
-								break;
-
-							case "profile":
-								githubData.large_image = await rpc.getExternalAsset(settings.rpc.discord.application.clients.github.id, `https://github.com/${githubData.profile}.png`);
-								break;
-						}
-
-						logger.info("[rpc/github]", "Data updated");
-					} else {
-						if (githubData) githubData.updatedAt = Date.now();
-						logger.debug("[rpc/github]", "Timings updated");
 					}
 
-					res.status(200).end();
-				} catch (e) {
-					githubData = null;
-					res.status(400).end();
+					logger.info("[rpc/github]", "Data updated");
+				} else {
+					if (githubData) githubData.updatedAt = Date.now();
+					logger.debug("[rpc/github]", "Timings updated");
 				}
-			});
+
+				res.status(200).end();
+			} catch (e) {
+				githubData = null;
+				res.status(400).end();
+			}
 		},
 		delete: async (logger, settings, req, res, bot, rpc) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
