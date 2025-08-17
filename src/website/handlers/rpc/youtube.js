@@ -65,8 +65,8 @@ const info = {
 					assets: {
 						small_image: settings.rpc.discord.application.clients.youtube.assets.icon,
 						small_text: "YouTube",
-						// large_image: youtubeData.thumbnail,
-						// large_text: youtubeData.name
+						large_image: youtubeData.thumbnail,
+						large_text: youtubeData.name
 					},
 					buttons: [
 						"Open video",
