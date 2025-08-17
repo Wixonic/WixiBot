@@ -24,10 +24,9 @@ const info = {
 				try {
 					blenderData = JSON.parse(body);
 					blenderData.date = Date.now();
-					logger.info("Data updated");
-
 					res.status(200).end();
 				} catch (e) {
+					logger.warn("[rpc/blender]", e);
 					blenderData = null;
 					res.status(400).end();
 				}

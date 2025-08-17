@@ -47,10 +47,10 @@ const info = {
 								break;
 						}
 
-						logger.info("Data updated");
+						logger.info("[rpc/github]", "Data updated");
 					} else {
 						if (githubData) githubData.updatedAt = Date.now();
-						logger.debug("Timings updated");
+						logger.debug("[rpc/github]", "Timings updated");
 					}
 
 					res.status(200).end();

@@ -133,7 +133,8 @@ const info = {
 					captureProcess[id].active = status;
 
 					res.json({ id, active: captureProcess[id].active });
-				} catch {
+				} catch (e) {
+					logger.warn("[obs/settings]", e);
 					res.status(400).send("Invalid status value");
 				}
 			});

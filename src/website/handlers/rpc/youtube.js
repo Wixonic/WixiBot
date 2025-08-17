@@ -25,22 +25,19 @@ const info = {
 						youtubeData = youtubeResponse;
 						youtubeData.thumbnail = await rpc.getExternalAsset(settings.rpc.discord.application.clients.youtube.id, youtubeData.thumbnail);
 						youtubeData.updatedAt = Date.now();
-						logger.info("Data updated");
 					} else if (youtubeResponse) {
 						youtubeData.updatedAt = Date.now();
 						youtubeData.timestamps = youtubeResponse.paused ? {} : {
 							start: Date.now() - youtubeResponse.time * 1000,
 							end: Date.now() + (youtubeResponse.duration - youtubeResponse.time) * 1000
 						};
-
-						logger.debug("Timings updated");
 					}
 
 					res.status(200).end();
 				} catch (e) {
 					youtubeData = null;
 					res.status(400).end();
-					logger.warn(e);
+					logger.warn("[rpc/youtube]", e);
 				}
 			});
 		},

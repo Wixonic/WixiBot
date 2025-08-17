@@ -103,10 +103,10 @@ class Server {
 						this.loopHandlers[path].lastUpdated = now;
 
 						const handlerLogger = {
-							debug: (...args) => this.logger.debug(`[${loop.name} init]`, ...args),
-							error: (...args) => this.logger.error(`[${loop.name} init]`, ...args),
-							info: (...args) => this.logger.info(`[${loop.name} init]`, ...args),
-							warn: (...args) => this.logger.warn(`[${loop.name} init]`, ...args)
+							debug: (...args) => this.logger.debug(`[${loop.name}]`, ...args),
+							error: (...args) => this.logger.error(`[${loop.name}]`, ...args),
+							info: (...args) => this.logger.info(`[${loop.name}]`, ...args),
+							warn: (...args) => this.logger.warn(`[${loop.name}]`, ...args)
 						};
 
 						promises.push((async () => {
