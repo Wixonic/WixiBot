@@ -20,8 +20,7 @@ const info = {
 					youtubeData = youtubeResponse;
 					youtubeData.thumbnail = await rpc.getExternalAsset(settings.rpc.discord.application.clients.youtube.id, youtubeData.thumbnail);
 					youtubeData.updatedAt = Date.now();
-				} else if (youtubeResponse) {
-					youtubeData = youtubeResponse;
+				} else if (youtubeResponse && youtubeData) {
 					youtubeData.updatedAt = Date.now();
 					youtubeData.timestamps = youtubeResponse.paused ? {} : {
 						start: Date.now() - youtubeResponse.time * 1000,
@@ -66,8 +65,8 @@ const info = {
 					assets: {
 						small_image: settings.rpc.discord.application.clients.youtube.assets.icon,
 						small_text: "YouTube",
-						large_image: youtubeData.thumbnail,
-						large_text: youtubeData.name
+						// large_image: youtubeData.thumbnail,
+						// large_text: youtubeData.name
 					},
 					buttons: [
 						"Open video",
