@@ -32,7 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		microphoneMenuItem.target = self
 		menu.addItem(microphoneMenuItem)
 
-		audioMenuItem = NSMenuItem(title: "Audio", action: #selector(toggleAudio(_:)), keyEquivalent: "m")
+		audioMenuItem = NSMenuItem(title: "Audio", action: #selector(toggleAudio(_:)), keyEquivalent: "a")
 		audioMenuItem.state = audioEnabled ? .on : .off
 		audioMenuItem.target = self
 		menu.addItem(audioMenuItem)
