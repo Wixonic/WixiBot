@@ -7,6 +7,7 @@ const info = {
 	path: "/rpc/blender/",
 	handlers: {
 		post: async (logger, settings, req, res, bot, rpc) => {
+			logger.info(req.headers.authorization);
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/blender]", "Unauthorized access attempt");
 				return res.status(401).json({
