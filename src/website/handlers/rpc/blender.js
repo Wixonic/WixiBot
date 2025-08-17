@@ -8,7 +8,7 @@ const info = {
 	handlers: {
 		post: async (logger, settings, req, res, bot, rpc) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
-				logger.warn("[rpc/warthunder]", "Unauthorized access attempt");
+				logger.warn("[rpc/blender]", "Unauthorized access attempt");
 				return res.status(401).json({
 					error: "Unauthorized"
 				});
