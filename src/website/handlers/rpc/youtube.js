@@ -15,12 +15,13 @@ const info = {
 			}
 
 			try {
-				const youtubeResponse = req.body;
+				const youtubeResponse = JSON.parse(req.body);
 				if (youtubeResponse.name != youtubeData?.name || youtubeResponse.author != youtubeData?.author) {
 					youtubeData = youtubeResponse;
 					youtubeData.thumbnail = await rpc.getExternalAsset(settings.rpc.discord.application.clients.youtube.id, youtubeData.thumbnail);
 					youtubeData.updatedAt = Date.now();
 				} else if (youtubeResponse) {
+					youtubeData = youtubeResponse;
 					youtubeData.updatedAt = Date.now();
 					youtubeData.timestamps = youtubeResponse.paused ? {} : {
 						start: Date.now() - youtubeResponse.time * 1000,

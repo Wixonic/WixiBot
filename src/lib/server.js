@@ -99,7 +99,7 @@ class Server {
 
 				for (const path in this.loopHandlers) {
 					const loop = this.loopHandlers[path];
-					if (typeof loop.process == "function" && loop.lastUpdated + (loop.idle ? 60 * 1000 : loop.delay) <= now) {
+					if (typeof loop.process == "function" && loop.lastUpdated + (loop.idle ? 20 * 1000 : loop.delay) <= now) {
 						this.loopHandlers[path].lastUpdated = now;
 
 						const handlerLogger = {

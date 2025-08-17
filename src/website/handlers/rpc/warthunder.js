@@ -17,7 +17,13 @@ const info = {
 				});
 			}
 
-			warthunderData = req.body;
+			try {
+				warthunderData = JSON.parse(req.body);
+			} catch (e) {
+				warthunderData = null;
+				res.status(400).end();
+				logger.warn("[rpc/warthunder]", e);
+			}
 
 			res.status(204).end();
 		},

@@ -15,7 +15,7 @@ const info = {
 			}
 
 			try {
-				blenderData = req.body;
+				blenderData = JSON.parse(req.body);
 				blenderData.date = Date.now();
 				res.status(200).end();
 			} catch (e) {
