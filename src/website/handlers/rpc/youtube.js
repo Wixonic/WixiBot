@@ -14,32 +14,26 @@ const info = {
 				});
 			}
 
-			let body = "";
-
-			req.on("data", (chunk) => body += chunk.toString());
-
-			req.on("end", async () => {
-				try {
-					const youtubeResponse = JSON.parse(body);
-					if (youtubeResponse.name != youtubeData?.name || youtubeResponse.author != youtubeData?.author) {
-						youtubeData = youtubeResponse;
-						youtubeData.thumbnail = await rpc.getExternalAsset(settings.rpc.discord.application.clients.youtube.id, youtubeData.thumbnail);
-						youtubeData.updatedAt = Date.now();
-					} else if (youtubeResponse) {
-						youtubeData.updatedAt = Date.now();
-						youtubeData.timestamps = youtubeResponse.paused ? {} : {
-							start: Date.now() - youtubeResponse.time * 1000,
-							end: Date.now() + (youtubeResponse.duration - youtubeResponse.time) * 1000
-						};
-					}
-
-					res.status(204).end();
-				} catch (e) {
-					youtubeData = null;
-					res.status(400).end();
-					logger.warn("[rpc/youtube]", e);
+			try {
+				const youtubeResponse = req.body;
+				if (youtubeResponse.name != youtubeData?.name || youtubeResponse.author != youtubeData?.author) {
+					youtubeData = youtubeResponse;
+					youtubeData.thumbnail = await rpc.getExternalAsset(settings.rpc.discord.application.clients.youtube.id, youtubeData.thumbnail);
+					youtubeData.updatedAt = Date.now();
+				} else if (youtubeResponse) {
+					youtubeData.updatedAt = Date.now();
+					youtubeData.timestamps = youtubeResponse.paused ? {} : {
+						start: Date.now() - youtubeResponse.time * 1000,
+						end: Date.now() + (youtubeResponse.duration - youtubeResponse.time) * 1000
+					};
 				}
-			});
+
+				res.status(204).end();
+			} catch (e) {
+				youtubeData = null;
+				res.status(400).end();
+				logger.warn("[rpc/youtube]", e);
+			}
 		},
 		delete: async (logger, settings, req, res, bot, rpc) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
