@@ -60,7 +60,7 @@ const info = {
 				return song.track != currentSong.track ||
 					song.artist != currentSong.artist ||
 					song.state != currentSong.state ||
-					Math.floor(currentSong.startedAt / 5000) != Math.floor(song.startedAt / 5000);
+					Math.floor(currentSong.startedAt / 2000) != Math.floor(song.startedAt / 2000);
 			};
 
 			if (needsUpdate()) {
