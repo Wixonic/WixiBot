@@ -283,6 +283,9 @@ export interface RPCSettings {
 		id: string;
 		secret: string;
 	};
+	status: {
+		channel: string;
+	};
 };
 
 export interface RPCSecretsSettings {

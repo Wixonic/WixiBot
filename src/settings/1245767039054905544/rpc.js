@@ -85,6 +85,9 @@ const rpcSettings = {
 		id: secrets.rpc.spotify.id,
 		secret: secrets.rpc.spotify.secret,
 	},
+	status: {
+		channel: "1405562261187072190"
+	},
 	steam: {
 		id: secrets.rpc.steam.id,
 		token: secrets.rpc.steam.token

@@ -13,6 +13,46 @@ const clone = (obj, cloned = new WeakMap()) => {
 };
 
 /**
+ * @param {import("discord.js").Presence | import("discord.js-selfbot-v13").Presence} presence
+ * @param {(import("discord.js").User | import("discord.js-selfbot-v13").User)?} user
+ * @param {import("../lib/bot.js")?} bot
+ */
+const displayInlineActivity = async (presence, user, bot) => {
+	let text = "";
+
+	if (user?.displayName) {
+		text += user.displayName;
+	}
+
+	const activities = () => {
+		if (presence?.activities.length > 0) {
+			const activity = presence.activities.at(0);
+
+			text += {
+				"PLAYING": `: \x1b[1mPlaying\x1b[0m ${activity.name}`,
+				"STREAMING": `: \x1b[1mStreaming\x1b[0m ${activity.details}`,
+				"LISTENING": `: \x1b[1mListening\x1b[0m to ${activity.name}`,
+				"WATCHING": `: \x1b[1mWatching\x1b[0m ${activity.details}`,
+				"CUSTOM": `: ${activity.emoji ? `${activity.emoji.name} ` : ""}${activity.state}`,
+				"COMPETING": `: \x1b[1mCompeting\x1b[0m in ${activity.name}`,
+				"HANG": `: ${activity.state ?? `${activity.emoji ? `${activity.emoji.name} ` : ""}${activity.state}`}`
+			}[activity.type];
+		}
+	};
+
+	if (bot && user.voice?.channelId) {
+		const channel = await bot.channels.fetch(user.voice.channelId);
+		if (channel) {
+			if (user.voice.streaming) text += `: \x1b[1mStreaming\x1b[0m in `;
+			else text += `: \x1b[1mIn\x1b[0m `;
+			text += channel.name;
+		} else activities();
+	} else activities();
+
+	return text;
+};
+
+/**
  * @param {number} time 
  * @returns {string}
  */
@@ -91,6 +131,7 @@ const wait = (milliseconds) => new Promise((resolve) => setTimeout(() => resolve
 
 module.exports = {
 	clone,
+	displayInlineActivity,
 	displayTime,
 	hexToIntColor,
 	randomInt,
