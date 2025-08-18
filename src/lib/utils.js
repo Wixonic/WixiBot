@@ -47,12 +47,16 @@ const displayInlineActivity = async (presence, user, bot) => {
 	};
 
 	if (bot && user.voice?.channelId) {
-		const channel = await bot.channels.fetch(user.voice.channelId);
-		if (channel) {
-			if (user.voice.streaming) text += `: \x1b[1mStreaming\x1b[0m in `;
-			else text += `: \x1b[1mIn\x1b[0m `;
-			text += channel.name;
-		} else activities();
+		try {
+			const channel = await bot.channels.fetch(user.voice.channelId);
+			if (channel) {
+				if (user.voice.streaming) text += `: \x1b[1mStreaming\x1b[0m in `;
+				else text += `: \x1b[1mIn\x1b[0m `;
+				text += channel.name;
+			} else activities();
+		} catch {
+			activities();
+		}
 	} else activities();
 
 	return text;

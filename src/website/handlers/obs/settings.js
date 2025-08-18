@@ -1,5 +1,4 @@
 const childProcess = require("child_process");
-const { log } = require("@wixonic/logger");
 
 /**
  * @type {{audio: string[], video: string[]}}
@@ -153,7 +152,7 @@ const info = {
 			for (const cp of Object.values(captureProcess)) {
 				if (!cp.process || cp.process.killed) {
 					if (cp.active) {
-						cp.process = cp.spawn(log);
+						cp.process = cp.spawn(logger);
 
 						for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
 							cp.process.once(signal, async (reason, code) => {
