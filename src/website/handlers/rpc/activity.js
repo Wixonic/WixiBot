@@ -7,7 +7,7 @@ const path = require("path");
 const info = {
 	path: "/rpc/",
 	handlers: {
-		get: async (logger, settings, req, res, bot, rpc) => {
+		get: async (logger, settings, req, res, bot, rpc, sdk) => {
 			const filePath = path.join(settings.paths.cache, "/activity.json");
 			if (fs.existsSync(filePath)) res.status(200).sendFile(filePath);
 			else res.status(404).end();

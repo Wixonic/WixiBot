@@ -9,7 +9,7 @@ const Rank = require("../../../lib/rank.js");
 const info = {
 	path: "/discord/link/",
 	handlers: {
-		get: async (logger, settings, req, res, bot, rpc) => {
+		get: async (logger, settings, req, res, bot, rpc, sdk) => {
 			let redirect = req.query.redirect;
 			let uid = req.query.uid;
 			if (req.query.state) {
@@ -81,7 +81,7 @@ const info = {
 			res.redirect(new URL("/discord/", settings.website.server));
 		},
 
-		delete: async (logger, settings, req, res, bot, rpc) => {
+		delete: async (logger, settings, req, res, bot, rpc, sdk) => {
 			const authHeader = req.headers.authorization;
 			if (!authHeader || authHeader !== `Basic ${btoa(settings.secrets.wixkey)}`) return res.status(401).send({
 				error: "Unauthorized: Invalid API key"

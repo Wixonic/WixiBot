@@ -6,7 +6,7 @@ const { displayInlineActivity } = require("../../../lib/utils.js");
 const info = {
 	path: "/rpc/status/",
 	handlers: {
-		get: async (logger, settings, req, res, bot, rpc) => {
+		get: async (logger, settings, req, res, bot, rpc, sdk) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/status]", "Unauthorized access attempt");
 				return res.status(401).json({

@@ -6,7 +6,7 @@ let blenderData = null;
 const info = {
 	path: "/rpc/blender/",
 	handlers: {
-		post: async (logger, settings, req, res, bot, rpc) => {
+		post: async (logger, settings, req, res, bot, rpc, sdk) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/blender]", "Unauthorized access attempt");
 				return res.status(401).json({
@@ -27,7 +27,7 @@ const info = {
 	},
 	loop: {
 		delay: 1 * 1000,
-		process: async (logger, settings, bot, rpc) => {
+		process: async (logger, settings, bot, rpc, sdk) => {
 			if (blenderData && blenderData.date + 30 * 1000 < Date.now()) blenderData = null;
 
 			if (!blenderData) rpc.removeActivity("blender");

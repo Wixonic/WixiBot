@@ -8,7 +8,7 @@ const info = {
 	handlers: {},
 	loop: {
 		delay: 15 * 1000,
-		process: async (logger, settings, bot, rpc) => {
+		process: async (logger, settings, bot, rpc, sdk) => {
 			const response = (await request(logger, {
 				method: "GET",
 				type: "json",

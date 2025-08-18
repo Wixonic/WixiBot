@@ -115,10 +115,10 @@ class RPC {
 		 * @type {import("@wixonic/logger").Logger}
 		 */
 		this.logger = {
-			debug: (...any) => logger.debug("[Discord]", ...any),
-			error: (...any) => logger.error("[Discord]", ...any),
-			info: (...any) => logger.info("[Discord]", ...any),
-			warn: (...any) => logger.warn("[Discord]", ...any)
+			debug: (...any) => logger.debug("[RPC]", ...any),
+			error: (...any) => logger.error("[RPC]", ...any),
+			info: (...any) => logger.info("[RPC]", ...any),
+			warn: (...any) => logger.warn("[RPC]", ...any)
 		};
 
 		this.activities = {};

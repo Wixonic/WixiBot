@@ -5,6 +5,7 @@ const Bot = require("./lib/bot.js");
 const CommandHandler = require("./lib/commands.js");
 const Settings = require("./lib/settings.js");
 const RPC = require("./lib/rpc.js");
+const SDK = require("./lib/sdk.js");
 const Server = require("./lib/server.js");
 const { clone } = require("./lib/utils.js");
 
@@ -42,7 +43,11 @@ const init = async (logger, applicationId) => {
 
 		await rpc.login();
 
-		await server.init(bot, rpc);
+		const sdk = new SDK(logger, settings);
+
+		await sdk.login();
+
+		await server.init(bot, rpc, sdk);
 	} else logger.warn("Application disabled.");
 };
 

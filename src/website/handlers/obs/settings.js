@@ -96,7 +96,7 @@ const captureProcess = {
 const info = {
 	path: "/obs/settings/",
 	handlers: {
-		get: async (logger, settings, req, res, bot, rpc) => {
+		get: async (logger, settings, req, res, bot, rpc, sdk) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[obs/settings]", "Unauthorized access attempt");
 				return res.status(401).json({
@@ -115,7 +115,7 @@ const info = {
 				active: captureProcess[id].active
 			});
 		},
-		post: async (logger, settings, req, res, bot, rpc) => {
+		post: async (logger, settings, req, res, bot, rpc, sdk) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[obs/settings]", "Unauthorized access attempt");
 				return res.status(401).json({
@@ -146,7 +146,7 @@ const info = {
 	},
 	loop: {
 		delay: 2 * 1000,
-		process: async (logger, settings, bot, rpc) => {
+		process: async (logger, settings, bot, rpc, sdk) => {
 			updateDeviceList();
 
 			for (const cp of Object.values(captureProcess)) {

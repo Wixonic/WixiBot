@@ -11,7 +11,7 @@ let updatingData = false;
 const info = {
 	path: "/rpc/warthunder/data.json",
 	handlers: {
-		get: async (logger, settings, req, res, bot, rpc) => {
+		get: async (logger, settings, req, res, bot, rpc, sdk) => {
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/data.json");
 			while (updatingData) await wait(50);
 			if (fs.existsSync(filePath)) res.status(200).sendFile(filePath);
@@ -19,7 +19,7 @@ const info = {
 				error: "Not Found"
 			});
 		},
-		post: (logger, settings, req, res, bot, rpc) => {
+		post: (logger, settings, req, res, bot, rpc, sdk) => {
 			updatingData = true;
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/data.json");
 
@@ -36,7 +36,7 @@ const info = {
 			res.status(204).end();
 			updatingData = false;
 		},
-		delete: (logger, settings, req, res, bot, rpc) => {
+		delete: (logger, settings, req, res, bot, rpc, sdk) => {
 			updatingData = true;
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/data.json");
 

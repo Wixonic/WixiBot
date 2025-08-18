@@ -11,13 +11,13 @@ let updatingMap = false;
 const info = {
 	path: "/rpc/warthunder/map.png",
 	handlers: {
-		get: async (logger, settings, req, res, bot, rpc) => {
+		get: async (logger, settings, req, res, bot, rpc, sdk) => {
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/map.png");
 			while (updatingMap) await wait(50);
 			if (fs.existsSync(filePath)) res.status(200).sendFile(filePath);
 			else res.status(404).end();
 		},
-		post: (logger, settings, req, res, bot, rpc) => {
+		post: (logger, settings, req, res, bot, rpc, sdk) => {
 			updatingMap = true;
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/map.png");
 
@@ -32,7 +32,7 @@ const info = {
 			res.status(204).end();
 			updatingMap = false;
 		},
-		delete: (logger, settings, req, res, bot, rpc) => {
+		delete: (logger, settings, req, res, bot, rpc, sdk) => {
 			updatingMap = true;
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/map.png");
 

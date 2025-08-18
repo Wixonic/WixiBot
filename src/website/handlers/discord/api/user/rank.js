@@ -6,7 +6,7 @@ const Rank = require("../../../../../lib/rank.js");
 const info = {
 	path: "/discord/api/user/rank",
 	handlers: {
-		get: async (logger, settings, req, res, bot, rpc) => {
+		get: async (logger, settings, req, res, bot, rpc, sdk) => {
 			const id = req.query.id;
 			if (!id) return res.status(400).json({
 				code: "missing_parameter",

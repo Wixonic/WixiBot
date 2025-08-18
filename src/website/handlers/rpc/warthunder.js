@@ -9,7 +9,7 @@ let warthunderData = null;
 const info = {
 	path: "/rpc/warthunder/",
 	handlers: {
-		post: async (logger, settings, req, res, bot, rpc) => {
+		post: async (logger, settings, req, res, bot, rpc, sdk) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/warthunder]", "Unauthorized access attempt");
 				return res.status(401).json({
@@ -27,7 +27,7 @@ const info = {
 
 			res.status(204).end();
 		},
-		delete: async (logger, settings, req, res, bot, rpc) => {
+		delete: async (logger, settings, req, res, bot, rpc, sdk) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/warthunder]", "Unauthorized access attempt");
 				return res.status(401).json({
@@ -42,7 +42,7 @@ const info = {
 	},
 	loop: {
 		delay: 0.5 * 1000,
-		process: async (logger, settings, bot, rpc) => {
+		process: async (logger, settings, bot, rpc, sdk) => {
 			const now = Date.now();
 
 			if (warthunderData) {

@@ -161,7 +161,11 @@ export interface CommandOptions {
 export interface CommandInfo {
 	name: string;
 	deploy: import("discord.js").APIApplicationCommand;
-	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), interaction: import("discord.js").CommandInteraction | import("discord.js").MessageContextMenuCommandInteraction | import("discord.js").UserContextMenuCommandInteraction) => Promise<void>;
+	run: (
+		logger: import("@wixonic/logger").Logger,
+		bot: import("./lib/bot.js"),
+		interaction: import("discord.js").CommandInteraction | import("discord.js").MessageContextMenuCommandInteraction | import("discord.js").UserContextMenuCommandInteraction
+	) => Promise<void>;
 };
 
 
@@ -169,27 +173,45 @@ export interface ComponentInfo {
 	name: string;
 	id: string;
 	type: import("discord.js").ComponentType;
-	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), interaction: import("discord.js").ButtonInteraction, ...args: string[]) => Promise<void>;
+	run: (
+		logger: import("@wixonic/logger").Logger,
+		bot: import("./lib/bot.js"),
+		interaction: import("discord.js").ButtonInteraction,
+		...args: string[]
+	) => Promise<void>;
 };
 
 
 export interface CronInfo {
 	name: string;
 	condition: (minutes: number, now: Date) => boolean;
-	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), minutes: number, now: Date) => Promise<void>;
+	run: (
+		logger: import("@wixonic/logger").Logger,
+		bot: import("./lib/bot.js"),
+		minutes: number,
+		now: Date
+	) => Promise<void>;
 };
 
 
 export interface ListenerInfo {
 	name: string;
 	event: string;
-	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), ...any: any[]) => Promise<void>;
+	run: (
+		logger: import("@wixonic/logger").Logger,
+		bot: import("./lib/bot.js"),
+		...any: any[]
+	) => Promise<void>;
 };
 
 
 export interface ModalInfo {
 	name: string;
-	run: (logger: import("@wixonic/logger").Logger, bot: import("./lib/bot.js"), interaction: import("discord.js").ModalSubmitInteraction) => Promise<void>;
+	run: (
+		logger: import("@wixonic/logger").Logger,
+		bot: import("./lib/bot.js"),
+		interaction: import("discord.js").ModalSubmitInteraction
+	) => Promise<void>;
 };
 
 
@@ -199,7 +221,8 @@ type HttpHandler = (
 	req: import("express").Request,
 	res: import("express").Response,
 	bot: import("./lib/bot.js"),
-	rpc: import("./lib/rpc.js")
+	rpc: import("./lib/rpc.js"),
+	sdk: import("./lib/sdk.js")
 ) => Promise<void>;
 
 type WSHandler = (
@@ -207,14 +230,16 @@ type WSHandler = (
 	settings: MainSettings,
 	ws: import("ws").WebSocket,
 	bot: import("./lib/bot.js"),
-	rpc: import("./lib/rpc.js")
+	rpc: import("./lib/rpc.js"),
+	sdk: import("./lib/sdk.js")
 ) => Promise<void>;
 
 type LoopHandler = (
 	logger: import("@wixonic/logger").Logger,
 	settings: MainSettings,
 	bot: import("./lib/bot.js"),
-	rpc: import("./lib/rpc.js")
+	rpc: import("./lib/rpc.js"),
+	sdk: import("./lib/sdk.js")
 ) => Promise<boolean>;
 
 export interface HandlerInfo {

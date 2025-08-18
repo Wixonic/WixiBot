@@ -6,7 +6,7 @@ let githubData = null;
 const info = {
 	path: "/rpc/github/",
 	handlers: {
-		post: async (logger, settings, req, res, bot, rpc) => {
+		post: async (logger, settings, req, res, bot, rpc, sdk) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/github]", "Unauthorized access attempt");
 				return res.status(401).json({
@@ -55,7 +55,7 @@ const info = {
 				res.status(400).end();
 			}
 		},
-		delete: async (logger, settings, req, res, bot, rpc) => {
+		delete: async (logger, settings, req, res, bot, rpc, sdk) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/github]", "Unauthorized access attempt");
 				return res.status(401).json({

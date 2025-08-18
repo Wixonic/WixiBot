@@ -46,9 +46,10 @@ class Server {
 	/**
 	 * @param {import("./bot.js")} bot
 	 * @param {import("./rpc.js")} rpc
+	 * @param {import("./sdk.js")} sdk
 	 * @returns {Promise<void>}
 	 */
-	init(bot, rpc) {
+	init(bot, rpc, sdk) {
 		const websitePath = path.join(__dirname, "..", "website");
 
 		return new Promise(async (resolve) => {
@@ -74,7 +75,7 @@ class Server {
 					const handlerName = handlerFile.replace(".js", "");
 
 					for (const method in handler.handlers) {
-						if (method != "ws") this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, this.settings, req, res, bot, rpc));
+						if (method != "ws") this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, this.settings, req, res, bot, rpc, sdk));
 						else this.wsHandlers[handler.path] = handler.handlers.ws;
 						this.logger.debug("Added handler for", handlerName, "at", handler.path, "with method", method);
 					}
@@ -111,7 +112,7 @@ class Server {
 
 						promises.push((async () => {
 							try {
-								const status = await loop.process(handlerLogger, this.settings, bot, rpc);
+								const status = await loop.process(handlerLogger, this.settings, bot, rpc, sdk);
 								if (status != loop.idle) {
 									handlerLogger.debug(`Now ${status ? "idle" : "active"}`);
 									this.loopHandlers[path].idle = status;
@@ -147,7 +148,7 @@ class Server {
 				this.ws.handleUpgrade(req, socket, head, (ws) => {
 					this.ws.emit("connection", ws, req);
 					const handler = this.wsHandlers[req.url];
-					if (handler) handler(this.logger, this.settings, ws, bot, rpc);
+					if (handler) handler(this.logger, this.settings, ws, bot, rpc, sdk);
 				});
 			});
 

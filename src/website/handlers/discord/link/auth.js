@@ -9,7 +9,7 @@ const Rank = require("../../../../lib/rank.js");
 const info = {
 	path: "/discord/link/auth/",
 	handlers: {
-		get: async (logger, settings, req, res, bot, rpc) => {
+		get: async (logger, settings, req, res, bot, rpc, sdk) => {
 			let redirect = req.query.redirect;
 
 			if (req.query.state) {
