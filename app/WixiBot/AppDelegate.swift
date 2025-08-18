@@ -13,10 +13,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var backgroundTaskPID: Int32?
 
     var microphoneEnabled: Bool = false
-	var microphoneMenuItem: NSMenuItem!
-
 	var audioEnabled: Bool = false
+	var broadcastEnabled: Bool = false
+
+	var microphoneMenuItem: NSMenuItem!
 	var audioMenuItem: NSMenuItem!
+    var broadcastMenuItem: NSMenuItem!
 
 	func applicationDidFinishLaunching(_ notification: Notification) {
 		statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -37,6 +39,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		audioMenuItem.target = self
 		menu.addItem(audioMenuItem)
 
+		broadcastMenuItem = NSMenuItem(title: "Broadcast", action: #selector(toggleBroadcast(_:)), keyEquivalent: "b")
+		broadcastMenuItem.state = broadcastEnabled ? .on : .off
+		broadcastMenuItem.target = self
+		menu.addItem(broadcastMenuItem)
+
 		menu.addItem(NSMenuItem(title: "Quit", action: #selector(terminate), keyEquivalent: "q"))
 		statusItem.menu = menu
 
@@ -55,11 +62,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		sendToggleRequest(id: "audio", status: audioEnabled)
 	}
 
+	@objc func toggleBroadcast(_ sender: NSMenuItem) {
+		broadcastEnabled.toggle()
+		broadcastMenuItem.state = broadcastEnabled ? .on : .off
+		sendToggleRequest(id: "broadcast", status: broadcastEnabled)
+	}
+
     func sendToggleRequest(id: String, status: Bool) {
 		guard let url = URL(string: "https://server.wixonic.fr/obs/settings/?id=\(id)") else { return }
 		
 		var request = URLRequest(url: url)
 		request.httpMethod = "POST"
+
+		if let url = Bundle.main.url(forResource: "secrets", withExtension: "json"),
+		   let data = try? Data(contentsOf: url),
+		   let secrets = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+		   let wixKey = secrets["WixKey"] as? String {
+			request.setValue("WixKey \(wixKey)", forHTTPHeaderField: "Authorization")
+		}
+
 		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 		
 		let body: [String: Bool] = ["status": status]

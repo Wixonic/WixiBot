@@ -73,37 +73,21 @@ const captureProcess = {
 				"-vn",
 
 				"-f", "mpegts",
-				"udp://@:2000"
+				"udp://10.0.0.2:2000"
 			], { stdio: "inherit" });
+		},
+		process: null
+	},
+	broadcast: {
+		active: false,
+		name: "Broadcast",
+		spawn: (logger, settings) => {
+			logger.info("Starting process:", captureProcess.broadcast.name);
+			return null;
 		},
 		process: null
 	}
 };
-
-const update = () => {
-	updateDeviceList();
-
-	for (const cp of Object.values(captureProcess)) {
-		if (!cp.process || cp.process.killed) {
-			if (cp.active) {
-				cp.process = cp.spawn(log);
-
-				for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
-					cp.process.once(signal, async (reason, code) => {
-						if (!cp.process.killed) {
-							cp.process.removeAllListeners("exit");
-							cp.process.kill("SIGTERM");
-						}
-					});
-				}
-			}
-		} else if (!cp.process.killed && !cp.active) cp.process.kill("SIGTERM");
-	}
-
-	setTimeout(update, 1000);
-};
-
-update();
 
 /**
  * @type {import("../../../types.d.ts").HandlerInfo}
@@ -112,32 +96,76 @@ const info = {
 	path: "/obs/settings/",
 	handlers: {
 		get: async (logger, settings, req, res, bot, rpc) => {
+			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+				logger.warn("[obs/settings]", "Unauthorized access attempt");
+				return res.status(401).json({
+					error: "Unauthorized"
+				});
+			}
+
 			const { id } = req.query;
-			const processId = id;
 
-			if (!processId || !captureProcess[processId]) return res.status(400).send("Invalid or missing process ID");
+			if (!id || !captureProcess[id]) return res.status(400).json({
+				error: "Invalid or missing process ID"
+			});
 
-			res.json({ id: processId, active: captureProcess[processId].active });
+			res.status(200).json({
+				id,
+				active: captureProcess[id].active
+			});
 		},
 		post: async (logger, settings, req, res, bot, rpc) => {
-			let body = "";
-			req.on("data", (chunk) => body += chunk.toString());
+			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+				logger.warn("[obs/settings]", "Unauthorized access attempt");
+				return res.status(401).json({
+					error: "Unauthorized"
+				});
+			}
 
-			req.on("end", async () => {
-				try {
-					const response = JSON.parse(body);
-					const { id } = req.query;
-					const { status } = response;
+			try {
+				const { id } = req.query;
+				const { status } = JSON.parse(req.body);
 
-					if (!id || !captureProcess[id]) return res.status(400).send("Invalid or missing process ID");
-					captureProcess[id].active = status;
+				if (!id || !captureProcess[id]) return res.status(400).json({
+					error: "Invalid or missing process ID"
+				});
+				captureProcess[id].active = status;
 
-					res.json({ id, active: captureProcess[id].active });
-				} catch (e) {
-					logger.warn("[obs/settings]", e);
-					res.status(400).send("Invalid status value");
-				}
-			});
+				res.status(200).json({
+					id,
+					active: captureProcess[id].active
+				});
+			} catch (e) {
+				logger.warn("[obs/settings]", e);
+				res.status(400).json({
+					error: "Invalid status value"
+				});
+			}
+		}
+	},
+	loop: {
+		delay: 2 * 1000,
+		process: async (logger, settings, bot, rpc) => {
+			updateDeviceList();
+
+			for (const cp of Object.values(captureProcess)) {
+				if (!cp.process || cp.process.killed) {
+					if (cp.active) {
+						cp.process = cp.spawn(log);
+
+						for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
+							cp.process.once(signal, async (reason, code) => {
+								if (!cp.process.killed) {
+									cp.process.removeAllListeners("exit");
+									cp.process.kill("SIGTERM");
+								}
+							});
+						}
+					}
+				} else if (!cp.process.killed && !cp.active) cp.process.kill("SIGTERM");
+			}
+
+			return false;
 		}
 	}
 };
