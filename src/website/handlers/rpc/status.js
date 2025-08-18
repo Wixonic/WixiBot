@@ -71,7 +71,7 @@ const info = {
 			const channel = guild.channels.cache.get(settings.rpc.status.channel);
 			let channelStatsText = "";
 			if (channel && channel.isVoiceBased() && channel.members.size > 0) {
-				channelStatsText = trim(`\x1b[1m${channel.members.size} ${channel.members.size > 1 ? "people" : "person"}\x1b[0m in ${channel.name}:\n`);
+				channelStatsText = trim(`\x1b[1m${channel.members.size} member${channel.members.size > 1 ? "s" : ""}\x1b[0m in ${channel.name}:\n`);
 
 				const channelStatsMembersText = [];
 				for (const member of channel.members.values()) channelStatsMembersText.push(trim(`- ${member.displayName}`));
