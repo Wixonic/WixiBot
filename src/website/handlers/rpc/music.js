@@ -4,6 +4,16 @@ const spotify = require("../../../lib/spotify.js");
 /**
  * @type {import("../../../types.d.ts").Song?}
  */
+let clientSong = null;
+
+/**
+ * @type {import("../../../types.d.ts").Song?}
+ */
+let serverSong = null;
+
+/**
+ * @type {import("../../../types.d.ts").Song?}
+ */
 let currentSong = null;
 
 /**
@@ -20,7 +30,7 @@ const info = {
 				});
 			}
 
-			currentSong = req.body;
+			clientSong = req.body;
 
 			res.status(204).end();
 		},
@@ -32,7 +42,7 @@ const info = {
 				});
 			}
 
-			currentSong = null;
+			clientSong = null;
 
 			res.status(204).end();
 		}
@@ -40,7 +50,7 @@ const info = {
 	loop: {
 		delay: 1 * 1000,
 		process: async (logger, settings, bot, rpc) => {
-			let song = await getCurrentTrackInfo();
+			const song = clientSong ?? await getCurrentTrackInfo();
 
 			const update = async () => {
 				if (song == null) {
@@ -91,14 +101,16 @@ const info = {
 				}
 			};
 
-			if ((song == null && currentSong != null) ||
+			const needsUpdate = () => (song == null && currentSong != null) ||
 				(song != null &&
 					(currentSong == null ||
 						currentSong.state != song.state ||
 						currentSong.track != song.track ||
 						currentSong.artist != song.artist ||
 						currentSong.album != song.album ||
-						Math.floor(currentSong.startedAt / 10000) != Math.floor(song.startedAt / 10000)))) await update();
+						Math.floor(currentSong.startedAt / 10000) != Math.floor(song.startedAt / 10000)));
+
+			if (needsUpdate()) await update();
 			return currentSong == null;
 		}
 	}
