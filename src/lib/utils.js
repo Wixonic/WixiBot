@@ -33,7 +33,7 @@ const displayInlineActivity = async (presence, user, bot) => {
 				"STREAMING": `: \x1b[1mStreaming\x1b[0m ${activity.details}`,
 				"LISTENING": `: \x1b[1mListening\x1b[0m to ${activity.name}`,
 				"WATCHING": `: \x1b[1mWatching\x1b[0m ${activity.details}`,
-				"CUSTOM": `: ${activity.emoji ? `${activity.emoji.name} ` : ""}${activity.state}`,
+				"CUSTOM": `: ${activity.emoji ? `${activity.emoji.name} ` : ""}${activity.state ?? ""}`,
 				"COMPETING": `: \x1b[1mCompeting\x1b[0m in ${activity.name}`,
 				"HANG": `: ${activity.state ?? `${activity.emoji ? `${activity.emoji.name} ` : ""}${activity.state}`}`
 			}[activity.type];
