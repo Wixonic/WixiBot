@@ -53,7 +53,7 @@ const info = {
 				const channelStatsMembersText = [];
 				for (const member of channel.members.values()) channelStatsMembersText.push(`- ${member.displayName}`);
 				channelStatsText += channelStatsMembersText.join("\n");
-			} else channelStatsText = `\x1b[1mNobody\x1b[0m is in ${channel.name}.`;
+			} else channelStatsText = `Nobody is in ${channel.name}.`;
 			if (channelStatsText.length > req.query.length - 3) channelStatsText = channelStatsText.slice(0, req.query.length - 3) + "...";
 
 			let serverStatsText = `\x1b[32;1m${guild.approximatePresenceCount ?? "..."}\x1b[0m \x1b[32monline\x1b[0m \x1b[90m-\x1b[0m \x1b[1m${guild.approximateMemberCount ?? "..."}\x1b[0m members`;
