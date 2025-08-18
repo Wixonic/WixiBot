@@ -48,6 +48,7 @@ const captureProcess = {
 				"-b:a", "320k",
 				"-ac", "1",
 				"-ar", "48000",
+				"-af", "volume=0.5",
 
 				"-tune", "zerolatency",
 				"-flags", "low_delay",
