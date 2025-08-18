@@ -47,40 +47,42 @@ const info = {
 		process: async (logger, settings, bot, rpc) => {
 			const song = clientSong ?? await getCurrentTrackInfo();
 
+			if (song?.state == "PAUSED" && currentSong) song = { ...currentSong, state: "PAUSED" };
+
 			const needsUpdate = () => {
-				if (!song && !currentSong) return false;
-				if (!song || !currentSong) return true;
+				if (song == null && currentSong == null) return false;
+				if (song == null || currentSong == null) return true;
 				return song.track != currentSong.track ||
 					song.artist != currentSong.artist ||
-					song.album != currentSong.album ||
-					song.state != currentSong.state;
+					song.state != currentSong.state ||
+					Math.floor(currentSong.startedAt / 5000) != Math.floor(song.startedAt / 5000);
 			};
 
 			if (needsUpdate()) {
-				if (!song) {
+				if (song == null || song.state == "STOPPED") {
 					rpc.removeActivity("music");
 					currentSong = null;
 					return true;
 				}
 
-				if (currentSong && (song.track != currentSong.track || song.artist != currentSong.artist)) {
-					const spotifySong = await spotify.search(logger, settings.rpc.spotify, `artist:${songSource.artist} track:${songSource.track}`);
-
-					if (spotifySong) {
-						songSource.spotifyId = spotifySong.id;
-						const spotifyArtworkUrl = spotifySong.album?.images?.[0]?.url;
-						if (spotifyArtworkUrl) {
-							songSource.spotifyArtwork = spotifyArtworkUrl.slice(spotifyArtworkUrl.lastIndexOf("/") + 1);
-						}
-					}
+				if (!currentSong || currentSong.track != song.track || currentSong.artist != song.artist) {
+					const spotifySong = (await spotify.search(logger, settings.rpc.spotify, `artist:${song.artist} track:${song.track}`)) ?? null;
+					song.spotifyId = spotifySong?.id ?? null;
+					const spotifyArtworkUrl = spotifySong?.album?.images?.at(0)?.url;
+					song.spotifyArtwork = spotifyArtworkUrl?.slice((spotifyArtworkUrl?.lastIndexOf("/") ?? -1) + 1) ?? null;
+				} else {
+					song.spotifyId = currentSong.spotifyId;
+					song.spotifyArtwork = currentSong.spotifyArtwork;
 				}
 
-				if (song.state === "PLAYING") {
+				currentSong = song;
+
+				if (currentSong.state === "PLAYING") {
 					rpc.addActivity("music", {
 						applicationId: settings.rpc.discord.application.clients.apple_music.id,
 						assets: {
-							large_image: song.spotifyArtwork ? `spotify:${song.spotifyArtwork}` : settings.rpc.discord.application.clients.apple_music.assets.icon,
-							large_text: song.album,
+							large_image: currentSong.spotifyArtwork ? `spotify:${currentSong.spotifyArtwork}` : settings.rpc.discord.application.clients.apple_music.assets.icon,
+							large_text: currentSong.album,
 							small_image: settings.rpc.discord.application.clients.apple_music.assets.icon,
 							small_text: "Apple Music"
 						},
@@ -92,17 +94,15 @@ const info = {
 							]
 						},
 						timestamps: {
-							start: song.startedAt,
-							end: song.startedAt + song.duration
+							start: currentSong.startedAt,
+							end: currentSong.startedAt + currentSong.duration
 						},
-						name: song.track,
-						details: song.track,
-						state: song.artist,
+						name: currentSong.track,
+						details: currentSong.track,
+						state: currentSong.artist,
 						type: "LISTENING"
 					});
 				} else rpc.removeActivity("music");
-
-				currentSong = song;
 			}
 			return false;
 		}
