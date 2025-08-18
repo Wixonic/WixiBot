@@ -14,7 +14,7 @@ const clone = (obj, cloned = new WeakMap()) => {
 
 /**
  * @param {import("discord.js").Presence | import("discord.js-selfbot-v13").Presence} presence
- * @param {(import("discord.js").User | import("discord.js-selfbot-v13").User)?} user
+ * @param {import("discord.js").User | import("discord.js-selfbot-v13").User} user
  * @param {import("../lib/bot.js")?} bot
  */
 const displayInlineActivity = async (presence, user, bot) => {
@@ -28,9 +28,7 @@ const displayInlineActivity = async (presence, user, bot) => {
 		"offline": " \x1b[90m\u25CC\x1b[0m "
 	}[presence.status];
 
-	if (user?.displayName) {
-		text += user.displayName;
-	}
+	text += user.displayName;
 
 	const activities = () => {
 		if (presence?.activities.length > 0) {
