@@ -9,11 +9,6 @@ let clientSong = null;
 /**
  * @type {import("../../../types.d.ts").Song?}
  */
-let serverSong = null;
-
-/**
- * @type {import("../../../types.d.ts").Song?}
- */
 let currentSong = null;
 
 /**
@@ -52,65 +47,63 @@ const info = {
 		process: async (logger, settings, bot, rpc) => {
 			const song = clientSong ?? await getCurrentTrackInfo();
 
-			const update = async () => {
-				if (song == null) {
-					currentSong = null;
-					rpc.removeActivity("music");
-				} else if ((currentSong?.state != "PAUSED" && song.state == "PAUSED") || song.state != "PAUSED") {
-					if (song.state == "PAUSED" && currentSong) {
-						song = currentSong;
-						currentSong.state = "PAUSED";
-					} else {
-						const spotifySong = (await spotify.search(logger, settings.rpc.spotify, `artist:${song.artist} track:${song.track}`)) ?? null;
-						song.spotifyId = spotifySong?.id ?? null;
-						const spotifyArtworkUrl = spotifySong?.album?.images?.at(0)?.url;
-						song.spotifyArtwork = spotifyArtworkUrl?.slice((spotifyArtworkUrl?.lastIndexOf("/") ?? -1) + 1) ?? null;
-					}
-
-					currentSong = song;
-
-					if (song.state == "PLAYING") {
-						rpc.addActivity("music", {
-							applicationId: settings.rpc.discord.application.clients.apple_music.id,
-							assets: {
-								large_image: `spotify:${song.spotifyArtwork}`,
-								large_text: song.album,
-								small_image: settings.rpc.discord.application.clients.apple_music.assets.icon,
-								small_text: "Apple Music"
-							},
-							buttons: [
-								"My profile",
-								"My website"
-							],
-							metadata: {
-								button_urls: [
-									"https://music.apple.com/profile/wixonic",
-									"https://wixonic.fr"
-								]
-							},
-							timestamps: {
-								start: song.startedAt,
-								end: song.startedAt + song.duration
-							},
-							name: song.track,
-							details: song.track,
-							state: song.artist,
-							type: "LISTENING"
-						});
-					} else rpc.removeActivity("music");
-				}
+			const needsUpdate = () => {
+				if (!song && !currentSong) return false;
+				if (!song || !currentSong) return true;
+				return song.track != currentSong.track ||
+					song.artist != currentSong.artist ||
+					song.album != currentSong.album ||
+					song.state != currentSong.state;
 			};
 
-			const needsUpdate = () => (song == null && currentSong != null) ||
-				(song != null &&
-					(currentSong == null ||
-						currentSong.state != song.state ||
-						currentSong.track != song.track ||
-						currentSong.artist != song.artist ||
-						currentSong.album != song.album ||
-						Math.floor(currentSong.startedAt / 10000) != Math.floor(song.startedAt / 10000)));
+			if (needsUpdate()) {
+				if (!song) {
+					rpc.removeActivity("music");
+					currentSong = null;
+					return true;
+				}
 
-			if (needsUpdate()) await update();
+				if (currentSong && (song.track != currentSong.track || song.artist != currentSong.artist)) {
+					const spotifySong = await spotify.search(logger, settings.rpc.spotify, `artist:${songSource.artist} track:${songSource.track}`);
+
+					if (spotifySong) {
+						songSource.spotifyId = spotifySong.id;
+						const spotifyArtworkUrl = spotifySong.album?.images?.[0]?.url;
+						if (spotifyArtworkUrl) {
+							songSource.spotifyArtwork = spotifyArtworkUrl.slice(spotifyArtworkUrl.lastIndexOf("/") + 1);
+						}
+					}
+				}
+
+				if (song.state === "PLAYING") {
+					rpc.addActivity("music", {
+						applicationId: settings.rpc.discord.application.clients.apple_music.id,
+						assets: {
+							large_image: song.spotifyArtwork ? `spotify:${song.spotifyArtwork}` : settings.rpc.discord.application.clients.apple_music.assets.icon,
+							large_text: song.album,
+							small_image: settings.rpc.discord.application.clients.apple_music.assets.icon,
+							small_text: "Apple Music"
+						},
+						buttons: ["My profile", "My website"],
+						metadata: {
+							button_urls: [
+								"https://music.apple.com/profile/wixonic",
+								"https://wixonic.fr"
+							]
+						},
+						timestamps: {
+							start: song.startedAt,
+							end: song.startedAt + song.duration
+						},
+						name: song.track,
+						details: song.track,
+						state: song.artist,
+						type: "LISTENING"
+					});
+				} else rpc.removeActivity("music");
+
+				currentSong = song;
+			}
 			return false;
 		}
 	}
