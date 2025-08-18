@@ -15,7 +15,8 @@ const info = {
 			}
 
 			try {
-				const githubResponse = req.body;
+				const githubResponse = JSON.parse(req.body);
+
 				let conditions = githubResponse.type != githubData?.type;
 				switch (githubResponse.type) {
 					case "repository":

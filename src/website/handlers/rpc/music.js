@@ -25,9 +25,14 @@ const info = {
 				});
 			}
 
-			clientSong = req.body;
-
-			res.status(204).end();
+			try {
+				clientSong = JSON.parse(req.body);
+				res.status(204).end();
+			} catch (e) {
+				logger.warn("[rpc/music]", e);
+				clientSong = null;
+				res.status(400).end();
+			}
 		},
 		delete: async (logger, settings, req, res, bot, rpc) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {

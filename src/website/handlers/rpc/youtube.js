@@ -16,6 +16,7 @@ const info = {
 
 			try {
 				const youtubeResponse = JSON.parse(req.body);
+
 				if (youtubeResponse.name != youtubeData?.name || youtubeResponse.author != youtubeData?.author) {
 					youtubeData = youtubeResponse;
 					youtubeData.thumbnail = await rpc.getExternalAsset(settings.rpc.discord.application.clients.youtube.id, youtubeData.thumbnail);
