@@ -49,6 +49,7 @@ const captureProcess = {
 				"-ac", "1",
 				"-ar", "48000",
 
+				"-tune", "zerolatency",
 				"-flags", "low_delay",
 				"-fflags", "nobuffer",
 				"-f", "mpegts",
@@ -90,7 +91,7 @@ const captureProcess = {
 };
 
 /**
- * @type {import("../../../types.d.ts").HandlerInfo}
+ * @type {import("../../types").HandlerInfo}
  */
 const info = {
 	path: "/obs/settings/",
