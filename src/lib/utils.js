@@ -20,6 +20,14 @@ const clone = (obj, cloned = new WeakMap()) => {
 const displayInlineActivity = async (presence, user, bot) => {
 	let text = "";
 
+	text += {
+		"online": " \x1b[32m\u25CF\x1b[0m ",
+		"idle": " \x1b[33m\u23FE\x1b[0m ",
+		"dnd": " \x1b[31m\u2296\x1b[0m ",
+		"invisible": " \x1b[90m\u25CC\x1b[0m ",
+		"offline": " \x1b[90m\u25CC\x1b[0m "
+	}[presence.status];
+
 	if (user?.displayName) {
 		text += user.displayName;
 	}

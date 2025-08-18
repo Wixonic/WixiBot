@@ -49,7 +49,7 @@ const info = {
 			const onlineFriends = [];
 			rpc.client.relationships.friendCache.forEach((friend) => {
 				const presence = rpc.client.presences.resolve(friend.id);
-				if (presence && ["online", "dnd"].includes(presence.status)) onlineFriends.push([friend, presence]);
+				if (presence && ["online", "idle", "dnd"].includes(presence.status)) onlineFriends.push([friend, presence]);
 			});
 
 			const onlineFriendsText = [];
