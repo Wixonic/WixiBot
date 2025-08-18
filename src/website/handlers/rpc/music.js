@@ -48,7 +48,7 @@ const info = {
 		}
 	},
 	loop: {
-		delay: 1 * 1000,
+		delay: 2 * 1000,
 		process: async (logger, settings, bot, rpc) => {
 			const song = clientSong ?? await getCurrentTrackInfo();
 
@@ -111,7 +111,7 @@ const info = {
 						Math.floor(currentSong.startedAt / 10000) != Math.floor(song.startedAt / 10000)));
 
 			if (needsUpdate()) await update();
-			return currentSong == null;
+			return false;
 		}
 	}
 };
