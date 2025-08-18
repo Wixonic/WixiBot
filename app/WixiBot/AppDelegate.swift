@@ -77,8 +77,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		if let url = Bundle.main.url(forResource: "secrets", withExtension: "json"),
 		   let data = try? Data(contentsOf: url),
 		   let secrets = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-		   let wixKey = secrets["WixKey"] as? String {
+		   let wixKey = secrets["wixkey"] as? String {
 			request.setValue("WixKey \(wixKey)", forHTTPHeaderField: "Authorization")
+			print("Sending toggle request for \(id) with WixKey \(wixKey)")
+		} else {
+			print("Sending toggle request for \(id) without WixKey")
 		}
 
 		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
