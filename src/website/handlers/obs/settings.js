@@ -97,7 +97,7 @@ const captureProcess = {
 			"-vn",
 
 			"-f", "mpegts",
-			"udp://10.0.0.2:2003"
+			"udp://10.0.0.2:2000?listen=1"
 		]),
 		process: null
 	},
