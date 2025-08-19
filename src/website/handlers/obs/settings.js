@@ -53,7 +53,7 @@ const udpOutput = (port) => ([
 	"-muxdelay", "0",
 	"-muxpreload", "0",
 	"-f", "mpegts",
-	`udp://10.0.0.1:${port}`
+	`udp://10.0.0.2:${port}`
 ]);
 
 /** @typedef {{spawn: () => childProcess.ChildProcess, process: childProcess.ChildProcess?, active: boolean, name: string}} CaptureProcess */
@@ -97,7 +97,7 @@ const captureProcess = {
 			"-vn",
 
 			"-f", "mpegts",
-			"udp://10.0.0.1:2003"
+			"udp://10.0.0.2:2003"
 		]),
 		process: null
 	},
@@ -112,9 +112,8 @@ const captureProcess = {
 /**
  * @param {import("@wixonic/logger").Logger} logger
  * @param {CaptureProcess} cp
- * @param {import("../../types.d.ts").Settings} settings
  */
-const startProcess = (logger, cp, settings) => {
+const startProcess = (logger, cp) => {
 	const cpLogger = {
 		debug: (...args) => logger.debug(`[${cp.name}]`, ...args),
 		error: (...args) => logger.error(`[${cp.name}]`, ...args),
