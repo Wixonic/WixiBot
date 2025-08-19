@@ -154,17 +154,12 @@ const info = {
 				if (!cp.process || cp.process.killed) {
 					if (cp.active) {
 						cp.process = cp.spawn(logger);
-
-						for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "uncaughtException", "unhandledRejection", "exit"]) {
-							cp.process.once(signal, async (reason, code) => {
-								if (!cp.process.killed) {
-									cp.process.removeAllListeners("exit");
-									cp.process.kill("SIGTERM");
-								}
-							});
-						}
+						cp.process.on("error", (error) => logger.warn("Child Process Error:", error));
 					}
-				} else if (!cp.process.killed && !cp.active) cp.process.kill("SIGTERM");
+				} else if (!cp.process.killed && !cp.active) {
+					logger.info("Killing process:", cp.process.name);
+					cp.process.kill("SIGTERM");
+				}
 			}
 
 			return false;
