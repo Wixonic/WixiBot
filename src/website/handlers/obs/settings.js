@@ -25,6 +25,15 @@ const updateDeviceList = () => {
 	for (const match of output[1].matchAll(/\.*\] \[(\d+)\] (.+)/g)) deviceList.audio[Number(match[1])] = trimName(match[2]);
 };
 
+const defaultArgs = [
+	"-hide_banner",
+	"-loglevel", "warning",
+
+	"-fflags", "nobuffer+genpts",
+	"-flags", "low_delay",
+	"-max_muxing_queue_size", "1024"
+];
+
 /**
  * @type {{[name: string]: {spawn: (logger: import("@wixonic/logger").Logger) => childProcess.ChildProcess, process: childProcess.ChildProcess?, active: boolean, name: string}}}
  */
@@ -35,8 +44,8 @@ const captureProcess = {
 		spawn: (logger) => {
 			logger.info("Starting process:", captureProcess.microphone.name);
 			return childProcess.spawn("/usr/local/ffmpeg-4.1/bin/ffmpeg", [
-				"-hide_banner",
-				"-loglevel", "warning",
+				...defaultArgs,
+
 				"-f", "avfoundation",
 				"-framerate", "60",
 				"-i", `:${deviceList.audio.indexOf("Elgato Wave:3")}`,
@@ -49,9 +58,6 @@ const captureProcess = {
 				"-ar", "48000",
 				"-af", "volume=0.5",
 
-				"-tune", "zerolatency",
-				"-flags", "low_delay",
-				"-fflags", "nobuffer",
 				"-f", "mpegts",
 				`udp://10.0.0.2:2003`
 			], { stdio: "inherit" });
@@ -64,11 +70,7 @@ const captureProcess = {
 		spawn: (logger) => {
 			logger.info("Starting process:", captureProcess.audio.name);
 			return childProcess.spawn("ffplay", [
-				"-hide_banner",
-				"-loglevel", "warning",
-
-				"-flags", "low_delay",
-				"-fflags", "nobuffer",
+				...defaultArgs,
 
 				"-autoexit",
 				"-nodisp",
@@ -157,7 +159,7 @@ const info = {
 						cp.process.on("error", (error) => logger.warn("Child Process Error:", error));
 					}
 				} else if (!cp.process.killed && !cp.active) {
-					logger.info("Killing process:", cp.process.name);
+					logger.info("Killing process:", cp.name);
 					cp.process.kill("SIGTERM");
 				}
 			}
