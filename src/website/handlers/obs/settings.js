@@ -33,14 +33,14 @@ const updateDeviceList = (logger) => {
 
 const defaultInputArgs = [
 	"-hide_banner",
-	"-loglevel", "repeat+level+verbose",
+	"-loglevel", "repeat+level+warning",
 	"-fflags", "nobuffer+genpts",
 	"-flags", "low_delay"
 ];
 
 const defaultOutputArgs = [
 	"-hide_banner",
-	"-loglevel", "repeat+level+verbose",
+	"-loglevel", "repeat+level+warning",
 	"-fflags", "nobuffer",
 	"-probesize", "32",
 	"-analyzeduration", "0",
