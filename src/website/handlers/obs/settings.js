@@ -18,7 +18,7 @@ const updateDeviceList = (logger) => {
 			"-f", "avfoundation",
 			"-list_devices", "true",
 			"-i", ""
-		], { stdio: "pipe" });
+		], { stderr: "pipe" });
 
 		deviceList.audio = [];
 		deviceList.video = [];
