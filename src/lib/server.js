@@ -136,7 +136,6 @@ class Server {
 				res.status(404).sendFile(path.join(websitePath, "lib", "404.html"));
 			});
 
-
 			this.http.on("clientError", (e) => this.logger.warn("[HTTP]", "Client error:", e));
 			this.http.on("close", () => this.logger.warn("[HTTP]", "Server closed"));
 			this.http.on("error", (e) => this.logger.error("[HTTP]", "Server error:", e));
