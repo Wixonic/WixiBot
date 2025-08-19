@@ -18,7 +18,7 @@ const updateDeviceList = (logger) => {
 			"-f", "avfoundation",
 			"-list_devices", "true",
 			"-i", ""
-		], { encoding: "utf8", stderr: "pipe" });
+		]);
 
 		deviceList.audio = [];
 		deviceList.video = [];
@@ -33,14 +33,14 @@ const updateDeviceList = (logger) => {
 
 const defaultInputArgs = [
 	"-hide_banner",
-	"-loglevel", "warning",
+	"-loglevel", "repeat+level+verbose",
 	"-fflags", "nobuffer+genpts",
 	"-flags", "low_delay"
 ];
 
 const defaultOutputArgs = [
 	"-hide_banner",
-	"-loglevel", "warning",
+	"-loglevel", "repeat+level+verbose",
 	"-fflags", "nobuffer",
 	"-probesize", "32",
 	"-analyzeduration", "0",
@@ -122,6 +122,7 @@ const startProcess = (logger, cp, settings) => {
 		warn: (...args) => logger.warn(`[${cp.name}]`, ...args)
 	};
 
+	cpLogger.info("Starting");
 	cp.process = cp.spawn();
 
 	if (cp.process instanceof childProcess.ChildProcess) {
