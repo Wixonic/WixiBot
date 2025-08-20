@@ -59,7 +59,7 @@ const defaultOutputArgs = [
 	"-hide_banner",
 	"-loglevel", "repeat+level+warning",
 	"-flags", "low_delay",
-	"-probesize", "32k",
+	"-probesize", "32",
 	"-analyzeduration", "500000",
 	"-sync", "audio",
 	"-autoexit"
