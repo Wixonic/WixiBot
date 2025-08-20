@@ -140,8 +140,7 @@ const startProcess = (logger, cp) => {
 	if (cp.process instanceof childProcess.ChildProcess) {
 		cp.process.on("error", (error) => cpLogger.warn(error));
 		cp.process.on("exit", (code, signal) => {
-			if (signal == "SIGTERM") cpLogger.info("Stopped");
-			else cpLogger.warn(`Exited with code ${code} and signal ${signal}.`);
+			cpLogger.info("Stopped");
 			cp.process = null;
 		});
 		cp.process.stderr?.on("data", (data) => cpLogger.warn(data.toString().trim()));
