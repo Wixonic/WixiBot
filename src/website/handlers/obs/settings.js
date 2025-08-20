@@ -34,7 +34,7 @@ const updateDeviceList = (logger) => {
 const defaultInputArgs = [
 	"-hide_banner",
 	"-loglevel", "repeat+level+warning",
-	"-fflags", "genpts",
+	"-fflags", "nobuffer+genpts",
 	"-flags", "low_delay"
 ];
 
@@ -58,17 +58,18 @@ const udpInput = (port) => ([
 const defaultOutputArgs = [
 	"-hide_banner",
 	"-loglevel", "repeat+level+warning",
+	"-fflags", "nobuffer",
 	"-flags", "low_delay",
 	"-probesize", "32",
-	"-analyzeduration", "500000",
-	"-sync", "audio",
+	"-analyzeduration", "50000",
+	"-sync", "ext",
 	"-autoexit"
 ];
 
 /** @param {number} port */
 const udpOutput = (port) => ([
 	"-f", "mpegts",
-	`udp://10.0.0.2:${port}?listen=1&fifo_size=50000&overrun_nonfatal=1`
+	`udp://10.0.0.2:${port}?listen=1&fifo_size=8192&overrun_nonfatal=1`
 ]);
 
 /** @typedef {{spawn: () => childProcess.ChildProcess, process: childProcess.ChildProcess?, active: boolean, name: string}} CaptureProcess */
