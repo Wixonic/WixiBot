@@ -34,26 +34,41 @@ const updateDeviceList = (logger) => {
 const defaultInputArgs = [
 	"-hide_banner",
 	"-loglevel", "repeat+level+warning",
-	"-fflags", "nobuffer+genpts",
+	"-fflags", "genpts",
 	"-flags", "low_delay"
 ];
+
+const h264VideotoolboxArgs = (bitrate = "16M", gop = 30) => ([
+	"-c:v", "h264_videotoolbox",
+	"-preset", "ultrafast",
+	"-realtime", "1",
+	"-profile:v", "high",
+	"-b:v", bitrate,
+	"-g", String(gop),
+]);
+
+/** @param {number} port */
+const udpInput = (port) => ([
+	"-muxdelay", "0.1",
+	"-muxpreload", "0.1",
+	"-f", "mpegts",
+	`udp://10.0.0.2:${port}?buffer_size=65535`
+]);
 
 const defaultOutputArgs = [
 	"-hide_banner",
 	"-loglevel", "repeat+level+warning",
-	"-fflags", "nobuffer",
-	"-probesize", "32",
-	"-analyzeduration", "0",
+	"-flags", "low_delay",
+	"-probesize", "32k",
+	"-analyzeduration", "500000",
+	"-sync", "audio",
 	"-autoexit"
 ];
 
 /** @param {number} port */
 const udpOutput = (port) => ([
-	"-flush_packets", "1",
-	"-muxdelay", "0",
-	"-muxpreload", "0",
 	"-f", "mpegts",
-	`udp://10.0.0.2:${port}`
+	`udp://10.0.0.2:${port}?listen=1&fifo_size=50000&overrun_nonfatal=1`
 ]);
 
 /** @typedef {{spawn: () => childProcess.ChildProcess, process: childProcess.ChildProcess?, active: boolean, name: string}} CaptureProcess */
@@ -81,7 +96,7 @@ const captureProcess = {
 
 				"-af", "volume=0.5",
 
-				...udpOutput(2003)
+				...udpInput(2003)
 			]);
 		},
 		process: null
@@ -92,12 +107,10 @@ const captureProcess = {
 		spawn: () => childProcess.spawn("ffplay", [
 			...defaultOutputArgs,
 
-			"-autoexit",
 			"-nodisp",
 			"-vn",
 
-			"-f", "mpegts",
-			"udp://10.0.0.2:2000?listen=1"
+			...udpOutput(2000)
 		]),
 		process: null
 	},
@@ -217,7 +230,7 @@ const info = {
 		}
 	},
 	loop: {
-		delay: 2 * 1000,
+		delay: 0.5 * 1000,
 		process: (logger, settings) => {
 			updateDeviceList(logger);
 
