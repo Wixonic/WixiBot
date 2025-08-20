@@ -62,8 +62,7 @@ const defaultOutputArgs = [
 	"-flags", "low_delay",
 	"-probesize", "32",
 	"-analyzeduration", "50000",
-	"-sync", "ext",
-	"-autoexit"
+	"-sync", "audio"
 ];
 
 /** @param {number} port */
