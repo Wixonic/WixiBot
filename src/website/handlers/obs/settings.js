@@ -62,7 +62,8 @@ const defaultOutputArgs = [
 	"-flags", "low_delay",
 	"-probesize", "32",
 	"-analyzeduration", "50000",
-	"-sync", "audio"
+	"-sync", "audio",
+	"-autoexit"
 ];
 
 /** @param {number} port */
@@ -111,7 +112,12 @@ const captureProcess = {
 			"-vn",
 
 			...udpOutput(2000)
-		]),
+		], {
+			env: {
+				...process.env,
+				"SDL_AUDIO_SAMPLES": "1024"
+			}
+		}),
 		process: null
 	},
 	broadcast: {
@@ -138,9 +144,13 @@ const startProcess = (logger, cp) => {
 	cp.process = cp.spawn();
 
 	if (cp.process instanceof childProcess.ChildProcess) {
+		cp.process.on("close", () => {
+			cpLogger.info("Closed");
+			cp.process = null;
+		});
 		cp.process.on("error", (error) => cpLogger.warn(error));
 		cp.process.on("exit", (code, signal) => {
-			cpLogger.info("Stopped");
+			cpLogger.info("Exited with code", code);
 			cp.process = null;
 		});
 		cp.process.stderr?.on("data", (data) => cpLogger.warn(data.toString().trim()));
