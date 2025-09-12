@@ -84,6 +84,11 @@ export interface DiscordSecretsSettings {
 	webhook: string;
 };
 
+export interface KCMathsSecretsSettings {
+	username: string;
+	password: string;
+};
+
 export interface ModerationSecretsSettings {
 	active: boolean;
 	llm: string;
@@ -100,6 +105,7 @@ export interface ServerSecretsSettings {
 
 export interface SecretsSettings {
 	discord: DiscordSecretsSettings;
+	kcmaths: KCMathsSecretsSettings;
 	moderation: ModerationSecretsSettings;
 	paths: PathsSecretsSettings;
 	rpc: RPCSecretsSettings;
