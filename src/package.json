@@ -26,6 +26,7 @@
 		"@wixonic/logger": "^1.1.0",
 		"applescript": "^1.0.0",
 		"bufferutil": "^4.0.9",
+		"cheerio": "^1.1.2",
 		"cors": "^2.8.5",
 		"discord.js": "^14.21.0",
 		"discord.js-selfbot-v13": "^3.7.0",

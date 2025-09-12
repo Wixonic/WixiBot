@@ -4,7 +4,7 @@ const { userAgent } = require("../../../../lib/utils.js");
 const Rank = require("../../../../lib/rank.js");
 
 /**
- * @type {import("../../../../types").HandlerInfo}
+ * @type {import("../../../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/discord/link/auth/",

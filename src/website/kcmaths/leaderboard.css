@@ -1,0 +1,130 @@
+.leaderboard {
+	display: flex;
+	flex-direction: column;
+
+	width: min(95%, 30rem);
+
+	margin: auto;
+	padding: 0.5rem;
+}
+
+.leaderboard .member {
+	display: grid;
+	grid-template-columns: 3rem auto 3rem 3rem 3rem 3rem;
+
+	width: 100%;
+	height: 2rem;
+
+	background: var(--secondary-background);
+
+	margin: 0.1rem 0;
+
+	transition: transform 0.1s ease-out;
+
+	cursor: pointer;
+}
+
+.leaderboard .member:hover {
+	transform: scale(1.025);
+}
+
+.leaderboard .member .rank {
+	grid-column: 1;
+	grid-row: 1;
+
+	display: flex;
+	justify-content: left;
+	align-items: center;
+
+	width: 3rem;
+	height: 2rem;
+
+	padding-left: 0.4rem;
+}
+
+.leaderboard .member .name {
+	grid-column: 2;
+	grid-row: 1;
+
+	width: 100%;
+	height: 2rem;
+
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	text-align: left;
+}
+
+.leaderboard .member .name>* {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.leaderboard .member .percent {
+	grid-column: 3;
+	grid-row: 1;
+
+	display: flex;
+	justify-content: right;
+	align-items: center;
+
+	width: 3rem;
+	height: 2rem;
+
+	text-align: right;
+}
+
+.leaderboard .member .victories {
+	grid-column: 4;
+	grid-row: 1;
+
+	display: flex;
+	justify-content: right;
+	align-items: center;
+
+	width: 3rem;
+	height: 2rem;
+
+	text-align: right;
+}
+
+.leaderboard .member .entries {
+	grid-column: 5;
+	grid-row: 1;
+
+	display: flex;
+	justify-content: right;
+	align-items: center;
+
+	width: 3rem;
+	height: 2rem;
+
+	text-align: right;
+}
+
+.leaderboard .member .coins {
+	grid-column: 6;
+	grid-row: 1;
+
+	display: flex;
+	justify-content: right;
+	align-items: center;
+
+	width: 3rem;
+	height: 2rem;
+
+	text-align: right;
+
+	padding-right: 0.4rem;
+}
+
+.leaderboard .member:first-child {
+	border-top-left-radius: 0.4rem;
+	border-top-right-radius: 0.4rem;
+}
+
+.leaderboard .member:last-child {
+	border-bottom-left-radius: 0.4rem;
+	border-bottom-right-radius: 0.4rem;
+}
