@@ -50,7 +50,7 @@ const info = {
 	loop: {
 		delay: 2 * 1000,
 		process: async (logger, settings, bot, rpc, sdk) => {
-			const song = clientSong ?? await getCurrentTrackInfo();
+			let song = clientSong ?? await getCurrentTrackInfo();
 
 			if (song?.state == "PAUSED" && currentSong) song = { ...currentSong, state: "PAUSED" };
 
