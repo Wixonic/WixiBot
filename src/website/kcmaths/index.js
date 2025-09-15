@@ -116,7 +116,7 @@ addEventListener("DOMContentLoaded", async () => {
 			return member;
 		};
 
-		const getIdFromDate = (date) => String(date.getDate()).padStart(2, "0") + String(date.getMonth() + 1).padStart(2, "0");
+		const getIdFromDate = (date) => String(date.getUTCDate()).padStart(2, "0") + String(date.getUTCMonth() + 1).padStart(2, "0") + date.getUTCFullYear();
 
 		const displayLeaderboard = async (entry) => {
 			const entryDate = new Date(entry.date);

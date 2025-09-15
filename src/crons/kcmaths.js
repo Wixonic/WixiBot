@@ -10,8 +10,12 @@ const cron = {
 	name: "KCMaths history",
 	priority: 0,
 	condition: (minutes, now) => {
-		const validDay = now.getDay() >= 0 && now.getDay() <= 5;
-		return validDay && (minutes + 1) % (60 * 24) == 0;
+		const validDays = [2, 3, 5, 6];
+		const validDay = validDays.includes(now.getUTCDay());
+
+		const validTime = minutes % (60 * 24) == 0;
+
+		return validDay && validTime;
 	},
 	run: async (logger, bot, minutes, now) => {
 		const sessionId = await getSession(logger, bot.settings.secrets);
@@ -20,8 +24,14 @@ const cron = {
 		if (!data) return;
 
 		const date = new Date(now);
+		date.setUTCDate(date.getUTCDate() - 1);
+
 		if (!fs.existsSync(bot.settings.paths.kcmaths)) fs.mkdirSync(bot.settings.paths.kcmaths, { recursive: true });
-		fs.writeFileSync(path.join(bot.settings.paths.kcmaths, `${String(date.getDate()).padStart(2, "0")}${String(date.getMonth() + 1).padStart(2, "0")}.json`), JSON.stringify(data), "utf-8");
+
+		const day = String(date.getUTCDate()).padStart(2, "0");
+		const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+
+		fs.writeFileSync(path.join(bot.settings.paths.kcmaths, `${day}${month}${date.getUTCFullYear()}.json`), JSON.stringify(data), "utf-8");
 	}
 };
 
