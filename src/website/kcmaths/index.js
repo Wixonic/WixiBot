@@ -239,7 +239,11 @@ addEventListener("DOMContentLoaded", async () => {
 				while (leaderboardRequest.status == 404) {
 					date.setUTCDate(date.getUTCDate() + (mode == "after" ? 1 : -1));
 
-					if (date.getTime() > Date.now()) date = new Date();
+					if (date.getTime() > Date.now()) {
+						date = new Date();
+						mode = "before";
+					}
+
 					if (initialDate - date.getTime() > 28 * 24 * 60 * 60 * 1000) break;
 
 					leaderboardRequest = await request("GET", new URL(`/kcmaths/api/?date=${getIdFromDate(date)}`, localEnvironment ? path.local.server : path.server), "json", "application/json", null, 600);
