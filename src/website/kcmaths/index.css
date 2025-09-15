@@ -21,3 +21,11 @@ h2 {
 	margin: auto;
 	padding: 0;
 }
+
+#entryDate {
+	background: none;
+
+	font-size: 1rem;
+
+	border: none;
+}
