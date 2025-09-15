@@ -1,4 +1,3 @@
-import loader from "/lib/loader.js";
 import { init } from "/lib/main.js";
 import { path } from "/lib/path.js";
 import request from "/lib/request.js";
