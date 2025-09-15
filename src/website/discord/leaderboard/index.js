@@ -15,7 +15,6 @@ addEventListener("DOMContentLoaded", async () => {
 	const discordSection = document.createElement("section");
 	discordSection.classList.add("fade");
 	discordSection.id = "discord";
-	main.append(discordSection);
 
 	if (!user.emailVerified) {
 		const banner = document.createElement("div");
@@ -39,128 +38,137 @@ addEventListener("DOMContentLoaded", async () => {
 		discordSection.append(banner);
 	}
 
-	const discordLink = await firebase.isLinked("discord");
-	if (!discordLink) location.href = new URL(`/discord/link/?uid=${user.uid}&redirect=${encodeURIComponent(location.href)}`, localEnvironment ? path.local.server : path.server);
-
-	const createMemberEntry = (id, rankData) => {
-		const member = document.createElement("a");
-		member.classList.add("member");
-		member.href = `/discord/user?id=${rankData.id}`;
-
-		if (discordLink.id == rankData.id) member.classList.add("self");
-
-		const rank = document.createElement("div");
-		rank.classList.add("rank");
-		rank.innerText = id + 1;
-		member.append(rank);
-
-		const points = document.createElement("div");
-		points.classList.add("points");
-		points.innerText = Math.ceil(rankData.points);
-		member.append(points);
-
-		request("GET", new URL(`/discord/api/user?id=${rankData.id}`, localEnvironment ? path.local.server : path.server), "json", "application/json").then(async (data) => {
-			if (data.status != 200) return;
-			const memberData = data.response;
-
-			try {
-				const image = document.createElement("img");
-				const imageData = await request("GET", memberData.avatar, "blob");
-				if (imageData.status != 200) throw `Status: ${imageData.status}`;
-				image.src = URL.createObjectURL(imageData.response);
-				image.onload = () => URL.revokeObjectURL(image.src);
-				member.append(image);
-			} catch (e) {
-				console.warn("Failed to load avatar: " + e);
-			}
-
-			const name = document.createElement("div");
-			name.classList.add("name");
-			name.innerText = memberData.displayName ?? memberData.username;
-			member.append(name);
-		});
-
-		return member;
-	};
-
 	const params = new URLSearchParams(location.search);
-	const category = params.get("category") ?? "month";
+	let category = params.get("category") ?? "month";
 
-	const nav = document.createElement("nav");
-	nav.classList.add("fade");
+	const load = async () => {
+		main.innerHTML = "";
+		main.append(discordSection);
 
-	{
-		const monthly = document.createElement("button");
-		monthly.classList.add("button");
-		monthly.disabled = category == "month";
-		monthly.innerHTML = "Monthly";
-		monthly.addEventListener("click", async () => {
-			if (!monthly.disabled) {
-				monthly.disabled = true;
-				location.href = "/discord/leaderboard/?category=month";
+		const discordLink = await firebase.isLinked("discord");
+		if (!discordLink) location.href = new URL(`/discord/link/?uid=${user.uid}&redirect=${encodeURIComponent(location.href)}`, localEnvironment ? path.local.server : path.server);
+
+		const createMemberEntry = (id, rankData) => {
+			const member = document.createElement("a");
+			member.classList.add("member");
+			member.href = `/discord/user?id=${rankData.id}`;
+
+			if (discordLink.id == rankData.id) member.classList.add("self");
+
+			const rank = document.createElement("div");
+			rank.classList.add("rank");
+			rank.innerText = id + 1;
+			member.append(rank);
+
+			const points = document.createElement("div");
+			points.classList.add("points");
+			points.innerText = Math.ceil(rankData.points);
+			member.append(points);
+
+			request("GET", new URL(`/discord/api/user?id=${rankData.id}`, localEnvironment ? path.local.server : path.server), "json", "application/json").then(async (data) => {
+				if (data.status != 200) return;
+				const memberData = data.response;
+
+				try {
+					const image = document.createElement("img");
+					const imageData = await request("GET", memberData.avatar, "blob");
+					if (imageData.status != 200) throw `Status: ${imageData.status}`;
+					image.src = URL.createObjectURL(imageData.response);
+					image.onload = () => URL.revokeObjectURL(image.src);
+					member.append(image);
+				} catch (e) {
+					console.warn("Failed to load avatar: " + e);
+				}
+
+				const name = document.createElement("div");
+				name.classList.add("name");
+				name.innerText = memberData.displayName ?? memberData.username;
+				member.append(name);
+			});
+
+			return member;
+		};
+
+		const nav = document.createElement("nav");
+		nav.classList.add("fade");
+
+		{
+			const monthly = document.createElement("button");
+			monthly.classList.add("button");
+			monthly.disabled = category == "month";
+			monthly.innerHTML = "Monthly";
+			monthly.addEventListener("click", async () => {
+				if (!monthly.disabled) {
+					monthly.disabled = true;
+					category = "month";
+					load();
+				}
+			});
+			nav.append(monthly);
+
+			const global = document.createElement("button");
+			global.classList.add("button");
+			global.disabled = category == "global";
+			global.innerHTML = "Global";
+			global.addEventListener("click", async () => {
+				if (!global.disabled) {
+					global.disabled = true;
+					category = "global";
+					load();
+				}
+			});
+			nav.append(global);
+		}
+
+		main.append(nav);
+
+		let part = 0;
+		let count = 0;
+		let total = 0;
+		let partLength = 10;
+
+		const title = document.createElement("h2");
+		title.classList.add("fade", "slide");
+		title.innerHTML = `${{ month: "Monthly", global: "Global" }[category]} Leaderboard`;
+		main.append(title);
+
+		const leaderboardContainer = document.createElement("div");
+		leaderboardContainer.classList.add("leaderboard", "fade", "slide");
+		main.append(leaderboardContainer);
+
+		const button = document.createElement("button");
+		button.classList.add("button", "fade", "slide");
+		button.disabled = true;
+		button.innerHTML = "View more";
+		button.addEventListener("click", async () => {
+			if (!button.disabled) {
+				button.disabled = true;
+				await loadLeaderboardPart();
 			}
 		});
-		nav.append(monthly);
+		main.append(button);
 
-		const global = document.createElement("button");
-		global.classList.add("button");
-		global.disabled = category == "global";
-		global.innerHTML = "Global";
-		global.addEventListener("click", async () => {
-			if (!global.disabled) {
-				global.disabled = true;
-				location.href = "/discord/leaderboard/?category=global";
-			}
-		});
-		nav.append(global);
-	}
+		const loadLeaderboardPart = async () => {
+			const leaderboardRequest = await request("GET", new URL(`/discord/api/leaderboard?start=${part * partLength}&end=${(part + 1) * partLength}&category=${category}`, localEnvironment ? path.local.server : path.server), "json", "application/json", null, 600);
 
-	main.append(nav);
+			if (leaderboardRequest.status == 200) {
+				part++;
 
-	let part = 0;
-	let count = 0;
-	let total = 0;
-	let partLength = 10;
+				const leaderboard = leaderboardRequest.response;
 
-	const title = document.createElement("h2");
-	title.classList.add("fade", "slide");
-	title.innerHTML = `${{ month: "Monthly", global: "Global" }[category]} Leaderboard`;
-	main.append(title);
+				for (const rankData of leaderboard[category]) {
+					const member = createMemberEntry(count++, rankData);
+					leaderboardContainer.append(member);
+				}
 
-	const leaderboardContainer = document.createElement("div");
-	leaderboardContainer.classList.add("leaderboard", "fade", "slide");
-	main.append(leaderboardContainer);
-
-	const button = document.createElement("button");
-	button.classList.add("button", "fade", "slide");
-	button.disabled = true;
-	button.innerHTML = "View more";
-	button.addEventListener("click", async () => {
-		if (!button.disabled) {
-			button.disabled = true;
-			await loadLeaderboardPart();
-		}
-	});
-	main.append(button);
-
-	const loadLeaderboardPart = async () => {
-		const leaderboardRequest = await request("GET", new URL(`/discord/api/leaderboard?start=${part * partLength}&end=${(part + 1) * partLength}&category=${category}`, localEnvironment ? path.local.server : path.server), "json", "application/json", null, 600);
-
-		if (leaderboardRequest.status == 200) {
-			part++;
-
-			const leaderboard = leaderboardRequest.response;
-
-			for (const rankData of leaderboard[category]) {
-				const member = createMemberEntry(count++, rankData);
-				leaderboardContainer.append(member);
+				total = leaderboard.total[category];
 			}
 
-			total = leaderboard.total[category];
-		}
+			button.disabled = !(count < total);
+		};
 
-		button.disabled = !(count < total);
+		await loadLeaderboardPart();
 	};
 
-	await loadLeaderboardPart();
+	await load();
 });
