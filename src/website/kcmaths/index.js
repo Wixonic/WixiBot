@@ -33,7 +33,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 			const before = document.createElement("button");
 			before.classList.add("button");
-			before.disabled = failed;
+			before.disabled = failed && checkNearest;
 			before.innerHTML = "Précédent";
 			before.addEventListener("click", async () => {
 				if (!before.disabled) {
