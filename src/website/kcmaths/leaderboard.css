@@ -53,6 +53,7 @@
 	white-space: nowrap;
 
 	text-align: left;
+	padding: 0.3rem 0;
 }
 
 .leaderboard .member .name>* {

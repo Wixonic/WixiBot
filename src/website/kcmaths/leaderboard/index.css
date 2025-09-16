@@ -1,5 +1,5 @@
 @import url("/lib/main.css");
-@import url("./leaderboard.css");
+@import url("../leaderboard.css");
 
 main {
 	background: none;
@@ -22,6 +22,10 @@ h2 {
 	padding: 0;
 }
 
-.uplot {
-	margin: auto;
+#entryDate {
+	background: none;
+
+	font-size: 1rem;
+
+	border: none;
 }

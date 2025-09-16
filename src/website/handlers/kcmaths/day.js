@@ -2,10 +2,10 @@ const fs = require("fs");
 const path = require("path");
 
 /**
- * @type {import("../../types.d.ts").HandlerInfo}
+ * @type {import("../../../types").HandlerInfo}
  */
 const info = {
-	path: "/kcmaths/api/",
+	path: "/kcmaths/api/day/",
 	handlers: {
 		get: async (logger, settings, req, res, bot, rpc, sdk) => {
 			const filePath = path.join(settings.paths.kcmaths, `${req.query.date}.json`);
