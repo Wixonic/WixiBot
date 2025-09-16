@@ -42,7 +42,12 @@ const info = {
 			latest.sort((a, b) => b.entries - a.entries);
 			for (const user of latest) leaderboard.entries.push(`${user.firstName} ${user.lastName}`);
 
-			latest.sort((a, b) => b.percent - a.percent);
+			latest.sort((a, b) => {
+				if (a.entries == 0 && b.entries == 0) return 0;
+				else if (a.entries == 0) return 1;
+				else if (b.entries == 0) return -1;
+				else return (b.victories / b.entries) - (a.victories / a.entries);
+			});
 			for (const user of latest) leaderboard.percent.push(`${user.firstName} ${user.lastName}`);
 
 			latest.sort((a, b) => b.victories - a.victories);

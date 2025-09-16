@@ -22,6 +22,12 @@ h2 {
 	padding: 0;
 }
 
-.uplot {
-	margin: auto;
+.graph {
+	width: fit-content !important;
+
+	margin: auto !important;
+}
+
+.graph * {
+	overflow: visible;
 }

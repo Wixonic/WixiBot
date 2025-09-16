@@ -116,22 +116,22 @@ addEventListener("DOMContentLoaded", async () => {
 
 			const percent = document.createElement("div");
 			percent.classList.add("percent");
-			percent.innerHTML = `${Math.floor(data.percent * 100)}%`;
+			percent.innerHTML = data.entries > 0 ? Math.floor((data.victories / data.entries) * 100) + "%" : "--";
 			member.append(percent);
 
 			const victories = document.createElement("div");
 			victories.classList.add("victories");
-			victories.innerHTML = data.victories;
+			victories.innerHTML = data.victories > 0 ? data.victories : "--";
 			member.append(victories);
 
 			const entries = document.createElement("div");
 			entries.classList.add("entries");
-			entries.innerHTML = data.entries;
+			entries.innerHTML = data.entries > 0 ? data.entries : "--";
 			member.append(entries);
 
 			const coins = document.createElement("div");
 			coins.classList.add("coins");
-			coins.innerHTML = data.kcCoins;
+			coins.innerHTML = data.kcCoins > 0 ? data.kcCoins : "--";
 			member.append(coins);
 
 			return member;

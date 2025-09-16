@@ -61,10 +61,8 @@ addEventListener("DOMContentLoaded", async () => {
 		open.unshift(0);
 		open.pop();
 
-		console.log(date, open, close);
-
 		const graph = document.createElement("div");
-		graph.classList.add("graph");
+		graph.classList.add("graph", "fade", "slide");
 		Plotly.newPlot(graph, [{
 			x: date,
 			open,
@@ -84,6 +82,7 @@ addEventListener("DOMContentLoaded", async () => {
 			yaxis: "y"
 		}], {
 			dragmode: "pan",
+			margin: { l: 20, r: 20, t: 20, b: 20 },
 			showlegend: false,
 			xaxis: {
 				autorange: true,
@@ -93,6 +92,11 @@ addEventListener("DOMContentLoaded", async () => {
 				autorange: true,
 				type: "linear"
 			}
+		}, {
+			displaylogo: false,
+			locale: "fr",
+			modeBarButtonsToRemove: ["select2d", "lasso2d", "toImage"],
+			scrollZoom: true
 		});
 		main.append(graph);
 	}

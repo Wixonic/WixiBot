@@ -1,6 +1,12 @@
 import { init } from "/lib/main.js";
 import request from "/lib/request.js";
 
+const formatRank = (rank) => {
+	if (rank <= 0) return "--";
+	else if (rank == 1) return "1er";
+	else return rank + "e";
+};
+
 addEventListener("DOMContentLoaded", async () => {
 	await init();
 
@@ -50,107 +56,150 @@ addEventListener("DOMContentLoaded", async () => {
 
 		for (const data of userData.entries) {
 			const entry = data.value;
-			entries.push({
-				date: new Date(`${data.date.slice(4)}-${data.date.slice(2, 4)}-${data.date.slice(0, 2)}`),
-				kcCoins: entry.kcCoins,
-				entries: entry.entries,
-				victories: entry.victories,
-				rank: {
-					bank: userData.leaderboard.bank.indexOf(id),
-					entries: userData.leaderboard.entries.indexOf(id),
-					percent: userData.leaderboard.percent.indexOf(id),
-					victories: userData.leaderboard.victories.indexOf(id)
-				}
-			});
+
+			if (entry) {
+				entries.push({
+					date: new Date(`${data.date.slice(4)}-${data.date.slice(2, 4)}-${data.date.slice(0, 2)}`),
+					kcCoins: entry.kcCoins,
+					entries: entry.entries,
+					victories: entry.victories,
+					rank: {
+						bank: userData.leaderboard.bank.indexOf(id) + 1,
+						entries: userData.leaderboard.entries.indexOf(id) + 1,
+						percent: userData.leaderboard.percent.indexOf(id) + 1,
+						victories: userData.leaderboard.victories.indexOf(id) + 1
+					}
+				});
+			}
 		}
 
 		const user = {
-			firstname: userData.entries[0].value.firstName,
-			lastname: userData.entries[0].value.lastName,
+			firstname: userData.entries.at(0)?.value?.firstName ?? id,
+			lastname: userData.entries.at(0)?.value?.lastName,
 			entries
 		};
 
-		console.log(user);
-
 		const title = document.createElement("h2");
 		title.classList.add("fade", "slide");
-		title.innerHTML = user.firstname;
+		title.innerHTML = user.firstname + (user.lastname ? ` ${user.lastname[0]}.` : "");
 		main.append(title);
 
 		const latest = user.entries.at(-1);
 
 		const preview = document.createElement("section");
-		preview.classList.add("fade", "slide");
+		preview.classList.add("fade", "slide", "preview");
 		{
-			const bank = document.createElement("div");
-			{
-				const label = document.createElement("div");
-				label.classList.add("label");
-				label.innerHTML = "Solde";
-				bank.append(label);
+			const percent = document.createElement("button");
+			percent.addEventListener("click", () => {
+				if (!percent.disabled) {
+					percent.disabled = true;
+					location.href = "/kcmaths/leaderboard?category=percent";
+				}
+			});
 
-				const value = document.createElement("div");
-				value.classList.add("value");
-				value.innerHTML = latest.kcCoins ?? "--";
-				bank.append(value);
-			}
-			preview.append(bank);
-
-			const percentRank = document.createElement("div");
+			percent.classList.add("block", "button");
+			percent.setAttribute("rank", latest.rank.percent);
 			{
 				const label = document.createElement("div");
 				label.classList.add("label");
 				label.innerHTML = "Rang";
-				percentRank.append(label);
+				percent.append(label);
+
+				const rank = document.createElement("div");
+				rank.classList.add("rank");
+				rank.innerHTML = formatRank(latest.rank.percent);
+				percent.append(rank);
 
 				const value = document.createElement("div");
 				value.classList.add("value");
-				value.innerHTML = latest.rank.percent == -1 ? "--" : latest.rank.percent;
-				percentRank.append(value);
+				value.innerHTML = `${latest.entries > 0 ? Number(((latest.victories / latest.entries) * 100).toFixed(2)) + "%" : "--"} de victoires`;
+				percent.append(value);
 			}
-			preview.append(percentRank);
+			preview.append(percent);
 
-			const bankRank = document.createElement("div");
+			const bank = document.createElement("button");
+			bank.addEventListener("click", () => {
+				if (!bank.disabled) {
+					bank.disabled = true;
+					location.href = "/kcmaths/leaderboard?category=bank";
+				}
+			});
+
+			bank.classList.add("block", "button");
+			bank.setAttribute("rank", latest.rank.bank);
 			{
 				const label = document.createElement("div");
 				label.classList.add("label");
 				label.innerHTML = "Richesse";
-				bankRank.append(label);
+				bank.append(label);
+
+				const rank = document.createElement("div");
+				rank.classList.add("rank");
+				rank.innerHTML = formatRank(latest.rank.bank);
+				bank.append(rank);
 
 				const value = document.createElement("div");
 				value.classList.add("value");
-				value.innerHTML = latest.rank.bank == -1 ? "--" : latest.rank.bank;
-				bankRank.append(value);
+				value.innerHTML = `${latest.kcCoins > 0 ? latest.kcCoins : "--"} KCCoin${latest.kcCoins > 1 ? "s" : ""}`;
+				bank.append(value);
 			}
-			preview.append(bankRank);
+			preview.append(bank);
 
-			const victoriesRank = document.createElement("div");
+			const victories = document.createElement("button");
+			victories.addEventListener("click", () => {
+				if (!victories.disabled) {
+					victories.disabled = true;
+					location.href = "/kcmaths/leaderboard?category=victories";
+				}
+			});
+
+			victories.classList.add("block", "button");
+			victories.setAttribute("rank", latest.rank.victories);
 			{
 				const label = document.createElement("div");
 				label.classList.add("label");
 				label.innerHTML = "Vainqueur";
-				victoriesRank.append(label);
+				victories.append(label);
+
+				const rank = document.createElement("div");
+				rank.classList.add("rank");
+				rank.innerHTML = formatRank(latest.rank.victories);
+				victories.append(rank);
 
 				const value = document.createElement("div");
 				value.classList.add("value");
-				value.innerHTML = latest.rank.victories == -1 ? "--" : latest.rank.victories;
-				victoriesRank.append(value);
+				value.innerHTML = `${latest.victories > 0 ? latest.victories : "--"} victoire${latest.victories > 1 ? "s" : ""}`;
+				victories.append(value);
 			}
-			preview.append(victoriesRank);
+			preview.append(victories);
 
-			const entriesRank = document.createElement("div");
+			const entries = document.createElement("button");
+			entries.addEventListener("click", () => {
+				if (!entries.disabled) {
+					entries.disabled = true;
+					location.href = "/kcmaths/leaderboard?category=entries";
+				}
+			});
+
+			entries.classList.add("block", "button");
+			entries.setAttribute("rank", latest.rank.entries);
 			{
 				const label = document.createElement("div");
 				label.classList.add("label");
-				label.innerHTML = "Participants";
-				entriesRank.append(label);
+				label.innerHTML = "Participant";
+				entries.append(label);
+
+				const rank = document.createElement("div");
+				rank.classList.add("rank");
+				rank.innerHTML = formatRank(latest.rank.entries);
+				entries.append(rank);
 
 				const value = document.createElement("div");
 				value.classList.add("value");
-				value.innerHTML = latest.rank.entries == -1 ? "--" : latest.rank.entries;
-				entriesRank.append(value);
+				value.innerHTML = `${latest.entries > 0 ? latest.entries : "--"} participation${latest.entries > 1 ? "s" : ""}`;
+				entries.append(value);
 			}
-			preview.append(entriesRank);
+			preview.append(entries);
 		}
 		main.append(preview);
 	}
