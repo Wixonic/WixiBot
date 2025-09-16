@@ -58,7 +58,8 @@ addEventListener("DOMContentLoaded", async () => {
 		}
 
 		const open = Array.from(close);
-		open.push(open.shift());
+		open.unshift(0);
+		open.pop();
 
 		console.log(date, open, close);
 
@@ -66,7 +67,7 @@ addEventListener("DOMContentLoaded", async () => {
 		graph.classList.add("graph");
 		Plotly.newPlot(graph, [{
 			x: date,
-			open: close,
+			open,
 			low: close,
 			high: close,
 			close,

@@ -23,11 +23,6 @@ const info = {
 				return { date, total };
 			});
 
-			totals.push({
-				date: "10092025",
-				total: 1000
-			});
-
 			totals.sort((a, b) => `${a.date.slice(4, 8)}${a.date.slice(2, 4)}${a.date.slice(0, 2)}`.localeCompare(`${b.date.slice(4, 8)}${b.date.slice(2, 4)}${b.date.slice(0, 2)}`));
 
 			res.status(200).json(totals);
