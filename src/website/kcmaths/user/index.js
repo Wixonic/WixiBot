@@ -296,6 +296,57 @@ addEventListener("DOMContentLoaded", async () => {
 		const details = document.createElement("section");
 		details.classList.add("details", "fade");
 		{
+			const percentHistory = document.createElement("div");
+			{
+				const title = document.createElement("h3");
+				title.innerHTML = "Ratio";
+				percentHistory.append(title);
+
+				const date = [];
+				const open = [];
+				const close = [];
+				const high = [];
+				const low = [];
+				const text = [];
+
+				for (const i in entries) {
+					const entry = entries[i];
+					date.push(entry.date);
+					close.push(entry.percent ?? 0);
+
+					const previous = entries[i - 1];
+					open.push(previous?.percent ?? 0);
+
+					high.push(Math.max(open[i], close[i]));
+					low.push(Math.min(open[i], close[i]));
+
+					const diff = (entry.percent ?? 0) - (previous?.percent ?? 0);
+					text.push(`${((entry.percent ?? 0) * 100).toFixed(2)}%<br />${diff >= 0 ? "+" : "-"}${Math.abs(diff * 100).toFixed(2)}%`);
+				}
+
+				const percentGraph = graph([{
+					x: date,
+					open,
+					low,
+					high,
+					close,
+
+					hovertext: text,
+					hoverinfo: "text",
+
+					decreasing: { line: { color: "#F00" } },
+					increasing: { line: { color: "#0C0" } },
+
+					type: "candlestick"
+				}], {}, {
+					title: { text: "Ratio" },
+				});
+
+				await percentGraph.update(date);
+				percentHistory.append(percentGraph);
+			}
+			details.append(percentHistory);
+
 			const bankHistory = document.createElement("div");
 			{
 				const title = document.createElement("h3");
@@ -434,57 +485,6 @@ addEventListener("DOMContentLoaded", async () => {
 				entriesHistory.append(entriesGraph);
 			}
 			details.append(entriesHistory);
-
-			const percentHistory = document.createElement("div");
-			{
-				const title = document.createElement("h3");
-				title.innerHTML = "Ratio";
-				percentHistory.append(title);
-
-				const date = [];
-				const open = [];
-				const close = [];
-				const high = [];
-				const low = [];
-				const text = [];
-
-				for (const i in entries) {
-					const entry = entries[i];
-					date.push(entry.date);
-					close.push(entry.percent ?? 0);
-
-					const previous = entries[i - 1];
-					open.push(previous?.percent ?? 0);
-
-					high.push(Math.max(open[i], close[i]));
-					low.push(Math.min(open[i], close[i]));
-
-					const diff = (entry.percent ?? 0) - (previous?.percent ?? 0);
-					text.push(`${((entry.percent ?? 0) * 100).toFixed(2)}%<br />${diff >= 0 ? "+" : "-"}${Math.abs(diff * 100).toFixed(2)}%`);
-				}
-
-				const percentGraph = graph([{
-					x: date,
-					open,
-					low,
-					high,
-					close,
-
-					hovertext: text,
-					hoverinfo: "text",
-
-					decreasing: { line: { color: "#F00" } },
-					increasing: { line: { color: "#0C0" } },
-
-					type: "candlestick"
-				}], {}, {
-					title: { text: "Ratio" },
-				});
-
-				await percentGraph.update(date);
-				percentHistory.append(percentGraph);
-			}
-			details.append(percentHistory);
 		}
 		main.append(details);
 	}
