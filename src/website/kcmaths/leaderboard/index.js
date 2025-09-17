@@ -42,6 +42,18 @@ addEventListener("DOMContentLoaded", async () => {
 				}
 			});
 			nav.append(leaderboard);
+
+			const user = document.createElement("button");
+			user.classList.add("button");
+			user.disabled = location.pathname == "/kcmaths/user/";
+			user.innerHTML = "Utilisateur";
+			user.addEventListener("click", async () => {
+				if (!user.disabled) {
+					user.disabled = true;
+					location.href = "/kcmaths/user/";
+				}
+			});
+			nav.append(user);
 		}
 
 		main.append(nav);

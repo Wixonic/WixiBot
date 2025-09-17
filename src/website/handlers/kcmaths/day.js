@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 /**
- * @type {import("../../../types").HandlerInfo}
+ * @type {import("../../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/kcmaths/api/day/",
@@ -12,7 +12,7 @@ const info = {
 			const exists = fs.existsSync(filePath);
 
 			if (!exists) res.status(404).json({
-				error: `${query} not found`,
+				error: `${req.query.date} not found`,
 				path: filePath
 			});
 			else res.sendFile(filePath);
