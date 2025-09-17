@@ -8,27 +8,42 @@
 	padding: 0.5rem;
 }
 
-.leaderboard .member {
+.leaderboard .member,
+.leaderboard .header {
 	display: grid;
-	grid-template-columns: 3rem auto 3rem 3rem 3rem 3rem;
+	grid-template-columns: 4rem auto 4rem 4rem 4rem 4rem;
 
 	width: 100%;
 	height: 2rem;
 
-	background: var(--secondary-background);
-
 	margin: 0.1rem 0;
+}
+
+.leaderboard .member {
+	background: var(--secondary-background);
 
 	transition: transform 0.1s ease-out;
 
 	cursor: pointer;
 }
 
+.leaderboard .header {
+	font-size: 0.9rem;
+
+	opacity: 0.4;
+}
+
 .leaderboard .member:hover {
 	transform: scale(1.025);
 }
 
-.leaderboard .member .rank {
+.leaderboard>*>* {
+	width: 100%;
+	height: 100%;
+}
+
+.leaderboard .member .rank,
+.leaderboard .header .rank {
 	grid-column: 1;
 	grid-row: 1;
 
@@ -36,18 +51,13 @@
 	justify-content: left;
 	align-items: center;
 
-	width: 3rem;
-	height: 2rem;
-
 	padding-left: 0.4rem;
 }
 
-.leaderboard .member .name {
+.leaderboard .member .name,
+.leaderboard .header .name {
 	grid-column: 2;
 	grid-row: 1;
-
-	width: 100%;
-	height: 2rem;
 
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -56,13 +66,15 @@
 	padding: 0.3rem 0;
 }
 
-.leaderboard .member .name>* {
+.leaderboard .member .name>*,
+.leaderboard .header .name>* {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 }
 
-.leaderboard .member .percent {
+.leaderboard .member .percent,
+.leaderboard .header .percent {
 	grid-column: 3;
 	grid-row: 1;
 
@@ -70,13 +82,11 @@
 	justify-content: right;
 	align-items: center;
 
-	width: 3rem;
-	height: 2rem;
-
 	text-align: right;
 }
 
-.leaderboard .member .victories {
+.leaderboard .member .victories,
+.leaderboard .header .victories {
 	grid-column: 4;
 	grid-row: 1;
 
@@ -84,13 +94,11 @@
 	justify-content: right;
 	align-items: center;
 
-	width: 3rem;
-	height: 2rem;
-
 	text-align: right;
 }
 
-.leaderboard .member .entries {
+.leaderboard .member .entries,
+.leaderboard .header .entries {
 	grid-column: 5;
 	grid-row: 1;
 
@@ -98,13 +106,11 @@
 	justify-content: right;
 	align-items: center;
 
-	width: 3rem;
-	height: 2rem;
-
 	text-align: right;
 }
 
-.leaderboard .member .coins {
+.leaderboard .member .coins,
+.leaderboard .header .coins {
 	grid-column: 6;
 	grid-row: 1;
 
@@ -112,15 +118,12 @@
 	justify-content: right;
 	align-items: center;
 
-	width: 3rem;
-	height: 2rem;
-
 	text-align: right;
 
 	padding-right: 0.4rem;
 }
 
-.leaderboard .member:first-child {
+.leaderboard .member:nth-child(2) {
 	border-top-left-radius: 0.4rem;
 	border-top-right-radius: 0.4rem;
 }

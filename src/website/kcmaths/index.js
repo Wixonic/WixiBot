@@ -47,57 +47,114 @@ addEventListener("DOMContentLoaded", async () => {
 		const kcCoinsRate = kcCoinsRateRequest.response;
 
 		const date = [];
+		const open = [];
 		const close = [];
+		const high = [];
+		const low = [];
 		const text = [];
 
-		for (const entry of kcCoinsRate) {
+		for (const i in kcCoinsRate) {
+			const entry = kcCoinsRate[i];
+
 			const entryDate = new Date(`${entry.date.slice(4)}-${entry.date.slice(2, 4)}-${entry.date.slice(0, 2)}`);
 			date.push(entryDate);
-			close.push(entry.total);
-			text.push(`${entry.total} KC`);
-		}
 
-		const open = Array.from(close);
-		open.unshift(0);
-		open.pop();
+			close.push(entry.total ?? 0);
+
+			const previous = kcCoinsRate[i - 1];
+			open.push(previous?.total ?? 0);
+
+			high.push(Math.max(open[i], close[i]));
+			low.push(Math.min(open[i], close[i]));
+
+			const diff = (entry.total ?? 0) - (previous?.total ?? 0);
+			text.push(`${entry.total ?? 0} KCC<br />${diff >= 0 ? "+" : "-"}${Math.abs(diff)} KCC`);
+		}
 
 		const graph = document.createElement("div");
 		graph.classList.add("graph", "fade", "slide");
 		Plotly.newPlot(graph, [{
 			x: date,
 			open,
-			low: close,
-			high: close,
 			close,
+			high,
+			low,
 
 			hovertext: text,
 			hoverinfo: "text",
 
 			decreasing: { line: { color: "#F00" } },
 			increasing: { line: { color: "#0C0" } },
-			line: { color: "#06F" },
 
-			type: "candlestick",
-			xaxis: "x",
-			yaxis: "y"
+			type: "candlestick"
 		}], {
+			autosize: false,
+			width: Math.min(innerWidth - 150, 800),
+			height: 500,
 			dragmode: "pan",
-			margin: { l: 20, r: 20, t: 20, b: 20 },
+			margin: { l: 50, r: 0, t: 20, b: 50 },
 			showlegend: false,
 			xaxis: {
 				autorange: true,
+				showgrid: false,
+				rangeslider: {
+					visible: false
+				},
+				tickformat: "%d/%m",
+				title: { text: "Date" },
 				type: "date"
 			},
 			yaxis: {
 				autorange: true,
+				fixedrange: true,
+				title: { text: "KCC" },
 				type: "linear"
 			}
 		}, {
 			displaylogo: false,
 			locale: "fr",
-			modeBarButtonsToRemove: ["select2d", "lasso2d", "toImage"],
+			displayModeBar: false,
+			responsive: true,
 			scrollZoom: true
 		});
+
+		graph.isUpdating = false;
+		graph.update = async () => {
+			if (!graph.isUpdating) {
+				graph.isUpdating = true;
+
+				const updateLayout = {};
+
+				const startTime = new Date(graph._fullLayout.xaxis.range[0]).getTime();
+				const endTime = new Date(graph._fullLayout.xaxis.range[1]).getTime();
+
+				let yMin = Infinity;
+				let yMax = -Infinity;
+
+				for (let i = 0; i < date.length; i++) {
+					const currentDate = new Date(date[i]).getTime();
+					if (currentDate >= startTime && currentDate <= endTime) {
+						yMin = Math.min(yMin, open[i], close[i]);
+						yMax = Math.max(yMax, open[i], close[i]);
+					}
+				}
+
+				if (isFinite(yMin) && isFinite(yMax)) {
+					const padding = (yMax - yMin) * 0.1;
+					updateLayout["yaxis.range"] = [yMin - padding, yMax + padding];
+				}
+
+				await Plotly.relayout(graph, updateLayout);
+				graph.isUpdating = false;
+			}
+		};
+
+		graph.on("plotly_relayout", async (data) => {
+			if (data["xaxis.range[0]"] || data["xaxis.range[1]"]) await graph.update();
+		});
+
+		await graph.update();
+
 		main.append(graph);
 	}
 });

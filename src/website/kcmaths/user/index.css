@@ -81,3 +81,24 @@ h2 {
 
 	margin: auto;
 }
+
+.details {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-template-rows: repeat(2, 1fr);
+	gap: 1rem 3rem;
+
+	width: fit-content;
+
+	margin: auto;
+}
+
+.details .graph {
+	width: fit-content;
+
+	margin: auto;
+}
+
+.details h3 {
+	display: none;
+}

@@ -116,7 +116,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 			const percent = document.createElement("div");
 			percent.classList.add("percent");
-			percent.innerHTML = data.entries > 0 ? Math.floor((data.victories / data.entries) * 100) + "%" : "--";
+			percent.innerHTML = data.entries > 0 && data.victories > 0 ? Math.floor((data.victories / data.entries) * 100) + "%" : "--";
 			member.append(percent);
 
 			const victories = document.createElement("div");
@@ -131,7 +131,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 			const coins = document.createElement("div");
 			coins.classList.add("coins");
-			coins.innerHTML = data.kcCoins > 0 ? data.kcCoins : "--";
+			coins.innerHTML = data.kcCoins;
 			member.append(coins);
 
 			return member;
@@ -238,6 +238,40 @@ addEventListener("DOMContentLoaded", async () => {
 				const leaderboardContainer = document.createElement("div");
 				leaderboardContainer.classList.add("leaderboard", "fade", "slide");
 
+				const header = document.createElement("div");
+				header.classList.add("header");
+				{
+					const rank = document.createElement("div");
+					rank.classList.add("rank");
+					header.append(rank);
+
+					const name = document.createElement("div");
+					name.classList.add("name");
+					name.innerHTML = "Nom";
+					header.append(name);
+
+					const percent = document.createElement("div");
+					percent.classList.add("percent");
+					percent.innerHTML = "Ratio";
+					header.append(percent);
+
+					const victories = document.createElement("div");
+					victories.classList.add("victories");
+					victories.innerHTML = "Victoires";
+					header.append(victories);
+
+					const entries = document.createElement("div");
+					entries.classList.add("entries");
+					entries.innerHTML = "Particip.";
+					header.append(entries);
+
+					const coins = document.createElement("div");
+					coins.classList.add("coins");
+					coins.innerHTML = "KCC";
+					header.append(coins);
+				}
+				leaderboardContainer.append(header);
+
 				let count = 0;
 				for (const data of sortedLeaderboard) {
 					const member = createMemberEntry(count++, data);
@@ -245,7 +279,7 @@ addEventListener("DOMContentLoaded", async () => {
 				}
 
 				section.append(leaderboardContainer);
-			}
+			};
 		};
 
 		const saved = history.find((entry) => sameDay(new Date(entry.date), date));
