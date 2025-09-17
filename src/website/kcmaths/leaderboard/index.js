@@ -178,6 +178,19 @@ addEventListener("DOMContentLoaded", async () => {
 				sortingFilters.classList.add("fade", "slide");
 
 				{
+					const percent = document.createElement("button");
+					percent.classList.add("button");
+					percent.disabled = category == "percent";
+					percent.innerHTML = "Pourcentage";
+					percent.addEventListener("click", async () => {
+						if (!percent.disabled) {
+							percent.disabled = true;
+							category = "percent";
+							load();
+						}
+					});
+					sortingFilters.append(percent);
+
 					const bank = document.createElement("button");
 					bank.classList.add("button");
 					bank.disabled = category == "bank";
@@ -203,19 +216,6 @@ addEventListener("DOMContentLoaded", async () => {
 						}
 					});
 					sortingFilters.append(entries);
-
-					const percent = document.createElement("button");
-					percent.classList.add("button");
-					percent.disabled = category == "percent";
-					percent.innerHTML = "Pourcentage";
-					percent.addEventListener("click", async () => {
-						if (!percent.disabled) {
-							percent.disabled = true;
-							category = "percent";
-							load();
-						}
-					});
-					sortingFilters.append(percent);
 
 					const victories = document.createElement("button");
 					victories.classList.add("button");
@@ -255,20 +255,20 @@ addEventListener("DOMContentLoaded", async () => {
 					percent.innerHTML = "Ratio";
 					header.append(percent);
 
-					const victories = document.createElement("div");
-					victories.classList.add("victories");
-					victories.innerHTML = "Victoires";
-					header.append(victories);
+					const coins = document.createElement("div");
+					coins.classList.add("coins");
+					coins.innerHTML = "KCCoins";
+					header.append(coins);
 
 					const entries = document.createElement("div");
 					entries.classList.add("entries");
 					entries.innerHTML = "Particip.";
 					header.append(entries);
 
-					const coins = document.createElement("div");
-					coins.classList.add("coins");
-					coins.innerHTML = "KCC";
-					header.append(coins);
+					const victories = document.createElement("div");
+					victories.classList.add("victories");
+					victories.innerHTML = "Victoir.";
+					header.append(victories);
 				}
 				leaderboardContainer.append(header);
 
