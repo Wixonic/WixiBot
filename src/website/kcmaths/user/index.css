@@ -1,5 +1,5 @@
 @import url("/lib/main.css");
-@import url("./leaderboard.css");
+@import url("../leaderboard.css");
 
 main {
 	background: none;
