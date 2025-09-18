@@ -1,4 +1,5 @@
 import { init } from "/lib/main.js";
+import { updateURL } from "/lib/path.js";
 import request from "/lib/request.js";
 
 addEventListener("DOMContentLoaded", async () => {
@@ -13,6 +14,11 @@ addEventListener("DOMContentLoaded", async () => {
 	const history = [];
 
 	const load = async (checkNearest = true) => {
+		const newURL = new URL(location.href);
+		newURL.searchParams.set("category", category);
+		newURL.searchParams.set("date", `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`);
+		updateURL(newURL);
+
 		main.innerHTML = "";
 
 		const nav = document.createElement("nav");
@@ -114,7 +120,7 @@ addEventListener("DOMContentLoaded", async () => {
 		const createMemberEntry = (id, data) => {
 			const member = document.createElement("a");
 			member.classList.add("member");
-			member.href = `/kcmaths/user?id=${data.id}`;
+			member.href = `/kcmaths/user?id=${encodeURIComponent(data.id)}`;
 
 			const rank = document.createElement("div");
 			rank.classList.add("rank");

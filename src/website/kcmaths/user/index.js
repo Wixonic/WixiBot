@@ -1,4 +1,5 @@
 import { init } from "/lib/main.js";
+import { updateURL } from "/lib/path.js";
 import request from "/lib/request.js";
 
 const formatRank = (rank) => {
@@ -94,7 +95,7 @@ addEventListener("DOMContentLoaded", async () => {
 	const main = document.querySelector("main");
 
 	const params = new URLSearchParams(location.search);
-	const id = params.get("id");
+	const id = params.get("id") ? decodeURIComponent(params.get("id")) : "";
 
 	const nav = document.createElement("nav");
 	nav.classList.add("fade");
@@ -197,6 +198,10 @@ addEventListener("DOMContentLoaded", async () => {
 		main.append(section);
 
 		const load = async (id) => {
+			const newURL = new URL(location.href);
+			newURL.searchParams.set("id", encodeURIComponent(id));
+			updateURL(newURL);
+
 			section.innerHTML = "";
 			const userRequest = await request("GET", `/kcmaths/api/user?id=${encodeURIComponent(id)}`, "json", "application/json", null, 600);
 			const userData = userRequest.response;
