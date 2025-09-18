@@ -12,7 +12,7 @@ const graph = (data = [], xaxis = {}, yaxis = {}, layout = {}, config = {}) => {
 	graph.classList.add("graph", "fade", "slide");
 	Plotly.newPlot(graph, data, {
 		autosize: false,
-		width: Math.min(innerWidth / 2 - 50, 500),
+		width: innerWidth > 512 ? innerWidth / 2 - 50 : innerWidth - 50,
 		height: 300,
 		dragmode: "pan",
 		margin: { l: 50, r: 50, t: 20, b: 50 },

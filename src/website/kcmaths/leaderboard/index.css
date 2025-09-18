@@ -30,6 +30,29 @@ h2 {
 	border: none;
 }
 
+.leaderboard .member,
+.leaderboard .header {
+	grid-template-columns: 3rem auto 4rem 4rem 4rem 4rem;
+}
+
+
+@media (max-width: 512px) {
+	.leaderboard {
+		width: 100%;
+
+		padding: 0.5rem 0;
+	}
+
+	.leaderboard .member,
+	.leaderboard .header {
+		grid-template-columns: 3rem auto 2.5rem 3rem 3rem 3rem;
+	}
+
+	.leaderboard .header {
+		display: none;
+	}
+}
+
 .leaderboard .member .rank,
 .leaderboard .header .rank {
 	grid-column: 1;
@@ -46,9 +69,6 @@ h2 {
 .leaderboard .header .name {
 	grid-column: 2;
 	grid-row: 1;
-
-	text-overflow: ellipsis;
-	white-space: nowrap;
 
 	text-align: left;
 	padding: 0.3rem 0;
