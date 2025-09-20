@@ -10,10 +10,19 @@ const cron = {
 	name: "KCMaths history",
 	priority: 0,
 	condition: (minutes, now) => {
-		const validDays = [2, 3, 5, 6];
-		const validDay = validDays.includes(now.getUTCDay());
+		const localDay = now.getDay();
+		const localHour = now.getHours();
+		const localMinute = now.getMinutes(); // Local time
 
-		const validTime = minutes % (60 * 24) == 0;
+		const schedule = {
+			[1]: 10, // Monday, 10:00
+			[2]: 17, // Tuesday, 17:00
+			[4]: 12, // Thursday, 12:00
+			[5]: 12  // Friday, 12:00
+		};
+
+		const validDay = localDay in schedule;
+		const validTime = validDay && localHour == schedule[localDay] && localMinute == 0;
 
 		return validDay && validTime;
 	},
@@ -23,15 +32,13 @@ const cron = {
 		const data = await getData(logger, sessionId);
 		if (!data) return;
 
-		const date = new Date(now);
-		date.setUTCDate(date.getUTCDate() - 1);
-
 		if (!fs.existsSync(bot.settings.paths.kcmaths)) fs.mkdirSync(bot.settings.paths.kcmaths, { recursive: true });
 
-		const day = String(date.getUTCDate()).padStart(2, "0");
-		const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+		const day = String(now.getUTCDate()).padStart(2, "0");
+		const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+		const year = now.getUTCFullYear();
 
-		fs.writeFileSync(path.join(bot.settings.paths.kcmaths, `${day}${month}${date.getUTCFullYear()}.json`), JSON.stringify(data), "utf-8");
+		fs.writeFileSync(path.join(bot.settings.paths.kcmaths, `${day}${month}${year}.json`), JSON.stringify(data), "utf-8");
 	}
 };
 
