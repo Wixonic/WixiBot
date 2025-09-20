@@ -9,24 +9,38 @@ const { getSession, getData } = require("../lib/kcmaths.js");
 const cron = {
 	name: "KCMaths history",
 	priority: 0,
-	condition: (minutes, now) => {
+	condition: (_, now) => {
 		const localDay = now.getDay();
 		const localHour = now.getHours();
 		const localMinute = now.getMinutes(); // Local time
 
 		const schedule = {
-			[1]: 10, // Monday, 10:00
-			[2]: 17, // Tuesday, 17:00
-			[4]: 12, // Thursday, 12:00
-			[5]: 12  // Friday, 12:00
+			[0]: 22, // Sunday,     22:00
+			[1]: 10, // Monday,     10:00
+			[2]: 17, // Tuesday,    17:00
+			[3]: 22, // Wednesday,  22:00
+			[4]: 12, // Thursday,   12:00
+			[5]: 12, // Friday,     12:00
+			[6]: 22  // Saturday,   22:00
 		};
+
+		const workDays = [
+			["2025-09-01", "2025-10-19"],
+			["2025-11-03", "2025-12-21"],
+			["2025-01-05", "2025-02-22"],
+			["2025-03-09", "2025-04-19"],
+			["2025-05-03", "2025-07-05"]
+		];
 
 		const validDay = localDay in schedule;
 		const validTime = validDay && localHour == schedule[localDay] && localMinute == 0;
 
-		return validDay && validTime;
+		const nowString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+		const inWorkPeriod = workDays.some(([start, end]) => start <= nowString && nowString <= end);
+
+		return validDay && validTime && inWorkPeriod;
 	},
-	run: async (logger, bot, minutes, now) => {
+	run: async (logger, bot, _, now) => {
 		const sessionId = await getSession(logger, bot.settings.secrets);
 		if (!sessionId) return;
 		const data = await getData(logger, sessionId);
@@ -34,9 +48,10 @@ const cron = {
 
 		if (!fs.existsSync(bot.settings.paths.kcmaths)) fs.mkdirSync(bot.settings.paths.kcmaths, { recursive: true });
 
-		const day = String(now.getUTCDate()).padStart(2, "0");
-		const month = String(now.getUTCMonth() + 1).padStart(2, "0");
-		const year = now.getUTCFullYear();
+		// Local time
+		const day = String(now.getDate()).padStart(2, "0");
+		const month = String(now.getMonth() + 1).padStart(2, "0");
+		const year = now.getFullYear();
 
 		fs.writeFileSync(path.join(bot.settings.paths.kcmaths, `${day}${month}${year}.json`), JSON.stringify(data), "utf-8");
 	}
