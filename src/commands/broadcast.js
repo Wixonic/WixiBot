@@ -88,7 +88,7 @@ const info = {
 			 * @type {import("ws").WebSocket?}
 			 */
 			let currentWs = null;
-			ws.on("connection", (ws) => {
+			server.ws.on("connection", (ws) => {
 				ws.once("message", (data) => {
 					if (data[0] == 0x01 && data.slice(1).toString() == bot.settings.secrets.wixkey) {
 						logger.debug("Broadcasting started");
