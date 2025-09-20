@@ -11,7 +11,7 @@ const listener = {
 	 * @param {import("@wixonic/logger").Logger} logger
 	 * @param {import("discord.js").Client} client
 	 */
-	run: (logger, bot, client) => {
+	run: (logger, bot, server, client) => {
 		logger.info("Connected as:", client.user.displayName);
 
 		const packageInfo = require("../package.json");

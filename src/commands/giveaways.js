@@ -46,7 +46,7 @@ module.exports = {
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 */
-	run: async (logger, bot, interaction) => {
+	run: async (logger, bot, server, interaction) => {
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});

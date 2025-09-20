@@ -170,6 +170,7 @@ export interface CommandInfo {
 	run: (
 		logger: import("@wixonic/logger").Logger,
 		bot: import("./lib/bot.js"),
+		server: import("./lib/server.js"),
 		interaction: import("discord.js").CommandInteraction | import("discord.js").MessageContextMenuCommandInteraction | import("discord.js").UserContextMenuCommandInteraction
 	) => Promise<void>;
 };
@@ -206,6 +207,7 @@ export interface ListenerInfo {
 	run: (
 		logger: import("@wixonic/logger").Logger,
 		bot: import("./lib/bot.js"),
+		server: import("./lib/server.js"),
 		...any: any[]
 	) => Promise<void>;
 };

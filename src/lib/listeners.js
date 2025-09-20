@@ -20,8 +20,9 @@ class ListenerHandler {
 
 	/**
 	 * @param {import("./bot.js")} bot
+	 * @param {import("./server.js")} server
 	 */
-	loadListeners(bot) {
+	loadListeners(bot, server) {
 		const listenersPath = path.join(__dirname, "..", "listeners");
 		const files = fs.readdirSync(listenersPath).filter((file) => file.endsWith(".js"));
 
@@ -42,7 +43,7 @@ class ListenerHandler {
 					error: (...any) => this.logger.error(`[${listener.name}]`, ...any),
 					info: (...any) => this.logger.info(`[${listener.name}]`, ...any),
 					warn: (...any) => this.logger.warn(`[${listener.name}]`, ...any)
-				}, bot, ...args));
+				}, bot, server, ...args));
 				this.listeners.push(listener.event);
 
 				this.logger.debug("Loaded listener:", listener.name);

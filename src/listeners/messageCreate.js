@@ -11,7 +11,7 @@ const listener = {
 	/**
 	 * @param {import("discord.js").Message} message
 	 */
-	run: async (logger, bot, message) => {
+	run: async (logger, bot, server, message) => {
 		if (!message.author.bot) {
 			logger.debug(`Message "${message.id}" sent by user "${message.author.displayName}" (${message.author.id})` + (message.inGuild() ? `, in guild "${message.guild.name}" (${message.guild.id}), in channel "${message.channel.name}" (${message.channel.id})` : ", outside of a guild"));
 

@@ -38,7 +38,7 @@ const info = {
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 */
-	run: async (logger, bot, interaction) => {
+	run: async (logger, bot, server, interaction) => {
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});
@@ -88,7 +88,7 @@ const info = {
 			 * @type {import("ws").WebSocket?}
 			 */
 			let currentWs = null;
-			bot.server.ws.on("connection", (ws) => {
+			ws.on("connection", (ws) => {
 				ws.once("message", (data) => {
 					if (data[0] == 0x01 && data.slice(1).toString() == bot.settings.secrets.wixkey) {
 						logger.debug("Broadcasting started");

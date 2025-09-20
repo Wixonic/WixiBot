@@ -37,7 +37,7 @@ const init = async (logger, applicationId) => {
 			webhook: settings.application.webhook
 		}, settings);
 
-		await bot.login();
+		await bot.login(server);
 
 		const rpc = new RPC(logger, settings);
 

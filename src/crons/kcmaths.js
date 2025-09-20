@@ -9,7 +9,7 @@ const { getSession, getData } = require("../lib/kcmaths.js");
 const cron = {
 	name: "KCMaths history",
 	priority: 0,
-	condition: (_, now) => {
+	condition: (minutes, now) => {
 		const localDay = now.getDay();
 		const localHour = now.getHours();
 		const localMinute = now.getMinutes(); // Local time
@@ -40,7 +40,7 @@ const cron = {
 
 		return validDay && validTime && inWorkPeriod;
 	},
-	run: async (logger, bot, _, now) => {
+	run: async (logger, bot, minutes, now) => {
 		const sessionId = await getSession(logger, bot.settings.secrets);
 		if (!sessionId) return;
 		const data = await getData(logger, sessionId);

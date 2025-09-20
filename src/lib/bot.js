@@ -76,7 +76,8 @@ class Bot extends Client {
 		process.on("unhandledRejection", (e) => this.logger.error(e));
 	};
 
-	async login() {
+	/** @param {import("./server.js")} server */
+	async login(server) {
 		try {
 			this.logger.debug("Attempting to log in...");
 			await super.login(this.settings.application.token);
@@ -85,7 +86,7 @@ class Bot extends Client {
 			this.commandHandler.loadCommands();
 			this.componentHandler.loadComponents();
 			this.cronHandler.loadCrons();
-			this.listenerHandler.loadListeners(this);
+			this.listenerHandler.loadListeners(this, server);
 			this.modalHandler.loadModals();
 
 			this.cronHandler.init(this);

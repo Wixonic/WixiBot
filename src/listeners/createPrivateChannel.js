@@ -13,7 +13,7 @@ const listener = {
 	 * @param {import("discord.js").VoiceState} oldState
 	 * @param {import("discord.js").VoiceState} newState
 	 */
-	run: async (logger, bot, oldState, newState) => {
+	run: async (logger, bot, server, oldState, newState) => {
 		const channels = bot.settings.application.commands.privateChannels.channels;
 		const creationChannel = newState.channel;
 		const member = newState.member;

@@ -147,7 +147,7 @@ class Server {
 				this.ws.handleUpgrade(req, socket, head, (ws) => {
 					this.ws.emit("connection", ws, req);
 					const handler = this.wsHandlers[req.url];
-					if (handler) handler(this.logger, this.settings, ws, bot, rpc, sdk);
+					if (handler) handler(this.logger, this, ws, bot, rpc, sdk);
 				});
 			});
 
