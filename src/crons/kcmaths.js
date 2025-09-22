@@ -15,13 +15,10 @@ const cron = {
 		const localMinute = now.getMinutes(); // Local time
 
 		const schedule = {
-			[0]: 22, // Sunday,     22:00
-			[1]: 10, // Monday,     10:00
+			[1]: 12, // Monday,     12:00
 			[2]: 17, // Tuesday,    17:00
-			[3]: 22, // Wednesday,  22:00
 			[4]: 12, // Thursday,   12:00
-			[5]: 12, // Friday,     12:00
-			[6]: 22  // Saturday,   22:00
+			[5]: 12  // Friday      12:00
 		};
 
 		const workDays = [
@@ -38,7 +35,7 @@ const cron = {
 		const nowString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 		const inWorkPeriod = workDays.some(([start, end]) => start <= nowString && nowString <= end);
 
-		return validDay && validTime && inWorkPeriod;
+		return (validDay && validTime && inWorkPeriod) || localHour == 22 && localMinute == 0;
 	},
 	run: async (logger, bot, minutes, now) => {
 		const sessionId = await getSession(logger, bot.settings.secrets);
