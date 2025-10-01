@@ -80,7 +80,7 @@ addEventListener("DOMContentLoaded", async () => {
 			low.push(Math.min(open[i], close[i]));
 
 			const diff = (entry.total ?? 0) - (previous?.total ?? 0);
-			text.push(`${entry.total ?? 0} KCC<br />${diff >= 0 ? "+" : "-"}${Math.abs(diff)} KCC`);
+			text.push(`${entry.date.slice(0, 2)}/${entry.date.slice(2, 4)}/${entry.date.slice(4)}<br />${entry.total ?? 0} KCC<br />${diff >= 0 ? "+" : "-"}${Math.abs(diff)} KCC`);
 		}
 
 		const graph = document.createElement("div");

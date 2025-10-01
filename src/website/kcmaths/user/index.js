@@ -390,7 +390,7 @@ addEventListener("DOMContentLoaded", async () => {
 							low.push(Math.min(open[i], close[i]));
 
 							const diff = (entry.percent ?? 0) - (previous?.percent ?? 0);
-							text.push(`${((entry.percent ?? 0) * 100).toFixed(2)}%<br />${diff >= 0 ? "+" : "-"}${Math.abs(diff * 100).toFixed(2)}%`);
+							text.push(`${String(entry.date.getDate()).padStart(2, "0")}/${String(entry.date.getMonth() + 1).padStart(2, "0")}/${entry.date.getFullYear()}<br />${((entry.percent ?? 0) * 100).toFixed(2)}%<br />${diff >= 0 ? "+" : "-"}${Math.abs(diff * 100).toFixed(2)}%`);
 						}
 
 						const percentGraph = graph([{
@@ -441,7 +441,7 @@ addEventListener("DOMContentLoaded", async () => {
 							low.push(Math.min(open[i], close[i]));
 
 							const diff = (entry.kcCoins ?? 0) - (previous?.kcCoins ?? 0);
-							text.push(`${entry.kcCoins ?? 0} KCC<br />${diff >= 0 ? "+" : "-"}${Math.abs(diff)} KCC`);
+							text.push(`${String(entry.date.getDate()).padStart(2, "0")}/${String(entry.date.getMonth() + 1).padStart(2, "0")}/${entry.date.getFullYear()}<br />${entry.kcCoins ?? 0} KCC<br />${diff >= 0 ? "+" : "-"}${Math.abs(diff)} KCC`);
 						}
 
 						const bankGraph = graph([{
@@ -485,7 +485,7 @@ addEventListener("DOMContentLoaded", async () => {
 							open.push(previous?.victories ?? 0);
 
 							const diff = (entry.victories ?? 0) - (previous?.victories ?? 0);
-							text.push(`${entry.victories ?? 0} victoire${entry.victories != 1 ? "s" : ""}<br />+${diff} victoire${diff != 1 ? "s" : ""}`);
+							text.push(`${String(entry.date.getDate()).padStart(2, "0")}/${String(entry.date.getMonth() + 1).padStart(2, "0")}/${entry.date.getFullYear()}<br />${entry.victories ?? 0} victoire${entry.victories != 1 ? "s" : ""}<br />+${diff} victoire${diff != 1 ? "s" : ""}`);
 						}
 
 						const victoriesGraph = graph([{
@@ -530,7 +530,7 @@ addEventListener("DOMContentLoaded", async () => {
 							open.push(previous?.entries ?? 0);
 
 							const diff = (entry.entries ?? 0) - (previous?.entries ?? 0);
-							text.push(`${entry.entries ?? 0} participation${entry.entries != 1 ? "s" : ""}<br />+${diff} participation${diff != 1 ? "s" : ""}`);
+							text.push(`${String(entry.date.getDate()).padStart(2, "0")}/${String(entry.date.getMonth() + 1).padStart(2, "0")}/${entry.date.getFullYear()}<br />${entry.entries ?? 0} participation${entry.entries != 1 ? "s" : ""}<br />+${diff} participation${diff != 1 ? "s" : ""}`);
 						}
 
 						const entriesGraph = graph([{
