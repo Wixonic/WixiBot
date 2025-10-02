@@ -12,10 +12,10 @@ const info = {
 			const exists = fs.existsSync(filePath);
 
 			const leaderboard = {
-				bank: [],
-				entries: [],
-				percent: [],
-				victories: [],
+				bank: {},
+				entries: {},
+				percent: {},
+				victories: {},
 				list: []
 			};
 
@@ -36,25 +36,22 @@ const info = {
 			});
 
 			totals.sort((a, b) => `${a.date.slice(4, 8)}${a.date.slice(2, 4)}${a.date.slice(0, 2)}`.localeCompare(`${b.date.slice(4, 8)}${b.date.slice(2, 4)}${b.date.slice(0, 2)}`));
+			totals.filter((data) => data.value.lastName != "Corbineau");
 
 			const list = Object.values(totals.at(-1).value);
 
 			list.sort((a, b) => b.kcCoins - a.kcCoins);
-			for (const user of list) leaderboard.bank.push(`${user.firstName} ${user.lastName}`);
+			for (const user of list) leaderboard.bank[`${user.firstName} ${user.lastName}`] = user.kcCoins;
 
 			list.sort((a, b) => b.entries - a.entries);
-			for (const user of list) leaderboard.entries.push(`${user.firstName} ${user.lastName}`);
+			for (const user of list) leaderboard.entries[`${user.firstName} ${user.lastName}`] = user.entries;
 
-			list.sort((a, b) => {
-				if (a.entries == 0 && b.entries == 0) return 0;
-				else if (a.entries == 0) return 1;
-				else if (b.entries == 0) return -1;
-				else return (b.victories / b.entries) - (a.victories / a.entries);
-			});
-			for (const user of list) leaderboard.percent.push(`${user.firstName} ${user.lastName}`);
+			const calculatePercent = (user) => user.entries == 0 ? 0 : (user.victories / user.entries);
+			list.sort((a, b) => calculatePercent(b) - calculatePercent(a));
+			for (const user of list) leaderboard.percent[`${user.firstName} ${user.lastName}`] = calculatePercent(user);
 
 			list.sort((a, b) => b.victories - a.victories);
-			for (const user of list) leaderboard.victories.push(`${user.firstName} ${user.lastName}`);
+			for (const user of list) leaderboard.victories[`${user.firstName} ${user.lastName}`] = user.victories;
 
 			list.sort((a, b) => a.lastName.localeCompare(b.lastName));
 			for (const user of list) leaderboard.list.push(`${user.firstName} ${user.lastName}`);

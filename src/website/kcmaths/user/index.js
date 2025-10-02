@@ -2,11 +2,7 @@ import { init } from "/lib/main.js";
 import { updateURL } from "/lib/path.js";
 import request from "/lib/request.js";
 
-const formatRank = (rank) => {
-	if (rank <= 0) return "--";
-	else if (rank == 1) return "1er";
-	else return rank + "e";
-};
+import { formatRank, findRankFor } from "/kcmaths/utils.js";
 
 const graph = (data = [], xaxis = {}, yaxis = {}, layout = {}, config = {}) => {
 	const graph = document.createElement("div");
@@ -220,10 +216,10 @@ addEventListener("DOMContentLoaded", async () => {
 							victories: entry.victories,
 							percent: entry.entries > 0 ? entry.victories / entry.entries : 0,
 							rank: {
-								bank: leaderboard.bank.indexOf(id) + 1,
-								entries: leaderboard.entries.indexOf(id) + 1,
-								percent: leaderboard.percent.indexOf(id) + 1,
-								victories: leaderboard.victories.indexOf(id) + 1
+								bank: findRankFor(leaderboard.bank, id),
+								entries: findRankFor(leaderboard.entries, id),
+								percent: findRankFor(leaderboard.percent, id),
+								victories: findRankFor(leaderboard.victories, id)
 							}
 						});
 					}

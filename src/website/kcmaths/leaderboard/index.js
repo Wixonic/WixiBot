@@ -117,14 +117,25 @@ addEventListener("DOMContentLoaded", async () => {
 			return dateControls;
 		};
 
+		let previousValue = { id: 0, value: 0 };
+		let currentModifier = 0;
 		const createMemberEntry = (id, data) => {
 			const member = document.createElement("a");
 			member.classList.add("member");
 			member.href = `/kcmaths/user?id=${encodeURIComponent(data.id)}`;
 
+			if (data.lastName == "Corbineau") currentModifier = -1;
+
+			const value = {
+				percent: data.percent,
+				bank: data.kcCoins,
+				victories: data.victories,
+				entries: data.entries
+			}[category];
+			if (previousValue.value != value) previousValue = { id: id + 1 + currentModifier, value };
 			const rank = document.createElement("div");
 			rank.classList.add("rank");
-			rank.innerHTML = id + 1;
+			rank.innerHTML = data.lastName == "Corbineau" ? "--" : previousValue.id;
 			member.append(rank);
 
 			const name = document.createElement("div");
