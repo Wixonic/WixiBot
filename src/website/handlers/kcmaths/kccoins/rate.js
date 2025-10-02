@@ -18,7 +18,9 @@ const info = {
 				const filePath = path.join(dir, file);
 
 				const content = JSON.parse(fs.readFileSync(filePath, "utf8"));
-				for (const user of Object.values(content)) total += user.kcCoins;
+				for (const user of Object.values(content)) {
+					if (user.lastName != "Corbineau") total += user.kcCoins;
+				}
 
 				return { date, total };
 			});
