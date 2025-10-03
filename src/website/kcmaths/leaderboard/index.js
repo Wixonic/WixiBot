@@ -2,6 +2,8 @@ import { init } from "/lib/main.js";
 import { updateURL } from "/lib/path.js";
 import request from "/lib/request.js";
 
+import { findRankFor } from "/kcmaths/utils.js";
+
 addEventListener("DOMContentLoaded", async () => {
 	await init();
 
@@ -11,7 +13,6 @@ addEventListener("DOMContentLoaded", async () => {
 	let category = params.get("category") ?? "percent";
 	let date = params.get("date") ? new Date(params.get("date")) : new Date();
 	let mode = "before";
-	const history = [];
 
 	const load = async (checkNearest = true) => {
 		const newURL = new URL(location.href);
@@ -119,7 +120,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 		let previousValue = { id: 0, value: 0 };
 		let currentModifier = 0;
-		const createMemberEntry = (id, data) => {
+		const createMemberEntry = (id, data, previousRank) => {
 			const member = document.createElement("a");
 			member.classList.add("member");
 			member.href = `/kcmaths/user?id=${encodeURIComponent(data.id)}`;
@@ -137,6 +138,13 @@ addEventListener("DOMContentLoaded", async () => {
 			rank.classList.add("rank");
 			rank.innerHTML = data.lastName == "Corbineau" ? "--" : previousValue.id;
 			member.append(rank);
+
+			const deltaRank = previousRank - previousValue.id;
+
+			const progress = document.createElement("div");
+			progress.classList.add("progress", deltaRank == 0 || previousRank <= 0 ? "nochange" : (deltaRank > 0 ? "up" : "down"));
+			progress.innerHTML = deltaRank == 0 || previousRank <= 0 ? "--" : `${deltaRank > 0 ? "&#x2197;" : "&#x2198;"} ${Math.abs(deltaRank)}`;
+			member.append(progress);
 
 			const name = document.createElement("div");
 			name.classList.add("name");
@@ -170,6 +178,13 @@ addEventListener("DOMContentLoaded", async () => {
 
 		const displayLeaderboard = async (entry) => {
 			const entryDate = new Date(entry.date);
+			const theDayBefore = new Date(entry.date);
+			theDayBefore.setDate(theDayBefore.getDate() - 1);
+			const progressLeaderboardRequest = await request("GET", `/kcmaths/api/leaderboard?date=${getIdFromDate(theDayBefore)}`, "json", "application/json", null, 600);
+
+			let progressLeaderboard;
+			if (progressLeaderboardRequest.status == 200) progressLeaderboard = progressLeaderboardRequest.response[category];
+
 			const sortedLeaderboard = Object.values(entry.leaderboard).sort((a, b) => {
 				switch (category) {
 					case "bank":
@@ -303,7 +318,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 				let count = 0;
 				for (const data of sortedLeaderboard) {
-					const member = createMemberEntry(count++, data);
+					const member = createMemberEntry(count++, data, progressLeaderboard ? findRankFor(progressLeaderboard, data.id) : 0);
 					leaderboardContainer.append(member);
 				}
 
@@ -311,59 +326,54 @@ addEventListener("DOMContentLoaded", async () => {
 			};
 		};
 
-		const saved = history.find((entry) => sameDay(new Date(entry.date), date));
+		const initialDate = date.getTime();
 
-		if (saved) displayLeaderboard(saved);
-		else {
-			const initialDate = date.getTime();
+		let leaderboardRequest = await request("GET", `/kcmaths/api/day?date=${getIdFromDate(date)}`, "json", "application/json", null, 600);
 
-			let leaderboardRequest = await request("GET", `/kcmaths/api/day?date=${getIdFromDate(date)}`, "json", "application/json", null, 600);
+		if (checkNearest) {
+			while (leaderboardRequest.status == 404) {
+				date.setUTCDate(date.getUTCDate() + (mode == "after" ? 1 : -1));
 
-			if (checkNearest) {
-				while (leaderboardRequest.status == 404) {
-					date.setUTCDate(date.getUTCDate() + (mode == "after" ? 1 : -1));
-
-					if (date.getTime() > Date.now()) {
-						date = new Date();
-						mode = "before";
-					}
-
-					if (initialDate - date.getTime() > 28 * 24 * 60 * 60 * 1000) break;
-
-					leaderboardRequest = await request("GET", `/kcmaths/api/day?date=${getIdFromDate(date)}`, "json", "application/json", null, 600);
+				if (date.getTime() > Date.now()) {
+					date = new Date();
+					mode = "before";
 				}
+
+				if (initialDate - date.getTime() > 28 * 24 * 60 * 60 * 1000) break;
+
+				leaderboardRequest = await request("GET", `/kcmaths/api/day?date=${getIdFromDate(date)}`, "json", "application/json", null, 600);
+			}
+		}
+
+		if (leaderboardRequest.status == 200) {
+			const leaderboard = leaderboardRequest.response;
+
+			for (const id in leaderboard) {
+				leaderboard[id].percent = leaderboard[id].entries > 0 ? leaderboard[id].victories / leaderboard[id].entries : 0;
+				leaderboard[id].id = id;
 			}
 
-			if (leaderboardRequest.status == 200) {
-				const leaderboard = leaderboardRequest.response;
-				for (const id in leaderboard) {
-					leaderboard[id].percent = leaderboard[id].entries > 0 ? leaderboard[id].victories / leaderboard[id].entries : 0;
-					leaderboard[id].id = id;
-				}
-
-				const entry = {
-					date: date.getTime(),
-					leaderboard
-				};
-
-				history.push(entry);
-				displayLeaderboard(entry);
-			} else {
-				const section = document.createElement("section");
-				section.classList.add("fade");
-				main.append(section);
-
-				const title = document.createElement("h2");
-				title.classList.add("fade", "slide");
-				title.innerHTML = "KCMaths";
-				section.append(title);
-
-				section.append(displayDateControls(date, true));
-
-				const message = document.createElement("div");
-				message.innerHTML = "Failed to fetch data for this period.";
-				section.append(message);
+			const entry = {
+				date: date.getTime(),
+				leaderboard
 			};
+
+			displayLeaderboard(entry);
+		} else {
+			const section = document.createElement("section");
+			section.classList.add("fade");
+			main.append(section);
+
+			const title = document.createElement("h2");
+			title.classList.add("fade", "slide");
+			title.innerHTML = "KCMaths";
+			section.append(title);
+
+			section.append(displayDateControls(date, true));
+
+			const message = document.createElement("div");
+			message.innerHTML = "Failed to fetch data for this period.";
+			section.append(message);
 		};
 	};
 

@@ -15,7 +15,17 @@ const info = {
 				error: `${req.query.date} not found`,
 				path: filePath
 			});
-			else res.sendFile(filePath);
+			else {
+				try {
+					const content = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+					res.status(200).json(content);
+				} catch (e) {
+					logger.warn(`Failed to parse ${req.query.date}:`, e);
+					res.status(500).json({
+						error: `Failed to parse ${req.query.date}`
+					});
+				}
+			}
 		}
 	}
 };

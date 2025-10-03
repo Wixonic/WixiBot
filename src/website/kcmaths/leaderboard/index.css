@@ -32,7 +32,7 @@ h2 {
 
 .leaderboard .member,
 .leaderboard .header {
-	grid-template-columns: 3rem auto 4rem 4rem 4rem 4rem;
+	grid-template-columns: 1.75rem 2.75rem auto 3rem 4rem 4rem 4rem;
 }
 
 
@@ -45,7 +45,7 @@ h2 {
 
 	.leaderboard .member,
 	.leaderboard .header {
-		grid-template-columns: 3rem auto 2.5rem 3rem 3rem 3rem;
+		grid-template-columns: 1.75rem 2.75rem auto 2.5rem 3rem 3rem 3rem;
 	}
 
 	.leaderboard .header {
@@ -65,9 +65,31 @@ h2 {
 	padding-left: 0.4rem;
 }
 
+.leaderboard .member .progress,
+.leaderboard .header .progress {
+	grid-column: 2;
+	grid-row: 1;
+
+	display: flex;
+	justify-content: left;
+	align-items: center;
+}
+
+.leaderboard .member .progress.up {
+	color: #0A0;
+}
+
+.leaderboard .member .progress.down {
+	color: #F00;
+}
+
+.leaderboard .member .progress.nochange {
+	opacity: 0;
+}
+
 .leaderboard .member .name,
 .leaderboard .header .name {
-	grid-column: 2;
+	grid-column: 3;
 	grid-row: 1;
 
 	text-align: left;
@@ -83,7 +105,7 @@ h2 {
 
 .leaderboard .member .percent,
 .leaderboard .header .percent {
-	grid-column: 3;
+	grid-column: 4;
 	grid-row: 1;
 
 	display: flex;
@@ -95,7 +117,7 @@ h2 {
 
 .leaderboard .member .coins,
 .leaderboard .header .coins {
-	grid-column: 4;
+	grid-column: 5;
 	grid-row: 1;
 
 	display: flex;
@@ -107,7 +129,7 @@ h2 {
 
 .leaderboard .member .entries,
 .leaderboard .header .entries {
-	grid-column: 5;
+	grid-column: 6;
 	grid-row: 1;
 
 	display: flex;
@@ -119,7 +141,7 @@ h2 {
 
 .leaderboard .member .victories,
 .leaderboard .header .victories {
-	grid-column: 6;
+	grid-column: 7;
 	grid-row: 1;
 
 	display: flex;

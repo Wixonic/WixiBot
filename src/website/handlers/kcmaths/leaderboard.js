@@ -19,26 +19,8 @@ const info = {
 				list: []
 			};
 
-			const dir = path.join(settings.paths.kcmaths);
-			const files = fs.readdirSync(dir).filter((file) => file.endsWith(".json"));
-
-			const totals = files.map((file) => {
-				const date = file.slice(0, -5);
-
-				const filePath = path.join(dir, file);
-
-				const content = JSON.parse(fs.readFileSync(filePath, "utf8"));
-
-				return {
-					date,
-					value: content
-				};
-			});
-
-			totals.sort((a, b) => `${a.date.slice(4, 8)}${a.date.slice(2, 4)}${a.date.slice(0, 2)}`.localeCompare(`${b.date.slice(4, 8)}${b.date.slice(2, 4)}${b.date.slice(0, 2)}`));
-			totals.filter((data) => data.value.lastName != "Corbineau");
-
-			const list = Object.values(totals.at(-1).value);
+			const content = JSON.parse(fs.readFileSync(filePath, "utf8"));
+			const list = Object.values(content).filter((value) => value.lastName != "Corbineau");
 
 			list.sort((a, b) => b.kcCoins - a.kcCoins);
 			for (const user of list) leaderboard.bank[`${user.firstName} ${user.lastName}`] = user.kcCoins;
