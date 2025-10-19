@@ -12,7 +12,7 @@ const findRankFor = (leaderboard, id) => {
 
 	let currentId = 0;
 	for (const name in leaderboard) {
-		if (!name.endsWith("Corbineau")) currentId++;
+		++currentId;
 		if (previousEntry.value != leaderboard[name]) previousEntry = { id: currentId, value: leaderboard[name] };
 		if (name == id) break;
 	}

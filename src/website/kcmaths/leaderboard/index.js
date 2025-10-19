@@ -119,13 +119,10 @@ addEventListener("DOMContentLoaded", async () => {
 		};
 
 		let previousValue = { id: 0, value: 0 };
-		let currentModifier = 0;
 		const createMemberEntry = (id, data, previousRank) => {
 			const member = document.createElement("a");
 			member.classList.add("member");
 			member.href = `/kcmaths/user?id=${encodeURIComponent(data.id)}`;
-
-			if (data.lastName == "Corbineau") currentModifier = -1;
 
 			const value = {
 				percent: data.percent,
@@ -133,13 +130,14 @@ addEventListener("DOMContentLoaded", async () => {
 				victories: data.victories,
 				entries: data.entries
 			}[category];
-			if (previousValue.value != value) previousValue = { id: id + 1 + currentModifier, value };
+			if (previousValue.value != value && data.lastName != "Corbineau") previousValue = { id, value };
 			const rank = document.createElement("div");
 			rank.classList.add("rank");
 			rank.innerHTML = data.lastName == "Corbineau" ? "--" : previousValue.id;
 			member.append(rank);
 
 			const deltaRank = previousRank - previousValue.id;
+			console.log(previousRank, previousValue.id);
 
 			const progress = document.createElement("div");
 			progress.classList.add("progress", deltaRank == 0 || previousRank <= 0 ? "nochange" : (deltaRank > 0 ? "up" : "down"));
@@ -318,7 +316,7 @@ addEventListener("DOMContentLoaded", async () => {
 
 				let count = 0;
 				for (const data of sortedLeaderboard) {
-					const member = createMemberEntry(count++, data, progressLeaderboard ? findRankFor(progressLeaderboard, data.id) : 0);
+					const member = createMemberEntry(data.lastName == "Corbineau" ? count : ++count, data, progressLeaderboard ? findRankFor(progressLeaderboard, data.id) : 0);
 					leaderboardContainer.append(member);
 				}
 

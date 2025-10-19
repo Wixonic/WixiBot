@@ -352,6 +352,19 @@ addEventListener("DOMContentLoaded", async () => {
 				}
 				section.append(preview);
 
+				/* const ranksTitle = document.createElement("h2");
+				ranksTitle.classList.add("fade");
+				ranksTitle.innerHTML = "Historique du Classement";
+				ranksTitle.style.marginTop = "2rem";
+				section.append(ranksTitle);
+
+				const ranks = document.createElement("section");
+				ranks.classList.add("ranks", "fade");
+				{
+					// Moyenne du classement sur 30 jours, 15 jours, 7 jours
+				}
+				section.append(ranks); */
+
 				const detailsTitle = document.createElement("h2");
 				detailsTitle.classList.add("fade");
 				detailsTitle.innerHTML = "Historique";
