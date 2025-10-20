@@ -5,13 +5,15 @@ let captureProcess = null;
 const capture = () => {
 	captureProcess = spawn("ffmpeg", [
 		"-hide_banner",
-		"-loglevel", "warning",
+		"-loglevel", "repeat+level+warning",
+		"-fflags", "nobuffer",
+		"-flags", "low_delay",
 
 		"-f", "mpegts",
 		"-i", "udp://localhost:2002",
 
 		"-c", "copy",
-		"-f", "mp4",
+		"-f", "mpegts",
 		"pipe:1"
 	]);
 };
