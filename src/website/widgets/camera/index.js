@@ -3,7 +3,7 @@ import { FilesetResolver, FaceLandmarker } from "https://cdn.jsdelivr.net/npm/@m
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-const SERVER_URL = "wss://server.wixonic.fr:999/obs/camera/";
+const SERVER_URL = "wss://server.wixonic.fr/obs/camera/";
 const FACE_DETECTION_FPS = 30;
 
 let canvas2D, ctx2D;
