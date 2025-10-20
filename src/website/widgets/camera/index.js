@@ -3,7 +3,7 @@ import { FilesetResolver, FaceLandmarker } from "https://cdn.jsdelivr.net/npm/@m
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-const SERVER_URL = "ws://localhost:999/obs/camera/";
+const SERVER_URL = "wss://server.wixonic.fr:999/obs/camera/";
 const FACE_DETECTION_FPS = 30;
 
 let canvas2D, ctx2D;
@@ -183,11 +183,8 @@ const connect = async () => {
 	ws.binaryType = "arraybuffer";
 
 	ws.addEventListener("message", (event) => {
-		if (bufferQueue.length < 50) {
-			bufferQueue.push(new Uint8Array(event.data));
-		} else {
-			console.warn("Buffer overflow - dropping frame");
-		}
+		if (bufferQueue.length < 50) bufferQueue.push(new Uint8Array(event.data));
+		else console.warn("Buffer overflow - dropping frame");
 
 		if (!isAppending) processBufferQueue();
 	});
