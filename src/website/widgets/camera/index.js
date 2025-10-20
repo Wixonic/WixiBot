@@ -9,7 +9,8 @@ const FACE_DETECTION_FPS = 30;
 let canvas2D, ctx2D;
 let canvas3D;
 
-let ws, video, mediaSource, sourceBuffer;
+let video, mediaSource, sourceBuffer;
+let ws;
 const bufferQueue = [];
 let isAppending = false;
 
@@ -122,7 +123,7 @@ const initModels = async () => {
 
 const MAX_QUEUE_SIZE = 50;
 const processBufferQueue = () => {
-	if (!sourceBuffer || sourceBuffer.updating || isAppending || bufferQueue.length == 0 || mediaSource.readyState != "open") return;
+	if (!sourceBuffer || sourceBuffer.updating || isAppending || bufferQueue.length == 0 || !mediaSource || mediaSource.readyState != "open") return;
 
 	isAppending = true;
 
@@ -130,25 +131,52 @@ const processBufferQueue = () => {
 		const data = bufferQueue.shift();
 		sourceBuffer.appendBuffer(data);
 	} catch (e) {
-		console.error("AppendBuffer error - resetting:", e);
+		console.error("AppendBuffer error:", e);
 		isAppending = false;
-		mediaSource.endOfStream();
-		initEncoder();
 	}
 };
 
-const initEncoder = () => {
-	if (mediaSource && mediaSource.readyState === "open") {
-		mediaSource.endOfStream();
-		mediaSource = null;
+
+const cleanupMedia = () => {
+	if (ws) {
+		ws.onclose = null;
+		ws.onerror = null;
+		ws.close();
+		ws = null;
 	}
+
+	if (mediaSource && mediaSource.readyState === 'open') {
+		try {
+			mediaSource.endOfStream();
+		} catch (e) {
+			console.warn("Error during endOfStream:", e);
+		}
+	}
+
+	if (video.src) {
+		URL.revokeObjectURL(video.src);
+		video.src = null;
+		video.removeAttribute('src');
+	}
+
+	mediaSource = null;
+	sourceBuffer = null;
+	bufferQueue.length = 0;
+	isAppending = false;
+};
+
+const initMedia = () => {
+	cleanupMedia();
 
 	mediaSource = new MediaSource();
 	video.src = URL.createObjectURL(mediaSource);
-	video.load();
 
 	mediaSource.addEventListener("sourceopen", async () => {
 		console.log("MediaSource opened");
+		if (mediaSource.readyState != "open") {
+			console.warn("MediaSource closed before SourceBuffer could be added.");
+			return;
+		}
 
 		try {
 			sourceBuffer = mediaSource.addSourceBuffer(`video/mp2t; codecs="avc1.42E01E"`);
@@ -156,51 +184,71 @@ const initEncoder = () => {
 
 			sourceBuffer.addEventListener("updateend", () => {
 				isAppending = false;
-				if (bufferQueue.length > 0) processBufferQueue();
+				processBufferQueue();
 			});
 
 			sourceBuffer.addEventListener("error", (error) => {
 				console.error("SourceBuffer fatal error:", error);
-				mediaSource.endOfStream();
 				reconnect();
 			}, { once: true });
 
 			await connect();
+
 		} catch (e) {
 			console.error("SourceBuffer creation failed:", e);
-			reconnect();
+			if (e.name !== 'AbortError') {
+				reconnect();
+			}
 		}
 	});
 
 	mediaSource.addEventListener("sourceended", () => {
-		console.warn("MediaSource ended - reinitializing");
+		console.warn("MediaSource ended.");
+	}, { once: true });
+
+	mediaSource.addEventListener("sourceclose", () => {
+		console.warn("MediaSource closed, attempting to reconnect.");
 		reconnect();
 	}, { once: true });
 };
 
 const connect = async () => {
+	console.log("Connecting WebSocket...");
 	ws = new WebSocket(SERVER_URL);
 	ws.binaryType = "arraybuffer";
 
 	ws.addEventListener("message", (event) => {
-		if (bufferQueue.length < 50) bufferQueue.push(new Uint8Array(event.data));
+		if (bufferQueue.length < MAX_QUEUE_SIZE) bufferQueue.push(new Uint8Array(event.data));
 		else console.warn("Buffer overflow - dropping frame");
 
-		if (!isAppending) processBufferQueue();
+		processBufferQueue();
 	});
 
 	ws.addEventListener("close", reconnect, { once: true });
+	ws.addEventListener("error", (err) => {
+		console.error("WebSocket error:", err);
+	}, { once: true });
 };
 
 let reconnecting = false;
-const reconnect = async () => {
-	if (!reconnecting) {
-		reconnecting = true;
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		initEncoder();
+let reconnectTimeout = null;
+
+const reconnect = () => {
+	if (reconnecting) return;
+
+	console.log("Reconnection scheduled...");
+	reconnecting = true;
+
+	cleanupMedia();
+
+	clearTimeout(reconnectTimeout);
+	reconnectTimeout = setTimeout(() => {
+		console.log("Attempting to reconnect now...");
 		reconnecting = false;
-	}
+		initMedia();
+	}, 3000);
 };
+
 
 let lastFrame = performance.now();
 const loop = async () => {
@@ -401,6 +449,6 @@ const loop = async () => {
 addEventListener("DOMContentLoaded", async () => {
 	await initCanvas();
 	await initModels();
-	initEncoder();
+	initMedia();
 	loop();
 });
