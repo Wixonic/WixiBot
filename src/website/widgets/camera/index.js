@@ -163,7 +163,7 @@ const initEncoder = () => {
 				console.error("SourceBuffer fatal error:", error);
 				mediaSource.endOfStream();
 				reconnect();
-			});
+			}, { once: true });
 
 			await connect();
 		} catch (e) {
@@ -175,7 +175,7 @@ const initEncoder = () => {
 	mediaSource.addEventListener("sourceended", () => {
 		console.warn("MediaSource ended - reinitializing");
 		reconnect();
-	});
+	}, { once: true });
 };
 
 const connect = async () => {
@@ -189,7 +189,7 @@ const connect = async () => {
 		if (!isAppending) processBufferQueue();
 	});
 
-	ws.addEventListener("close", reconnect);
+	ws.addEventListener("close", reconnect, { once: true });
 };
 
 let reconnecting = false;
