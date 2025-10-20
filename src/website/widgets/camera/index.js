@@ -145,11 +145,11 @@ const cleanupMedia = () => {
 		ws = null;
 	}
 
-	if (mediaSource && mediaSource.readyState === 'open') {
+	if (mediaSource && mediaSource.readyState == "open") {
 		try {
 			mediaSource.endOfStream();
 		} catch (e) {
-			console.warn("Error during endOfStream:", e);
+			console.warn("Could not call endOfStream() safely:", e.name);
 		}
 	}
 
@@ -196,9 +196,7 @@ const initMedia = () => {
 
 		} catch (e) {
 			console.error("SourceBuffer creation failed:", e);
-			if (e.name !== 'AbortError') {
-				reconnect();
-			}
+			if (e.name != "AbortError") reconnect();
 		}
 	});
 

@@ -6,14 +6,22 @@ const capture = () => {
 	captureProcess = spawn("ffmpeg", [
 		"-hide_banner",
 		"-loglevel", "repeat+level+warning",
+
+		"-analyzeduration", "5000000",
+		"-probesize", "5000000",
+
 		"-fflags", "nobuffer",
 		"-flags", "low_delay",
 
 		"-f", "mpegts",
-		"-i", "udp://localhost:2002",
+		"-i", "udp://localhost:2002?fifo_size=1000000&overrun_nonfatal=1",
 
 		"-c", "copy",
 		"-f", "mpegts",
+
+		"-bsf:v", "h264_mp4toannexb",
+		"-mpegts_flags", "resend_headers",
+
 		"pipe:1"
 	]);
 };
