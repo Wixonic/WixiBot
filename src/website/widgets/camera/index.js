@@ -3,7 +3,7 @@ import { FilesetResolver, FaceLandmarker } from "https://cdn.jsdelivr.net/npm/@m
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-const SERVER_URL = "wss://localhost:999/video/camera/";
+const SERVER_URL = "ws://localhost:999/obs/camera/";
 const FACE_DETECTION_FPS = 30;
 
 let canvas2D, ctx2D;
@@ -195,9 +195,14 @@ const connect = async () => {
 	ws.addEventListener("close", reconnect);
 };
 
+let reconnecting = false;
 const reconnect = async () => {
-	await new Promise(resolve => setTimeout(resolve, 1000));
-	initEncoder();
+	if (!reconnecting) {
+		reconnecting = true;
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+		initEncoder();
+		reconnecting = false;
+	}
 };
 
 let lastFrame = performance.now();
