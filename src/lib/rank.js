@@ -235,8 +235,6 @@ class Rank {
 			this.voice = data.voice;
 			this.penalty = data.penalty;
 
-			this.linked = data.linked;
-
 			if (converted) this.save();
 		} else {
 			this.eliteOfTheMonth = [];
@@ -252,15 +250,13 @@ class Rank {
 			};
 			this.penalty = 0;
 
-			this.linked = false;
-
 			this.save();
 		}
 	};
 
 	get points() {
 		return {
-			global: this.bot.settings.application.commands.ranks.points.messages * this.messages.global + this.bot.settings.application.commands.ranks.points.voice * this.voice.global - this.penalty + (this.linked ? 5000 : 0),
+			global: this.bot.settings.application.commands.ranks.points.messages * this.messages.global + this.bot.settings.application.commands.ranks.points.voice * this.voice.global - this.penalty,
 			month: this.bot.settings.application.commands.ranks.points.messages * this.messages.month + this.bot.settings.application.commands.ranks.points.voice * this.voice.month - this.penalty
 		};
 	};
@@ -437,8 +433,7 @@ class Rank {
 			messages: this.messages,
 			roles: this.roles,
 			voice: this.voice,
-			penalty: this.penalty,
-			linked: this.linked
+			penalty: this.penalty
 		}), "utf-8");
 	}
 };

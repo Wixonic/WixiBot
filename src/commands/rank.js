@@ -41,7 +41,7 @@ const info = {
 		const userRank = Rank.get(logger, bot, targetUser.id);
 		await interaction.followUp({
 			allowedMentions: {},
-			content: userRank.description + `\n[See more](<${new URL(`/discord/user/?id=${targetUser.id}`, bot.settings.website.server)}>)` + (targetUser.id == interaction.user.id && !userRank.linked ? `\n### Get 5,000 points for free by [linking your account](<${new URL(`/discord/user/@me`, bot.settings.website.server)}>)!` : "")
+			content: userRank.description
 		});
 	}
 };
