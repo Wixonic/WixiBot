@@ -50,7 +50,7 @@ class Server {
 	 * @returns {Promise<void>}
 	 */
 	init(bot, rpc, sdk) {
-		const websitePath = path.join(__dirname, "..", "website");
+		const handlersPath = path.join(__dirname, "..", "handlers");
 
 		return new Promise(async (resolve) => {
 			this.app.use(cors({
@@ -64,14 +64,13 @@ class Server {
 				next();
 			});
 
-			this.app.use(express.static(websitePath));
 			this.app.use(express.text({ limit: "1gb", type: "*/*" }));
 
-			const handlers = fs.readdirSync(path.join(websitePath, "handlers"), { recursive: true });
+			const handlers = fs.readdirSync(handlersPath, { recursive: true });
 			for (const handlerFile of handlers) {
 				if (handlerFile.endsWith(".js")) {
 					/** @type {import("../types.d.ts").HandlerInfo} */
-					const handler = require(path.join(websitePath, "handlers", handlerFile));
+					const handler = require(path.join(handlersPath, handlerFile));
 					const handlerName = handlerFile.replace(".js", "");
 
 					for (const method in handler.handlers) {
@@ -130,11 +129,6 @@ class Server {
 
 				setTimeout(loopUpdate, Math.max(0, 500 - (Date.now() - now)));
 			};
-
-			this.app.use((req, res) => {
-				this.logger.warn(`404: ${req.method} ${req.url}`);
-				res.status(404).sendFile(path.join(websitePath, "lib", "404.html"));
-			});
 
 			this.http.on("clientError", (e) => this.logger.warn("[HTTP]", "Client error:", e));
 			this.http.on("close", () => this.logger.warn("[HTTP]", "Server closed"));

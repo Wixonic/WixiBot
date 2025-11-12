@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 /**
- * @type {import("../../../types.d.ts").HandlerInfo}
+ * @type {import("../../types").HandlerInfo}
  */
 const info = {
 	path: "/kcmaths/api/day/",
