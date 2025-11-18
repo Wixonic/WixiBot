@@ -12,12 +12,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var backgroundTaskProcess: Process?
     var backgroundTaskPID: Int32?
 
-    var microphoneEnabled: Bool = false
-	var audioEnabled: Bool = false
 	var broadcastEnabled: Bool = false
 
-	var microphoneMenuItem: NSMenuItem!
-	var audioMenuItem: NSMenuItem!
     var broadcastMenuItem: NSMenuItem!
 
 	func applicationDidFinishLaunching(_ notification: Notification) {
@@ -29,17 +25,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 		let menu = NSMenu()
 
-        microphoneMenuItem = NSMenuItem(title: "Microphone", action: #selector(toggleMicrophone(_:)), keyEquivalent: "m")
-		microphoneMenuItem.state = microphoneEnabled ? .on : .off
-		microphoneMenuItem.target = self
-		menu.addItem(microphoneMenuItem)
-
-		audioMenuItem = NSMenuItem(title: "Audio", action: #selector(toggleAudio(_:)), keyEquivalent: "a")
-		audioMenuItem.state = audioEnabled ? .on : .off
-		audioMenuItem.target = self
-		menu.addItem(audioMenuItem)
-
-		broadcastMenuItem = NSMenuItem(title: "Broadcast", action: #selector(toggleBroadcast(_:)), keyEquivalent: "b")
+       broadcastMenuItem = NSMenuItem(title: "Broadcast", action: #selector(toggleBroadcast(_:)), keyEquivalent: "b")
 		broadcastMenuItem.state = broadcastEnabled ? .on : .off
 		broadcastMenuItem.target = self
 		menu.addItem(broadcastMenuItem)
@@ -50,19 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		runZshScript()
 	}
 
-    @objc func toggleMicrophone(_ sender: NSMenuItem) {
-		microphoneEnabled.toggle()
-		microphoneMenuItem.state = microphoneEnabled ? .on : .off
-		sendToggleRequest(id: "microphone", status: microphoneEnabled)
-	}
-
-	@objc func toggleAudio(_ sender: NSMenuItem) {
-		audioEnabled.toggle()
-		audioMenuItem.state = audioEnabled ? .on : .off
-		sendToggleRequest(id: "audio", status: audioEnabled)
-	}
-
-	@objc func toggleBroadcast(_ sender: NSMenuItem) {
+    @objc func toggleBroadcast(_ sender: NSMenuItem) {
 		broadcastEnabled.toggle()
 		broadcastMenuItem.state = broadcastEnabled ? .on : .off
 		sendToggleRequest(id: "broadcast", status: broadcastEnabled)
