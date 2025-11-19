@@ -41,9 +41,7 @@ class Bot extends Client {
 					method: "POST",
 					type: "json",
 					url: this.webhook
-				});
-
-				logger.error("[Client]", ...any);
+				}).then(() => logger.error("[Client]", ...any));
 			},
 			info: (...any) => logger.info("[Client]", ...any),
 			warn: (...any) => logger.warn("[Client]", ...any)
@@ -95,7 +93,7 @@ class Bot extends Client {
 		}
 	};
 
-	async destroy(code = 0) {
+	async destroy(code) {
 		this.cronHandler.destroy();
 		this.listenerHandler.destroy(this);
 

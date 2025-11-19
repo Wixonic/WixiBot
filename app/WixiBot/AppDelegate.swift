@@ -43,7 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	}
 
     func sendToggleRequest(id: String, status: Bool) {
-		guard let url = URL(string: "https://server.wixonic.fr/obs/settings/?id=\(id)") else { return }
+		guard let url = URL(string: "https://server.wixonic.fr/process/?id=\(id)") else { return }
 		
 		var request = URLRequest(url: url)
 		request.httpMethod = "POST"

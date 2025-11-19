@@ -14,7 +14,7 @@ const trimName = (name) => name.split("(")[0].replace(/\s\n\t/, " ").trim();
 /** @param {import("@wixonic/logger").Logger} logger */
 const updateDeviceList = (logger) => {
 	try {
-		const result = childProcess.spawnSync("/usr/local/ffmpeg-4.1/bin/ffmpeg", [
+		const result = childProcess.spawnSync("ffmpeg", [
 			"-f", "avfoundation",
 			"-list_devices", "true",
 			"-i", ""
@@ -94,7 +94,7 @@ const stopProcess = (logger, cp) => {
 
 	const killTimeout = setTimeout(() => {
 		if (!cp.process.killed) {
-			cpLogger.warn(`Did not respond to SIGTERM.Forcing kill with SIGKILL.`);
+			cpLogger.warn(`Did not respond to SIGTERM. Forcing kill with SIGKILL.`);
 			cp.process.kill("SIGKILL");
 		}
 	}, 3000);
@@ -102,10 +102,10 @@ const stopProcess = (logger, cp) => {
 };
 
 /**
- * @type {import("../../types.d.ts").HandlerInfo}
+ * @type {import("../types").HandlerInfo}
  */
 const info = {
-	path: "/obs/settings/",
+	path: "/process/",
 	handlers: {
 		get: async (logger, settings, req, res, bot, rpc, sdk) => {
 			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
