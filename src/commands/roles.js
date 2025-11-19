@@ -3,7 +3,7 @@ const { ApplicationCommandType, InteractionContextType, MessageFlags, Permission
 const Roles = require("../lib/roles.js");
 
 /**
- * @type {import("../types").CommandInfo}
+ * @type {import("../types.d.ts").CommandInfo}
  */
 const info = {
 	name: "Roles",

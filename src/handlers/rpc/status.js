@@ -1,7 +1,7 @@
-const { displayInlineActivity } = require("../../../lib/utils.js");
+const { displayInlineActivity } = require("../../lib/utils.js");
 
 /**
- * @type {import("../../../types.d.ts").HandlerInfo}
+ * @type {import("../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/rpc/status/",

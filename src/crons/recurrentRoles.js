@@ -6,7 +6,7 @@ const Roles = require("../lib/roles.js");
 const { hexToIntColor } = require("../lib/utils.js");
 
 /**
- * @type {import("../types").CronInfo}
+ * @type {import("../types.d.ts").CronInfo}
  */
 const cron = {
 	name: "Recurrent Roles",

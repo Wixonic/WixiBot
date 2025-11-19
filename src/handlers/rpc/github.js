@@ -1,7 +1,7 @@
 let githubData = null;
 
 /**
- * @type {import("../../../types.d.ts").HandlerInfo}
+ * @type {import("../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/rpc/github/",
@@ -78,7 +78,7 @@ const info = {
 				return true;
 			} else {
 				/**
-				 * @type {import("../types.d.ts").Activity}
+				 * @type {import("../../types.d.ts").Activity}
 				 */
 				let data = null;
 				const type = githubData.type;

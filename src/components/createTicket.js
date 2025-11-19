@@ -1,7 +1,7 @@
 const { ActionRowBuilder, ComponentType, ModalBuilder, TextInputBuilder, TextInputStyle } = require("discord.js");
 
 /**
- * @type {import("../types").ComponentInfo}
+ * @type {import("../types.d.ts").ComponentInfo}
  */
 const component = {
 	name: "Create Ticket",

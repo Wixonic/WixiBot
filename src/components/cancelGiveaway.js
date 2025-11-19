@@ -3,7 +3,7 @@ const { ComponentType, MessageFlags } = require("discord.js");
 const Giveaway = require("../lib/giveaways.js");
 
 /**
- * @type {import("../types").ComponentInfo}
+ * @type {import("../types.d.ts").ComponentInfo}
  */
 const component = {
 	name: "Cancel Giveaway",

@@ -31,95 +31,12 @@ const updateDeviceList = (logger) => {
 	}
 };
 
-const defaultInputArgs = [
-	"-hide_banner",
-	"-loglevel", "repeat+level+warning",
-	"-fflags", "nobuffer+genpts",
-	"-flags", "low_delay"
-];
-
-const h264VideotoolboxArgs = (bitrate = "16M", gop = 30) => ([
-	"-c:v", "h264_videotoolbox",
-	"-preset", "ultrafast",
-	"-realtime", "1",
-	"-profile:v", "high",
-	"-b:v", bitrate,
-	"-g", String(gop),
-]);
-
-/** @param {number} port */
-const udpInput = (port) => ([
-	"-muxdelay", "0.1",
-	"-muxpreload", "0.1",
-	"-f", "mpegts",
-	`udp://10.0.0.2:${port}?buffer_size=65535`
-]);
-
-const defaultOutputArgs = [
-	"-hide_banner",
-	"-loglevel", "repeat+level+warning",
-	"-fflags", "nobuffer",
-	"-flags", "low_delay",
-	"-probesize", "32",
-	"-analyzeduration", "50000",
-	"-sync", "audio",
-	"-autoexit"
-];
-
-/** @param {number} port */
-const udpOutput = (port) => ([
-	"-f", "mpegts",
-	`udp://10.0.0.2:${port}?listen=1&fifo_size=8192&overrun_nonfatal=1`
-]);
-
 /** @typedef {{spawn: () => childProcess.ChildProcess, process: childProcess.ChildProcess?, active: boolean, name: string}} CaptureProcess */
 
 /**
  * @type {{[name: string]: CaptureProcess}}
  */
 const captureProcess = {
-	microphone: {
-		active: false,
-		name: "Microphone capture",
-		spawn: () => {
-			const deviceIndex = deviceList.audio.indexOf("Elgato Wave:3");
-			if (deviceIndex == -1) return null;
-			else return childProcess.spawn("/usr/local/ffmpeg-4.1/bin/ffmpeg", [
-				...defaultInputArgs,
-
-				"-f", "avfoundation",
-				"-framerate", "60",
-				"-i", `:${deviceIndex}`,
-
-				"-vn",
-
-				"-c:a", "aac", "-b:a", "320k", "-ac", "1", "-ar", "48000",
-
-				"-af", "volume=0.5",
-
-				...udpInput(2003)
-			]);
-		},
-		process: null
-	},
-	audio: {
-		active: false,
-		name: "Audio",
-		spawn: () => childProcess.spawn("ffplay", [
-			...defaultOutputArgs,
-
-			"-nodisp",
-			"-vn",
-
-			...udpOutput(2000)
-		], {
-			env: {
-				...process.env,
-				"SDL_AUDIO_SAMPLES": "1024"
-			}
-		}),
-		process: null
-	},
 	broadcast: {
 		active: false,
 		name: "Broadcast",
@@ -185,7 +102,7 @@ const stopProcess = (logger, cp) => {
 };
 
 /**
- * @type {import("../../types").HandlerInfo}
+ * @type {import("../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/obs/settings/",

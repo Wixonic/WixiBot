@@ -13,7 +13,7 @@ for (const job of handler.crons) choices.push({
 });
 
 /**
- * @type {import("../types").CommandInfo}
+ * @type {import("../types.d.ts").CommandInfo}
  */
 const info = {
 	name: "Execute Cron",

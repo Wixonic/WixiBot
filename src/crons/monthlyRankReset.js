@@ -3,7 +3,7 @@ const { MessageFlags } = require("discord.js");
 const Rank = require("../lib/rank.js");
 
 /**
- * @type {import("../types").CronInfo}
+ * @type {import("../types.d.ts").CronInfo}
  */
 const cron = {
 	name: "Monthly Rank Reset",

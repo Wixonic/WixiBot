@@ -1,18 +1,18 @@
-const { getCurrentTrackInfo } = require("../../../lib/music.js");
-const spotify = require("../../../lib/spotify.js");
+const { getCurrentTrackInfo } = require("../../lib/music.js");
+const spotify = require("../../lib/spotify.js");
 
 /**
- * @type {import("../../../types.d.ts").Song?}
+ * @type {import("../../types.d.ts").Song?}
  */
 let clientSong = null;
 
 /**
- * @type {import("../../../types.d.ts").Song?}
+ * @type {import("../../types.d.ts").Song?}
  */
 let currentSong = null;
 
 /**
- * @type {import("../../../types.d.ts").HandlerInfo}
+ * @type {import("../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/rpc/music/",

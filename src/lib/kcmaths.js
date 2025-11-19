@@ -7,7 +7,7 @@ const { userAgent } = require("../lib/utils.js");
 
 /**
  * @param {import("@wixonic/logger").Logger}
- * @param {import("../../../types.d.ts").SecretsSettings} secrets
+ * @param {import("../../types.d.ts").SecretsSettings} secrets
  */
 const getSession = async (logger, secrets) => {
 	const response = await request(logger, {

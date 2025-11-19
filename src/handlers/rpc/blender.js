@@ -1,7 +1,7 @@
 let blenderData = null;
 
 /**
- * @type {import("../../../types.d.ts").HandlerInfo}
+ * @type {import("../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/rpc/blender/",

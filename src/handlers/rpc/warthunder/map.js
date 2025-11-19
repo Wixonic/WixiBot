@@ -1,12 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 
-const { wait } = require("../../../../lib/utils.js");
+const { wait } = require("../../../lib/utils.js");
 
 let updatingMap = false;
 
 /**
- * @type {import("../../../../types.d.ts").HandlerInfo}
+ * @type {import("../../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/rpc/warthunder/map.png",
