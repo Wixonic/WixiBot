@@ -45,12 +45,7 @@ const cron = {
 
 		if (!fs.existsSync(bot.settings.paths.kcmaths)) fs.mkdirSync(bot.settings.paths.kcmaths, { recursive: true });
 
-		// Local time
-		const day = String(now.getDate()).padStart(2, "0");
-		const month = String(now.getMonth() + 1).padStart(2, "0");
-		const year = now.getFullYear();
-
-		fs.writeFileSync(path.join(bot.settings.paths.kcmaths, `${day}${month}${year}.json`), JSON.stringify(data), "utf-8");
+		fs.writeFileSync(path.join(bot.settings.paths.kcmaths, `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}.json`), JSON.stringify(data), "utf-8");
 	}
 };
 
