@@ -1,15 +1,14 @@
-const { getCurrentTrackInfo } = require("../../lib/music.js");
 const spotify = require("../../lib/spotify.js");
 
 /**
  * @type {import("../../types.d.ts").Song?}
  */
-let clientSong = null;
+let currentSong = null;
 
 /**
  * @type {import("../../types.d.ts").Song?}
  */
-let currentSong = null;
+let song = null;
 
 /**
  * @type {import("../../types.d.ts").HandlerInfo}
@@ -26,11 +25,11 @@ const info = {
 			}
 
 			try {
-				clientSong = JSON.parse(req.body);
+				song = JSON.parse(req.body);
 				res.status(204).end();
 			} catch (e) {
 				logger.warn("[rpc/music]", e);
-				clientSong = null;
+				song = null;
 				res.status(400).end();
 			}
 		},
@@ -42,7 +41,7 @@ const info = {
 				});
 			}
 
-			clientSong = null;
+			song = null;
 
 			res.status(204).end();
 		}
@@ -50,13 +49,11 @@ const info = {
 	loop: {
 		delay: 2 * 1000,
 		process: async (logger, settings, bot, rpc, sdk) => {
-			let song = clientSong ?? await getCurrentTrackInfo();
-
 			if (song?.state == "PAUSED" && currentSong) song = { ...currentSong, state: "PAUSED" };
 
 			const needsUpdate = () => {
 				if (song == null && currentSong == null) return false;
-				if (song == null || currentSong == null) return true;
+				else if (song == null || currentSong == null) return true;
 				return song.track != currentSong.track ||
 					song.artist != currentSong.artist ||
 					song.state != currentSong.state ||
