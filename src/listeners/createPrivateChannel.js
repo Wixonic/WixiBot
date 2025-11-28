@@ -62,6 +62,7 @@ const listener = {
 									id: member.id,
 									allow: [
 										PermissionFlagsBits.ViewChannel,
+										PermissionFlagsBits.ManageChannels,
 										PermissionFlagsBits.PrioritySpeaker,
 
 										PermissionFlagsBits.MuteMembers,
