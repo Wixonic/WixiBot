@@ -21,13 +21,17 @@ const cron = {
 			for (const giveaway of giveaways) {
 				if (giveaway.status == Giveaway.status.active && giveaway.previousStatus == Giveaway.status.planned) {
 					const gifts = [];
-					for (const gift of giveaway.gifts) gifts.push(gift.name);
+					const notes = [];
+					for (const gift of giveaway.gifts) {
+						gifts.push(gift.name);
+						if (gift.note) notes.push(`**${gift.name}**: ${gift.note}`);
+					}
 
 					const message = await channel.send({
 						allowedMentions: {
 							roles: [bot.settings.application.commands.giveaways.role]
 						},
-						content: `## Giveaway\n\n- Ends: <t:${Math.floor(giveaway.endsAt / 1000)}:f>\n- Entries: **${giveaway.participants.length}**\n### Gifts\n${gifts.length > 0 ? "- " + gifts.join("\n- ") : "_No gift available right now._"}\n\n-# Giveaway #${giveaway.id} - <@&${bot.settings.application.commands.giveaways.role}>`,
+						content: `## Giveaway\n\n- Ends: <t:${Math.floor(giveaway.endsAt / 1000)}:f>\n- Entries: **${giveaway.participants.length}**\n### Gifts\n${gifts.length > 0 ? "- " + gifts.join("\n- ") : "_No gift available right now._"}\n\n-#${notes.join("\n-# ")}\n-# Giveaway #${giveaway.id} - <@&${bot.settings.application.commands.giveaways.role}>`,
 						components: [
 							{
 								type: ComponentType.ActionRow,
@@ -66,7 +70,7 @@ const cron = {
 							winners[gift.name] = potentialWinners.at(randomInt(potentialWinners.length, 1) - 1);
 							gifts.push(`<@${winners[gift.name]}> won **${gift.name}**`);
 							const dmChannel = await bot.users.createDM(winners[gift.name]);
-							await dmChannel.send(`## Congrats!\nYou won **${gift.name}** from [this giveaway](<${message ? message.url : "https://wixonic.fr/lib/404.html"}>)!\n\nHere is your gift:\n${gift.secret}\n\n-# If you have any problems, feel free to [open a ticket](<https://go.wixonic.fr/help>).\n-# Giveaway #${giveaway.id}`);
+							await dmChannel.send(`## Congrats!\nYou won **${gift.name}** from [this giveaway](<${message ? message.url : "https://wixonic.fr/lib/404.html"}>)!\n\nHere is your gift:\n${gift.secret + (gift.note ? `\n-# ${gift.note}` : "")}\n\n-# If you have any problems, feel free to [open a ticket](<https://go.wixonic.fr/help>).\n-# Giveaway #${giveaway.id}`);
 						} else break;
 					}
 

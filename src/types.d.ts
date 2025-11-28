@@ -271,6 +271,7 @@ export interface HandlerInfo {
 export interface Gift {
 	name: string;
 	secret: string;
+	note: string?;
 };
 
 export interface GiveawayData {

@@ -25,7 +25,11 @@ const component = {
 		if (typeof giveaway.endsAt == "number") endsAt.setTime(giveaway.endsAt);
 
 		const gifts = [];
-		for (const gift of giveaway.gifts) gifts.push(gift.name + " _ " + gift.secret);
+		const notes = [];
+		for (const gift of giveaway.gifts) {
+			gifts.push(gift.name + " _ " + gift.secret);
+			notes.push(gift.note);
+		}
 
 		await interaction.showModal(
 			new ModalBuilder()
@@ -77,6 +81,16 @@ const component = {
 								.setRequired(true)
 								.setStyle(TextInputStyle.Paragraph)
 								.setValue(gifts.join("; "))
+						),
+					new ActionRowBuilder()
+						.setComponents(
+							new TextInputBuilder()
+								.setCustomId("notes")
+								.setLabel("Notes")
+								.setPlaceholder("note1; note2; ...")
+								.setRequired(true)
+								.setStyle(TextInputStyle.Paragraph)
+								.setValue(notes.join("; "))
 						)
 				)
 				.toJSON()

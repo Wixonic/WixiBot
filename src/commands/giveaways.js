@@ -82,7 +82,7 @@ module.exports = {
 				const editedGiveaway = Giveaway.get(logger, bot, giveawayId);
 
 				const gifts = [""];
-				for (const gift of editedGiveaway.gifts) gifts.push(gift.name);
+				for (const gift of editedGiveaway.gifts) gifts.push(gift.name + "\n> " + gift.note ?? "No note.");
 
 				await interaction.followUp({
 					content: `Available gifts:${gifts.length > 1 ? gifts.join("\n- ") : " _no available gift right now._"}${typeof editedGiveaway.startsAt == "number" ? `\n\n- Starts at: <t:${Math.floor(editedGiveaway.startsAt / 1000)}:f>` : ""}${typeof editedGiveaway.endsAt == "number" ? `\n- Ends at: <t:${Math.floor(editedGiveaway.endsAt / 1000)}:f>` : ""}\n\n-# Giveaway #${editedGiveaway.id}`,

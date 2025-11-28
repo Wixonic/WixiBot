@@ -22,12 +22,21 @@ const modal = {
 			const startsAt = new Date(interaction.fields.getTextInputValue("startsAt") + " UTC");
 			const endsAt = new Date(interaction.fields.getTextInputValue("endsAt") + " UTC");
 			const textGifts = interaction.fields.getTextInputValue("gifts").split("; ");
+			const textNotes = interaction.fields.getTextInputValue("notes").split("; ");
 
 			const gifts = [];
-			for (const textGift of textGifts) gifts.push({
-				name: textGift.split(" _ ")[0],
-				secret: textGift.split(" _ ")[1]
-			});
+			for (let i = 0; i < textGifts.length; ++i) {
+				const textGift = textGifts[i];
+				const textNote = textNotes[i];
+
+				const gift = {
+					name: textGift.split(" _ ")[0],
+					secret: textGift.split(" _ ")[1]
+				};
+				if (textNote && textNote.length > 0) gift.note = textNote;
+
+				gifts.push(gift);
+			}
 
 			const giveaway = Giveaway.get(interaction.guildId, bot, giveawayId);
 			giveaway.startsAt = startsAt.getTime();
