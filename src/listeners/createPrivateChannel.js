@@ -64,8 +64,6 @@ const listener = {
 										PermissionFlagsBits.ViewChannel,
 										PermissionFlagsBits.PrioritySpeaker,
 
-										PermissionFlagsBits.ManageMessages,
-
 										PermissionFlagsBits.MuteMembers,
 										PermissionFlagsBits.DeafenMembers,
 										PermissionFlagsBits.MoveMembers,
