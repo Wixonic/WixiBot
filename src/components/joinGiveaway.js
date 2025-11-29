@@ -39,13 +39,17 @@ const component = {
 					const message = await channel.messages.fetch(giveaway.message);
 
 					const gifts = [];
-					for (const gift of giveaway.gifts) gifts.push(gift.name);
+					const notes = [];
+					for (const gift of giveaway.gifts) {
+						gifts.push(gift.name);
+						if (gift.note) notes.push(`**${gift.name}**: ${gift.note}`);
+					}
 
 					await message.edit({
 						allowedMentions: {
 							roles: [bot.settings.application.commands.giveaways.role]
 						},
-						content: `## Giveaway\n\n- Ends: <t:${Math.floor(giveaway.endsAt / 1000)}:f>\n- Entries: **${giveaway.participants.length}**\n### Gifts\n${gifts.length > 0 ? "- " + gifts.join("\n- ") : "_No gift available right now._"}\n\n-# Giveaway #${giveaway.id} - <@&${bot.settings.application.commands.giveaways.role}>`,
+						content: `## Giveaway\n\n- Ends: <t:${Math.floor(giveaway.endsAt / 1000)}:f>\n- Entries: **${giveaway.participants.length}**\n### Gifts\n${gifts.length > 0 ? "- " + gifts.join("\n- ") : "_No gift available right now._"}\n\n-# ${notes.join("\n-# ")}\n-# Giveaway #${giveaway.id} - <@&${bot.settings.application.commands.giveaways.role}>`,
 						components: [
 							{
 								type: ComponentType.ActionRow,
