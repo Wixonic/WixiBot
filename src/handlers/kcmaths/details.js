@@ -1,0 +1,57 @@
+const path = require("path");
+const fsp = require("fs/promises");
+
+/**
+ * @type {import("../../types.d.ts").HandlerInfo}
+ */
+const info = {
+	path: "/kcmaths/details/",
+	handlers: {
+		get: async (logger, settings, req, res, bot, rpc, sdk) => {
+			if (!req.query.id) return res.status(400).json({
+				error: "Missing id query parameter"
+			});
+
+			const id = decodeURIComponent(req.query.id);
+			const dir = settings.paths.kcmaths;
+
+			let files;
+			try {
+				files = (await fsp.readdir(dir)).filter((file) => file.endsWith(".json"));
+			} catch (e) {
+				logger.error("Error reading directory:", e);
+				return res.status(500).json({ error: "Internal Server Error" });
+			}
+
+			const readPromises = files.map(async (file) => {
+				const dateStr = file.slice(0, -5);
+				const filePath = path.join(dir, file);
+
+				try {
+					const fileContent = await fsp.readFile(filePath, "utf8");
+					const jsonContent = JSON.parse(fileContent);
+
+					return {
+						date: dateStr,
+						val: jsonContent[id] ?? null
+					};
+				} catch (readError) {
+					logger.warn(`Failed to read/parse file ${file}:`, readError);
+					return null;
+				}
+			});
+
+			const results = (await Promise.all(readPromises)).filter(item => item !== null);
+
+			results.sort((a, b) => {
+				const dateA = `${a.date.slice(4, 8)}${a.date.slice(2, 4)}${a.date.slice(0, 2)}`;
+				const dateB = `${b.date.slice(4, 8)}${b.date.slice(2, 4)}${b.date.slice(0, 2)}`;
+				return dateA.localeCompare(dateB);
+			});
+
+			res.status(200).json(results.map(entry => ({ date: entry.date, value: entry.val })));
+		}
+	}
+};
+
+module.exports = info;
