@@ -19,12 +19,11 @@ const info = {
 
 					if (jsonFiles.length == 0) return res.status(500).send("");
 
-					let latestDate = new Date(0);
+					const statsPromises = jsonFiles.map((file) => fsp.stat(path.join(dirPath, file)).then(stats => stats.mtime));
+					const allDates = await Promise.all(statsPromises);
 
-					for (const file of jsonFiles) {
-						const stats = await fsp.stat(path.join(dirPath, file));
-						if (stats.mtime > latestDate) latestDate = stats.mtime;
-					}
+					const maxTime = Math.max(...allDates.map((date) => date.getTime()));
+					const latestDate = new Date(maxTime);
 
 					res.status(200).send(latestDate.toISOString());
 
