@@ -2,10 +2,10 @@ const fs = require("fs");
 const fsp = require("fs/promises");
 const path = require("path");
 
-const modifiers = require("./modifiers.json");
+const modifiers = require("../modifiers.json");
 
 /**
- * @type {import("../../types.d.ts").HandlerInfo}
+ * @type {import("../../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/kcmaths/leaderboard/",
@@ -19,7 +19,7 @@ const info = {
 					error: "Invalid Date"
 				});
 			} else {
-				const filePath = path.join(bot.settings.paths.kcmaths, `${String(date.getDate()).padStart(2, "0")}${String(date.getMonth() + 1).padStart(2, "0")}${date.getFullYear()}.json`);
+				const filePath = path.join(bot.settings.paths.kcmaths, "leaderboard", `${String(date.getDate()).padStart(2, "0")}${String(date.getMonth() + 1).padStart(2, "0")}${date.getFullYear()}.json`);
 				const exists = fs.existsSync(filePath);
 
 				if (exists) {

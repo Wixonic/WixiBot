@@ -1,5 +1,9 @@
 const cheerio = require("cheerio");
 
+const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
+
 const request = require("../lib/request.js");
 const { userAgent } = require("../lib/utils.js");
 
@@ -102,7 +106,136 @@ const getData = async (logger, sessionId) => {
 	return data;
 };
 
+/**
+ * @param {import("@wixonic/logger").Logger} logger
+ * @param {string} sessionId
+ * @param {import("../../types.d.ts").SecretsSettings} secrets
+ * @returns {Promise<{name: string, url: string, date: string, size: string}[]?>}
+ */
+const getFiles = async (logger, sessionId, secrets) => {
+	const response = await request(logger, {
+		auth: `${secrets.kcmaths.username}:${secrets.kcmaths.password}`,
+		headers: {
+			"Accept": "text/html",
+			"Cookie": `PHPSESSID=${sessionId}`,
+			"User-Agent": userAgent()
+		},
+		method: "GET",
+		type: "text",
+		url: "https://www.kcmaths.com/docs/25-26/"
+	});
+
+	if (response.error) return null;
+
+	const files = [];
+	const $ = cheerio.load(response);
+
+	$("table tr").each((i, row) => {
+		const cells = $(row).find("td");
+		if (cells.length >= 4) {
+			const nameLink = $(cells[1]).find("a");
+			const name = nameLink.text().trim();
+			const url = nameLink.attr("href");
+			const date = $(cells[2]).text().trim();
+			const size = $(cells[3]).text().trim();
+
+			if (name && url && name !== "Parent Directory" && url !== "/docs/") {
+				files.push({
+					name,
+					url: `https://www.kcmaths.com/docs/25-26/${url}`,
+					date,
+					size
+				});
+			}
+		}
+	});
+
+	return files;
+};
+
+/**
+ * @param {import("@wixonic/logger").Logger} logger
+ * @param {string} sessionId
+ * @param {import("../../types.d.ts").SecretsSettings} secrets
+ * @param {string} url
+ * @returns {Promise<Buffer?>}
+ */
+const downloadFile = async (logger, sessionId, secrets, url) => {
+	const response = await request(logger, {
+		auth: `${secrets.kcmaths.username}:${secrets.kcmaths.password}`,
+		headers: {
+			"Cookie": `PHPSESSID=${sessionId}`,
+			"User-Agent": userAgent()
+		},
+		method: "GET",
+		type: "raw",
+		url
+	});
+
+	if (response.error) return null;
+
+	return Buffer.concat(response);
+};
+
+/**
+ * @param {import("@wixonic/logger").Logger} logger
+ * @param {import("../../types.d.ts").PathsSettings} paths
+ * @param {Date} now
+ * @param {{name: string, buffer: Buffer, size: string}[]} files
+ */
+const saveFilesSnapshot = (logger, paths, now, files) => {
+	const storagePath = path.join(paths.kcmaths, "files", "storage");
+	const historyPath = path.join(paths.kcmaths, "files", "history");
+
+	if (!fs.existsSync(storagePath)) fs.mkdirSync(storagePath, { recursive: true });
+	if (!fs.existsSync(historyPath)) fs.mkdirSync(historyPath, { recursive: true });
+
+	const manifest = {};
+
+	for (const file of files) {
+		const hash = crypto.createHash("sha256").update(file.buffer).digest("hex");
+		const filePath = path.join(storagePath, hash);
+
+		if (!fs.existsSync(filePath)) {
+			fs.writeFileSync(filePath, file.buffer);
+			logger.info(`[KCMaths] New file downloaded: ${file.name} (${hash})`);
+		}
+
+		manifest[file.name] = {
+			hash,
+			size: file.size,
+			lastModified: file.date
+		};
+	}
+
+	const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}`;
+	const yesterday = new Date(now);
+	yesterday.setDate(now.getDate() - 1);
+	const yesterdayStr = `${String(yesterday.getDate()).padStart(2, "0")}${String(yesterday.getMonth() + 1).padStart(2, "0")}${yesterday.getFullYear()}`;
+
+	const currentManifestPath = path.join(historyPath, `${dateStr}.json`);
+	const yesterdayManifestPath = path.join(historyPath, `${yesterdayStr}.json`);
+
+	let shouldSave = true;
+
+	if (fs.existsSync(yesterdayManifestPath)) {
+		const yesterdayManifest = JSON.parse(fs.readFileSync(yesterdayManifestPath, "utf-8"));
+		if (JSON.stringify(manifest) === JSON.stringify(yesterdayManifest)) {
+			shouldSave = false;
+			logger.info(`[KCMaths] No changes detected for ${dateStr}, skipping manifest save.`);
+		}
+	}
+
+	if (shouldSave) {
+		fs.writeFileSync(currentManifestPath, JSON.stringify(manifest), "utf-8");
+		logger.info(`[KCMaths] Saved manifest for ${dateStr}`);
+	}
+};
+
 module.exports = {
 	getSession,
-	getData
+	getData,
+	getFiles,
+	downloadFile,
+	saveFilesSnapshot
 };

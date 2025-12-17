@@ -3,13 +3,13 @@ const fsp = require("fs/promises");
 const path = require("path");
 
 /**
- * @type {import("../../types.d.ts").HandlerInfo}
+ * @type {import("../../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/kcmaths/lastUpdate/",
 	handlers: {
 		get: async (logger, settings, req, res, bot, rpc, sdk) => {
-			const dirPath = settings.paths.kcmaths;
+			const dirPath = path.join(settings.paths.kcmaths, "leaderboard");
 			const exists = fs.existsSync(dirPath);
 
 			if (exists) {

@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const { getSession, getData } = require("../lib/kcmaths.js");
+const { getSession, getData, getFiles, downloadFile, saveFilesSnapshot } = require("../lib/kcmaths.js");
 
 /**
  * @type {import("../types.d.ts").CronInfo}
@@ -46,6 +46,25 @@ const cron = {
 		if (!fs.existsSync(bot.settings.paths.kcmaths)) fs.mkdirSync(bot.settings.paths.kcmaths, { recursive: true });
 
 		fs.writeFileSync(path.join(bot.settings.paths.kcmaths, `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}.json`), JSON.stringify(data), "utf-8");
+
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		const filesList = await getFiles(logger, sessionId, bot.settings.secrets);
+
+		if (filesList) {
+			const files = [];
+			for (const file of filesList) {
+				files.push({
+					...file,
+					buffer: await downloadFile(logger, sessionId, bot.settings.secrets, file.url)
+				});
+
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+			}
+
+			const validFiles = files.filter((f) => f.buffer);
+			if (validFiles.length > 0) saveFilesSnapshot(logger, bot.settings.paths, now, validFiles);
+		}
 	}
 };
 

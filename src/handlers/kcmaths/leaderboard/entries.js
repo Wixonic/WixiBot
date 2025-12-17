@@ -1,17 +1,18 @@
 const fs = require("fs");
 const fsp = require("fs/promises");
+const path = require("path");
 
 /**
- * @type {import("../../types.d.ts").HandlerInfo}
+ * @type {import("../../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/kcmaths/entries/",
 	handlers: {
 		get: async (logger, settings, req, res, bot, rpc, sdk) => {
-			const exists = fs.existsSync(settings.paths.kcmaths);
+			const exists = fs.existsSync(path.join(settings.paths.kcmaths, "leaderboard"));
 
 			if (exists) {
-				const files = await fsp.readdir(settings.paths.kcmaths);
+				const files = await fsp.readdir(path.join(settings.paths.kcmaths, "leaderboard"));
 				const entries = files.filter((file) => file.endsWith(".json"));
 
 				for (let i = 0; i < entries.length; ++i) {

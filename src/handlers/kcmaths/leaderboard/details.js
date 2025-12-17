@@ -1,8 +1,8 @@
-const path = require("path");
 const fsp = require("fs/promises");
+const path = require("path");
 
 /**
- * @type {import("../../types.d.ts").HandlerInfo}
+ * @type {import("../../../types.d.ts").HandlerInfo}
  */
 const info = {
 	path: "/kcmaths/details/",
@@ -13,7 +13,7 @@ const info = {
 			});
 
 			const id = decodeURIComponent(req.query.id);
-			const dir = settings.paths.kcmaths;
+			const dir = path.join(settings.paths.kcmaths, "leaderboard");
 
 			let files;
 			try {
