@@ -43,23 +43,86 @@ const cron = {
 		const data = await getData(logger, sessionId);
 		if (!data) return;
 
-		if (!fs.existsSync(bot.settings.paths.kcmaths)) fs.mkdirSync(bot.settings.paths.kcmaths, { recursive: true });
+		const leaderboardPath = path.join(bot.settings.paths.kcmaths, "leaderboard");
+		if (!fs.existsSync(leaderboardPath)) fs.mkdirSync(leaderboardPath, { recursive: true });
 
-		fs.writeFileSync(path.join(bot.settings.paths.kcmaths, `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}.json`), JSON.stringify(data), "utf-8");
+		fs.writeFileSync(path.join(leaderboardPath, `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}.json`), JSON.stringify(data), "utf-8");
 
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
 		const filesList = await getFiles(logger, sessionId, bot.settings.secrets);
 
 		if (filesList) {
-			const files = [];
+			const historyPath = path.join(bot.settings.paths.kcmaths, "files", "history");
+			let lastManifest = {};
+
+			if (fs.existsSync(historyPath)) {
+				const files = fs.readdirSync(historyPath).filter((file) => file.endsWith(".json"));
+
+				if (files.length > 0) {
+					files.sort((a, b) => {
+						const dateA = a.replace(".json", "");
+						const dateB = b.replace(".json", "");
+
+						const format = (d) => `${d.substring(4, 8)}${d.substring(2, 4)}${d.substring(0, 2)}`;
+						return format(dateB).localeCompare(format(dateA));
+					});
+
+					for (const historyFile of files) {
+						try {
+							const manifestPath = path.join(historyPath, historyFile);
+							lastManifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+							logger.info(`[KCMaths] Loaded manifest from ${historyFile} with ${Object.keys(lastManifest).length} entries.`);
+							break;
+						} catch (e) {
+							logger.error(`[KCMaths] Failed to read manifest ${historyFile}: ${e.message}`);
+						}
+					}
+				} else {
+					logger.info(`[KCMaths] No manifest files found in ${historyPath}.`);
+				}
+			} else {
+				logger.info(`[KCMaths] History directory does not exist: ${historyPath}`);
+			}
+
+			const uniqueFiles = [];
+			const seenNames = new Set();
 			for (const file of filesList) {
+				if (!seenNames.has(file.name)) {
+					seenNames.add(file.name);
+					uniqueFiles.push(file);
+				}
+			}
+
+			const files = [];
+			for (const file of uniqueFiles) {
+				let buffer = null;
+				const cached = lastManifest[file.name];
+
+				if (cached) {
+					if (cached.lastModified === file.date) {
+						const cachedFilePath = path.join(bot.settings.paths.kcmaths, "files", "storage", cached.hash);
+						if (fs.existsSync(cachedFilePath)) {
+							buffer = fs.readFileSync(cachedFilePath);
+						} else {
+							logger.warn(`[KCMaths] Cache file missing for ${file.name} (hash: ${cached.hash})`);
+						}
+					} else {
+						logger.info(`[KCMaths] File changed: ${file.name} (Manifest: ${cached.lastModified}, Current: ${file.date})`);
+					}
+				} else {
+					logger.info(`[KCMaths] New file detected: ${file.name}`);
+				}
+
+				if (!buffer) {
+					buffer = await downloadFile(logger, sessionId, bot.settings.secrets, file.url);
+					await new Promise((resolve) => setTimeout(resolve, 1000));
+				}
+
 				files.push({
 					...file,
-					buffer: await downloadFile(logger, sessionId, bot.settings.secrets, file.url)
+					buffer
 				});
-
-				await new Promise((resolve) => setTimeout(resolve, 1000));
 			}
 
 			const validFiles = files.filter((f) => f.buffer);
