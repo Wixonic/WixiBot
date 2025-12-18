@@ -57,10 +57,10 @@ const cron = {
 			let lastManifest = {};
 
 			if (fs.existsSync(historyPath)) {
-				const files = fs.readdirSync(historyPath).filter((file) => file.endsWith(".json"));
+				const historyFiles = fs.readdirSync(historyPath).filter((file) => file.endsWith(".json"));
 
-				if (files.length > 0) {
-					files.sort((a, b) => {
+				if (historyFiles.length > 0) {
+					historyFiles.sort((a, b) => {
 						const dateA = a.replace(".json", "");
 						const dateB = b.replace(".json", "");
 
@@ -68,7 +68,7 @@ const cron = {
 						return format(dateB).localeCompare(format(dateA));
 					});
 
-					for (const historyFile of files) {
+					for (const historyFile of historyFiles) {
 						try {
 							const manifestPath = path.join(historyPath, historyFile);
 							lastManifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));

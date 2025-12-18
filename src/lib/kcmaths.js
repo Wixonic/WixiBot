@@ -7,10 +7,10 @@ const path = require("path");
 const request = require("../lib/request.js");
 const { userAgent } = require("../lib/utils.js");
 
-/** @typedef {Record<string, {firstname: string, lastname: string, kcCoins: number, victories: number, entries: number}>} Data */
+/** @typedef {Record<string, {firstName: string, lastName: string, kcCoins: number, victories: number, entries: number}>} Data */
 
 /**
- * @param {import("@wixonic/logger").Logger}
+ * @param {import("@wixonic/logger").Logger} logger
  * @param {import("../../types.d.ts").SecretsSettings} secrets
  */
 const getSession = async (logger, secrets) => {
@@ -50,7 +50,7 @@ const getData = async (logger, sessionId) => {
 
 	if (response.error) return null;
 
-	/** @type {data} */
+	/** @type {Data} */
 	const data = {};
 
 	const initializeStudent = (fullName) => {
