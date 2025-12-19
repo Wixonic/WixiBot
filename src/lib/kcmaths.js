@@ -1,6 +1,5 @@
 const cheerio = require("cheerio");
 
-const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
@@ -178,57 +177,55 @@ const downloadFile = async (logger, sessionId, secrets, url) => {
 };
 
 /**
- * @param {import("@wixonic/logger").Logger} logger
- * @param {import("../../types.d.ts").PathsSettings} paths
- * @param {Date} now
- * @param {{name: string, buffer: Buffer, size: string}[]} files
+ * @param {string} dateString
+ * @returns {Date}
  */
-const saveFilesSnapshot = (logger, paths, now, files) => {
+const parseDate = (dateString) => {
+	const [datePart, timePart] = dateString.split(" ");
+	const [year, month, day] = datePart.split("-").map(Number);
+	const [hour, minute] = timePart.split(":").map(Number);
+	return new Date(year, month - 1, day, hour, minute);
+};
+
+/**
+ * @param {import("@wixonic/logger").Logger} logger
+ * @param {string} sessionId
+ * @param {import("../../types.d.ts").SecretsSettings} secrets
+ * @param {{name: string, url: string, date: string, size: string}[]} filesList
+ * @param {import("../../types.d.ts").PathsSettings} paths
+ */
+const syncFiles = async (logger, sessionId, secrets, filesList, paths) => {
 	const storagePath = path.join(paths.kcmaths, "files", "storage");
-	const historyPath = path.join(paths.kcmaths, "files", "history");
-
 	if (!fs.existsSync(storagePath)) fs.mkdirSync(storagePath, { recursive: true });
-	if (!fs.existsSync(historyPath)) fs.mkdirSync(historyPath, { recursive: true });
 
-	const manifest = {};
+	for (const file of filesList) {
+		const filePath = path.join(storagePath, file.name);
+		const serverDate = parseDate(file.date);
 
-	for (const file of files) {
-		const hash = crypto.createHash("sha256").update(file.buffer).digest("hex");
-		const filePath = path.join(storagePath, hash);
+		let shouldDownload = false;
 
 		if (!fs.existsSync(filePath)) {
-			fs.writeFileSync(filePath, file.buffer);
-			logger.info(`[KCMaths] New file downloaded: ${file.name} (${hash})`);
+			shouldDownload = true;
+			logger.info(`[KCMaths] New file detected: ${file.name}`);
+		} else {
+			const stats = fs.statSync(filePath);
+			if (stats.mtime.getTime() < serverDate.getTime()) {
+				shouldDownload = true;
+				logger.info(`[KCMaths] File update detected: ${file.name} (Local: ${stats.mtime.toISOString()}, Server: ${serverDate.toISOString()})`);
+			}
 		}
 
-		manifest[file.name] = {
-			hash,
-			size: file.size,
-			lastModified: file.date
-		};
-	}
-
-	const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}`;
-	const yesterday = new Date(now);
-	yesterday.setDate(now.getDate() - 1);
-	const yesterdayStr = `${String(yesterday.getDate()).padStart(2, "0")}${String(yesterday.getMonth() + 1).padStart(2, "0")}${yesterday.getFullYear()}`;
-
-	const currentManifestPath = path.join(historyPath, `${dateStr}.json`);
-	const yesterdayManifestPath = path.join(historyPath, `${yesterdayStr}.json`);
-
-	let shouldSave = true;
-
-	if (fs.existsSync(yesterdayManifestPath)) {
-		const yesterdayManifest = JSON.parse(fs.readFileSync(yesterdayManifestPath, "utf-8"));
-		if (JSON.stringify(manifest) === JSON.stringify(yesterdayManifest)) {
-			shouldSave = false;
-			logger.info(`[KCMaths] No changes detected for ${dateStr}, skipping manifest save.`);
+		if (shouldDownload) {
+			const buffer = await downloadFile(logger, sessionId, secrets, file.url);
+			if (buffer) {
+				fs.writeFileSync(filePath, buffer);
+				fs.utimesSync(filePath, serverDate, serverDate);
+				logger.debug(`[KCMaths] Downloaded ${file.name}`);
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+			} else {
+				logger.error(`[KCMaths] Failed to download ${file.name}`);
+			}
 		}
-	}
-
-	if (shouldSave) {
-		fs.writeFileSync(currentManifestPath, JSON.stringify(manifest), "utf-8");
-		logger.info(`[KCMaths] Saved manifest for ${dateStr}`);
 	}
 };
 
@@ -237,5 +234,5 @@ module.exports = {
 	getData,
 	getFiles,
 	downloadFile,
-	saveFilesSnapshot
+	syncFiles
 };

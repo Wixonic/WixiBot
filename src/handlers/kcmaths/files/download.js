@@ -8,13 +8,14 @@ const info = {
 	path: "/kcmaths/files/download/",
 	handlers: {
 		get: async (logger, settings, req, res, bot, rpc, sdk) => {
-			const { hash, name } = req.query;
-			if (!hash || !name) return res.status(400).json({ error: "Missing hash or name parameter" });
+			const { name } = req.query;
+			if (!name) return res.status(400).json({ error: "Missing name parameter" });
 
-			const filePath = path.join(settings.paths.kcmaths, "files", "storage", hash);
+			const safeName = path.basename(name);
+			const filePath = path.join(settings.paths.kcmaths, "files", "storage", safeName);
 
 			if (fs.existsSync(filePath)) {
-				res.setHeader("Content-Disposition", `attachment; filename="${name}"`);
+				res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);
 				const stream = fs.createReadStream(filePath);
 				stream.pipe(res);
 			} else {
