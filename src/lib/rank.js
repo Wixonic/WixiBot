@@ -67,7 +67,7 @@ class Rank {
 	 * @param {number} rank
 	 * @returns {string}
 	 */
-	static getRankText = (rank) => rank == -1 ? "Unranked" : `${rank + 1}${["st", "nd", "rd"][((rank + 1 + 90) % 100 - 10) % 10 - 1] || "th"}`;
+	static getRankText = (rank) => rank === -1 ? "Unranked" : `${rank + 1}${["st", "nd", "rd"][((rank + 1 + 90) % 100 - 10) % 10 - 1] || "th"}`;
 
 
 	/**
@@ -222,9 +222,9 @@ class Rank {
 
 		if (data) {
 			let converted = false;
-			if (data.version != "3") {
-				if (data.version == null || data.version == "1") data = Rank.convert["1"](data);
-				if (data.version == "2") data = Rank.convert["2"](data);
+			if (data.version !== "3") {
+				if (data.version === null || data.version === "1") data = Rank.convert["1"](data);
+				if (data.version === "2") data = Rank.convert["2"](data);
 				converted = true;
 				this.logger.info(`Converting rank data for member "${memberId}"`);
 			}
@@ -269,7 +269,7 @@ class Rank {
 	};
 
 	async voiceStart() {
-		if (this.voice.startedAt == null) {
+		if (this.voice.startedAt === null) {
 			this.voice.startedAt = Date.now();
 			this.logger.debug("Started recording voice time");
 			await this.save();
@@ -277,7 +277,7 @@ class Rank {
 	};
 
 	async voiceStop() {
-		if (this.voice.startedAt != null) {
+		if (this.voice.startedAt !== null) {
 			this.voice.global += Math.ceil((Date.now() - this.voice.startedAt) / 1000);
 			this.voice.month += Math.ceil((Date.now() - this.voice.startedAt) / 1000);
 			this.voice.startedAt = null;
@@ -312,7 +312,7 @@ class Rank {
 						inline: true
 					}, {
 						name: "Penalty",
-						value: `${amount} point${Math.abs(amount) == 1 ? "" : "s"}`,
+						value: `${amount} point${Math.abs(amount) === 1 ? "" : "s"}`,
 						inline: true
 					}, {
 						name: "Reason",
@@ -320,7 +320,7 @@ class Rank {
 					}]
 				}
 			],
-			flags: process.env.silent == "true" ? MessageFlags.SuppressNotifications : null
+			flags: process.env.silent === "true" ? MessageFlags.SuppressNotifications : null
 		});
 		else this.logger.warn("Invalid moderation channel:", this.bot.settings.application.moderationChannel);
 
@@ -344,8 +344,8 @@ class Rank {
 	get rank() {
 		const leaderboard = Rank.getLeaderboard(this.logger, this.bot);
 		return {
-			global: leaderboard.global.findIndex((rank) => rank.id == this.memberId),
-			month: leaderboard.month.findIndex((rank) => rank.id == this.memberId),
+			global: leaderboard.global.findIndex((rank) => rank.id === this.memberId),
+			month: leaderboard.month.findIndex((rank) => rank.id === this.memberId),
 			updatedAt: leaderboard.updatedAt
 		};
 	};
@@ -359,7 +359,7 @@ class Rank {
 			if (rankSettings?.roles[role] <= this.points.global) roles.push(role);
 		}
 
-		if (this.roles.values() != roles.values()) {
+		if (this.roles.values() !== roles.values()) {
 			try {
 				const guild = await this.bot.guilds.fetch(this.bot.settings.application.guildId);
 
@@ -392,10 +392,10 @@ class Rank {
 									content: `<@${this.memberId}> just unlocked a new rank role!`,
 									embeds: [{
 										title: role.name,
-										description: `Reached ${rankSettings?.roles[role.id] ?? 0} point${(rankSettings?.roles[role.id] ?? 0) == 1 ? "" : "s"}`,
+										description: `Reached ${rankSettings?.roles[role.id] ?? 0} point${(rankSettings?.roles[role.id] ?? 0) === 1 ? "" : "s"}`,
 										color: role.color
 									}],
-									flags: process.env.silent == "true" ? MessageFlags.SuppressNotifications : null
+									flags: process.env.silent === "true" ? MessageFlags.SuppressNotifications : null
 								});
 
 								await member.roles.add(role);

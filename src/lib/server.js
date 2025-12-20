@@ -28,7 +28,7 @@ class Server {
 		this.app = express();
 
 		/** @type {https.Server} */
-		this.http = process.env.dev == "true" ? http.createServer() : https.createServer({
+		this.http = process.env.dev === "true" ? http.createServer() : https.createServer({
 			cert: fs.readFileSync(this.settings.secrets.server.cert),
 			key: fs.readFileSync(this.settings.secrets.server.key)
 		});
@@ -74,7 +74,7 @@ class Server {
 					const handlerName = handlerFile.replace(".js", "");
 
 					for (const method in handler.handlers) {
-						if (method != "ws") this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, this.settings, req, res, bot, rpc, sdk));
+						if (method !== "ws") this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, this.settings, req, res, bot, rpc, sdk));
 						else this.wsHandlers[handler.path] = handler.handlers.ws;
 						this.logger.debug("Added handler for", handlerName, "at", handler.path, "with method", method);
 					}
@@ -99,7 +99,7 @@ class Server {
 
 				for (const path in this.loopHandlers) {
 					const loop = this.loopHandlers[path];
-					if (typeof loop.process == "function" && loop.lastUpdated + (loop.idle ? 20 * 1000 : loop.delay) <= now) {
+					if (typeof loop.process === "function" && loop.lastUpdated + (loop.idle ? 20 * 1000 : loop.delay) <= now) {
 						this.loopHandlers[path].lastUpdated = now;
 
 						const handlerLogger = {
@@ -112,7 +112,7 @@ class Server {
 						promises.push((async () => {
 							try {
 								const status = await loop.process(handlerLogger, this.settings, bot, rpc, sdk);
-								if (status != loop.idle) {
+								if (status !== loop.idle) {
 									handlerLogger.debug(`Now ${status ? "idle" : "active"}`);
 									this.loopHandlers[path].idle = status;
 								}

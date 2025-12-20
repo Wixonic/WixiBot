@@ -38,13 +38,13 @@ const info = {
 
 				if (command.options && command.options.length > 0) {
 					for (const option of command.options) {
-						if (option.type == ApplicationCommandOptionType.Subcommand) {
+						if (option.type === ApplicationCommandOptionType.Subcommand) {
 							entry.push(`  - </${command.name} ${option.name}:${command.id}>: ${option.description}`);
-						} else if (option.type == ApplicationCommandOptionType.SubcommandGroup) {
+						} else if (option.type === ApplicationCommandOptionType.SubcommandGroup) {
 							entry.push(`  - \`/${command.name} ${option.name}\``);
 
 							for (const subOption of option.options) {
-								if (subOption.type == ApplicationCommandOptionType.Subcommand) entry.push(`    - </${command.name} ${option.name} ${subOption.name}:${command.id}>: ${subOption.description}`);
+								if (subOption.type === ApplicationCommandOptionType.Subcommand) entry.push(`    - </${command.name} ${option.name} ${subOption.name}:${command.id}>: ${subOption.description}`);
 							}
 						}
 					}
@@ -58,7 +58,7 @@ const info = {
 
 			const globalSlashCommandList = [];
 			for (const command of globalCommands.values()) {
-				let valid = command.type == ApplicationCommandType.ChatInput;
+				let valid = command.type === ApplicationCommandType.ChatInput;
 				if (command.contexts && interaction.context) valid &&= command.contexts.includes(interaction.context);
 				if (interaction.inGuild() && command.defaultMemberPermissions) valid &&= interaction.memberPermissions.has(command.defaultMemberPermissions);
 
@@ -67,7 +67,7 @@ const info = {
 
 			const guildSlashCommandList = [];
 			for (const command of guildCommands.values()) {
-				let valid = command.type == ApplicationCommandType.ChatInput;
+				let valid = command.type === ApplicationCommandType.ChatInput;
 				if (command.contexts && interaction.context) valid &&= command.contexts.includes(interaction.context);
 				if (interaction.inGuild() && command.defaultMemberPermissions) valid &&= interaction.memberPermissions.has(command.defaultMemberPermissions);
 

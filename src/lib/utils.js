@@ -1,5 +1,5 @@
 const clone = (obj, cloned = new WeakMap()) => {
-	if (obj === null || typeof obj !== "object") return obj;
+	if (obj === null || typeof obj !=== "object") return obj;
 	if (cloned.has(obj)) return cloned.get(obj);
 
 	const clonedObj = Array.isArray(obj) ? [] : {};

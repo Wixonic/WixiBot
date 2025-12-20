@@ -48,8 +48,8 @@ const info = {
 		 */
 		const channel = interaction.options.getChannel("channel");
 
-		if (channel && channel.isVoiceBased() && channel.joinable && channel.id != connectionChannelId) {
-			if (connection && connection.state.status != VoiceConnectionStatus.Destroyed) {
+		if (channel && channel.isVoiceBased() && channel.joinable && channel.id !== connectionChannelId) {
+			if (connection && connection.state.status !== VoiceConnectionStatus.Destroyed) {
 				logger.debug("Old connection destroyed");
 				connection.destroy();
 			}
@@ -90,7 +90,7 @@ const info = {
 			let currentWs = null;
 			server.ws.on("connection", (ws) => {
 				ws.once("message", (data) => {
-					if (data[0] == 0x01 && data.slice(1).toString() == bot.settings.secrets.wixkey) {
+					if (data[0] === 0x01 && data.slice(1).toString() === bot.settings.secrets.wixkey) {
 						logger.debug("Broadcasting started");
 						currentWs = ws;
 						reset();
@@ -105,9 +105,9 @@ const info = {
 			});
 
 			connection.on("stateChange", (oldState, newState) => {
-				logger.debug("Connection state changed from", Object.keys(VoiceConnectionStatus).find((key) => VoiceConnectionStatus[key] == oldState.status), "to", Object.keys(VoiceConnectionStatus).find((key) => VoiceConnectionStatus[key] == newState.status));
+				logger.debug("Connection state changed from", Object.keys(VoiceConnectionStatus).find((key) => VoiceConnectionStatus[key] === oldState.status), "to", Object.keys(VoiceConnectionStatus).find((key) => VoiceConnectionStatus[key] === newState.status));
 
-				if (newState.status == VoiceConnectionStatus.Destroyed) {
+				if (newState.status === VoiceConnectionStatus.Destroyed) {
 					if (currentWs && currentWs.readyState < 2) currentWs.terminate();
 					connectionChannelId = null;
 					bot.off("voiceStateUpdate", handleVoiceStateUpdate);
@@ -122,21 +122,21 @@ const info = {
 			 * @param {import("discord.js").VoiceState} newState
 			 */
 			const handleVoiceStateUpdate = (oldState, newState) => {
-				if (!newState.member.user.bot && !oldState.channel && newState.channelId == channel.id) {
+				if (!newState.member.user.bot && !oldState.channel && newState.channelId === channel.id) {
 					membersCount++;
-					logger.debug(`${newState.member.displayName} joined, broadcasting with ${membersCount == 1 ? "one" : membersCount} member${membersCount == 1 ? "" : "s"}`);
-				} else if (!newState.member.user.bot && oldState.channelId == channel.id && !newState.channel) {
+					logger.debug(`${newState.member.displayName} joined, broadcasting with ${membersCount === 1 ? "one" : membersCount} member${membersCount === 1 ? "" : "s"}`);
+				} else if (!newState.member.user.bot && oldState.channelId === channel.id && !newState.channel) {
 					membersCount--;
-					logger.debug(`${oldState.member.displayName} left, broadcasting with ${membersCount == 1 ? "one" : membersCount} member${membersCount == 1 ? "" : "s"}`);
+					logger.debug(`${oldState.member.displayName} left, broadcasting with ${membersCount === 1 ? "one" : membersCount} member${membersCount === 1 ? "" : "s"}`);
 				}
 
-				if ((membersCount < 1 || (newState.member.id == bot.user.id && !newState.channel)) && connection.state.status != VoiceConnectionStatus.Destroyed) connection.destroy();
+				if ((membersCount < 1 || (newState.member.id === bot.user.id && !newState.channel)) && connection.state.status !== VoiceConnectionStatus.Destroyed) connection.destroy();
 				else bot.once("voiceStateUpdate", handleVoiceStateUpdate);
 			};
 
 			bot.once("voiceStateUpdate", handleVoiceStateUpdate);
 
-			await interaction.followUp(`Broadcasting in <#${channel.id}> with ${membersCount == 1 ? "one" : membersCount} member${membersCount == 1 ? "" : "s"}.`);
+			await interaction.followUp(`Broadcasting in <#${channel.id}> with ${membersCount === 1 ? "one" : membersCount} member${membersCount === 1 ? "" : "s"}.`);
 		} else await interaction.followUp("Invalid voice channel or unable to join.");
 	}
 };

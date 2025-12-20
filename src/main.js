@@ -112,7 +112,7 @@ const main = async (logger) => {
 		});
 
 		child.on("exit", (code, signal) => {
-			if (code == 0) {
+			if (code === 0) {
 				logger.debug(tries.text, `Exited with code ${code} and signal ${signal}`);
 				process.exit(0);
 			} else {

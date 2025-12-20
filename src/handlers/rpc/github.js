@@ -7,7 +7,7 @@ const info = {
 	path: "/rpc/github/",
 	handlers: {
 		post: async (logger, settings, req, res, bot, rpc, sdk) => {
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/github]", "Unauthorized access attempt");
 				return res.status(401).json({
 					error: "Unauthorized"
@@ -17,14 +17,14 @@ const info = {
 			try {
 				const githubResponse = JSON.parse(req.body);
 
-				let conditions = githubResponse.type != githubData?.type;
+				let conditions = githubResponse.type !== githubData?.type;
 				switch (githubResponse.type) {
 					case "repository":
-						conditions ||= githubResponse.repository != githubData?.repository || githubResponse.owner != githubData?.owner;
+						conditions ||= githubResponse.repository !== githubData?.repository || githubResponse.owner !== githubData?.owner;
 						break;
 
 					case "profile":
-						conditions ||= githubResponse.profile != githubData?.profile;
+						conditions ||= githubResponse.profile !== githubData?.profile;
 						break;
 				};
 
@@ -56,7 +56,7 @@ const info = {
 			}
 		},
 		delete: async (logger, settings, req, res, bot, rpc, sdk) => {
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/github]", "Unauthorized access attempt");
 				return res.status(401).json({
 					error: "Unauthorized"

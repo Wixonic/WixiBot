@@ -38,9 +38,9 @@ class CronHandler {
 			if (!cron) {
 				this.logger.warn("Invalid cron at", file);
 				continue;
-			} else if (typeof cron.name != "string") cron.name = file.slice(0, -3);
+			} else if (typeof cron.name !== "string") cron.name = file.slice(0, -3);
 
-			if (typeof cron.condition != "function" || typeof cron.run != "function") this.logger.warn("Invalid cron:", cron.name);
+			if (typeof cron.condition !== "function" || typeof cron.run !== "function") this.logger.warn("Invalid cron:", cron.name);
 			else {
 				this.crons.push(cron);
 				this.logger.debug("Loaded cron:", cron.name);

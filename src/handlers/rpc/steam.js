@@ -24,7 +24,7 @@ const info = {
 					url: `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${settings.secrets.rpc.steam.token}&steamid=${settings.secrets.rpc.steam.id}&include_appinfo=true&include_played_free_games=true&include_free_sub=true`
 				})).response ?? {};
 
-				const game = response?.games?.find((game) => game.appid == player.gameid);
+				const game = response?.games?.find((game) => game.appid === player.gameid);
 
 				if (game) {
 					rpc.addActivity("steam", {

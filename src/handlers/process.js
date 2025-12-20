@@ -108,7 +108,7 @@ const info = {
 	path: "/process/",
 	handlers: {
 		get: async (logger, settings, req, res, bot, rpc, sdk) => {
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[obs/settings]", "Unauthorized access attempt");
 				return res.status(401).json({
 					error: "Unauthorized"
@@ -127,7 +127,7 @@ const info = {
 			});
 		},
 		post: async (logger, settings, req, res, bot, rpc, sdk) => {
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[obs/settings]", "Unauthorized access attempt");
 				return res.status(401).json({
 					error: "Unauthorized"

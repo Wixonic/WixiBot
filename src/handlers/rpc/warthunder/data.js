@@ -23,7 +23,7 @@ const info = {
 			updatingData = true;
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/data.json");
 
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/warthunder]", "Unauthorized access attempt");
 				updatingData = false;
 				return res.status(401).json({
@@ -40,7 +40,7 @@ const info = {
 			updatingData = true;
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/data.json");
 
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/warthunder]", "Unauthorized access attempt");
 				updatingData = false;
 				return res.status(401).json({

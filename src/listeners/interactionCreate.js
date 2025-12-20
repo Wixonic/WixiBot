@@ -24,7 +24,7 @@ const listener = {
 					warn: (...any) => logger.warn(`[Command ${command.name}]`, ...any)
 				};
 
-				if (command.deploy.type == interaction.commandType && command.deploy.name == interaction.commandName) {
+				if (command.deploy.type === interaction.commandType && command.deploy.name === interaction.commandName) {
 					try {
 						commandLogger.info(`Launched by "${(interaction.member ?? interaction.user).displayName}" (${interaction.user.id})`);
 						await command.run(commandLogger, bot, server, interaction);
@@ -48,7 +48,7 @@ const listener = {
 					warn: (...any) => logger.warn(`[Button ${component.name}]`, ...any)
 				};
 
-				if (component.id == id) {
+				if (component.id === id) {
 					try {
 						componentLogger.info(`Launched by "${(interaction.member ?? interaction.user).displayName}" (${interaction.user.id})` + (args.length > 0 ? ` with args: ${args.join(", ")}` : ""));
 						await component.run(componentLogger, bot, interaction, ...args);
@@ -71,7 +71,7 @@ const listener = {
 					warn: (...any) => logger.warn(`[Modal ${modal.name}]`, ...any)
 				};
 
-				if (modal.id == id) {
+				if (modal.id === id) {
 					try {
 						modalLogger.info(`Launched by "${(interaction.member ?? interaction.user).displayName}" (${interaction.user.id})`);
 						await modal.run(modalLogger, bot, interaction);
@@ -83,7 +83,7 @@ const listener = {
 			}
 
 			logger.warn("Invalid modal interaction:", interaction.customId);
-		} else logger.warn("Invalid interaction:", Object.keys(InteractionType).find((key) => InteractionType[key] == interaction.type));
+		} else logger.warn("Invalid interaction:", Object.keys(InteractionType).find((key) => InteractionType[key] === interaction.type));
 	}
 };
 

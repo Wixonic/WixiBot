@@ -8,7 +8,7 @@ const Rank = require("../lib/rank.js");
 const cron = {
 	name: "Voice Check",
 	priority: 0,
-	condition: (minutes, now) => minutes % 5 == 0, // Every 5 minutes
+	condition: (minutes, now) => minutes % 5 === 0, // Every 5 minutes
 	run: async (logger, bot, minutes, now) => {
 		const guild = await bot.guilds.fetch(bot.settings.application.guildId);
 		const guildPath = bot.settings.paths.ranks(bot.settings.application.guildId);
@@ -23,7 +23,7 @@ const cron = {
 							try {
 								const member = await guild.members.fetch(rank.memberId);
 
-								if (rank.voice.startedAt != null && (!member.voice.channel || !Rank.canGetPoint(member, member.voice.channel))) {
+								if (rank.voice.startedAt !== null && (!member.voice.channel || !Rank.canGetPoint(member, member.voice.channel))) {
 									logger.debug(`Voice force-stopped for "${member.displayName}" (${member.id})`);
 									await rank.voiceStop();
 								}

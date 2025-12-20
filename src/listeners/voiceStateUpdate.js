@@ -12,7 +12,7 @@ const listener = {
 	 * @param {import("discord.js").VoiceState} newState
 	 */
 	run: async (logger, bot, server, oldState, newState) => {
-		const isTrackedGuild = newState.guild.id == bot.settings.application.guildId;
+		const isTrackedGuild = newState.guild.id === bot.settings.application.guildId;
 		const channel = newState.channel || oldState.channel;
 		const member = newState.member || oldState.member;
 

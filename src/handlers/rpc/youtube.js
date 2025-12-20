@@ -7,7 +7,7 @@ const info = {
 	path: "/rpc/youtube/",
 	handlers: {
 		post: async (logger, settings, req, res, bot, rpc, sdk) => {
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/youtube]", "Unauthorized access attempt");
 				return res.status(401).json({
 					error: "Unauthorized"
@@ -17,7 +17,7 @@ const info = {
 			try {
 				const youtubeResponse = JSON.parse(req.body);
 
-				if (youtubeResponse.name != youtubeData?.name || youtubeResponse.author != youtubeData?.author) {
+				if (youtubeResponse.name !== youtubeData?.name || youtubeResponse.author !== youtubeData?.author) {
 					youtubeData = youtubeResponse;
 					youtubeData.thumbnail = await rpc.getExternalAsset(settings.rpc.discord.application.clients.youtube.id, youtubeData.thumbnail);
 					youtubeData.updatedAt = Date.now();
@@ -37,7 +37,7 @@ const info = {
 			}
 		},
 		delete: async (logger, settings, req, res, bot, rpc, sdk) => {
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/youtube]", "Unauthorized access attempt");
 				return res.status(401).json({
 					error: "Unauthorized"
@@ -89,7 +89,7 @@ const info = {
 				const isValidURL = (string) => {
 					try {
 						const url = new URL(string);
-						return url.protocol != "" && url.hostname != "";
+						return url.protocol !== "" && url.hostname !== "";
 					} catch { return false; }
 				};
 

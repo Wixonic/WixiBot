@@ -41,7 +41,7 @@ const info = {
 				}
 			});
 
-			const results = (await Promise.all(readPromises)).filter(item => item !== null);
+			const results = (await Promise.all(readPromises)).filter(item => item !=== null);
 
 			results.sort((a, b) => {
 				const dateA = `${a.date.slice(4, 8)}${a.date.slice(2, 4)}${a.date.slice(0, 2)}`;

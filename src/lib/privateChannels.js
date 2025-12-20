@@ -67,8 +67,8 @@ class PrivateChannel {
 
 		return channel.permissionOverwrites.cache
 			.filter((overwrite) =>
-				overwrite.type == OverwriteType.Role &&
-				overwrite.id != guild.roles.everyone.id &&
+				overwrite.type === OverwriteType.Role &&
+				overwrite.id !== guild.roles.everyone.id &&
 				overwrite.allow.has(PermissionFlagsBits.ViewChannel)
 			).map((overwrite) => overwrite.id);
 	}
@@ -80,7 +80,7 @@ class PrivateChannel {
 
 		return channel.permissionOverwrites.cache
 			.filter((overwrite) =>
-				overwrite.type == OverwriteType.Member &&
+				overwrite.type === OverwriteType.Member &&
 				overwrite.allow.has(PermissionFlagsBits.ViewChannel)
 			).map((overwrite) => overwrite.id);
 	}
@@ -97,7 +97,7 @@ class PrivateChannel {
 
 		if (channel) {
 			await channel.permissionOverwrites.delete(memberId);
-			if (member.voice.channel?.id == channel.id) await member.voice.disconnect("Permission removed");
+			if (member.voice.channel?.id === channel.id) await member.voice.disconnect("Permission removed");
 		}
 	}
 
@@ -114,7 +114,7 @@ class PrivateChannel {
 		if (channel) {
 			await channel.permissionOverwrites.delete(roleId);
 
-			for (const member of role.members.values()) if (member.voice.channel?.id == channel.id) await member.voice.disconnect("Permission removed");
+			for (const member of role.members.values()) if (member.voice.channel?.id === channel.id) await member.voice.disconnect("Permission removed");
 		}
 	}
 

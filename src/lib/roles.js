@@ -91,7 +91,7 @@ class Role {
 			const list = this.list(logger, bot);
 
 			for (const category of list.categories) {
-				const categoryRoles = list.roles.all.filter((role) => role.category == category.id);
+				const categoryRoles = list.roles.all.filter((role) => role.category === category.id);
 
 				if (categoryRoles.length > 0) {
 					const roles = [];
@@ -135,7 +135,7 @@ class Role {
 
 			for (const role of list.recurrentRoles.active) {
 				const guildRoles = await guild.roles.fetch();
-				const guildRole = guildRoles.find((r) => r.name == `${role.name} ${now.getUTCFullYear()}`);
+				const guildRole = guildRoles.find((r) => r.name === `${role.name} ${now.getUTCFullYear()}`);
 
 				const to = new Date(`${now.getUTCFullYear()}-${role.to}`);
 

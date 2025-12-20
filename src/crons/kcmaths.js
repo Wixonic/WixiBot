@@ -30,12 +30,12 @@ const cron = {
 		];
 
 		const validDay = localDay in schedule;
-		const validTime = validDay && localHour == schedule[localDay] && localMinute == 0;
+		const validTime = validDay && localHour === schedule[localDay] && localMinute === 0;
 
 		const nowString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 		const inWorkPeriod = workDays.some(([start, end]) => start <= nowString && nowString <= end);
 
-		return (validDay && validTime && inWorkPeriod) || localHour == 22 && localMinute == 0;
+		return (validDay && validTime && inWorkPeriod) || localHour === 22 && localMinute === 0;
 	},
 	run: async (logger, bot, minutes, now) => {
 		const sessionId = await getSession(logger, bot.settings.secrets);

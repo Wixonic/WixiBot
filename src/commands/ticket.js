@@ -42,7 +42,7 @@ const info = {
 
 				for (let role of roles.values()) {
 					const permissions = channel.permissionsFor(role);
-					if (role.id != interaction.guild.roles.everyone.id && (permissions.has(PermissionFlagsBits.ViewChannel) || permissions.has(PermissionFlagsBits.Administrator))) rolesText.push(`<@&${role.id}>`);
+					if (role.id !== interaction.guild.roles.everyone.id && (permissions.has(PermissionFlagsBits.ViewChannel) || permissions.has(PermissionFlagsBits.Administrator))) rolesText.push(`<@&${role.id}>`);
 				}
 
 				await buttonChannel.send({

@@ -23,7 +23,7 @@ const component = {
 		if (fs.existsSync(ticketPath)) {
 			try {
 				const initialTicket = JSON.parse(fs.readFileSync(ticketPath, "utf-8"));
-				if (initialTicket.type == "WAITING") {
+				if (initialTicket.type === "WAITING") {
 					const ticket = {
 						...initialTicket,
 						claimedBy: {

@@ -7,7 +7,7 @@ const info = {
 	path: "/rpc/status/",
 	handlers: {
 		get: async (logger, settings, req, res, bot, rpc, sdk) => {
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/status]", "Unauthorized access attempt");
 				return res.status(401).json({
 					error: "Unauthorized"
@@ -25,17 +25,17 @@ const info = {
 				for (let i = 0; i < text.length; i++) {
 					const char = text[i];
 
-					if (char == "\x1b") {
+					if (char === "\x1b") {
 						const endAnsi = text.indexOf("m", i);
-						if (endAnsi !== -1) {
+						if (endAnsi !=== -1) {
 							i = endAnsi;
 							continue;
 						}
 					}
 
-					if (char != "\n") visibleLength++;
+					if (char !== "\n") visibleLength++;
 
-					if (visibleLength == targetVisibleLength) trimIndex = i + 1;
+					if (visibleLength === targetVisibleLength) trimIndex = i + 1;
 				}
 
 				if (visibleLength <= maxLength) return text;
@@ -54,10 +54,10 @@ const info = {
 
 			const onlineFriendsText = [];
 			for (const friend of onlineFriends) onlineFriendsText.push(trim(`- ${await displayInlineActivity(friend[1], friend[0], bot)}`));
-			if (onlineFriendsText.length == 0) onlineFriendsText.push(trim("No friends online"));
+			if (onlineFriendsText.length === 0) onlineFriendsText.push(trim("No friends online"));
 			else onlineFriendsText.unshift(`${onlineFriendsText.length} friend${onlineFriendsText.length > 1 ? "s" : ""} online:`);
 
-			if (bot.guilds.cache.get(settings.application.guildId).approximatePresenceCount == null) {
+			if (bot.guilds.cache.get(settings.application.guildId).approximatePresenceCount === null) {
 				logger.debug("Cache disabled to get presence count on guild");
 				await bot.guilds.fetch({
 					force: true,

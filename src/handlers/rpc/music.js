@@ -17,7 +17,7 @@ const info = {
 	path: "/rpc/music/",
 	handlers: {
 		post: async (logger, settings, req, res, bot, rpc, sdk) => {
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/music]", "Unauthorized access attempt");
 				return res.status(401).json({
 					error: "Unauthorized"
@@ -34,7 +34,7 @@ const info = {
 			}
 		},
 		delete: async (logger, settings, req, res, bot, rpc, sdk) => {
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/music]", "Unauthorized access attempt");
 				return res.status(401).json({
 					error: "Unauthorized"
@@ -49,25 +49,25 @@ const info = {
 	loop: {
 		delay: 2 * 1000,
 		process: async (logger, settings, bot, rpc, sdk) => {
-			if (song?.state == "PAUSED" && currentSong) song = { ...currentSong, state: "PAUSED" };
+			if (song?.state === "PAUSED" && currentSong) song = { ...currentSong, state: "PAUSED" };
 
 			const needsUpdate = () => {
-				if (song == null && currentSong == null) return false;
-				else if (song == null || currentSong == null) return true;
-				return song.track != currentSong.track ||
-					song.artist != currentSong.artist ||
-					song.state != currentSong.state ||
-					Math.floor(currentSong.startedAt / 2000) != Math.floor(song.startedAt / 2000);
+				if (song === null && currentSong === null) return false;
+				else if (song === null || currentSong === null) return true;
+				return song.track !== currentSong.track ||
+					song.artist !== currentSong.artist ||
+					song.state !== currentSong.state ||
+					Math.floor(currentSong.startedAt / 2000) !== Math.floor(song.startedAt / 2000);
 			};
 
 			if (needsUpdate()) {
-				if (song == null || song.state == "STOPPED") {
+				if (song === null || song.state === "STOPPED") {
 					rpc.removeActivity("music");
 					currentSong = null;
 					return true;
 				}
 
-				if (!currentSong || currentSong.track != song.track || currentSong.artist != song.artist) {
+				if (!currentSong || currentSong.track !== song.track || currentSong.artist !== song.artist) {
 					const spotifySong = (await spotify.search(logger, settings.rpc.spotify, `artist:${song.artist} track:${song.track}`)) ?? null;
 					song.spotifyId = spotifySong?.id ?? null;
 					const spotifyArtworkUrl = spotifySong?.album?.images?.at(0)?.url;

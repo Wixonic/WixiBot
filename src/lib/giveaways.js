@@ -94,7 +94,7 @@ class Giveaway {
 	get status() {
 		if (this.cancelled) return Giveaway.status.cancelled;
 
-		if (typeof this.startsAt == "number" && typeof this.endsAt == "number") {
+		if (typeof this.startsAt === "number" && typeof this.endsAt === "number") {
 			if (this.endsAt <= Date.now()) return Giveaway.status.done;
 			else if (this.startsAt <= Date.now()) return Giveaway.status.active;
 		}

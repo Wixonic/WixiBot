@@ -17,7 +17,7 @@ const info = {
 					const files = await fsp.readdir(dirPath);
 					const jsonFiles = files.filter((file) => file.endsWith(".json"));
 
-					if (jsonFiles.length == 0) return res.status(500).send("");
+					if (jsonFiles.length === 0) return res.status(500).send("");
 
 					const statsPromises = jsonFiles.map((file) => fsp.stat(path.join(dirPath, file)).then(stats => stats.mtime));
 					const allDates = await Promise.all(statsPromises);

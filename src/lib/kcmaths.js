@@ -70,7 +70,7 @@ const getData = async (logger, sessionId) => {
 
 	$('h1:contains("Banque")').next("table").find("tr").each((i, row) => {
 		const cells = $(row).find("td");
-		if (cells.length == 2) {
+		if (cells.length === 2) {
 			const fullName = $(cells[0]).text().trim();
 			const kcCoinsText = $(cells[1]).text().trim();
 			const kcCoins = parseInt(kcCoinsText.replace(" KC-coins", ""), 10);
@@ -84,7 +84,7 @@ const getData = async (logger, sessionId) => {
 
 	$('h1:contains("Classement des victoires au chifoumi")').next("table").find("tr").each((i, row) => {
 		const cells = $(row).find("td");
-		if (cells.length == 2) {
+		if (cells.length === 2) {
 			const fullName = $(cells[0]).text().trim();
 			const entryText = $(cells[1]).text().trim();
 
@@ -138,7 +138,7 @@ const getFiles = async (logger, sessionId, secrets) => {
 			const date = $(cells[2]).text().trim();
 			const size = $(cells[3]).text().trim();
 
-			if (name && url && name !== "Parent Directory" && url !== "/docs/") {
+			if (name && url && name !=== "Parent Directory" && url !=== "/docs/") {
 				files.push({
 					name,
 					url: `https://www.kcmaths.com/docs/25-26/${url}`,

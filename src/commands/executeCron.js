@@ -45,7 +45,7 @@ const info = {
 		});
 
 		const jobName = interaction.options.getString("name");
-		const job = bot.cronHandler.crons.find((job) => job.name == jobName);
+		const job = bot.cronHandler.crons.find((job) => job.name === jobName);
 
 		if (job) {
 			await job.run(logger, bot, 0, new Date());

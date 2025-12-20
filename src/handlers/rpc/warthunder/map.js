@@ -21,7 +21,7 @@ const info = {
 			updatingMap = true;
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/map.png");
 
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/warthunder]", "Unauthorized access attempt");
 				updatingMap = false;
 				return res.status(401).end();
@@ -36,7 +36,7 @@ const info = {
 			updatingMap = true;
 			const filePath = path.join(settings.paths.cache, "/rpc/warthunder/map.png");
 
-			if (req.headers.authorization != "WixKey " + settings.secrets.wixkey) {
+			if (req.headers.authorization !== "WixKey " + settings.secrets.wixkey) {
 				logger.warn("[rpc/warthunder]", "Unauthorized access attempt");
 				updatingMap = false;
 				return res.status(401).end();

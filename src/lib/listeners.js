@@ -34,9 +34,9 @@ class ListenerHandler {
 			if (!listener) {
 				this.logger.warn("Invalid listener at", file);
 				continue;
-			} else if (typeof listener.name != "string") listener.name = file.slice(0, -3);
+			} else if (typeof listener.name !== "string") listener.name = file.slice(0, -3);
 
-			if (typeof listener.event != "string" || typeof listener.run != "function") this.logger.warn("Invalid listener:", listener.name);
+			if (typeof listener.event !== "string" || typeof listener.run !== "function") this.logger.warn("Invalid listener:", listener.name);
 			else {
 				bot.on(listener.event, (...args) => listener.run({
 					debug: (...any) => this.logger.debug(`[${listener.name}]`, ...any),

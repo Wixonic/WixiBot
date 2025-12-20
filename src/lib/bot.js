@@ -100,7 +100,7 @@ class Bot extends Client {
 		this.emit("destroy");
 		await super.destroy();
 
-		process.exit(typeof code == "number" ? code : 1);
+		process.exit(typeof code === "number" ? code : 1);
 	};
 };
 

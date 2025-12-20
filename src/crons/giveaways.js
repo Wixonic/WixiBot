@@ -9,7 +9,7 @@ const { randomInt } = require("../lib/utils.js");
 const cron = {
 	name: "Giveaways Update",
 	priority: 0,
-	condition: (minutes, now) => minutes % 30 == 0, // Every 30 minutes
+	condition: (minutes, now) => minutes % 30 === 0, // Every 30 minutes
 	run: async (logger, bot, minutes, now) => {
 		const guild = await bot.guilds.fetch(bot.settings.application.guildId);
 
@@ -19,7 +19,7 @@ const cron = {
 			const giveaways = Giveaway.list(logger, bot);
 
 			for (const giveaway of giveaways) {
-				if (giveaway.status == Giveaway.status.active && giveaway.previousStatus == Giveaway.status.planned) {
+				if (giveaway.status === Giveaway.status.active && giveaway.previousStatus === Giveaway.status.planned) {
 					const gifts = [];
 					const notes = [];
 					for (const gift of giveaway.gifts) {
@@ -45,13 +45,13 @@ const cron = {
 								]
 							}
 						],
-						flags: process.env.silent == "true" ? MessageFlags.SuppressNotifications : null
+						flags: process.env.silent === "true" ? MessageFlags.SuppressNotifications : null
 					});
 
 					giveaway.message = message.id;
 					giveaway.previousStatus = giveaway.status;
 					await giveaway.save();
-				} else if (giveaway.status == Giveaway.status.done && giveaway.previousStatus == Giveaway.status.active) {
+				} else if (giveaway.status === Giveaway.status.done && giveaway.previousStatus === Giveaway.status.active) {
 					const winners = {};
 					const gifts = [""];
 

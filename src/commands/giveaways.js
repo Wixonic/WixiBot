@@ -85,7 +85,7 @@ module.exports = {
 				for (const gift of editedGiveaway.gifts) gifts.push(gift.name + "\n> " + gift.note ?? "No note.");
 
 				await interaction.followUp({
-					content: `Available gifts:${gifts.length > 1 ? gifts.join("\n- ") : " _no available gift right now._"}${typeof editedGiveaway.startsAt == "number" ? `\n\n- Starts at: <t:${Math.floor(editedGiveaway.startsAt / 1000)}:f>` : ""}${typeof editedGiveaway.endsAt == "number" ? `\n- Ends at: <t:${Math.floor(editedGiveaway.endsAt / 1000)}:f>` : ""}\n\n-# Giveaway #${editedGiveaway.id}`,
+					content: `Available gifts:${gifts.length > 1 ? gifts.join("\n- ") : " _no available gift right now._"}${typeof editedGiveaway.startsAt === "number" ? `\n\n- Starts at: <t:${Math.floor(editedGiveaway.startsAt / 1000)}:f>` : ""}${typeof editedGiveaway.endsAt === "number" ? `\n- Ends at: <t:${Math.floor(editedGiveaway.endsAt / 1000)}:f>` : ""}\n\n-# Giveaway #${editedGiveaway.id}`,
 					components: [{
 						type: ComponentType.ActionRow,
 						components: [{
@@ -107,7 +107,7 @@ module.exports = {
 				const giveaways = Giveaway.list(logger, bot).filter((giveaway) => giveaway.status < Giveaway.status.done);
 
 				let giveawaysList = [""];
-				for (const giveaway of giveaways) giveawaysList.push(`Giveaway #${giveaway.id}${typeof giveaway.startsAt == "number" && typeof giveaway.endsAt == "number" ? ` - from <t:${Math.floor(giveaway.startsAt / 1000)}:f> to <t:${Math.floor(giveaway.endsAt / 1000)}:f>` : ""} (${["Planned", "Active"][giveaway.status] ?? "Unknown"})`);
+				for (const giveaway of giveaways) giveawaysList.push(`Giveaway #${giveaway.id}${typeof giveaway.startsAt === "number" && typeof giveaway.endsAt === "number" ? ` - from <t:${Math.floor(giveaway.startsAt / 1000)}:f> to <t:${Math.floor(giveaway.endsAt / 1000)}:f>` : ""} (${["Planned", "Active"][giveaway.status] ?? "Unknown"})`);
 
 				await interaction.followUp(`All active or planned giveaways: ${giveawaysList.length > 1 ? giveawaysList.join("\n- ") : " _no active or planned giveaway right now._"}`);
 				break;

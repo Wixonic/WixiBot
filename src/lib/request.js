@@ -7,8 +7,8 @@ const https = require("https");
  * @returns {Promise<any>}
  */
 const request = (logger, options = {}) => {
-	if (options.secure == null) options.secure = true;
-	if (options.method == null) options.method = "GET";
+	if (options.secure === null) options.secure = true;
+	if (options.method === null) options.method = "GET";
 
 	return new Promise((resolve) => {
 		let reject = (reason = "Unknown reason") => {
@@ -47,9 +47,9 @@ const request = (logger, options = {}) => {
 				req.on("response", (res) => {
 					req.removeAllListeners();
 
-					if (res.statusCode == 204) resolve(null);
+					if (res.statusCode === 204) resolve(null);
 					else {
-						if (options.type == "headers") resolve(res.headers);
+						if (options.type === "headers") resolve(res.headers);
 						else {
 							const chunks = [];
 

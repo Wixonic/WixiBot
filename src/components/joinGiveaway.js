@@ -20,11 +20,11 @@ const component = {
 
 		const giveaway = Giveaway.get(logger, bot, giveawayId);
 
-		if (giveaway.status == Giveaway.status.active) {
+		if (giveaway.status === Giveaway.status.active) {
 			const { id } = interaction.user;
 			const index = giveaway.participants.indexOf(id);
 
-			if (index != -1) {
+			if (index !== -1) {
 				giveaway.participants.splice(index, 1);
 				await interaction.followUp("You have successfully left the giveaway.");
 			} else {

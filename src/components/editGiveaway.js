@@ -18,11 +18,11 @@ const component = {
 		const giveaway = Giveaway.get(logger, bot, giveawayId);
 
 		const startsAt = new Date();
-		if (typeof giveaway.startsAt == "number") startsAt.setTime(giveaway.startsAt);
+		if (typeof giveaway.startsAt === "number") startsAt.setTime(giveaway.startsAt);
 
 		const endsAt = new Date(startsAt);
 		endsAt.setUTCDate(startsAt.getUTCDate() + 1);
-		if (typeof giveaway.endsAt == "number") endsAt.setTime(giveaway.endsAt);
+		if (typeof giveaway.endsAt === "number") endsAt.setTime(giveaway.endsAt);
 
 		const gifts = [];
 		const notes = [];
