@@ -12,7 +12,7 @@ const info = {
 			if (!name) return res.status(400).json({ error: "Missing name parameter" });
 
 			const safeName = path.basename(name);
-			const filePath = path.join(settings.paths.kcmaths, "files", "storage", safeName);
+			const filePath = path.join(settings.paths.kcmaths, "files", safeName);
 
 			if (fs.existsSync(filePath)) {
 				res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);

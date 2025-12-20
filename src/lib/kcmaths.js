@@ -133,8 +133,8 @@ const getFiles = async (logger, sessionId, secrets) => {
 		const cells = $(row).find("td");
 		if (cells.length >= 4) {
 			const nameLink = $(cells[1]).find("a");
-			const name = nameLink.text().trim();
 			const url = nameLink.attr("href");
+			const name = decodeURIComponent(url);
 			const date = $(cells[2]).text().trim();
 			const size = $(cells[3]).text().trim();
 
@@ -195,7 +195,7 @@ const parseDate = (dateString) => {
  * @param {import("../../types.d.ts").PathsSettings} paths
  */
 const syncFiles = async (logger, sessionId, secrets, filesList, paths) => {
-	const storagePath = path.join(paths.kcmaths, "files", "storage");
+	const storagePath = path.join(paths.kcmaths, "files");
 	if (!fs.existsSync(storagePath)) fs.mkdirSync(storagePath, { recursive: true });
 
 	for (const file of filesList) {

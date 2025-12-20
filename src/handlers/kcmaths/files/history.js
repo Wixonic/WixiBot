@@ -8,7 +8,7 @@ const info = {
 	path: "/kcmaths/files/history/",
 	handlers: {
 		get: async (logger, settings, req, res, bot, rpc, sdk) => {
-			const storagePath = path.join(settings.paths.kcmaths, "files", "storage");
+			const storagePath = path.join(settings.paths.kcmaths, "files");
 
 			if (fs.existsSync(storagePath)) {
 				const files = fs.readdirSync(storagePath);
