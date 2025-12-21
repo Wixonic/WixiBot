@@ -138,7 +138,7 @@ const getFiles = async (logger, sessionId, secrets) => {
 			const date = $(cells[2]).text().trim();
 			const size = $(cells[3]).text().trim();
 
-			if (name && url && name !=== "Parent Directory" && url !=== "/docs/") {
+			if (name && url && name !== "Parent Directory" && url !== "/docs/") {
 				files.push({
 					name,
 					url: `https://www.kcmaths.com/docs/25-26/${url}`,

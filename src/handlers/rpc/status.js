@@ -27,7 +27,7 @@ const info = {
 
 					if (char === "\x1b") {
 						const endAnsi = text.indexOf("m", i);
-						if (endAnsi !=== -1) {
+						if (endAnsi !== -1) {
 							i = endAnsi;
 							continue;
 						}
