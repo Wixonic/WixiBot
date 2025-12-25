@@ -7,7 +7,6 @@ const https = require("https");
  * @returns {Promise<any>}
  */
 const request = (logger, options = {}) => {
-	if (options.secure === null) options.secure = true;
 	if (options.method === null) options.method = "GET";
 
 	return new Promise((resolve) => {
@@ -19,6 +18,10 @@ const request = (logger, options = {}) => {
 		};
 
 		if (!("url" in options) || (!(options.url instanceof URL) && !URL.canParse(options.url))) reject("Cannot request an empty url");
+		if (!(options.url instanceof URL)) options.url = new URL(options.url);
+
+		if (options.secure === null || options.secure === undefined) options.secure = options.url.protocol === "https:";
+
 		logger.debug("[Request]", "Request:", options.method, options.url.toString());
 
 		try {

@@ -49,7 +49,6 @@ const info = {
 	loop: {
 		delay: 2 * 1000,
 		process: async (logger, settings, bot, rpc, sdk) => {
-			if (song?.state === "PAUSED" && currentSong) song = { ...currentSong, state: "PAUSED" };
 
 			const needsUpdate = () => {
 				if (song === null && currentSong === null) return false;

@@ -5,7 +5,7 @@ const { ActivityType } = require("discord.js");
  */
 const listener = {
 	name: "Ready",
-	event: "ready",
+	event: "clientReady",
 
 	/**
 	 * @param {import("@wixonic/logger").Logger} logger
