@@ -13,22 +13,43 @@ const trimName = (name) => name.split("(")[0].replace(/\s\n\t/, " ").trim();
 
 /** @param {import("@wixonic/logger").Logger} logger */
 const updateDeviceList = (logger) => {
-	try {
-		const result = childProcess.spawnSync("ffmpeg", [
-			"-f", "avfoundation",
-			"-list_devices", "true",
-			"-i", ""
-		], { encoding: "utf8", stderr: "pipe" });
+	return new Promise((resolve) => {
+		try {
+			const process = childProcess.spawn("ffmpeg", [
+				"-f", "avfoundation",
+				"-list_devices", "true",
+				"-i", ""
+			]);
 
-		deviceList.audio = [];
-		deviceList.video = [];
-		const output = (result.stderr || result.stdout).split("AVFoundation audio devices");
+			let output = "";
 
-		for (const match of output[0].matchAll(/\.*\] \[(\d+)\] (.+)/g)) deviceList.video[Number(match[1])] = trimName(match[2]);
-		for (const match of output[1].matchAll(/\.*\] \[(\d+)\] (.+)/g)) deviceList.audio[Number(match[1])] = trimName(match[2]);
-	} catch (e) {
-		logger.error("Failed to list devices:", e);
-	}
+			process.stderr.on("data", (data) => output += data.toString());
+			process.stdout.on("data", (data) => output += data.toString());
+
+			process.on("close", () => {
+				deviceList.audio = [];
+				deviceList.video = [];
+				const devices = output.split("AVFoundation audio devices");
+
+				if (devices[0]) {
+					for (const match of devices[0].matchAll(/\.*\] \[(\d+)\] (.+)/g)) deviceList.video[Number(match[1])] = trimName(match[2]);
+				}
+				if (devices[1]) {
+					for (const match of devices[1].matchAll(/\.*\] \[(\d+)\] (.+)/g)) deviceList.audio[Number(match[1])] = trimName(match[2]);
+				}
+
+				resolve();
+			});
+
+			process.on("error", (e) => {
+				logger.error("Failed to list devices:", e);
+				resolve();
+			});
+		} catch (e) {
+			logger.error("Failed to list devices:", e);
+			resolve();
+		}
+	});
 };
 
 /** @typedef {{spawn: () => childProcess.ChildProcess, process: childProcess.ChildProcess?, active: boolean, name: string}} CaptureProcess */
@@ -157,16 +178,21 @@ const info = {
 	},
 	loop: {
 		delay: 0.5 * 1000,
-		process: (logger, settings) => {
+		process: async (logger, settings) => {
 			let updated = false;
 
 			for (const cp of Object.values(captureProcess)) {
 				if (cp.active && !cp.process) {
 					if (!updated) {
 						updated = true;
-						updateDeviceList(logger);
+						await updateDeviceList(logger);
 					}
 					startProcess(logger, cp, settings);
+
+					if (!cp.process && cp.active) {
+						logger.warn(`Failed to spawn process for ${cp.name}, disabling.`);
+						cp.active = false;
+					}
 				} else if (!cp.active && cp.process) stopProcess(logger, cp);
 			}
 

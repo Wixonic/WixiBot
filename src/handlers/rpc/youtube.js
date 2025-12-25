@@ -50,7 +50,7 @@ const info = {
 		}
 	},
 	loop: {
-		delay: 1 * 1000,
+		delay: 5 * 1000,
 		process: async (logger, settings, bot, rpc, sdk) => {
 			if (youtubeData && youtubeData.updatedAt + 30 * 1000 < Date.now()) youtubeData = null;
 

@@ -93,13 +93,15 @@ class Server {
 				}
 			}
 
-			const loopUpdate = async () => {
-				const now = Date.now();
-				const promises = [];
+			const startLoop = (path) => {
+				const loop = this.loopHandlers[path];
+				if (typeof loop.process !== "function") return;
 
-				for (const path in this.loopHandlers) {
-					const loop = this.loopHandlers[path];
-					if (typeof loop.process === "function" && loop.lastUpdated + (loop.idle ? 20 * 1000 : loop.delay) <= now) {
+				const runLoop = async () => {
+					const now = Date.now();
+					const delay = loop.idle ? 20 * 1000 : loop.delay;
+
+					if (loop.lastUpdated + delay <= now) {
 						this.loopHandlers[path].lastUpdated = now;
 
 						const handlerLogger = {
@@ -109,26 +111,26 @@ class Server {
 							warn: (...args) => this.logger.warn(`[${loop.name}]`, ...args)
 						};
 
-						promises.push((async () => {
-							try {
-								const status = await loop.process(handlerLogger, this.settings, bot, rpc, sdk);
-								if (status !== loop.idle) {
-									handlerLogger.debug(`Now ${status ? "idle" : "active"}`);
-									this.loopHandlers[path].idle = status;
-								}
-							} catch (e) {
-								handlerLogger.warn("Failed to process:", e);
-								handlerLogger.debug("Now idle");
-								this.loopHandlers[path].idle = true;
+						try {
+							const status = await loop.process(handlerLogger, this.settings, bot, rpc, sdk);
+							if (status !== loop.idle) {
+								handlerLogger.debug(`Now ${status ? "idle" : "active"}`);
+								this.loopHandlers[path].idle = status;
 							}
-						})());
+						} catch (e) {
+							handlerLogger.warn("Failed to process:", e);
+							handlerLogger.debug("Now idle");
+							this.loopHandlers[path].idle = true;
+						}
 					}
-				}
 
-				if (promises.length > 0) await Promise.all(promises);
+					setTimeout(runLoop, Math.max(10, (loop.lastUpdated + (this.loopHandlers[path].idle ? 20 * 1000 : loop.delay)) - Date.now()));
+				};
 
-				setTimeout(loopUpdate, Math.max(0, 500 - (Date.now() - now)));
+				runLoop();
 			};
+
+			for (const path in this.loopHandlers) startLoop(path);
 
 			this.http.on("clientError", (e) => this.logger.warn("[HTTP]", "Client error:", e));
 			this.http.on("close", () => this.logger.warn("[HTTP]", "Server closed"));
@@ -171,7 +173,7 @@ class Server {
 			this.http.listen(this.port, () => {
 				this.logger.info(`Running on :${this.port}`);
 
-				loopUpdate();
+
 
 				resolve();
 			});
