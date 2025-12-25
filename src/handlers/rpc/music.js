@@ -9,6 +9,7 @@ let currentSong = null;
  * @type {import("../../types.d.ts").Song?}
  */
 let song = null;
+let lastUpdate = 0;
 
 /**
  * @type {import("../../types.d.ts").HandlerInfo}
@@ -26,6 +27,7 @@ const info = {
 
 			try {
 				song = JSON.parse(req.body);
+				lastUpdate = Date.now();
 				res.status(204).end();
 			} catch (e) {
 				logger.warn("[rpc/music]", e);
@@ -49,6 +51,8 @@ const info = {
 	loop: {
 		delay: 2 * 1000,
 		process: async (logger, settings, bot, rpc, sdk) => {
+
+			if (song && Date.now() - lastUpdate > 30 * 1000) song = null;
 
 			const needsUpdate = () => {
 				if (song === null && currentSong === null) return false;
@@ -105,6 +109,7 @@ const info = {
 					});
 				} else rpc.removeActivity("music");
 			}
+
 			return false;
 		}
 	}
