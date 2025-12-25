@@ -91,6 +91,9 @@ const main = async (logger) => {
 		process.exit(1);
 	};
 
+	process.on("uncaughtException", (e) => handler.error("Uncaught exception:", e));
+	process.on("unhandledRejection", (e) => handler.error("Unhandled rejection:", e));
+
 	try {
 		switch (process.env.mode) {
 			case "publish":

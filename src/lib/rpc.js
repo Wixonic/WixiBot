@@ -99,7 +99,7 @@ class RPC {
 	 */
 	async getExternalAsset(applicationId, url) {
 		try {
-			return (await RichPresence.getExternal(this.client, applicationId, url))[0].external_asset_path;
+			return (await RichPresence.getExternal(this.client, applicationId, url))?.[0]?.external_asset_path ?? null;
 		} catch (e) {
 			this.logger.warn("Failed to get external url for:", url, "-", e);
 			return null;
