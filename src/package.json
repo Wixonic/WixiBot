@@ -21,19 +21,19 @@
 		"node": "24"
 	},
 	"dependencies": {
-		"@discordjs/opus": "^0.10.0",
-		"@discordjs/voice": "^0.18.0",
-		"@wixonic/logger": "^1.1.0",
-		"applescript": "^1.0.0",
-		"cheerio": "^1.1.2",
-		"cors": "^2.8.5",
-		"discord.js": "^14.25.1",
-		"discord.js-selfbot-v13": "^3.7.1",
-		"express": "^5.2.1",
-		"uuid": "^11.1.0"
+		"@discordjs/opus": "0.10.0",
+		"@discordjs/voice": "0.19.0",
+		"@wixonic/logger": "1.1.0",
+		"applescript": "1.0.0",
+		"cheerio": "1.1.2",
+		"cors": "2.8.5",
+		"discord.js": "14.25.1",
+		"discord.js-selfbot-v13": "3.7.1",
+		"express": "5.2.1",
+		"uuid": "13.0.0"
 	},
 	"devDependencies": {
-		"@types/node": "^24.10.1"
+		"@types/node": "24.10.4"
 	},
 	"typings": "./types.d.ts"
 }
