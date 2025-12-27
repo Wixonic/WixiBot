@@ -12,10 +12,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var backgroundTaskProcess: Process?
     var backgroundTaskPID: Int32?
 
-	var broadcastEnabled: Bool = false
-
-    var broadcastMenuItem: NSMenuItem!
-
 	func applicationDidFinishLaunching(_ notification: Notification) {
 		statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
@@ -25,59 +21,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 		let menu = NSMenu()
 
-       broadcastMenuItem = NSMenuItem(title: "Broadcast", action: #selector(toggleBroadcast(_:)), keyEquivalent: "b")
-		broadcastMenuItem.state = broadcastEnabled ? .on : .off
-		broadcastMenuItem.target = self
-		menu.addItem(broadcastMenuItem)
-
 		menu.addItem(NSMenuItem(title: "Quit", action: #selector(terminate), keyEquivalent: "q"))
 		statusItem.menu = menu
 
 		runZshScript()
 	}
-
-    @objc func toggleBroadcast(_ sender: NSMenuItem) {
-		broadcastEnabled.toggle()
-		broadcastMenuItem.state = broadcastEnabled ? .on : .off
-		sendToggleRequest(id: "broadcast", status: broadcastEnabled)
-	}
-
-    func sendToggleRequest(id: String, status: Bool) {
-		guard let url = URL(string: "https://server.wixonic.fr/process/?id=\(id)") else { return }
-		
-		var request = URLRequest(url: url)
-		request.httpMethod = "POST"
-
-		if let url = Bundle.main.url(forResource: "secrets", withExtension: "json"),
-		   let data = try? Data(contentsOf: url),
-		   let secrets = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-		   let wixKey = secrets["wixkey"] as? String {
-			request.setValue("WixKey \(wixKey)", forHTTPHeaderField: "Authorization")
-			print("Sending toggle request for \(id) with WixKey \(wixKey)")
-		} else {
-			print("Sending toggle request for \(id) without WixKey")
-		}
-
-		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-		
-		let body: [String: Bool] = ["status": status]
-		request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-
-		let session = URLSession(
-			configuration: .default,
-			delegate: InsecureDelegate(),
-			delegateQueue: nil
-		)
-
-		let task = session.dataTask(with: request) { data, response, error in
-			if let error = error {
-				print("Error sending toggle request for \(id):", error)
-			} else {
-				print("Sent toggle request for \(id) with status: \(status)")
-			}
-		}
-		task.resume()
-    }
 
 	@objc func terminate() {
 		if let task = backgroundTaskProcess {
