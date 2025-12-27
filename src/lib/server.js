@@ -61,6 +61,15 @@ class Server {
 			this.app.use((req, res, next) => {
 				const origin = req.headers.origin;
 				this.logger.debug(`Request: ${req.method + (origin ? " " + origin : "")} | ${req.url}`);
+
+				const Performance = require("./performance.js");
+				if (!Performance.logger) Performance.init(this.logger);
+
+				const start = performance.now();
+				res.on("finish", () => {
+					Performance.log("HTTP", `${req.method} ${req.url}`, performance.now() - start, `Status: ${res.statusCode}`);
+				});
+
 				next();
 			});
 
