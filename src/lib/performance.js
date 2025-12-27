@@ -17,11 +17,9 @@ class Performance {
 		this.logDir = path.join(settings.secrets.paths.root, "logs", "performance");
 		this.csvPath = path.join(this.logDir, "server.csv");
 
-		if (process.env.dev === "true") {
-			if (!fs.existsSync(this.logDir)) fs.mkdirSync(this.logDir, { recursive: true });
-			if (!fs.existsSync(this.csvPath)) {
-				fs.writeFileSync(this.csvPath, "Timestamp,Type,Name,Duration(ms),Details\n");
-			}
+		if (!fs.existsSync(this.logDir)) fs.mkdirSync(this.logDir, { recursive: true });
+		if (!fs.existsSync(this.csvPath)) {
+			fs.writeFileSync(this.csvPath, "Timestamp,Type,Name,Duration(ms),Details\n");
 		}
 	}
 
@@ -34,8 +32,6 @@ class Performance {
 	 * @returns {Promise<T>}
 	 */
 	static async measure(type, name, callback, details = "") {
-		if (process.env.dev !== "true") return await callback();
-
 		const start = performance.now();
 		let result;
 		try {
@@ -50,8 +46,6 @@ class Performance {
 	}
 
 	static log(type, name, duration, details = "") {
-		if (process.env.dev !== "true") return;
-
 		const timestamp = new Date().toISOString();
 		const row = `"${timestamp}","${type}","${name}",${duration.toFixed(3)},"${String(details).replace(/"/g, '""')}"\n`;
 
@@ -59,7 +53,7 @@ class Performance {
 			if (err && this.logger) this.logger.error("[Performance]", "Failed to write to CSV:", err);
 		});
 
-		if (this.logger) {
+		if (this.logger && process.env.dev === "true") {
 			this.logger.debug(`[PERF] [${type}] ${name} took ${duration.toFixed(3)}ms ${details ? `(${details})` : ""}`);
 		}
 	}
