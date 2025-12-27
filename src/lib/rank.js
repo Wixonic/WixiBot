@@ -100,59 +100,64 @@ class Rank {
 	 * @returns {import("../types.d.ts").Leaderboard}
 	 */
 	static updateLeaderboard(logger, bot) {
-		const guildPath = bot.settings.paths.ranks(bot.settings.application.guildId);
-		const leaderboardPath = bot.settings.paths.leaderboard(bot.settings.application.guildId);
+		const Performance = require("./performance.js");
+		if (!Performance.logger) Performance.init(logger);
 
-		/**
-		 * @type {import("../types.d.ts").Leaderboard}
-		 */
-		const leaderboard = {
-			global: [],
-			month: [],
-			updatedAt: Date.now(),
-			eliteOfTheMonth: null
-		};
+		return Performance.measure("Rank", "Update Leaderboard", () => {
+			const guildPath = bot.settings.paths.ranks(bot.settings.application.guildId);
+			const leaderboardPath = bot.settings.paths.leaderboard(bot.settings.application.guildId);
 
-		if (fs.existsSync(guildPath)) {
-			for (const file of fs.readdirSync(guildPath)) {
-				if (file.endsWith(".json")) {
-					try {
-						const rank = this.get(logger, bot, file.replace(".json", ""));
+			/**
+			 * @type {import("../types.d.ts").Leaderboard}
+			 */
+			const leaderboard = {
+				global: [],
+				month: [],
+				updatedAt: Date.now(),
+				eliteOfTheMonth: null
+			};
 
-						if (rank) {
-							if (rank.points.global > 0) leaderboard.global.push({
-								id: rank.memberId,
-								points: rank.points.global
-							});
+			if (fs.existsSync(guildPath)) {
+				for (const file of fs.readdirSync(guildPath)) {
+					if (file.endsWith(".json")) {
+						try {
+							const rank = this.get(logger, bot, file.replace(".json", ""));
 
-							if (rank.points.month > 0) leaderboard.month.push({
-								id: rank.memberId,
-								points: rank.points.month
-							});
-						} else logger.warn(`[Rank] Error reading rank data for file ${file}:`, e);
-					} catch (e) {
-						logger.error(`[Rank] Error reading rank data for file ${file}:`, e);
+							if (rank) {
+								if (rank.points.global > 0) leaderboard.global.push({
+									id: rank.memberId,
+									points: rank.points.global
+								});
+
+								if (rank.points.month > 0) leaderboard.month.push({
+									id: rank.memberId,
+									points: rank.points.month
+								});
+							} else logger.warn(`[Rank] Error reading rank data for file ${file}:`, e);
+						} catch (e) {
+							logger.error(`[Rank] Error reading rank data for file ${file}:`, e);
+						}
 					}
+				}
+
+				leaderboard.global.sort((rankA, rankB) => rankB.points - rankA.points);
+				leaderboard.month.sort((rankA, rankB) => rankB.points - rankA.points);
+
+				for (const user of leaderboard.month) {
+					if (user.points > 0) {
+						if (!bot.settings.application.commands.ranks.ignored.includes(user.id)) {
+							leaderboard.eliteOfTheMonth = user;
+							break;
+						} else logger.debug(`Ignoring user "${user.id}"`);
+					} else break;
 				}
 			}
 
-			leaderboard.global.sort((rankA, rankB) => rankB.points - rankA.points);
-			leaderboard.month.sort((rankA, rankB) => rankB.points - rankA.points);
+			if (!fs.existsSync(path.dirname(leaderboardPath))) fs.mkdirSync(path.dirname(leaderboardPath), { recursive: true });
+			fs.writeFileSync(leaderboardPath, JSON.stringify(leaderboard));
 
-			for (const user of leaderboard.month) {
-				if (user.points > 0) {
-					if (!bot.settings.application.commands.ranks.ignored.includes(user.id)) {
-						leaderboard.eliteOfTheMonth = user;
-						break;
-					} else logger.debug(`Ignoring user "${user.id}"`);
-				} else break;
-			}
-		}
-
-		if (!fs.existsSync(path.dirname(leaderboardPath))) fs.mkdirSync(path.dirname(leaderboardPath), { recursive: true });
-		fs.writeFileSync(leaderboardPath, JSON.stringify(leaderboard));
-
-		return leaderboard;
+			return leaderboard;
+		});
 	};
 
 	/**
@@ -161,26 +166,31 @@ class Rank {
 	 * @returns {Promise<import("../types.d.ts").Leaderboard>}
 	 */
 	static async resetLeaderboard(logger, bot) {
-		const guildPath = bot.settings.paths.ranks(bot.settings.application.guildId);
+		const Performance = require("./performance.js");
+		if (!Performance.logger) Performance.init(logger);
 
-		if (fs.existsSync(guildPath)) {
-			for (const file of fs.readdirSync(guildPath)) {
-				if (![".DS_Store"].includes(file)) {
-					try {
-						const rank = this.get(logger, bot, file.replace(".json", ""));
+		return Performance.measure("Rank", "Reset Leaderboard", async () => {
+			const guildPath = bot.settings.paths.ranks(bot.settings.application.guildId);
 
-						rank.messages.month = 0;
-						rank.voice.month = 0;
+			if (fs.existsSync(guildPath)) {
+				for (const file of fs.readdirSync(guildPath)) {
+					if (![".DS_Store"].includes(file)) {
+						try {
+							const rank = this.get(logger, bot, file.replace(".json", ""));
 
-						await rank.save();
-					} catch (e) {
-						logger.error(`[Rank] Error reading rank data for file ${file}:`, e);
+							rank.messages.month = 0;
+							rank.voice.month = 0;
+
+							await rank.save();
+						} catch (e) {
+							logger.error(`[Rank] Error reading rank data for file ${file}:`, e);
+						}
 					}
 				}
 			}
-		}
 
-		return this.updateLeaderboard(logger, bot);
+			return this.updateLeaderboard(logger, bot);
+		});
 	};
 
 	/**

@@ -1,5 +1,6 @@
 const http = require("http");
 const https = require("https");
+const Performance = require("./performance.js");
 
 /**
  * @param {import("@wixonic/logger").Logger} logger
@@ -7,9 +8,11 @@ const https = require("https");
  * @returns {Promise<any>}
  */
 const request = (logger, options = {}) => {
+	if (!Performance.logger) Performance.init(logger);
+
 	if (options.method === null) options.method = "GET";
 
-	return new Promise((resolve) => {
+	return Performance.measure("HTTP", options.url.toString(), () => new Promise((resolve) => {
 		let reject = (reason = "Unknown reason") => {
 			logger.debug("[Request]", "Rejected while init:", reason);
 			resolve({
@@ -113,7 +116,7 @@ const request = (logger, options = {}) => {
 		} catch (e) {
 			reject(e);
 		}
-	});
+	}), `Method: ${options.method}`);
 };
 
 module.exports = request;

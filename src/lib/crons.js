@@ -24,28 +24,33 @@ class CronHandler {
 	};
 
 	loadCrons() {
-		const cronsPath = path.join(__dirname, "..", "crons");
-		const files = fs.readdirSync(cronsPath).filter((file) => file.endsWith(".js"));
+		const Performance = require("./performance.js");
+		if (!Performance.logger) Performance.init(this.logger);
 
-		for (const file of files) {
-			const modulePath = path.join(cronsPath, file);
-			delete require.cache[require.resolve(modulePath)];
-			/**
-			 * @type {import("../types.d.ts").CronInfo}
-			 */
-			const cron = require(modulePath);
+		return Performance.measure("Module", "Crons", () => {
+			const cronsPath = path.join(__dirname, "..", "crons");
+			const files = fs.readdirSync(cronsPath).filter((file) => file.endsWith(".js"));
 
-			if (!cron) {
-				this.logger.warn("Invalid cron at", file);
-				continue;
-			} else if (typeof cron.name !== "string") cron.name = file.slice(0, -3);
+			for (const file of files) {
+				const modulePath = path.join(cronsPath, file);
+				delete require.cache[require.resolve(modulePath)];
+				/**
+				 * @type {import("../types.d.ts").CronInfo}
+				 */
+				const cron = require(modulePath);
 
-			if (typeof cron.condition !== "function" || typeof cron.run !== "function") this.logger.warn("Invalid cron:", cron.name);
-			else {
-				this.crons.push(cron);
-				this.logger.debug("Loaded cron:", cron.name);
-			}
-		};
+				if (!cron) {
+					this.logger.warn("Invalid cron at", file);
+					continue;
+				} else if (typeof cron.name !== "string") cron.name = file.slice(0, -3);
+
+				if (typeof cron.condition !== "function" || typeof cron.run !== "function") this.logger.warn("Invalid cron:", cron.name);
+				else {
+					this.crons.push(cron);
+					this.logger.debug("Loaded cron:", cron.name);
+				}
+			};
+		});
 	};
 
 	/**

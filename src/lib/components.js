@@ -21,27 +21,32 @@ class ComponentHandler {
 	};
 
 	loadComponents() {
-		const componentsPath = path.join(__dirname, "..", "components");
-		const files = fs.readdirSync(componentsPath).filter((file) => file.endsWith(".js"));
+		const Performance = require("./performance.js");
+		if (!Performance.logger) Performance.init(this.logger);
 
-		for (const file of files) {
-			const modulePath = path.join(componentsPath, file);
-			delete require.cache[require.resolve(modulePath)];
-			const component = require(modulePath);
+		return Performance.measure("Module", "Components", () => {
+			const componentsPath = path.join(__dirname, "..", "components");
+			const files = fs.readdirSync(componentsPath).filter((file) => file.endsWith(".js"));
 
-			if (component.type) {
-				switch (component.type) {
-					case ComponentType.Button:
-						ComponentHandler.buttons.push(component);
-						this.logger.debug("Loaded button component:", component.name);
-						break;
+			for (const file of files) {
+				const modulePath = path.join(componentsPath, file);
+				delete require.cache[require.resolve(modulePath)];
+				const component = require(modulePath);
 
-					default:
-						this.logger.warn("Unknown type in file:", file);
-						break;
-				}
-			} else this.logger.warn("Invalid component:", component.name);
-		}
+				if (component.type) {
+					switch (component.type) {
+						case ComponentType.Button:
+							ComponentHandler.buttons.push(component);
+							this.logger.debug("Loaded button component:", component.name);
+							break;
+
+						default:
+							this.logger.warn("Unknown type in file:", file);
+							break;
+					}
+				} else this.logger.warn("Invalid component:", component.name);
+			}
+		});
 	}
 };
 

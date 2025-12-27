@@ -20,17 +20,22 @@ class ModalHandler {
 	};
 
 	loadModals() {
-		const modalsPath = path.join(__dirname, "..", "modals");
-		const files = fs.readdirSync(modalsPath).filter((file) => file.endsWith(".js"));
+		const Performance = require("./performance.js");
+		if (!Performance.logger) Performance.init(this.logger);
 
-		for (const file of files) {
-			const modulePath = path.join(modalsPath, file);
-			delete require.cache[require.resolve(modulePath)];
-			const modal = require(modulePath);
+		return Performance.measure("Module", "Modals", () => {
+			const modalsPath = path.join(__dirname, "..", "modals");
+			const files = fs.readdirSync(modalsPath).filter((file) => file.endsWith(".js"));
 
-			ModalHandler.modals.push(modal);
-			this.logger.debug("Loaded modal:", modal.name);
-		}
+			for (const file of files) {
+				const modulePath = path.join(modalsPath, file);
+				delete require.cache[require.resolve(modulePath)];
+				const modal = require(modulePath);
+
+				ModalHandler.modals.push(modal);
+				this.logger.debug("Loaded modal:", modal.name);
+			}
+		});
 	}
 };
 

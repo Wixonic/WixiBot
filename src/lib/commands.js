@@ -42,37 +42,42 @@ class CommandHandler {
 	};
 
 	loadCommands() {
-		const commandsPath = path.join(__dirname, "..", "commands");
-		const files = fs.readdirSync(commandsPath).filter((file) => file.endsWith(".js"));
+		const Performance = require("./performance.js");
+		if (!Performance.logger) Performance.init(this.logger);
 
-		for (const file of files) {
-			const modulePath = path.join(commandsPath, file);
-			delete require.cache[require.resolve(modulePath)];
-			const command = require(modulePath);
+		return Performance.measure("Module", "Commands", () => {
+			const commandsPath = path.join(__dirname, "..", "commands");
+			const files = fs.readdirSync(commandsPath).filter((file) => file.endsWith(".js"));
 
-			if (command.deploy && command.deploy.type) {
-				switch (command.deploy.type) {
-					case ApplicationCommandType.ChatInput:
-						CommandHandler.slashCommands.push(command);
-						this.logger.debug("Loaded slash command:", command.name);
-						break;
+			for (const file of files) {
+				const modulePath = path.join(commandsPath, file);
+				delete require.cache[require.resolve(modulePath)];
+				const command = require(modulePath);
 
-					case ApplicationCommandType.User:
-						CommandHandler.userCommands.push(command);
-						this.logger.debug("Loaded user command:", command.name);
-						break;
+				if (command.deploy && command.deploy.type) {
+					switch (command.deploy.type) {
+						case ApplicationCommandType.ChatInput:
+							CommandHandler.slashCommands.push(command);
+							this.logger.debug("Loaded slash command:", command.name);
+							break;
 
-					case ApplicationCommandType.Message:
-						CommandHandler.messageCommands.push(command);
-						this.logger.debug("Loaded message command:", command.name);
-						break;
+						case ApplicationCommandType.User:
+							CommandHandler.userCommands.push(command);
+							this.logger.debug("Loaded user command:", command.name);
+							break;
 
-					default:
-						this.logger.warn("Unknown type at:", file);
-						break;
-				}
-			} else this.logger.warn("Invalid command:", command.name);
-		}
+						case ApplicationCommandType.Message:
+							CommandHandler.messageCommands.push(command);
+							this.logger.debug("Loaded message command:", command.name);
+							break;
+
+						default:
+							this.logger.warn("Unknown type at:", file);
+							break;
+					}
+				} else this.logger.warn("Invalid command:", command.name);
+			}
+		});
 	};
 
 	/**
