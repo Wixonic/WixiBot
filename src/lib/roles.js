@@ -39,8 +39,8 @@ class Role {
 				for (const role of content.recurrentRoles) {
 					data.recurrentRoles.all.push(role);
 
-					const from = new Date(`${now.getUTCFullYear()}-${role.from}`);
-					const to = new Date(`${now.getUTCFullYear()}-${role.to}`);
+					const from = new Date(`${now.getFullYear()}-${role.from}`);
+					const to = new Date(`${now.getFullYear()}-${role.to}`);
 					if (now.getTime() >= from.getTime() && now.getTime() <= to.getTime()) data.recurrentRoles.active.push(role);
 				}
 
@@ -135,9 +135,9 @@ class Role {
 
 			for (const role of list.recurrentRoles.active) {
 				const guildRoles = await guild.roles.fetch();
-				const guildRole = guildRoles.find((r) => r.name === `${role.name} ${now.getUTCFullYear()}`);
+				const guildRole = guildRoles.find((r) => r.name === `${role.name} ${now.getFullYear()}`);
 
-				const to = new Date(`${now.getUTCFullYear()}-${role.to}`);
+				const to = new Date(`${now.getFullYear()}-${role.to}`);
 
 				if (guildRole) {
 					roles.push(`- <@&${role.id}>: available until <t:${Math.floor(to.getTime() / 1000)}:f>`);

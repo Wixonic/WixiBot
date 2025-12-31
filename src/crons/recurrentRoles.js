@@ -33,7 +33,7 @@ const cron = {
 
 		for (const newRole of list.recurrentRoles.active) {
 			if (!isIncluded(newRole, previousRecurrentRoles)) {
-				const name = `${newRole.name} ${now.getUTCFullYear()}`;
+				const name = `${newRole.name} ${now.getFullYear()}`;
 
 				const cosmeticMarkerRole = await guild.roles.fetch(bot.settings.application.commands.roles.cosmeticMarkerRole);
 				const guildRole = await guild.roles.create({
@@ -49,7 +49,7 @@ const cron = {
 		for (const oldRole of previousRecurrentRoles) {
 			if (!isIncluded(oldRole, list.recurrentRoles.active)) {
 				oldRoles.push(oldRole);
-				const name = `${oldRole.name} ${now.getUTCFullYear()}`;
+				const name = `${oldRole.name} ${now.getFullYear()}`;
 
 				const oldMarkerRole = await guild.roles.fetch(bot.settings.application.commands.roles.oldMarkerRole);
 				const role = guild.roles.cache.find((r) => r.name === name);
@@ -65,7 +65,7 @@ const cron = {
 
 			if (channel && channel.isSendable()) {
 				for (const newRole of newRoles) {
-					const to = new Date(`${now.getUTCFullYear()}-${newRole.to}`);
+					const to = new Date(`${now.getFullYear()}-${newRole.to}`);
 					await channel.send({
 						allowedMentions: settings.mentionRole ? {
 							roles: [settings.mentionRole]
@@ -74,7 +74,7 @@ const cron = {
 						flags: process.env.silent === "true" ? MessageFlags.SuppressNotifications : null
 					});
 
-					logger.debug(`Announcing role ${newRole.name} ${now.getUTCFullYear()}`);
+					logger.debug(`Announcing role ${newRole.name} ${now.getFullYear()}`);
 				}
 			}
 		}
