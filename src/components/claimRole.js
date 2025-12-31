@@ -47,7 +47,7 @@ const component = {
 			const list = Roles.list(logger, bot);
 
 			if (recurrent === "true") {
-				if (list.recurrentRoles.active.findIndex((r) => r.name === role.name.replace(` ${new Date().getUTCFullYear()}`, "")) > -1) return await claimRole(role.id);
+				if (list.recurrentRoles.active.findIndex((r) => r.name === role.name.replace(` ${new Date().getFullYear()}`, "")) > -1) return await claimRole(role.id);
 			} else {
 				const roleSettings = list.roles.all.find((r) => r.id === role.id);
 
