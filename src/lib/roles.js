@@ -133,17 +133,18 @@ class Role {
 			const roles = [];
 			const buttons = [];
 
+			const guildRoles = await guild.roles.fetch();
+
 			for (const role of list.recurrentRoles.active) {
-				const guildRoles = await guild.roles.fetch();
 				const guildRole = guildRoles.find((r) => r.name === `${role.name} ${now.getFullYear()}`);
 
 				const to = new Date(`${now.getFullYear()}-${role.to}`);
 
 				if (guildRole) {
-					roles.push(`- <@&${role.id}>: available until <t:${Math.floor(to.getTime() / 1000)}:f>`);
+					roles.push(`- <@&${guildRole.id}>: available until <t:${Math.floor(to.getTime() / 1000)}:f>`);
 					buttons.push({
 						type: ComponentType.Button,
-						custom_id: `claimRole_${role.id}_true`,
+						custom_id: `claimRole_${guildRole.id}_true`,
 						label: guildRole.name ?? "Unknown role",
 						style: ButtonStyle.Primary
 					});
