@@ -1,6 +1,8 @@
 const fsp = require("fs/promises");
 const path = require("path");
 
+const modifiers = require("../modifiers.json");
+
 /**
  * @type {import("../../../types.d.ts").HandlerInfo}
  */
@@ -48,6 +50,31 @@ const info = {
 				const dateB = `${b.date.slice(4, 8)}${b.date.slice(2, 4)}${b.date.slice(0, 2)}`;
 				return dateA.localeCompare(dateB);
 			});
+
+			if (modifiers[id]) {
+				for (const result of results) {
+					if (!result.val) continue;
+
+					const day = result.date.slice(0, 2);
+					const month = result.date.slice(2, 4);
+					const year = result.date.slice(4, 8);
+					const date = new Date(`${year}-${month}-${day}`);
+					date.setUTCHours(0, 0, 0, 0);
+
+					for (const field in modifiers[id]) {
+						if (result.val[field] === undefined) continue;
+
+						for (const modifier of modifiers[id][field]) {
+							const modifierDate = new Date(modifier[0]);
+							modifierDate.setUTCHours(0, 0, 0, 0);
+
+							if (date.getTime() >= modifierDate.getTime()) {
+								result.val[field] += modifier[1];
+							}
+						}
+					}
+				}
+			}
 
 			res.status(200).json(results.map((entry) => ({
 				date: entry.date,
