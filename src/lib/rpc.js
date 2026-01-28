@@ -75,8 +75,8 @@ class RPC {
 		try {
 			const filePath = path.join(this.settings.paths.cache, "/activity.json");
 
-			if (!fs.existsSync(path.dirname(filePath))) fs.mkdirSync(path.dirname(filePath), { recursive: true });
-			fs.writeFileSync(filePath, JSON.stringify(activities), "utf-8");
+			await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
+			await fs.promises.writeFile(filePath, JSON.stringify(activities), "utf-8");
 		} catch (e) {
 			this.logger.warn("Failed to upload activites:", e);
 		}

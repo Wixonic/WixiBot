@@ -69,7 +69,7 @@ class Bot extends Client {
 		};
 
 		this.destroyed = false;
-		for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "exit"]) process.on(signal, (reason, code) => processSignal(reason, code));
+		for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) process.on(signal, (reason, code) => processSignal(reason, code));
 		process.on("uncaughtException", (e) => this.logger.error(e));
 		process.on("unhandledRejection", (e) => this.logger.error(e));
 	};

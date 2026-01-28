@@ -47,7 +47,14 @@ const main = async (logger) => {
 				if (!child.killed) {
 					child.removeAllListeners("exit");
 					child.kill(signal);
-					await new Promise((callback) => process.once("exit", callback));
+
+					const timeout = setTimeout(() => {
+						logger.warn(tries.text, "Child process did not exit in time. Force killing...");
+						child.kill("SIGKILL");
+					}, 5000);
+
+					await new Promise((callback) => child.once("exit", callback));
+					clearTimeout(timeout);
 					process.exit(code);
 				} else process.exit(code);
 			});
