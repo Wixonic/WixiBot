@@ -115,6 +115,10 @@ const main = async (logger) => {
 			if (code === 0) {
 				logger.debug(tries.text, `Exited with code ${code} and signal ${signal}`);
 				process.exit(0);
+			} else if (code === 42) {
+				logger.info(tries.text, "Restart requested by the process.");
+				tries.current = 0;
+				execute();
 			} else {
 				logger.error(tries.text, `Exited with code ${code} and signal ${signal}`);
 				const remainingBufferData = buffer.split("\n").slice(cursor).join("\n");
