@@ -50,7 +50,7 @@ const roles = {
 	recurrentRoles: [
 		{
 			name: "New Year",
-			color: "#B19128",
+			color: "#DFA947",
 			from: "01-01T00:00:00",
 			to: "01-14T23:59:59"
 		},
@@ -74,13 +74,13 @@ const roles = {
 		},
 		{
 			name: "Halloween",
-			color: "#FF9A00",
+			color: "#F75F1C",
 			from: "10-30T00:00:00",
 			to: "11-06T23:59:59"
 		},
 		{
 			name: "Christmas",
-			color: "#D41616",
+			color: "#308505",
 			from: "12-24T00:00:00",
 			to: "12-31T23:59:59"
 		}
