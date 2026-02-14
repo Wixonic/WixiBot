@@ -56,31 +56,31 @@ const roles = {
 		},
 		{
 			name: "Valentine's Day",
-			color: "#D80046",
+			color: "#C00645",
 			from: "02-14T00:00:00",
 			to: "02-21T23:59:59"
 		},
 		{
 			name: "Easter",
-			color: "#98B8A5",
+			color: "#A490E5",
 			from: "04-01T00:00:00",
 			to: "04-07T23:59:59"
 		},
 		{
 			name: "Summer",
-			color: "#47927E",
+			color: "#65C4ED",
 			from: "08-01T00:00:00",
 			to: "08-14T23:59:59"
 		},
 		{
 			name: "Halloween",
-			color: "#EB5A1C",
+			color: "#FF9A00",
 			from: "10-30T00:00:00",
 			to: "11-06T23:59:59"
 		},
 		{
 			name: "Christmas",
-			color: "#B43B2B",
+			color: "#D41616",
 			from: "12-24T00:00:00",
 			to: "12-31T23:59:59"
 		}
