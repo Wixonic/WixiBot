@@ -56,7 +56,7 @@ const roles = {
 		},
 		{
 			name: "Valentine's Day",
-			color: "#E06287",
+			color: "#D80046",
 			from: "02-14T00:00:00",
 			to: "02-21T23:59:59"
 		},
