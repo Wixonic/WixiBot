@@ -9,7 +9,8 @@ const mainSettings = {
 	application: require("./application.js"),
 	paths: require("./paths.js"),
 	secrets: require("./secrets.js"),
-	rpc: require("./rpc.js")
+	rpc: require("./rpc.js"),
+	website: require("./website.js")
 };
 
 module.exports = mainSettings;

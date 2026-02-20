@@ -15,6 +15,7 @@ const applicationSettings = {
 	defaultTextChannel: "1179535918277865614",
 	guildId: "1020663521530351627",
 	moderationChannel: "1020680767921197186",
+	ticketChannel: "1247276648366080144",
 
 	commands
 };

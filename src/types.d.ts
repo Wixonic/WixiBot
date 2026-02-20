@@ -11,6 +11,7 @@ export interface ApplicationSettings {
 	defaultTextChannel: string;
 	guildId: string;
 	moderationChannel: string;
+	ticketChannel: string;
 
 	commands: CommandsSettings;
 };
@@ -110,12 +111,17 @@ export interface SecretsSettings {
 	paths: PathsSecretsSettings;
 	rpc: RPCSecretsSettings;
 	server: ServerSecretsSettings;
+	smtp?: {
+		host: string;
+		port: number;
+		user: string;
+		password: string;
+	};
 	wixkey: string;
 };
 
 export interface WebsiteSettings {
-	accounts: string;
-	functions: string;
+	onion: string;
 	server: string;
 };
 

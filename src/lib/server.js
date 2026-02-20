@@ -73,7 +73,10 @@ class Server {
 				next();
 			});
 
-			this.app.use(express.text({ limit: "1gb", type: "*/*" }));
+			this.app.use((req, res, next) => {
+				if (req.hostname === new URL(this.settings.website.onion).hostname) return next();
+				express.text({ limit: "1gb", type: "*/*" })(req, res, next);
+			});
 
 			const handlers = fs.readdirSync(handlersPath, { recursive: true });
 			for (const handlerFile of handlers) {
@@ -83,8 +86,9 @@ class Server {
 					const handlerName = handlerFile.replace(".js", "");
 
 					for (const method in handler.handlers) {
-						if (method !== "ws") this.app[method](handler.path, (req, res) => handler.handlers[method](this.logger, this.settings, req, res, bot, rpc, sdk));
+						if (method !== "ws") this.app[method](handler.path, (req, res, next) => handler.handlers[method](this.logger, this.settings, req, res, bot, rpc, sdk, next));
 						else this.wsHandlers[handler.path] = handler.handlers.ws;
+
 						this.logger.debug("Added handler for", handlerName, "at", handler.path, "with method", method);
 					}
 
