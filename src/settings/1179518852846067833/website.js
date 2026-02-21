@@ -2,7 +2,7 @@
  * @type {import("../../types.d.ts").WebsiteSettings}
  */
 const websiteSettings = {
-	onion: "https://onion.wixonic.fr",
+	storage: "https://onion.wixonic.fr",
 	server: "https://wixonic.fr"
 };
 

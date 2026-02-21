@@ -3,7 +3,7 @@ const { execSync } = require("child_process");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const { getStorage } = require("../lib/onion/storage.js");
+const { getStorage } = require("../lib/storage.js");
 
 /**
  * @type {import("../types.d.ts").CommandInfo}
@@ -90,7 +90,7 @@ const info = {
 
 			api.write(db);
 
-			const url = `${server.settings.website.onion}/${id}/`;
+			const url = `${server.settings.website.storage}/${id}/`;
 
 			const content = `**Ephemeral Storage Link**\nHere is your unique link to send a file. It will remain **valid for 1 hour** after upload.\n\n-# ID: \`${id}\``;
 

@@ -1,8 +1,8 @@
 const fs = require("fs");
 const path = require("path");
-const { getStorage } = require("../../lib/onion/storage.js");
+const { getStorage } = require("../lib/storage.js");
 
-const html = fs.readFileSync(path.join(__dirname, "../../lib/onion/base.html"), "utf-8");
+const html = fs.readFileSync(path.join(__dirname, "../lib/storage.html"), "utf-8");
 
 /**
  * @type {import("../types.d.ts").HandlerInfo}
@@ -11,7 +11,7 @@ const info = {
 	path: "/:code/",
 	handlers: {
 		get: async (logger, settings, req, res, bot, rpc, sdk, next) => {
-			if (req.hostname !== new URL(settings.website.onion).hostname) return next ? next() : res.status(404).end();
+			if (req.hostname !== new URL(settings.website.storage).hostname) return next ? next() : res.status(404).end();
 
 			const code = req.params.code;
 			const api = getStorage(settings);
@@ -74,7 +74,7 @@ const info = {
 			}
 		},
 		post: async (logger, settings, req, res, bot, rpc, sdk, next) => {
-			if (req.hostname !== new URL(settings.website.onion).hostname) return next ? next() : res.status(404).end();
+			if (req.hostname !== new URL(settings.website.storage).hostname) return next ? next() : res.status(404).end();
 
 			const code = req.params.code;
 			const api = getStorage(settings);

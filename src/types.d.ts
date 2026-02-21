@@ -111,17 +111,11 @@ export interface SecretsSettings {
 	paths: PathsSecretsSettings;
 	rpc: RPCSecretsSettings;
 	server: ServerSecretsSettings;
-	smtp?: {
-		host: string;
-		port: number;
-		user: string;
-		password: string;
-	};
 	wixkey: string;
 };
 
 export interface WebsiteSettings {
-	onion: string;
+	storage: string;
 	server: string;
 };
 

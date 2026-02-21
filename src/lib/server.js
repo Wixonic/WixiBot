@@ -74,7 +74,7 @@ class Server {
 			});
 
 			this.app.use((req, res, next) => {
-				if (req.hostname === new URL(this.settings.website.onion).hostname) return next();
+				if (req.hostname === new URL(this.settings.website.storage).hostname) return next();
 				express.text({ limit: "1gb", type: "*/*" })(req, res, next);
 			});
 
