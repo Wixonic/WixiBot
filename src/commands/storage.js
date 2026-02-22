@@ -148,7 +148,7 @@ const info = {
 			for (const id of activeIds) {
 				const entry = db[id];
 				const timeLeft = Math.max(0, Math.floor((entry.expiresAt - Date.now()) / 1000 / 60));
-				description += `\`[${id}](<${server.settings.website.storage}/${id}/>)\` - ${isMod ? `<@${entry.author}> - ` : ""}Uploaded: ${entry.uploaded ? "Yes" : "No"} - Expires in ${timeLeft}m\n`;
+				description += `[\`${id}\`](<${server.settings.website.storage}/${id}/>) - ${isMod ? `<@${entry.author}> - ` : ""}Uploaded: ${entry.uploaded ? "Yes" : "No"} - Expires in ${timeLeft}m\n`;
 			}
 
 			await interaction.followUp({ content: description });
