@@ -9,9 +9,9 @@ export interface ApplicationSettings {
 
 	adminRole: string;
 	defaultTextChannel: string;
+	defaultFrenchTextChannel: string;
 	guildId: string;
 	moderationChannel: string;
-	ticketChannel: string;
 
 	commands: CommandsSettings;
 };

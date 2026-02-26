@@ -34,6 +34,8 @@ const info = {
 			const channel = await guild.channels.fetch(settings.channel);
 
 			if (channel && channel.isSendable()) {
+				const commands = await bot.application.commands.fetch();
+				const helpCommandId = commands.find(c => c.name === "help")?.id || "HELP_ID";
 				const messages = await channel.messages.fetch({
 					limit: 10
 				});
@@ -47,8 +49,10 @@ const info = {
 						.replaceAll("{{GUILDNAME}}", guild.name)
 						.replaceAll("{{ADMINROLE}}", bot.settings.application.adminRole)
 						.replaceAll("{{DEFAULTTEXTCHANNEL}}", bot.settings.application.defaultTextChannel)
+						.replaceAll("{{DEFAULTFRENCHTEXTCHANNEL}}", bot.settings.application.defaultFrenchTextChannel)
 						.replaceAll("{{ROLESCHANNEL}}", bot.settings.application.commands.roles.channel)
 						.replaceAll("{{TICKETSCHANNEL}}", bot.settings.application.commands.tickets.channel)
+						.replaceAll("{{HELPCOMMAND}}", helpCommandId)
 				});
 
 				await interaction.followUp(`Rules published at <#${channel.id}>.`);

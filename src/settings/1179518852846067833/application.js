@@ -13,9 +13,9 @@ const applicationSettings = {
 
 	adminRole: "1179522523201802290",
 	defaultTextChannel: "1179535918277865614",
+	defaultFrenchTextChannel: "1476592213608628265",
 	guildId: "1020663521530351627",
 	moderationChannel: "1020680767921197186",
-	ticketChannel: "1247276648366080144",
 
 	commands
 };

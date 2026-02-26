@@ -65,7 +65,33 @@ const publish = async (logger, applicationId) => {
 	commandHandler.loadCommands();
 
 	await commandHandler.deployCommands(applicationId, settings.application.token, settings.application.guildId);
-	logger.info("Successfully published.");
+	logger.info("Successfully published commands.");
+
+	logger.info("Republishing rules and ticket prompts...");
+	try {
+		const { Client, GatewayIntentBits } = require("discord.js");
+		const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+		client.settings = settings;
+		await client.login(settings.application.token);
+
+		const rulesCmd = require("./commands/rules.js");
+		const ticketCmd = require("./commands/ticket.js");
+
+		const fakeInteraction = {
+			deferReply: async () => { },
+			followUp: async (msg) => logger.info(msg),
+			guild: await client.guilds.fetch(settings.application.guildId)
+		};
+
+		// Pass the logged-in client to the commands as the 'bot' object
+		await rulesCmd.run(logger, client, null, fakeInteraction);
+		await ticketCmd.run(logger, client, null, fakeInteraction);
+
+		client.destroy();
+		logger.info("Successfully republished rules and tickets.");
+	} catch (e) {
+		logger.error("Error republishing:", e);
+	}
 
 	process.exit(0);
 };
