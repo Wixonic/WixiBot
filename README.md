@@ -1,5 +1,5 @@
 # WixiBot
-> WixiLand Management Agency's main server
+> WixiLand's Discord Application
 
 [![Wakatime](https://wakatime.com/badge/user/0df5f3f8-e8fd-48e9-9695-f2e5d8773af9/project/0bf03ef6-02dc-4d7b-8aa0-3b43449be39b.svg?style=flat)](https://wakatime.com/@Wixonic/projects/stvzradqwp) [![Patreon](https://img.shields.io/badge/Patreon-black?style=flat&logo=patreon)](https://patreon.com/Wixonic)
 
