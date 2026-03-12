@@ -41,9 +41,10 @@ export interface Logger extends LoggerOptions {
 	info(...any: unknown[]): void;
 	warn(...any: unknown[]): void;
 	clone(prefixGenerator: string | (() => string)): Logger;
+	jump(): void;
 }
 
-export const rawLog = (level: string, color: string, options: LoggerOptions, ...any: unknown[]): void => {
+const rawLog = (level: string, color: string, options: LoggerOptions, ...any: unknown[]): void => {
 	const logParts: string[] = [];
 
 	if (options.displayLevel) logParts.push(color + level + colors.reset);
@@ -60,24 +61,22 @@ export const rawLog = (level: string, color: string, options: LoggerOptions, ...
 	const formatItem = (item: unknown): string => {
 		if (item instanceof Error) {
 			let str = item.stack || String(item);
-			if (item.cause) {
-				str += `\nCaused by: ${formatItem(item.cause)}`;
-			}
+			if (item.cause) str += `\nCaused by: ${formatItem(item.cause)}`;
 			return str;
 		}
+
 		if (typeof item === "object" && item !== null) {
 			if ("cause" in item) {
 				const causeOutput = formatItem((item as Record<string, unknown>).cause);
 				const rest = { ...(item as Record<string, unknown>) };
 				delete rest.cause;
-				
-				if (Object.keys(rest).length === 0) {
-					return `\nCaused by: ${causeOutput}`;
-				}
+
+				if (Object.keys(rest).length === 0) return `\nCaused by: ${causeOutput}`;
 				return JSON.stringify(rest) + `\nCaused by: ${causeOutput}`;
 			}
 			return JSON.stringify(item);
 		}
+
 		return String(item);
 	};
 
@@ -105,7 +104,15 @@ const createLogger = (options: Partial<LoggerOptions> & { prefix?: string | (() 
 		error: (...any) => rawLog("[ERROR]", colors.error, mergedOptions, ...injectPrefix(any)),
 		info: (...any) => rawLog(" [INFO]", colors.info, mergedOptions, ...injectPrefix(any)),
 		warn: (...any) => rawLog(" [WARN]", colors.warn, mergedOptions, ...injectPrefix(any)),
-		clone: (prefixGenerator) => createLogger({ ...mergedOptions, prefix: prefixGenerator }),
+		clone: (prefixGenerator) => createLogger({
+			...mergedOptions,
+			prefix: () => {
+				const oldPrefix = options.prefix ? (typeof options.prefix === "function" ? options.prefix() : options.prefix) : "";
+				const newPrefix = typeof prefixGenerator === "function" ? prefixGenerator() : prefixGenerator;
+				return oldPrefix ? `${oldPrefix} ${newPrefix}` : newPrefix;
+			}
+		}),
+		jump: () => console.log(""),
 		...mergedOptions
 	};
 };

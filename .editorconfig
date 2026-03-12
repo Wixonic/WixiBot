@@ -6,4 +6,5 @@ tab_width = 4
 charset = utf-8
 trim_trailing_whitespace = false
 insert_final_newline = false
+max_line_length = off
 end_of_line = lf

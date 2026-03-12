@@ -3,6 +3,6 @@
 
 deno.lock
 
-guilds/
+storage/
 secrets.js*
 secrets.ts

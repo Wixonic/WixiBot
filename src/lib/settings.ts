@@ -1,18 +1,20 @@
+import type { ClientOptions } from "discord.js";
 import index from "../settings/index.json" with { type: "json" };
 
 export interface ClientSettings {
+	discord: Omit<ClientOptions, "intents">;
 	clientId: string;
 	publicKey: string;
 	token: string;
-	webhookUrl: string;
+	webhookUrl: URL;
 };
 
-export type ClientName = keyof typeof index;
+export type ClientType = keyof typeof index;
 
 let current: ClientSettings | null = null;
-let currentClient: ClientName = "default";
+let currentClient: ClientType = "default";
 
-const loadSettings = async (client?: ClientName): Promise<ClientSettings> => {
+const loadSettings = async (client?: ClientType): Promise<ClientSettings> => {
 	if (client) currentClient = client;
 	const clientId = index[currentClient];
 

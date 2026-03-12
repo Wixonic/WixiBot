@@ -3,14 +3,15 @@
 	"displayName": "WixiBot",
 	"description": "WixiLand's Discord Application",
 	"author": "Wixonic <contact@wixonic.fr> (https://wixonic.fr)",
-	"version": "2.0.0-dev.1",
+	"version": "2.0.0.dev.1",
 	"license": "Wix Non-Commercial License",
 	"repository": "github:Wixonic/WixiBot",
 	"exports": "./src/main.ts",
 	"tasks": {
-		"dev": "CLIENT=dev deno run --watch --allow-all src/main.ts",
 		"start": "deno run --allow-all src/main.ts",
-		"deploy": "deno run --allow-all src/deploy.ts"
+		"deploy": "deno run --allow-all src/deploy.ts",
+		"dev:start": "CLIENT=dev deno run --allow-all src/main.ts",
+		"dev:deploy": "CLIENT=dev deno run --allow-all src/deploy.ts"
 	},
 	"imports": {
 		"discord.js": "npm:discord.js@14.25.1"
