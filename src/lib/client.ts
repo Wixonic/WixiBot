@@ -1,4 +1,4 @@
-import { ActivityType, type ChatInputCommandInteraction, Client as DiscordClient, Events, GatewayIntentBits, type SlashCommandBuilder } from "discord.js";
+import { ActivityType, type ChatInputCommandInteraction, Client as DiscordClient, type ContextMenuCommandBuilder, Events, GatewayIntentBits, type MessageContextMenuCommandInteraction, type ModalSubmitInteraction, type SlashCommandBuilder, type SlashCommandOptionsOnlyBuilder, type SlashCommandSubcommandsOnlyBuilder } from "discord.js";
 import EventEmitter from "node:events";
 
 import type { Guild } from "./guild.ts";
@@ -7,8 +7,9 @@ import type { ClientSettings } from "./settings.ts";
 import { User } from "./user.ts";
 
 export interface Command {
-	data: SlashCommandBuilder;
-	execute: (logger: Logger, client: Client, interaction: ChatInputCommandInteraction) => Promise<void>;
+	data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder | ContextMenuCommandBuilder;
+	execute: (logger: Logger, client: Client, interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction) => Promise<void>;
+	onModalSubmit?: (logger: Logger, client: Client, interaction: ModalSubmitInteraction) => Promise<void>;
 };
 
 class Client extends EventEmitter {
@@ -29,11 +30,12 @@ class Client extends EventEmitter {
 		this.#discordClient = new DiscordClient({
 			...settings.discord,
 			intents: [
-				GatewayIntentBits.Guilds
+				GatewayIntentBits.Guilds,
+				GatewayIntentBits.GuildVoiceStates
 			],
 			presence: {
 				activities: [{
-					name: `/help | v${(await import("../../deno.json", { with: { type: "json" } })).default.version}`,
+					name: `/help - v${(await import("../../deno.json", { with: { type: "json" } })).default.version}`,
 					type: ActivityType.Custom
 				}]
 			}
@@ -146,22 +148,33 @@ class Client extends EventEmitter {
 		}
 
 		this.#discordClient?.on(Events.InteractionCreate, async (interaction) => {
-			if (!interaction.isChatInputCommand()) return;
+			if (interaction.isChatInputCommand() || interaction.isMessageContextMenuCommand()) {
+				if (!this.#users.has(interaction.user.id)) {
+					const user = new User(logger, interaction.user);
+					await user.init();
+				}
 
-			if (!this.#users.has(interaction.user.id)) {
-				const user = new User(logger, interaction.user);
-				await user.init();
-			}
+				const command = this.#commands.get(interaction.commandName);
+				if (!command) return logger.error(`No command matching ${interaction.commandName} was found.`);
 
-			const command = this.#commands.get(interaction.commandName);
-			if (!command) return logger.error(`No command matching ${interaction.commandName} was found.`);
+				try {
+					await command.execute(logger, this, interaction);
+				} catch (e) {
+					logger.error(`Error executing ${interaction.commandName}`, { cause: e });
+					if (interaction.replied || interaction.deferred) await interaction.followUp({ content: "There was an error while executing this command!", ephemeral: true });
+					else await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
+				}
+			} else if (interaction.isModalSubmit()) {
+				const command = Array.from(this.#commands.values()).find((command) => interaction.customId === command.data.name || interaction.customId.startsWith(`${command.data.name}_`) || interaction.customId.startsWith(`${command.data.name}_`));
+				if (!command || !command.onModalSubmit) return;
 
-			try {
-				await command.execute(logger, this, interaction);
-			} catch (e) {
-				logger.error(`Error executing ${interaction.commandName}`, { cause: e });
-				if (interaction.replied || interaction.deferred) await interaction.followUp({ content: "There was an error while executing this command!", ephemeral: true });
-				else await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
+				try {
+					await command.onModalSubmit(logger, this, interaction);
+				} catch (e) {
+					logger.error(`Error handling modal for ${interaction.customId}`, { cause: e });
+					if (interaction.replied || interaction.deferred) await interaction.followUp({ content: "There was an error while submitting the modal!", ephemeral: true });
+					else await interaction.reply({ content: "There was an error while submitting the modal!", ephemeral: true });
+				}
 			}
 		});
 	};

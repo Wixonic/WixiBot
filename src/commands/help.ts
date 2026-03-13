@@ -50,8 +50,7 @@ export const command = {
 
 		for (const chunk of chunks) {
 			await interaction.followUp({
-				content: chunk,
-				flags: MessageFlags.Ephemeral
+				content: chunk
 			});
 		}
 	}
