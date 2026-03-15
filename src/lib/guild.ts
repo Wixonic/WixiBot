@@ -4,13 +4,17 @@ import { client } from "./client.ts";
 import type { Logger } from "./logger.ts";
 
 export interface GuildSettings {
-	logChannelId: string | null;
+	channels: {
+		logs?: string;
+	};
 };
 
 export class Guild {
 	#discordGuild: DiscordGuild;
 	#storagePath: string;
-	#settings: GuildSettings = { logChannelId: null };
+	#settings: GuildSettings = {
+		channels: {}
+	};
 	#logger: Logger;
 
 	constructor(logger: Logger, discordGuild: DiscordGuild) {
@@ -25,7 +29,6 @@ export class Guild {
 
 	async init() {
 		this.#logger.debug("Initializing guild...");
-		client.addGuild(this);
 
 		try {
 			await Deno.mkdir(this.#storagePath.split("/").slice(0, -1).join("/"), { recursive: true });
@@ -42,13 +45,15 @@ export class Guild {
 						const owner = await this.#discordGuild.fetchOwner();
 
 						const helpCommandId = await client.getCommandId("help", this.id);
+						const settingsCommandId = await client.getCommandId("settings", this.id);
+
 						await owner.send(`Hi!
 I was successfully installed and initialized for your server **${this.name}**.
 
 Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId}>` : "`/help`"}.
 
-> **Tip**: You can configure an error logging channel so that I can send you reports directly in your server instead of DMs.
-> Use the appropriate command to set it up!`);
+> **Tip**: You can configure an error logging channel and a moderation channel so that I can send you reports directly in your server instead of DMs.
+> Use </settings:${settingsCommandId}> to set it up!`).catch(() => { });;
 					} catch (e) {
 						this.#logger.warn("Failed to notify guild owner. DMs might be closed.", { cause: e });
 					}
@@ -57,6 +62,8 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		} catch (e) {
 			this.#logger.error("Failed to initialize guild storage", { cause: e });
 		}
+
+		client.addGuild(this);
 	};
 
 	async saveSettings() {
@@ -64,16 +71,21 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 	};
 
 	reportError(message: string, error: unknown) {
-		this.#logger.error(message, { cause: error });
+		this.#logger.error(message, {
+			cause: error
+		});
 
-		if (this.#settings.logChannelId) {
-			const channel = this.#discordGuild.channels.cache.get(this.#settings.logChannelId);
+		if (this.#settings.channels.logs) {
+			const channel = this.#discordGuild.channels.cache.get(this.#settings.channels.logs);
+
 			if (channel && channel.isTextBased()) channel.send(`An error occurred:
-\`\`\`
+					\`\`\`
 ${String(message)}
 ${error instanceof Error ? error.stack : String(error)}
 \`\`\``).catch(() => { });
-		} else this.#discordGuild.fetchOwner().then((owner) => {
+		} else this.#discordGuild.fetchOwner().then(async (owner) => {
+			const settingsCommandId = await client.getCommandId("settings", this.id);
+
 			owner.send(`An error occurred in your server **${this.name}**:
 \`\`\`
 ${String(message)}
@@ -81,7 +93,7 @@ ${error instanceof Error ? error.stack : String(error)}
 \`\`\`
 
 > **Tip**: You can configure an error logging channel so that I can send you reports directly in your server instead of DMs.
-> Use the appropriate command to set it up!`).catch(() => { });
+> Use </settings:${settingsCommandId}> to set it up!`).catch(() => { });
 		}).catch(() => { });
 	};
 };

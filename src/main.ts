@@ -57,8 +57,6 @@ const main = async () => {
 					}, { once: true });
 
 					client.on("error", reject);
-
-					client.main().catch(reject);
 				});
 			} catch (e) {
 				logger.error("Failed to start client", {

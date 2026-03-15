@@ -1,7 +1,14 @@
 import type { ClientOptions } from "discord.js";
 import index from "../settings/index.json" with { type: "json" };
 
+export interface AISettings {
+	enabled: boolean;
+	model: string;
+	maxTokens: number;
+};
+
 export interface ClientSettings {
+	ai?: AISettings;
 	discord: Omit<ClientOptions, "intents">;
 	clientId: string;
 	publicKey: string;

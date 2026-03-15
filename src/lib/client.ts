@@ -1,15 +1,24 @@
-import { ActivityType, type ChatInputCommandInteraction, Client as DiscordClient, type ContextMenuCommandBuilder, Events, GatewayIntentBits, type MessageContextMenuCommandInteraction, type ModalSubmitInteraction, type SlashCommandBuilder, type SlashCommandOptionsOnlyBuilder, type SlashCommandSubcommandsOnlyBuilder } from "discord.js";
+import { ActivityType, type ChatInputCommandInteraction, Client as DiscordClient, type ContextMenuCommandBuilder, Events, GatewayIntentBits, type MessageContextMenuCommandInteraction, type ModalSubmitInteraction, type SlashCommandBuilder, type SlashCommandOptionsOnlyBuilder, type SlashCommandSubcommandsOnlyBuilder, type UserContextMenuCommandInteraction, type MessageComponentInteraction, MessageFlags } from "discord.js";
 import EventEmitter from "node:events";
 
-import type { Guild } from "./guild.ts";
+import { Guild } from "./guild.ts";
 import type { Logger } from "./logger.ts";
 import type { ClientSettings } from "./settings.ts";
 import { User } from "./user.ts";
 
 export interface Command {
 	data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder | ContextMenuCommandBuilder;
-	execute: (logger: Logger, client: Client, interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction) => Promise<void>;
-	onModalSubmit?: (logger: Logger, client: Client, interaction: ModalSubmitInteraction) => Promise<void>;
+	execute: (logger: Logger, client: Client, interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction) => Promise<void>;
+};
+
+export interface Component {
+	customId: string | RegExp;
+	execute: (logger: Logger, client: Client, interaction: MessageComponentInteraction) => Promise<void>;
+};
+
+export interface Modal {
+	customId: string | RegExp;
+	execute: (logger: Logger, client: Client, interaction: ModalSubmitInteraction) => Promise<void>;
 };
 
 class Client extends EventEmitter {
@@ -18,6 +27,8 @@ class Client extends EventEmitter {
 	#settings: ClientSettings | null = null;
 
 	#commands = new Map<string, Command>();
+	#components = new Set<Component>();
+	#modals = new Set<Modal>();
 	#guilds = new Map<string, Guild>();
 	#users = new Map<string, User>();
 
@@ -31,7 +42,10 @@ class Client extends EventEmitter {
 			...settings.discord,
 			intents: [
 				GatewayIntentBits.Guilds,
-				GatewayIntentBits.GuildVoiceStates
+				GatewayIntentBits.GuildMembers,
+				GatewayIntentBits.GuildMessages,
+				GatewayIntentBits.GuildVoiceStates,
+				GatewayIntentBits.MessageContent
 			],
 			presence: {
 				activities: [{
@@ -43,6 +57,11 @@ class Client extends EventEmitter {
 
 		this.#discordClient.on("error", (e) => this.emit("error", e));
 
+		await this.loadCommands();
+		await this.loadComponents();
+		await this.loadEvents();
+		await this.loadModals();
+
 		await this.#discordClient.login(settings.token);
 	};
 
@@ -52,11 +71,6 @@ class Client extends EventEmitter {
 		this.#settings = null;
 	};
 
-	async main() {
-		this.#logger.debug("Loading components...");
-		await this.loadEvents();
-		await this.loadCommands();
-	};
 	addGuild(guild: Guild) {
 		this.#guilds.set(guild.id, guild);
 		this.#logger.debug(`[Guilds] Registered guild ${guild.name} (${guild.id})`);
@@ -64,7 +78,7 @@ class Client extends EventEmitter {
 
 	getGuild(id: string) {
 		return this.#guilds.get(id);
-	}
+	};
 
 	addUser(user: User) {
 		this.#users.set(user.id, user);
@@ -104,6 +118,7 @@ class Client extends EventEmitter {
 
 		try {
 			let count = 0;
+
 			for await (const dirEntry of Deno.readDir("./src/events")) {
 				if (dirEntry.isFile && (dirEntry.name.endsWith(".ts") || dirEntry.name.endsWith(".js"))) {
 					const moduleUrl = new URL(`../events/${dirEntry.name}`, import.meta.url).href;
@@ -120,7 +135,9 @@ class Client extends EventEmitter {
 
 			logger.debug(`Loaded ${count} event${count === 1 ? "" : "s"}.`);
 		} catch (e) {
-			if (!(e instanceof Deno.errors.NotFound)) logger.error("Failed to load events", { cause: e });
+			if (!(e instanceof Deno.errors.NotFound)) logger.error("Failed to load events", {
+				cause: e
+			});
 		}
 	};
 
@@ -129,6 +146,7 @@ class Client extends EventEmitter {
 
 		try {
 			let count = 0;
+
 			for await (const dirEntry of Deno.readDir("./src/commands")) {
 				if (dirEntry.isFile && (dirEntry.name.endsWith(".ts") || dirEntry.name.endsWith(".js"))) {
 					const moduleUrl = new URL(`../commands/${dirEntry.name}`, import.meta.url).href;
@@ -144,36 +162,139 @@ class Client extends EventEmitter {
 
 			logger.debug(`Loaded ${count} command${count === 1 ? "" : "s"}.`);
 		} catch (e) {
-			if (!(e instanceof Deno.errors.NotFound)) logger.error("Failed to load commands", { cause: e });
+			if (!(e instanceof Deno.errors.NotFound)) logger.error("Failed to load commands", {
+				cause: e
+			});
+		}
+	};
+
+	async loadComponents() {
+		const logger = this.#logger.clone(() => "[Components]");
+
+		try {
+			let count = 0;
+
+			for await (const dirEntry of Deno.readDir("./src/components")) {
+				if (dirEntry.isFile && (dirEntry.name.endsWith(".ts") || dirEntry.name.endsWith(".js"))) {
+					const moduleUrl = new URL(`../components/${dirEntry.name}`, import.meta.url).href;
+					const module = await import(moduleUrl);
+					if ("component" in module) {
+						this.#components.add(module.component);
+						count++;
+					}
+				}
+			}
+
+			logger.debug(`Loaded ${count} component${count === 1 ? "" : "s"}.`);
+		} catch (e) {
+			if (!(e instanceof Deno.errors.NotFound)) logger.error("Failed to load components", {
+				cause: e
+			});
+		}
+	};
+
+	async loadModals() {
+		const logger = this.#logger.clone(() => "[Modals]");
+
+		try {
+			let count = 0;
+
+			for await (const dirEntry of Deno.readDir("./src/modals")) {
+				if (dirEntry.isFile && (dirEntry.name.endsWith(".ts") || dirEntry.name.endsWith(".js"))) {
+					const moduleUrl = new URL(`../modals/${dirEntry.name}`, import.meta.url).href;
+					const module = await import(moduleUrl);
+
+					if ("modal" in module) {
+						this.#modals.add(module.modal);
+						count++;
+					}
+				}
+			}
+
+			logger.debug(`Loaded ${count} modal${count === 1 ? "" : "s"}.`);
+		} catch (e) {
+			if (!(e instanceof Deno.errors.NotFound)) logger.error("Failed to load modals", {
+				cause: e
+			});
 		}
 
 		this.#discordClient?.on(Events.InteractionCreate, async (interaction) => {
-			if (interaction.isChatInputCommand() || interaction.isMessageContextMenuCommand()) {
+			if (interaction.isChatInputCommand() || interaction.isMessageContextMenuCommand() || interaction.isUserContextMenuCommand()) {
+				if (interaction.guildId && !this.#guilds.has(interaction.guildId)) {
+					const discordGuild = interaction.guild ?? await this.#discordClient?.guilds.fetch(interaction.guildId).catch(() => null);
+
+					if (discordGuild) {
+						const guild = new Guild(logger, discordGuild);
+						await guild.init();
+					}
+				}
+
 				if (!this.#users.has(interaction.user.id)) {
 					const user = new User(logger, interaction.user);
 					await user.init();
 				}
 
-				const command = this.#commands.get(interaction.commandName);
-				if (!command) return logger.error(`No command matching ${interaction.commandName} was found.`);
+				const commandObject = this.#commands.get(interaction.commandName);
 
 				try {
-					await command.execute(logger, this, interaction);
+					await commandObject?.execute(logger, this, interaction);
 				} catch (e) {
-					logger.error(`Error executing ${interaction.commandName}`, { cause: e });
-					if (interaction.replied || interaction.deferred) await interaction.followUp({ content: "There was an error while executing this command!", ephemeral: true });
-					else await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
+					logger.error(`Error executing ${interaction.commandName}`, {
+						cause: e
+					});
+
+					if (interaction.replied || interaction.deferred) await interaction.followUp({
+						content: "There was an error while executing this command!",
+						flags: MessageFlags.Ephemeral
+					});
+					else await interaction.reply({
+						content: "There was an error while executing this command!",
+						flags: MessageFlags.Ephemeral
+					});
+				}
+			} else if (interaction.isMessageComponent()) {
+				const componentObject = Array.from(this.#components).find((component) => {
+					if (component.customId instanceof RegExp) return component.customId.test(interaction.customId);
+					return component.customId === interaction.customId || interaction.customId.startsWith(`${component.customId}:`);
+				});
+
+				try {
+					await componentObject?.execute(logger, this, interaction);
+				} catch (e) {
+					logger.error(`Error handling component ${interaction.customId}`, {
+						cause: e
+					});
+
+					if (interaction.replied || interaction.deferred) await interaction.followUp({
+						content: "There was an error while interacting with this component!",
+						flags: MessageFlags.Ephemeral
+					});
+					else await interaction.reply({
+						content: "There was an error while interacting with this component!",
+						flags: MessageFlags.Ephemeral
+					});
 				}
 			} else if (interaction.isModalSubmit()) {
-				const command = Array.from(this.#commands.values()).find((command) => interaction.customId === command.data.name || interaction.customId.startsWith(`${command.data.name}_`) || interaction.customId.startsWith(`${command.data.name}_`));
-				if (!command || !command.onModalSubmit) return;
+				const modalObject = Array.from(this.#modals).find((modal) => {
+					if (modal.customId instanceof RegExp) return modal.customId.test(interaction.customId);
+					return modal.customId === interaction.customId || interaction.customId.startsWith(`${modal.customId}:`);
+				});
 
 				try {
-					await command.onModalSubmit(logger, this, interaction);
+					await modalObject?.execute(logger, this, interaction);
 				} catch (e) {
-					logger.error(`Error handling modal for ${interaction.customId}`, { cause: e });
-					if (interaction.replied || interaction.deferred) await interaction.followUp({ content: "There was an error while submitting the modal!", ephemeral: true });
-					else await interaction.reply({ content: "There was an error while submitting the modal!", ephemeral: true });
+					logger.error(`Error handling modal ${interaction.customId}`, {
+						cause: e
+					});
+
+					if (interaction.replied || interaction.deferred) await interaction.followUp({
+						content: "There was an error while submitting this modal!",
+						flags: MessageFlags.Ephemeral
+					});
+					else await interaction.reply({
+						content: "There was an error while submitting this modal!",
+						flags: MessageFlags.Ephemeral
+					});
 				}
 			}
 		});
