@@ -19,7 +19,7 @@ export class Guild {
 
 	constructor(logger: Logger, discordGuild: DiscordGuild) {
 		this.#discordGuild = discordGuild;
-		this.#logger = logger.clone(`[Guild: ${discordGuild.name}]`);
+		this.#logger = logger.clone(`[G-${discordGuild.id}]`);
 		this.#storagePath = `./storage/guilds/${discordGuild.id}/settings.json`;
 	};
 

@@ -65,14 +65,14 @@ export class StopSignal extends Error {
 	constructor() {
 		super("StopSignal");
 		this.name = "";
-	}
+	};
 };
 
 export const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const parseDuration = (input: string): number | null => {
 	const durationRegex = /(\d+)\s*(seconds?|secs?|s|minutes?|mins?|m|hours?|h|days?|d|weeks?|w|months?|mo|years?|y)/gi;
-	let totalMs = 0;
+	let milliseconds = 0;
 	let found = false;
 
 	let match;
@@ -81,14 +81,14 @@ export const parseDuration = (input: string): number | null => {
 		const unit = match[2].toLowerCase();
 		found = true;
 
-		if (unit.startsWith("y")) totalMs += value * 365 * 24 * 60 * 60 * 1000;
-		else if (unit.startsWith("mo")) totalMs += value * 30 * 24 * 60 * 60 * 1000;
-		else if (unit.startsWith("w")) totalMs += value * 7 * 24 * 60 * 60 * 1000;
-		else if (unit.startsWith("d")) totalMs += value * 24 * 60 * 60 * 1000;
-		else if (unit.startsWith("h")) totalMs += value * 60 * 60 * 1000;
-		else if (unit.startsWith("min") || unit === "m") totalMs += value * 60 * 1000;
-		else if (unit.startsWith("s")) totalMs += value * 1000;
+		if (unit.startsWith("y")) milliseconds += value * 365 * 24 * 60 * 60 * 1000;
+		else if (unit.startsWith("mo")) milliseconds += value * 30 * 24 * 60 * 60 * 1000;
+		else if (unit.startsWith("w")) milliseconds += value * 7 * 24 * 60 * 60 * 1000;
+		else if (unit.startsWith("d")) milliseconds += value * 24 * 60 * 60 * 1000;
+		else if (unit.startsWith("h")) milliseconds += value * 60 * 60 * 1000;
+		else if (unit.startsWith("min") || unit === "m") milliseconds += value * 60 * 1000;
+		else if (unit.startsWith("s")) milliseconds += value * 1000;
 	}
 
-	return found ? totalMs : null;
+	return found ? milliseconds : null;
 };

@@ -8,10 +8,12 @@ const deploy = async () => {
 
 	let clientType: ClientType;
 	try {
-		clientType = (Deno.env.get("CLIENT") as ClientType) ?? "default";
+		clientType = (Deno.env.get("CLIENT") as ClientType) ?? "prod";
 		await loadSettings(clientType);
-	} catch (e) {
-		return logger.error("Failed to load settings", { cause: e });
+	} catch (error) {
+		return logger.error("Failed to load settings", {
+			cause: error
+		});
 	}
 
 	const settings = getSettings();
@@ -22,9 +24,9 @@ const deploy = async () => {
 	logger.debug("Scanning commands...");
 
 	try {
-		for await (const dirEntry of Deno.readDir("./src/commands")) {
-			if (dirEntry.isFile && (dirEntry.name.endsWith(".ts") || dirEntry.name.endsWith(".js"))) {
-				const moduleUrl = new URL(`./commands/${dirEntry.name}`, import.meta.url).href;
+		for await (const file of Deno.readDir("./src/commands")) {
+			if (file.isFile && (file.name.endsWith(".ts") || file.name.endsWith(".js"))) {
+				const moduleUrl = new URL(`./commands/${file.name}`, import.meta.url).href;
 				const module = await import(moduleUrl);
 
 				if ("command" in module) {
@@ -33,8 +35,10 @@ const deploy = async () => {
 				}
 			}
 		}
-	} catch (e) {
-		return logger.error("Failed to scan commands", { cause: e });
+	} catch (error) {
+		return logger.error("Failed to scan commands", {
+			cause: error
+		});
 	}
 
 	logger.info(`Deploying ${commands.length} command${commands.length === 1 ? "" : "s"} as ${clientType}...`);
@@ -45,8 +49,10 @@ const deploy = async () => {
 		});
 
 		logger.info(`Successfully deployed ${commands.length} command${commands.length === 1 ? "" : "s"}.`);
-	} catch (e) {
-		logger.error("Failed to deploy commands", { cause: e });
+	} catch (error) {
+		logger.error("Failed to deploy commands", {
+			cause: error
+		});
 	}
 };
 

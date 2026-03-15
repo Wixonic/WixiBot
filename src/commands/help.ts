@@ -48,10 +48,8 @@ export const command = {
 		const fullMessage = sections.join("\n\n");
 		const chunks = chunkMessage(fullMessage, 2000);
 
-		for (const chunk of chunks) {
-			await interaction.followUp({
-				content: chunk
-			});
-		}
+		for (const chunk of chunks) await interaction.followUp({
+			content: chunk
+		});
 	}
 } satisfies Command;

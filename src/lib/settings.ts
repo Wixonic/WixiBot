@@ -19,7 +19,7 @@ export interface ClientSettings {
 export type ClientType = keyof typeof index;
 
 let current: ClientSettings | null = null;
-let currentClient: ClientType = "default";
+let currentClient: ClientType = "prod";
 
 const loadSettings = async (client?: ClientType): Promise<ClientSettings> => {
 	if (client) currentClient = client;

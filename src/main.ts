@@ -7,12 +7,12 @@ const main = async () => {
 	let clientType: ClientType;
 	let settings: ClientSettings;
 	try {
-		clientType = (Deno.env.get("CLIENT") as ClientType) ?? "default";
+		clientType = (Deno.env.get("CLIENT") as ClientType) ?? "prod";
 		await loadSettings(clientType);
 		settings = getSettings();
-	} catch (e) {
+	} catch (error) {
 		return mainLogger.error(`Failed to load settings`, {
-			cause: e
+			cause: error
 		});
 	}
 
@@ -46,26 +46,26 @@ const main = async () => {
 				logger.info(`Client connected as ${client.user?.username}.`);
 
 				await new Promise((_, reject) => {
-					globalThis.addEventListener("error", (e: ErrorEvent) => {
-						e.preventDefault();
-						reject(e.error);
+					globalThis.addEventListener("error", (event: ErrorEvent) => {
+						event.preventDefault();
+						reject(event.error);
 					}, { once: true });
 
-					globalThis.addEventListener("unhandledrejection", (e: PromiseRejectionEvent) => {
-						e.preventDefault();
-						reject(e.reason);
+					globalThis.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
+						event.preventDefault();
+						reject(event.reason);
 					}, { once: true });
 
 					client.on("error", reject);
 				});
-			} catch (e) {
+			} catch (error) {
 				logger.error("Failed to start client", {
-					cause: e
+					cause: error
 				});
 			}
-		} catch (e) {
+		} catch (error) {
 			logger.error("Failure", {
-				cause: e
+				cause: error
 			});
 		} finally {
 			await client.destroy();

@@ -13,7 +13,7 @@ export class User {
 
 	constructor(logger: Logger, discordUser: DiscordUser) {
 		this.#discordUser = discordUser;
-		this.#logger = logger.clone(`[User: ${discordUser.username}]`);
+		this.#logger = logger.clone(`[U-${discordUser.id}]`);
 		this.#storagePath = `./storage/users/${discordUser.id}/settings.json`;
 	};
 
