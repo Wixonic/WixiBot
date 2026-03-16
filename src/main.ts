@@ -56,7 +56,7 @@ const main = async () => {
 						reject(event.reason);
 					}, { once: true });
 
-					client.on("error", reject);
+					client.once("error", reject);
 				});
 			} catch (error) {
 				logger.error("Failed to start client", {
