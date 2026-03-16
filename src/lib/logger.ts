@@ -56,7 +56,8 @@ const rawLog = (level: string, color: string, options: LoggerOptions, ...any: un
 		logParts.push(
 			colors.dim + colors.white +
 			now.toLocaleDateString("fr", { day: "2-digit", month: "2-digit", year: "numeric" }),
-			now.toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3 }) + colors.reset
+			now.toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3 }) +
+			colors.reset
 		);
 	}
 
@@ -76,6 +77,7 @@ const rawLog = (level: string, color: string, options: LoggerOptions, ...any: un
 				if (Object.keys(rest).length === 0) return `\nCaused by: ${causeOutput}`;
 				return safeStringify(rest) + `\nCaused by: ${causeOutput}`;
 			}
+
 			return safeStringify(item);
 		}
 
@@ -85,7 +87,6 @@ const rawLog = (level: string, color: string, options: LoggerOptions, ...any: un
 	const argsJoined = any.map(formatItem).join(" ");
 
 	logParts.push(color + argsJoined + colors.reset);
-
 	console.log(logParts.join(" "));
 };
 
