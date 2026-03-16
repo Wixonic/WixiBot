@@ -1,7 +1,9 @@
 import type { User as DiscordUser } from "discord.js";
+import path from "node:path";
 
 import { client } from "./client.ts";
 import type { Logger } from "./logger.ts";
+import { sendChunks } from "./utils.ts";
 
 export type UserSettings = Record<string, unknown>;
 
@@ -14,7 +16,7 @@ export class User {
 	constructor(logger: Logger, discordUser: DiscordUser) {
 		this.#discordUser = discordUser;
 		this.#logger = logger.clone(`[U-${discordUser.id}]`);
-		this.#storagePath = `./storage/users/${discordUser.id}/settings.json`;
+		this.#storagePath = `./storage/users/${discordUser.id}/`;
 	};
 
 	get id() { return this.#discordUser.id; };
@@ -28,7 +30,7 @@ export class User {
 		try {
 			await Deno.mkdir(this.#storagePath.split("/").slice(0, -1).join("/"), { recursive: true });
 			try {
-				const content = await Deno.readTextFile(this.#storagePath);
+				const content = await Deno.readTextFile(path.join(this.#storagePath, "settings.json"));
 				this.#settings = JSON.parse(content);
 				this.#logger.debug("Loaded existing user settings.");
 			} catch (e) {
@@ -43,16 +45,16 @@ export class User {
 	};
 
 	async saveSettings() {
-		await Deno.writeTextFile(this.#storagePath, JSON.stringify(this.#settings, null, "\t"));
+		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings, null, "\t"));
 	};
 
 	reportError(message: string, error: unknown) {
 		this.#logger.error(message, { cause: error });
 
-		this.#discordUser.send(`An error occurred while processing your request:
+		sendChunks(`An error occurred while processing your request:
 \`\`\`
 ${String(message)}
 ${error instanceof Error ? error.stack : String(error)}
-\`\`\``).catch(() => { });
+\`\`\``, this.#discordUser.send.bind(this.#discordUser)).catch(() => { });
 	};
 };

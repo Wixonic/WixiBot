@@ -1,7 +1,7 @@
 import { ApplicationCommandType, ApplicationIntegrationType, InteractionContextType, MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import type { Command } from "../lib/client.ts";
-import { displayCommand, chunkMessage } from "../lib/utils.ts";
+import { displayCommand, sendChunks } from "../lib/utils.ts";
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -45,11 +45,6 @@ export const command = {
 		if (interaction.guild) sections.push(`## Guild Commands in ${interaction.guild.name}\n${guildSlashCommandList.length > 0 ? guildSlashCommandList.join("\n") : "*No guild-specific commands available.*"}`);
 		sections.push(`-# Guild commands are only available in their respective server.`);
 
-		const fullMessage = sections.join("\n\n");
-		const chunks = chunkMessage(fullMessage, 2000);
-
-		for (const chunk of chunks) await interaction.followUp({
-			content: chunk
-		});
+		await sendChunks(sections.join("\n\n"), interaction.followUp.bind(interaction));
 	}
 } satisfies Command;

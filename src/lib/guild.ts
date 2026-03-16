@@ -1,7 +1,9 @@
 import type { Guild as DiscordGuild } from "discord.js";
+import path from "node:path";
 
 import { client } from "./client.ts";
 import type { Logger } from "./logger.ts";
+import { sendChunks } from "./utils.ts";
 
 export interface GuildSettings {
 	channels: {
@@ -20,7 +22,7 @@ export class Guild {
 	constructor(logger: Logger, discordGuild: DiscordGuild) {
 		this.#discordGuild = discordGuild;
 		this.#logger = logger.clone(`[G-${discordGuild.id}]`);
-		this.#storagePath = `./storage/guilds/${discordGuild.id}/settings.json`;
+		this.#storagePath = `./storage/guilds/${discordGuild.id}/`;
 	};
 
 	get id() { return this.#discordGuild.id; };
@@ -33,7 +35,7 @@ export class Guild {
 		try {
 			await Deno.mkdir(this.#storagePath.split("/").slice(0, -1).join("/"), { recursive: true });
 			try {
-				const content = await Deno.readTextFile(this.#storagePath);
+				const content = await Deno.readTextFile(path.join(this.#storagePath, "settings.json"));
 				this.#settings = JSON.parse(content);
 				this.#logger.debug("Loaded existing guild settings.");
 			} catch (e) {
@@ -47,13 +49,13 @@ export class Guild {
 						const helpCommandId = await client.getCommandId("help", this.id);
 						const settingsCommandId = await client.getCommandId("settings", this.id);
 
-						await owner.send(`Hi!
+						await sendChunks(`Hi!
 I was successfully installed and initialized for your server **${this.name}**.
 
 Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId}>` : "`/help`"}.
 
 > **Tip**: You can configure an error logging channel and a moderation channel so that I can send you reports directly in your server instead of DMs.
-> Use </settings:${settingsCommandId}> to set it up!`).catch(() => { });;
+> Use </settings:${settingsCommandId}> to set it up!`, owner.send.bind(owner));
 					} catch (e) {
 						this.#logger.warn("Failed to notify guild owner. DMs might be closed.", { cause: e });
 					}
@@ -67,7 +69,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 	};
 
 	async saveSettings() {
-		await Deno.writeTextFile(this.#storagePath, JSON.stringify(this.#settings, null, "\t"));
+		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings, null, "\t"));
 	};
 
 	reportError(message: string, error: unknown) {
@@ -78,22 +80,23 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		if (this.#settings.channels.logs) {
 			const channel = this.#discordGuild.channels.cache.get(this.#settings.channels.logs);
 
-			if (channel && channel.isTextBased()) channel.send(`An error occurred:
+			if (channel && channel.isTextBased()) sendChunks(`An error occurred:
 					\`\`\`
 ${String(message)}
 ${error instanceof Error ? error.stack : String(error)}
-\`\`\``).catch(() => { });
-		} else this.#discordGuild.fetchOwner().then(async (owner) => {
-			const settingsCommandId = await client.getCommandId("settings", this.id);
+\`\`\``, channel.send.bind(channel)).catch(() => { });
+		} else this.#discordGuild.fetchOwner()
+			.then(async (owner) => {
+				const settingsCommandId = await client.getCommandId("settings", this.id);
 
-			owner.send(`An error occurred in your server **${this.name}**:
+				sendChunks(`An error occurred in your server **${this.name}**:
 \`\`\`
 ${String(message)}
 ${error instanceof Error ? error.stack : String(error)}
 \`\`\`
 
 > **Tip**: You can configure an error logging channel so that I can send you reports directly in your server instead of DMs.
-> Use </settings:${settingsCommandId}> to set it up!`).catch(() => { });
-		}).catch(() => { });
+> Use </settings:${settingsCommandId}> to set it up!`, owner.send.bind(owner)).catch(() => { });
+			}).catch(() => { });
 	};
 };
