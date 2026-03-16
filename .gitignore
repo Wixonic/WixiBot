@@ -1,5 +1,8 @@
-node_modules/
-
 .DS_Store
+.deno/
+
+deno.lock
+
+storage/
 secrets.js*
-package-lock.json
+secrets.ts
