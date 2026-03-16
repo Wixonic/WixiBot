@@ -1,6 +1,8 @@
 # WixiBot
 > Multi-purpose Discord bot
 
+[![GitHub Release](https://img.shields.io/github/v/release/Wixonic/WixiBot?display_name=tag&style=flat&label=Version)](https://github.com/Wixonic/WixiBot/releases)
+
 [![Wakatime](https://wakatime.com/badge/github/Wixonic/WixiBot.svg?style=flat)](https://wakatime.com/badge/github/Wixonic/WixiBot)
 [![Contributors](https://img.shields.io/github/contributors/Wixonic/WixiBot?color=%2308F&label=Contributors)](https://github.com/Wixonic/WixiBot/graphs/contributors)
 [![License](https://img.shields.io/badge/License-Wix%20Non--Commerical%20License-%23555.svg)](https://github.com/Wixonic/WixiBot/blob/Default/LICENSE)
