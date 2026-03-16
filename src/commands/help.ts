@@ -2,6 +2,7 @@ import { ApplicationCommandType, ApplicationIntegrationType, InteractionContextT
 
 import type { Command } from "../lib/client.ts";
 import { displayCommand, sendChunks } from "../lib/utils.ts";
+import { getSettings } from "../lib/settings.ts";
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -21,6 +22,8 @@ export const command = {
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});
+
+		const settings = getSettings();
 
 		const guildCommands = interaction.guild?.commands ? await interaction.guild.commands.fetch() : null;
 		const globalCommands = await interaction.client.application?.commands.fetch();
@@ -44,6 +47,7 @@ export const command = {
 		sections.push(`## Global Commands\n${globalSlashCommandList.length > 0 ? globalSlashCommandList.join("\n") : "*No global commands available.*"}`);
 		if (interaction.guild) sections.push(`## Guild Commands in ${interaction.guild.name}\n${guildSlashCommandList.length > 0 ? guildSlashCommandList.join("\n") : "*No guild-specific commands available.*"}`);
 		sections.push(`-# Guild commands are only available in their respective server.`);
+		sections.push(`**If you need help, feel free to ask in ${settings.links?.help ?? "<https://go.wixonic.fr/help>"}**`);
 
 		await sendChunks(sections.join("\n\n"), interaction.followUp.bind(interaction));
 	}

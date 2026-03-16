@@ -7,13 +7,30 @@ export interface AISettings {
 	maxTokens: number;
 };
 
-export interface ClientSettings {
-	ai?: AISettings;
-	discord: Omit<ClientOptions, "intents">;
+export interface DiscordSkuSettings {
+	funding?: string;
+};
+
+export interface DiscordSettings {
 	clientId: string;
+	options: Omit<ClientOptions, "intents">;
 	publicKey: string;
+	roles: Record<string, string>;
+	sku: DiscordSkuSettings;
 	token: string;
 	webhookUrl: URL;
+};
+
+export interface ClientLinksSettings {
+	funding?: string;
+	help?: string;
+	join?: string;
+};
+
+export interface ClientSettings {
+	ai?: AISettings;
+	discord: DiscordSettings;
+	links?: ClientLinksSettings;
 };
 
 export type ClientType = keyof typeof index;

@@ -17,7 +17,7 @@ const deploy = async () => {
 	}
 
 	const settings = getSettings();
-	const rest = new REST().setToken(settings.token);
+	const rest = new REST().setToken(settings.discord.token);
 
 	const commands = [];
 
@@ -44,7 +44,7 @@ const deploy = async () => {
 	logger.info(`Deploying ${commands.length} command${commands.length === 1 ? "" : "s"} as ${clientType}...`);
 
 	try {
-		await rest.put(Routes.applicationCommands(settings.clientId), {
+		await rest.put(Routes.applicationCommands(settings.discord.clientId), {
 			body: commands
 		});
 

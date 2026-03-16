@@ -19,5 +19,8 @@
 	},
 	"compilerOptions": {
 		"strict": true
-	}
+	},
+	"unstable": [
+		"cron"
+	]
 }

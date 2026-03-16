@@ -38,7 +38,7 @@ const main = async () => {
 
 	while (!isStopping) {
 		retries++;
-		logger.debug(`Starting as ${clientType} - ID: ${settings.clientId}`);
+		logger.debug(`Starting as ${clientType} - ID: ${settings.discord.clientId}`);
 
 		try {
 			try {

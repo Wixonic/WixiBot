@@ -7,9 +7,23 @@ export const settings: ClientSettings = {
 		model: "qwen3.5-4b-mlx",
 		maxTokens: 512
 	},
-	discord: {},
-	clientId: "1481288839250182304",
-	publicKey: "fd9e008cca4da07f95dda81cc8f0f6a9e2ba621edd6598ccb90e2cbce1588324",
-	token: secrets.token,
-	webhookUrl: secrets.webhookUrl
+	discord: {
+		clientId: "1481288839250182304",
+		options: {},
+		publicKey: "fd9e008cca4da07f95dda81cc8f0f6a9e2ba621edd6598ccb90e2cbce1588324",
+		roles: {
+			booster: "1483120012297375868",
+			supporter: "1483120012297375868"
+		},
+		sku: {
+			funding: "1483116808193183765",
+		},
+		token: secrets.token,
+		webhookUrl: secrets.webhookUrl
+	},
+	links: {
+		funding: "https://discord.gg/2QB7QkPtrA",
+		help: "https://discord.gg/wVHSFqG85J",
+		join: "https://discord.gg/BcXFAVKJZQ"
+	}
 };
