@@ -1,0 +1,16 @@
+{
+	"packages": {
+		".": {
+			"release-type": "simple",
+			"extra-files": [
+				{
+					"type": "json",
+					"path": "deno.json",
+					"jsonpath": "$.version"
+				}
+			],
+			"pull-request-header": "Automatic release",
+			"pull-request-title-pattern": "WixiBot v${version}"
+		}
+	}
+}
