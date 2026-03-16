@@ -51,8 +51,15 @@ export const parseDuration = (input: string): number | null => {
 	return found ? milliseconds : null;
 };
 
-// deno-lint-ignore no-explicit-any
-export const sendChunks = async (text: string, f: (chunk: string) => Promise<any>): Promise<void> => {
+export const safeStringify = (obj: unknown): string => {
+	try {
+		return JSON.stringify(obj, null, 2);
+	} catch {
+		return String(obj);
+	}
+};
+
+export const sendChunks = async (text: string, f: (chunk: string) => Promise<unknown>): Promise<void> => {
 	const maxLength = 2000;
 	if (text.length <= maxLength) await f(text);
 	else {

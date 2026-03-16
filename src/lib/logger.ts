@@ -1,3 +1,5 @@
+import { safeStringify } from "./utils.ts";
+
 export const colors = {
 	reset: "\x1b[0m",
 	bright: "\x1b[1m",
@@ -72,9 +74,9 @@ const rawLog = (level: string, color: string, options: LoggerOptions, ...any: un
 				delete rest.cause;
 
 				if (Object.keys(rest).length === 0) return `\nCaused by: ${causeOutput}`;
-				return JSON.stringify(rest) + `\nCaused by: ${causeOutput}`;
+				return safeStringify(rest) + `\nCaused by: ${causeOutput}`;
 			}
-			return JSON.stringify(item);
+			return safeStringify(item);
 		}
 
 		return String(item);
