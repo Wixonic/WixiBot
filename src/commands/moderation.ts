@@ -22,10 +22,15 @@ export const command = {
 			)
 		),
 
-	async execute(_logger, _client, interaction) {
+	async execute(_logger, interaction) {
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});
+
+		const stop = async (error: Error) => {
+			await interaction.deleteReply();
+			throw error;
+		};
 
 		switch (interaction.options.getSubcommand(true)) {
 			default: {

@@ -1,7 +1,7 @@
 import { AttachmentBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "discord.js";
 import { Buffer } from "node:buffer";
 
-import type { Component } from "../lib/client.ts";
+import { client, type Component } from "../lib/client.ts";
 import type { User } from "../lib/user.ts";
 
 const createUserStorageArchive = async (user: User): Promise<Uint8Array> => {
@@ -32,7 +32,7 @@ const createUserStorageArchive = async (user: User): Promise<Uint8Array> => {
 
 export const component = {
 	customId: "privacy",
-	async execute(_logger, client, interaction, ...options) {
+	async execute(_logger, interaction, ...options) {
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});

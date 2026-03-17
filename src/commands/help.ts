@@ -18,7 +18,7 @@ export const command = {
 			InteractionContextType.PrivateChannel
 		]),
 
-	async execute(_logger, _client, interaction) {
+	async execute(_logger, interaction) {
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});

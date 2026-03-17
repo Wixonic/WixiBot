@@ -27,7 +27,7 @@ export const command = {
 			.setRequired(true)
 		),
 
-	async execute(logger, _client, interaction) {
+	async execute(logger, interaction) {
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});

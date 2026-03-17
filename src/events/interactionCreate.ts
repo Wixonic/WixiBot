@@ -31,7 +31,7 @@ export const event = {
 			const commandObject = client.getCommand(interaction.commandName);
 
 			try {
-				await commandObject?.execute(interactionLogger, client, interaction);
+				await commandObject?.execute(interactionLogger, interaction);
 			} catch (error) {
 				interactionLogger.error(`Error executing ${interaction.commandName}`, {
 					cause: error
@@ -63,7 +63,7 @@ export const event = {
 			const componentObject = client.getComponent(customId);
 
 			try {
-				await componentObject?.execute(interactionLogger, client, interaction, ...options);
+				await componentObject?.execute(interactionLogger, interaction, ...options);
 			} catch (error) {
 				interactionLogger.error(`Error handling component ${customId}`, {
 					cause: error
@@ -95,7 +95,7 @@ export const event = {
 			const modalObject = client.getModal(customId);
 
 			try {
-				await modalObject?.execute(interactionLogger, client, interaction, ...options);
+				await modalObject?.execute(interactionLogger, interaction, ...options);
 			} catch (error) {
 				interactionLogger.error(`Error handling modal ${customId}`, {
 					cause: error

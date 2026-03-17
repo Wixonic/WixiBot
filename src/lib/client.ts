@@ -10,17 +10,17 @@ export type AnyCommandInteraction = ChatInputCommandInteraction | MessageContext
 
 export interface Command<InteractionType extends AnyCommandInteraction = AnyCommandInteraction> {
 	data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder | ContextMenuCommandBuilder;
-	execute: (logger: Logger, client: Client, interaction: InteractionType) => Promise<void>;
+	execute: (logger: Logger, interaction: InteractionType) => Promise<void>;
 };
 
 export interface Component {
 	customId: string | RegExp;
-	execute: (logger: Logger, client: Client, interaction: MessageComponentInteraction, ...options: string[]) => Promise<void>;
+	execute: (logger: Logger, interaction: MessageComponentInteraction, ...options: string[]) => Promise<void>;
 };
 
 export interface Modal {
 	customId: string | RegExp;
-	execute: (logger: Logger, client: Client, interaction: ModalSubmitInteraction, ...options: string[]) => Promise<void>;
+	execute: (logger: Logger, interaction: ModalSubmitInteraction, ...options: string[]) => Promise<void>;
 };
 
 export interface Job {
