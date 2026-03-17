@@ -1,4 +1,14 @@
-import { ApplicationIntegrationType, ButtonBuilder, ButtonStyle, type ChatInputCommandInteraction, ContainerBuilder, InteractionContextType, MessageFlags, SeparatorSpacingSize, SlashCommandBuilder } from "discord.js";
+import {
+	ApplicationIntegrationType,
+	ButtonBuilder,
+	ButtonStyle,
+	type ChatInputCommandInteraction,
+	ContainerBuilder,
+	InteractionContextType,
+	MessageFlags,
+	SeparatorSpacingSize,
+	SlashCommandBuilder
+} from "discord.js";
 
 import type { Command } from "../lib/client.ts";
 

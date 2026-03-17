@@ -1,4 +1,10 @@
-import { ApplicationIntegrationType, type ChatInputCommandInteraction, InteractionContextType, MessageFlags, SlashCommandBuilder } from "discord.js";
+import {
+	ApplicationIntegrationType,
+	type ChatInputCommandInteraction,
+	InteractionContextType,
+	MessageFlags,
+	SlashCommandBuilder
+} from "discord.js";
 
 import type { Command } from "../lib/client.ts";
 
@@ -27,12 +33,14 @@ export const command = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const stop = async (error: Error) => {
-			await interaction.deleteReply();
-			throw error;
-		};
-
 		switch (interaction.options.getSubcommand(true)) {
+			case "warn": {
+				await interaction.editReply({
+					content: "This subcommand is not implemented yet."
+				});
+				break;
+			}
+
 			default: {
 				await interaction.deleteReply();
 				throw new Error("Unknown subcommand");

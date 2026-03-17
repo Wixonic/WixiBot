@@ -1,4 +1,11 @@
-import { ApplicationCommandType, ApplicationIntegrationType, type ChatInputCommandInteraction, InteractionContextType, MessageFlags, SlashCommandBuilder } from "discord.js";
+import {
+	ApplicationCommandType,
+	ApplicationIntegrationType,
+	type ChatInputCommandInteraction,
+	InteractionContextType,
+	MessageFlags,
+	SlashCommandBuilder
+} from "discord.js";
 
 import type { Command } from "../lib/client.ts";
 import { displayCommand, sendChunks } from "../lib/utils.ts";

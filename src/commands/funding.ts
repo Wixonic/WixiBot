@@ -1,4 +1,14 @@
-import { ActionRowBuilder, ApplicationIntegrationType, ButtonBuilder, ButtonStyle, type ChatInputCommandInteraction, ContainerBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder } from "discord.js";
+import {
+	ActionRowBuilder,
+	ApplicationIntegrationType,
+	ButtonBuilder,
+	ButtonStyle,
+	type ChatInputCommandInteraction,
+	ContainerBuilder,
+	InteractionContextType,
+	MessageFlags,
+	SlashCommandBuilder
+} from "discord.js";
 
 import type { Command } from "../lib/client.ts";
 import { getSettings } from "../lib/settings.ts";
@@ -21,12 +31,7 @@ export const command = {
 		const settings = getSettings();
 		const fundingSku = settings.discord.sku.funding;
 
-		if (!fundingSku) {
-			await interaction.reply({
-				content: "Funding is currently unavailable. Please try again later.",
-				flags: MessageFlags.Ephemeral
-			});
-		} else {
+		if (fundingSku) {
 			await interaction.reply({
 				components: [
 					new ContainerBuilder()
@@ -49,6 +54,9 @@ It’s a win-win deal!`)
 				],
 				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
 			});
-		}
+		} else await interaction.reply({
+			content: "Funding is currently unavailable. Please try again later.",
+			flags: MessageFlags.Ephemeral
+		});
 	}
 } satisfies Command<ChatInputCommandInteraction>;

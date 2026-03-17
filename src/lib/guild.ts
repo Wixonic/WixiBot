@@ -39,8 +39,8 @@ export class Guild {
 				const content = await Deno.readTextFile(path.join(this.#storagePath, "settings.json"));
 				this.#settings = JSON.parse(content);
 				this.#logger.debug("Loaded existing guild settings.");
-			} catch (e) {
-				if (e instanceof Deno.errors.NotFound) {
+			} catch (error) {
+				if (error instanceof Deno.errors.NotFound) {
 					await this.saveSettings();
 					this.#logger.debug("Created new guild settings.");
 
@@ -49,6 +49,7 @@ export class Guild {
 
 						const helpCommandId = await client.getCommandId("help", this.id);
 						const settingsCommandId = await client.getCommandId("settings", this.id);
+						const settingsCommandText = settingsCommandId ? `</settings:${settingsCommandId}>` : "`/settings`";
 
 						await sendChunks(`Hi!
 I was successfully installed and initialized for your server **${this.name}**.
@@ -56,14 +57,18 @@ I was successfully installed and initialized for your server **${this.name}**.
 Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId}>` : "`/help`"}.
 
 > **Tip**: You can configure an error logging channel and a moderation channel so that I can send you reports directly in your server instead of DMs.
-> Use </settings:${settingsCommandId}> to set it up!`, owner.send.bind(owner));
-					} catch (e) {
-						this.#logger.warn("Failed to notify guild owner. DMs might be closed.", { cause: e });
+> Use ${settingsCommandText} to set it up!`, owner.send.bind(owner));
+					} catch (error) {
+						this.#logger.warn("Failed to notify guild owner. DMs might be closed.", {
+							cause: error
+						});
 					}
-				} else throw e;
+				} else throw error;
 			}
-		} catch (e) {
-			this.#logger.error("Failed to initialize guild storage", { cause: e });
+		} catch (error) {
+			this.#logger.error("Failed to initialize guild storage", {
+				cause: error
+			});
 		}
 
 		client.addGuild(this);
@@ -89,6 +94,7 @@ ${error instanceof Error ? error.stack : String(error)}
 		} else this.#discordGuild.fetchOwner()
 			.then(async (owner) => {
 				const settingsCommandId = await client.getCommandId("settings", this.id);
+				const settingsCommandText = settingsCommandId ? `</settings:${settingsCommandId}>` : "`/settings`";
 
 				sendChunks(`An error occurred in your server **${this.name}**:
 \`\`\`
@@ -97,7 +103,7 @@ ${error instanceof Error ? error.stack : String(error)}
 \`\`\`
 
 > **Tip**: You can configure an error logging channel so that I can send you reports directly in your server instead of DMs.
-> Use </settings:${settingsCommandId}> to set it up!`, owner.send.bind(owner)).catch(() => { });
+> Use ${settingsCommandText} to set it up!`, owner.send.bind(owner)).catch(() => { });
 			}).catch(() => { });
 	};
 };

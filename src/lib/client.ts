@@ -1,4 +1,17 @@
-import { ActivityType, Client as DiscordClient, type ContextMenuCommandBuilder, GatewayIntentBits, type ChatInputCommandInteraction, type MessageComponentInteraction, type MessageContextMenuCommandInteraction, type ModalSubmitInteraction, type SlashCommandBuilder, type SlashCommandOptionsOnlyBuilder, type SlashCommandSubcommandsOnlyBuilder, type UserContextMenuCommandInteraction } from "discord.js";
+import {
+	ActivityType,
+	Client as DiscordClient,
+	type ContextMenuCommandBuilder,
+	GatewayIntentBits,
+	type ChatInputCommandInteraction,
+	type MessageComponentInteraction,
+	type MessageContextMenuCommandInteraction,
+	type ModalSubmitInteraction,
+	type SlashCommandBuilder,
+	type SlashCommandOptionsOnlyBuilder,
+	type SlashCommandSubcommandsOnlyBuilder,
+	type UserContextMenuCommandInteraction
+} from "discord.js";
 import EventEmitter from "node:events";
 
 import type { Guild } from "./guild.ts";
@@ -113,24 +126,26 @@ export class Client extends EventEmitter {
 	};
 
 	async getCommandId(name: string, guildId?: string): Promise<string | null> {
-		if (!this.#discordClient?.application) return null;
+		if (this.#discordClient?.application) {
+			try {
+				const globalCommands = await this.#discordClient.application.commands.fetch();
+				const globalCommand = globalCommands.find((command) => command.name === name);
+				if (globalCommand) return globalCommand.id;
 
-		try {
-			const globalCommands = await this.#discordClient.application.commands.fetch();
-			const globalCommand = globalCommands.find((command) => command.name === name);
-			if (globalCommand) return globalCommand.id;
+				if (guildId) {
+					const guild = await this.#discordClient.guilds.fetch(guildId).catch(() => null);
 
-			if (guildId) {
-				const guild = await this.#discordClient.guilds.fetch(guildId).catch(() => null);
-
-				if (guild) {
-					const localCommands = await guild.commands.fetch();
-					const localCommand = localCommands.find((command) => command.name === name);
-					if (localCommand) return localCommand.id;
+					if (guild) {
+						const localCommands = await guild.commands.fetch();
+						const localCommand = localCommands.find((command) => command.name === name);
+						if (localCommand) return localCommand.id;
+					}
 				}
+			} catch (error) {
+				this.#logger.error(`Failed to fetch command ID for ${name}`, { cause: error });
 			}
-		} catch (e) {
-			this.#logger.error(`Failed to fetch command ID for ${name}`, { cause: e });
+
+			return null;
 		}
 
 		return null;
@@ -186,9 +201,9 @@ export class Client extends EventEmitter {
 			}
 
 			logger.debug(`Loaded ${count} command${count === 1 ? "" : "s"}.`);
-		} catch (e) {
-			if (!(e instanceof Deno.errors.NotFound)) logger.error("Failed to load commands", {
-				cause: e
+		} catch (error) {
+			if (!(error instanceof Deno.errors.NotFound)) logger.error("Failed to load commands", {
+				cause: error
 			});
 		}
 	};
@@ -211,9 +226,9 @@ export class Client extends EventEmitter {
 			}
 
 			logger.debug(`Loaded ${count} component${count === 1 ? "" : "s"}.`);
-		} catch (e) {
-			if (!(e instanceof Deno.errors.NotFound)) logger.error("Failed to load components", {
-				cause: e
+		} catch (error) {
+			if (!(error instanceof Deno.errors.NotFound)) logger.error("Failed to load components", {
+				cause: error
 			});
 		}
 	};
@@ -239,9 +254,9 @@ export class Client extends EventEmitter {
 			}
 
 			logger.debug(`Loaded ${count} event${count === 1 ? "" : "s"}.`);
-		} catch (e) {
-			if (!(e instanceof Deno.errors.NotFound)) logger.error("Failed to load events", {
-				cause: e
+		} catch (error) {
+			if (!(error instanceof Deno.errors.NotFound)) logger.error("Failed to load events", {
+				cause: error
 			});
 		}
 	};

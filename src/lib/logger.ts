@@ -97,9 +97,12 @@ const createLogger = (options: Partial<LoggerOptions> & { prefix?: string | (() 
 	};
 
 	const injectPrefix = (args: unknown[]): unknown[] => {
-		if (!options.prefix) return args;
-		const prefixStr = typeof options.prefix === "function" ? options.prefix() : options.prefix;
-		return [prefixStr, ...args];
+		if (options.prefix) {
+			const prefixStr = typeof options.prefix === "function" ? options.prefix() : options.prefix;
+			return [prefixStr, ...args];
+		}
+
+		return args;
 	};
 
 	return {

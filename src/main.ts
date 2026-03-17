@@ -1,6 +1,11 @@
 import { client } from "./lib/client.ts";
 import { colors, logger as mainLogger } from "./lib/logger.ts";
-import { type ClientSettings, type ClientType, getSettings, loadSettings } from "./lib/settings.ts";
+import {
+	type ClientSettings,
+	type ClientType,
+	getSettings,
+	loadSettings
+} from "./lib/settings.ts";
 import { StopSignal, wait } from "./lib/utils.ts";
 
 const main = async () => {

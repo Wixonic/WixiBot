@@ -1,4 +1,16 @@
-import { ApplicationIntegrationType, ChannelType, type ChatInputCommandInteraction, ContainerBuilder, type GuildTextBasedChannel, InteractionContextType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "discord.js";
+import {
+	ApplicationIntegrationType,
+	ChannelType,
+	type ChatInputCommandInteraction,
+	ContainerBuilder,
+	type GuildTextBasedChannel,
+	InteractionContextType,
+	MessageFlags,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+	StringSelectMenuBuilder,
+	StringSelectMenuOptionBuilder
+} from "discord.js";
 
 import { client, type Command } from "../lib/client.ts";
 
@@ -34,111 +46,110 @@ export const command = {
 			flags: MessageFlags.Ephemeral
 		});
 
-		const stop = async (error: Error) => {
-			await interaction.deleteReply();
-			throw error;
-		};
-
 		switch (interaction.options.getSubcommand(true)) {
 			case "as": {
-				const type = interaction.options.getString("type", true);
-				switch (type) {
-					default: {
-						await interaction.deleteReply();
-						throw new Error("Unknown message type");
-					}
-				}
+				await interaction.editReply({
+					content: "This subcommand is not implemented yet."
+				});
 				break;
 			}
 
 			case "ticket": {
-				if (!interaction.guild) return await stop(new Error("Guild context required"));
+				if (interaction.guild) {
+					const guild = client.getGuild(interaction.guild.id);
+					if (guild) {
+						const channel = interaction.options.getChannel("channel", true) as GuildTextBasedChannel;
+						const ticketChannel = await interaction.guild.channels.fetch(guild.settings.channels.ticket ?? "-1").catch(() => null);
 
-				const guild = client.getGuild(interaction.guild.id);
-				if (!guild) return await stop(new Error("Guild not found"));
-
-				const channel = interaction.options.getChannel("channel", true) as GuildTextBasedChannel;
-				const ticketChannel = await interaction.guild.channels.fetch(guild.settings.channels.ticket ?? "-1").catch(() => null);
-
-				if (!ticketChannel || (ticketChannel.isTextBased() && ticketChannel.isSendable())) {
-					const settingsCommandId = await client.getCommandId("settings");
-					await interaction.editReply({
-						content: `The ticket channel is not set up yet! Please set it up using </settings:${settingsCommandId}>.`
-					});
-					return;
-				}
-
-				const rolesText: string[] = [];
-				const roles = await interaction.guild.roles.fetch();
-
-				for (const role of roles.values()) {
-					const permissions = ticketChannel.permissionsFor(role);
-					if (permissions.has(PermissionFlagsBits.ViewChannel) || permissions.has(PermissionFlagsBits.Administrator)) {
-						if (role.id === interaction.guild.roles.everyone.id) {
+						if (!ticketChannel || (ticketChannel.isTextBased() && ticketChannel.isSendable())) {
+							const settingsCommandId = await client.getCommandId("settings");
+							const settingsCommandText = settingsCommandId ? `</settings:${settingsCommandId}>` : "`/settings`";
 							await interaction.editReply({
-								content: `The ticket channel cannot be visible to everyone!
-Please adjust the permissions and try again.`
+								content: `The ticket channel is not set up yet! Please set it up using ${settingsCommandText}.`
 							});
 							return;
-						} else rolesText.push(`<@&${role.id}>`);
-					}
-				}
+						}
 
-				const applicationUserId = interaction.client.user?.id;
-				const guildName = interaction.guild.name;
+						const rolesText: string[] = [];
+						const roles = await interaction.guild.roles.fetch();
 
-				await channel.send({
-					components: [
-						new ContainerBuilder()
-							.addTextDisplayComponents((component) => component
-								.setContent(`# Need help?
+						for (const role of roles.values()) {
+							const permissions = ticketChannel.permissionsFor(role);
+							if (permissions.has(PermissionFlagsBits.ViewChannel) || permissions.has(PermissionFlagsBits.Administrator)) {
+								if (role.id === interaction.guild.roles.everyone.id) {
+									await interaction.editReply({
+										content: `The ticket channel cannot be visible to everyone!
+Please adjust the permissions and try again.`
+									});
+									return;
+								} else rolesText.push(`<@&${role.id}>`);
+							}
+						}
+
+						const applicationUserId = interaction.client.user?.id;
+						const guildName = interaction.guild.name;
+
+						await channel.send({
+							components: [
+								new ContainerBuilder()
+									.addTextDisplayComponents((component) => component
+										.setContent(`# Need help?
 If you need assistance and believe we can help, please select a reason below.
 Our support team will review your request and get back to you as soon as possible!`)
-							)
-							.addActionRowComponents((component) => component
-								.addComponents([
-									new StringSelectMenuBuilder()
-										.setCustomId("ticket:reason")
-										.setPlaceholder("Select a reason")
-										.addOptions([
-											new StringSelectMenuOptionBuilder()
-												.setLabel(`I have an issue on ${guildName}`)
-												.setValue("server"),
-											new StringSelectMenuOptionBuilder()
-												.setLabel("I have an issue on Discord in general")
-												.setValue("discord"),
-											new StringSelectMenuOptionBuilder()
-												.setLabel("I need help with a command")
-												.setValue("command"),
-											new StringSelectMenuOptionBuilder()
-												.setLabel(`I have a question about <@${applicationUserId}> in general`)
-												.setValue("application"),
-											new StringSelectMenuOptionBuilder()
-												.setLabel("I have a question about privacy")
-												.setValue("privacy"),
-											new StringSelectMenuOptionBuilder()
-												.setLabel("I found a bug")
-												.setValue("bug"),
-											new StringSelectMenuOptionBuilder()
-												.setLabel("I want to contribute on GitHub")
-												.setValue("github"),
-											new StringSelectMenuOptionBuilder()
-												.setLabel("I want to contribute in another way")
-												.setValue("contribute"),
-											new StringSelectMenuOptionBuilder()
-												.setLabel("Not listed above")
-												.setValue("other")
+									)
+									.addActionRowComponents((component) => component
+										.addComponents([
+											new StringSelectMenuBuilder()
+												.setCustomId("ticket:reason")
+												.setPlaceholder("Select a reason")
+												.addOptions([
+													new StringSelectMenuOptionBuilder()
+														.setLabel(`I have an issue on ${guildName}`)
+														.setValue("server"),
+													new StringSelectMenuOptionBuilder()
+														.setLabel("I have an issue on Discord in general")
+														.setValue("discord"),
+													new StringSelectMenuOptionBuilder()
+														.setLabel("I need help with a command")
+														.setValue("command"),
+													new StringSelectMenuOptionBuilder()
+														.setLabel(`I have a question about <@${applicationUserId}> in general`)
+														.setValue("application"),
+													new StringSelectMenuOptionBuilder()
+														.setLabel("I have a question about privacy")
+														.setValue("privacy"),
+													new StringSelectMenuOptionBuilder()
+														.setLabel("I found a bug")
+														.setValue("bug"),
+													new StringSelectMenuOptionBuilder()
+														.setLabel("I want to contribute on GitHub")
+														.setValue("github"),
+													new StringSelectMenuOptionBuilder()
+														.setLabel("I want to contribute in another way")
+														.setValue("contribute"),
+													new StringSelectMenuOptionBuilder()
+														.setLabel("Not listed above")
+														.setValue("other")
+												])
 										])
-								])
-							)
-							.addTextDisplayComponents((component) => component
-								.setContent(`-# Your ticket will be visible to ${rolesText.join(", ")}`)
-							)
-					],
-					flags: MessageFlags.IsComponentsV2 | MessageFlags.SuppressNotifications
-				});
+									)
+									.addTextDisplayComponents((component) => component
+										.setContent(`-# Your ticket will be visible to ${rolesText.join(", ")}`)
+									)
+							],
+							flags: MessageFlags.IsComponentsV2 | MessageFlags.SuppressNotifications
+						});
 
-				break;
+						break;
+					} else {
+						await interaction.deleteReply();
+						throw new Error("Guild not found")
+					}
+				} else {
+					await interaction.deleteReply();
+					throw new Error("Guild context expected");
+				}
+
 			}
 
 			default: {

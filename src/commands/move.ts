@@ -1,4 +1,14 @@
-import { ApplicationIntegrationType, ChannelType, type ChatInputCommandInteraction, InteractionContextType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder, type StageChannel, type VoiceChannel } from "discord.js";
+import {
+	ApplicationIntegrationType,
+	ChannelType,
+	type ChatInputCommandInteraction,
+	InteractionContextType,
+	MessageFlags,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+	type StageChannel,
+	type VoiceChannel
+} from "discord.js";
 
 import type { Command } from "../lib/client.ts";
 

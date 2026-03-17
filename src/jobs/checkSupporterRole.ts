@@ -10,59 +10,59 @@ export const job: Job = {
 		const fundingSku = settings.discord.sku.funding;
 		const supporterRoleId = settings.discord.roles.supporter;
 
-		if (!fundingSku || !supporterRoleId) return;
+		if (fundingSku && supporterRoleId && client.discord) {
+			logger.debug("Running daily supporter role check...");
 
-		const discordClient = client.discord;
-		if (!discordClient) {
-			logger.warn("Skipped supporter role check: Discord client unavailable.");
-			return;
-		}
+			let checked = 0;
+			let removed = 0;
 
-		logger.debug("Running daily supporter role check...");
-
-		let checked = 0;
-		let removed = 0;
-
-		for (const guild of discordClient.guilds.cache.values()) {
-			let members;
-			try {
-				members = await guild.members.fetch();
-			} catch (error) {
-				logger.error(`Failed to fetch members for guild ${guild.id}`, { cause: error });
-				continue;
-			}
-
-			const supporters = members.filter((member) => member.roles.cache.has(supporterRoleId));
-
-			for (const member of supporters.values()) {
-				checked++;
-
-				let entitlements;
+			for (const guild of client.discord.guilds.cache.values()) {
+				let members;
 				try {
-					entitlements = await discordClient.application?.entitlements.fetch({
-						user: member.id
-					});
+					members = await guild.members.fetch();
 				} catch (error) {
-					logger.error(`Failed to fetch entitlements for ${member.id}`, { cause: error });
+					logger.error(`Failed to fetch members for guild ${guild.id}`, {
+						cause: error
+					});
 					continue;
 				}
 
-				const hasActive = entitlements?.some(
-					(entitlement) => entitlement.skuId === fundingSku && entitlement.isActive()
-				);
+				const supporters = members.filter((member) => member.roles.cache.has(supporterRoleId));
 
-				if (!hasActive) {
+				for (const member of supporters.values()) {
+					checked++;
+
+					let entitlements;
+					try {
+						entitlements = await client.discord.application?.entitlements.fetch({
+							user: member.id
+						});
+					} catch (error) {
+						logger.error(`Failed to fetch entitlements for ${member.id}`, {
+							cause: error
+						});
+						continue;
+					}
+
+					const hasActive = entitlements?.some(
+						(entitlement) => entitlement.skuId === fundingSku && entitlement.isActive()
+					);
+
+					if (hasActive) continue;
+
 					try {
 						await member.roles.remove(supporterRoleId, "Funding entitlement no longer active");
 						logger.info(`Removed supporter role from ${member.id} in guild ${guild.id}.`);
 						removed++;
 					} catch (error) {
-						logger.error(`Failed to remove supporter role from ${member.id} in guild ${guild.id}`, { cause: error });
+						logger.error(`Failed to remove supporter role from ${member.id} in guild ${guild.id}`, {
+							cause: error
+						});
 					}
 				}
 			}
-		}
 
-		logger.info(`Daily supporter role check complete: ${checked} checked, ${removed} removed.`);
+			logger.info(`Daily supporter role check complete: ${checked} checked, ${removed} removed.`);
+		} else logger.warn("Skipped supporter role check: Discord client unavailable.");
 	}
 };

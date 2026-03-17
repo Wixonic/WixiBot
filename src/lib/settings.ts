@@ -42,22 +42,22 @@ const loadSettings = async (client?: ClientType): Promise<ClientSettings> => {
 	if (client) currentClient = client;
 	const clientId = index[currentClient];
 
-	if (!clientId) throw new Error(`Client "${currentClient}" not found in index.json`);
-
-	try {
-		const { settings } = await import(`../settings/${clientId}/main.ts`);
-		current = settings as ClientSettings;
-		return current;
-	} catch (e) {
-		throw new Error(`Failed to load settings for ${currentClient} client`, {
-			cause: e
-		});
-	}
+	if (clientId) {
+		try {
+			const { settings } = await import(`../settings/${clientId}/main.ts`);
+			current = settings as ClientSettings;
+			return current;
+		} catch (error) {
+			throw new Error(`Failed to load settings for ${currentClient} client`, {
+				cause: error
+			});
+		}
+	} else throw new Error(`Client "${currentClient}" not found in index.json`);
 };
 
 const getSettings = (): ClientSettings => {
-	if (!current) throw new Error("Settings not loaded. Call loadSettings() first.");
-	return current;
+	if (current) return current;
+	else throw new Error("Settings not loaded. Call loadSettings() first.");
 };
 
 export { loadSettings, getSettings };

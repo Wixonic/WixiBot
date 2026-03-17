@@ -12,63 +12,39 @@ export const event = {
 		const settings = getSettings();
 		const fundingSku = settings.discord.sku.funding;
 
-		if (!fundingSku || entitlement.skuId !== fundingSku) return;
+		if (fundingSku && entitlement.skuId === fundingSku) {
+			if (entitlement.guildId) {
+				const discordGuild = await client.discord?.guilds.fetch(entitlement.guildId).catch(() => null);
 
-		const discordClient = client.discord;
-		if (!discordClient) {
-			logger.warn("Skipped entitlement cleanup: Discord client unavailable.");
-			return;
-		}
+				if (discordGuild) {
+					const member = await discordGuild.members.fetch(entitlement.userId).catch(() => null);
 
-		const supporterRoleId = settings.discord.roles.supporter;
-		if (!supporterRoleId) {
-			logger.warn("Skipped entitlement cleanup: supporter role is not configured.");
-			return;
-		}
-
-		let discordGuild = entitlement.guildId ? await discordClient.guilds.fetch(entitlement.guildId).catch(() => null) : null;
-
-		if (!discordGuild) {
-			for (const guild of discordClient.guilds.cache.values()) {
-				const role = await guild.roles.fetch(supporterRoleId).catch(() => null);
-
-				if (role) {
-					discordGuild = guild;
-					break;
+					if (member) {
+						try {
+							await member.roles.remove(settings.discord.roles.supporter, "Funding entitlement removed");
+							logger.info(`Removed supporter role from ${entitlement.userId} in guild ${discordGuild.id}.`);
+						} catch (error) {
+							logger.error(`Failed to remove supporter role from ${entitlement.userId}`, {
+								cause: error
+							});
+						}
+						return;
+					} else logger.warn(`Skipped supporter role cleanup for ${entitlement.userId}: entitlement guild ${entitlement.guildId} not found (sku: ${entitlement.skuId}).`);
 				}
-			}
-		}
 
-		if (discordGuild) {
-			const member = await discordGuild.members.fetch(entitlement.userId).catch(() => null);
-
-			if (member) {
-				try {
-					await member.roles.remove(supporterRoleId, "Funding entitlement removed");
-					logger.info(`Removed supporter role from ${entitlement.userId} in guild ${discordGuild.id}.`);
-				} catch (error) {
-					logger.error(`Failed to remove supporter role from ${entitlement.userId}`, {
-						cause: error
-					});
-				}
-				return;
-			}
-		}
-
-		const user = await discordClient.users.fetch(entitlement.userId).catch(() => null);
-		if (!user) {
-			logger.warn(`Could not fetch user ${entitlement.userId} after funding removal.`);
-			return;
-		}
-
-		try {
-			await user.send(`Your supporter perks were removed because your funding has ended.
+				const user = await client.discord?.users.fetch(entitlement.userId).catch(() => null);
+				if (user) {
+					try {
+						await user.send(`Your supporter perks were removed because your funding has ended.
 			You can renew support here: ${settings.links?.funding ?? "<https://go.wixonic.fr/funding>"}`);
-			logger.info(`Sent funding renewal DM to ${entitlement.userId} after funding removal.`);
-		} catch (error) {
-			logger.error(`Failed to DM ${entitlement.userId} after funding removal.`, {
-				cause: error
-			});
+						logger.info(`Sent funding renewal DM to ${entitlement.userId} after funding removal.`);
+					} catch (error) {
+						logger.error(`Failed to DM ${entitlement.userId} after funding removal.`, {
+							cause: error
+						});
+					}
+				} else logger.warn(`Could not fetch user ${entitlement.userId} after funding removal.`);
+			} else logger.warn(`Skipped supporter role cleanup for ${entitlement.userId}: missing entitlement guild ID (sku: ${entitlement.skuId}).`);
 		}
 	}
 };
