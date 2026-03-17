@@ -8,6 +8,7 @@ import { sendChunks } from "./utils.ts";
 export interface GuildSettings {
 	channels: {
 		logs?: string;
+		ticket?: string;
 	};
 };
 
