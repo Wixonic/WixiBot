@@ -2,10 +2,18 @@ import type { User as DiscordUser } from "discord.js";
 import path from "node:path";
 
 import { client } from "./client.ts";
+import type { DynamicSettingsSchema } from "./dynamicSettings.ts";
 import type { Logger } from "./logger.ts";
-import { sendChunks } from "./utils.ts";
 
-export type UserSettings = Record<string, unknown>;
+export interface UserSettings {
+
+};
+
+export const userSettingsSchema: DynamicSettingsSchema = {
+	description: "User-specific settings.",
+	type: "object",
+	children: {}
+};
 
 export class User {
 	#discordUser: DiscordUser;

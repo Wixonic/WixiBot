@@ -11,10 +11,7 @@ import {
 } from "discord.js";
 import { Buffer } from "node:buffer";
 
-import {
-	client,
-	type Component
-} from "../lib/client.ts";
+import { client, type Component } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
 import type { User } from "../lib/user.ts";
 
@@ -100,6 +97,7 @@ Please note that we may need to verify your identity before processing your requ
 							],
 							files: [
 								new AttachmentBuilder(Buffer.from(archive), {
+									description: "Your data archive in ZIP format",
 									name: attachmentName
 								})
 							],

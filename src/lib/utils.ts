@@ -1,5 +1,23 @@
 import { type ApplicationCommand, type ApplicationCommandOption, ApplicationCommandOptionType } from "discord.js";
 
+export const clone = <T>(obj: T, cloned = new WeakMap<object, unknown>()): T => {
+	if (obj === null || typeof obj !== "object") return obj;
+
+	const objectRef = obj as object;
+	if (cloned.has(objectRef)) return cloned.get(objectRef) as T;
+
+	const clonedObj = (Array.isArray(obj) ? [] : {}) as Record<string, unknown>;
+	cloned.set(objectRef, clonedObj);
+
+	for (const key in obj as Record<string, unknown>) {
+		if (Object.prototype.hasOwnProperty.call(obj, key)) {
+			clonedObj[key] = clone((obj as Record<string, unknown>)[key], cloned);
+		}
+	}
+
+	return clonedObj as T;
+};
+
 export const displayCommand = (command: ApplicationCommand) => {
 	const entry = [];
 

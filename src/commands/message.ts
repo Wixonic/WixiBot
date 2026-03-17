@@ -61,7 +61,7 @@ export const command = {
 						const channel = interaction.options.getChannel("channel", true) as GuildTextBasedChannel;
 						const ticketChannel = await interaction.guild.channels.fetch(guild.settings.channels.ticket ?? "-1").catch(() => null);
 
-						if (!ticketChannel || (ticketChannel.isTextBased() && ticketChannel.isSendable())) {
+						if (!ticketChannel || !ticketChannel.isTextBased() || !ticketChannel.isSendable()) {
 							const settingsCommandId = await client.getCommandId("settings");
 							const settingsCommandText = settingsCommandId ? `</settings:${settingsCommandId}>` : "`/settings`";
 							await interaction.editReply({
@@ -86,7 +86,7 @@ Please adjust the permissions and try again.`
 							}
 						}
 
-						const applicationUserId = interaction.client.user?.id;
+						const applicationBotName = interaction.client.user?.username;
 						const guildName = interaction.guild.name;
 
 						await channel.send({
@@ -113,7 +113,7 @@ Our support team will review your request and get back to you as soon as possibl
 														.setLabel("I need help with a command")
 														.setValue("command"),
 													new StringSelectMenuOptionBuilder()
-														.setLabel(`I have a question about <@${applicationUserId}> in general`)
+														.setLabel(`I have a question about ${applicationBotName} in general`)
 														.setValue("application"),
 													new StringSelectMenuOptionBuilder()
 														.setLabel("I have a question about privacy")
@@ -140,6 +140,7 @@ Our support team will review your request and get back to you as soon as possibl
 							flags: MessageFlags.IsComponentsV2 | MessageFlags.SuppressNotifications
 						});
 
+						await interaction.deleteReply();
 						break;
 					} else {
 						await interaction.deleteReply();

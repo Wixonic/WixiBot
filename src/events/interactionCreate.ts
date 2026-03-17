@@ -48,7 +48,11 @@ export const event = {
 					}
 
 					if (fetchedReply) await fetchedReply.edit("There was an error while executing this command!");
-					else await interaction.followUp({
+					else if (interaction.replied || interaction.deferred) await interaction.followUp({
+						content: "There was an error while executing this command!",
+						flags: MessageFlags.Ephemeral
+					});
+					else await interaction.reply({
 						content: "There was an error while executing this command!",
 						flags: MessageFlags.Ephemeral
 					});
@@ -80,7 +84,11 @@ export const event = {
 					}
 
 					if (fetchedReply) await fetchedReply.edit("There was an error while interacting with this component!");
-					else await interaction.followUp({
+					else if (interaction.replied || interaction.deferred) await interaction.followUp({
+						content: "There was an error while interacting with this component!",
+						flags: MessageFlags.Ephemeral
+					});
+					else await interaction.reply({
 						content: "There was an error while interacting with this component!",
 						flags: MessageFlags.Ephemeral
 					});
@@ -112,7 +120,11 @@ export const event = {
 					}
 
 					if (fetchedReply) await fetchedReply.edit("There was an error while submitting this modal!");
-					else await interaction.followUp({
+					else if (interaction.replied || interaction.deferred) await interaction.followUp({
+						content: "There was an error while submitting this modal!",
+						flags: MessageFlags.Ephemeral
+					});
+					else await interaction.reply({
 						content: "There was an error while submitting this modal!",
 						flags: MessageFlags.Ephemeral
 					});
