@@ -20,6 +20,7 @@ export class User {
 	};
 
 	get id() { return this.#discordUser.id; };
+	get path() { return this.#storagePath; };
 	get username() { return this.#discordUser.username; };
 	get settings() { return this.#settings; };
 
@@ -28,33 +29,40 @@ export class User {
 		client.addUser(this);
 
 		try {
-			await Deno.mkdir(this.#storagePath.split("/").slice(0, -1).join("/"), { recursive: true });
 			try {
 				const content = await Deno.readTextFile(path.join(this.#storagePath, "settings.json"));
 				this.#settings = JSON.parse(content);
 				this.#logger.debug("Loaded existing user settings.");
-			} catch (e) {
-				if (e instanceof Deno.errors.NotFound) {
+			} catch (error) {
+				if (error instanceof Deno.errors.NotFound) {
 					await this.saveSettings();
 					this.#logger.debug("Created new user settings.");
-				} else throw e;
+				} else throw error;
 			}
-		} catch (e) {
-			this.#logger.error("Failed to initialize user storage", { cause: e });
+		} catch (error) {
+			this.#logger.error("Failed to initialize user storage", {
+				cause: error
+			});
 		}
 	};
 
 	async saveSettings() {
+		await Deno.mkdir(this.#storagePath.split("/").slice(0, -1).join("/"), {
+			recursive: true
+		});
 		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings, null, "\t"));
 	};
 
-	reportError(message: string, error: unknown) {
-		this.#logger.error(message, { cause: error });
+	async delete(): Promise<void> {
+		await Deno.remove(this.#storagePath, {
+			recursive: true
+		});
+		this.#settings = {};
+	};
 
-		sendChunks(`An error occurred while processing your request:
-\`\`\`
-${String(message)}
-${error instanceof Error ? error.stack : String(error)}
-\`\`\``, this.#discordUser.send.bind(this.#discordUser)).catch(() => { });
+	reportError(message: string, error: unknown) {
+		this.#logger.error(message, {
+			cause: error
+		});
 	};
 };

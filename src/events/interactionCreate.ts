@@ -4,6 +4,7 @@ import { client } from "../lib/client.ts";
 import { Guild } from "../lib/guild.ts";
 import type { Logger } from "../lib/logger.ts";
 import { User } from "../lib/user.ts";
+import { parseCustomId } from "../lib/utils.ts";
 
 export const event = {
 	type: Events.InteractionCreate,
@@ -11,6 +12,11 @@ export const event = {
 
 	async execute(logger: Logger, interaction: Interaction) {
 		const interactionLogger = logger.clone(() => `[I-${interaction.id}]`);
+
+		if (!client.getUser(interaction.user.id)) {
+			const user = new User(interactionLogger, interaction.user);
+			await user.init();
+		}
 
 		if (interaction.isChatInputCommand() || interaction.isMessageContextMenuCommand() || interaction.isUserContextMenuCommand()) {
 			if (interaction.guildId && !client.getGuild(interaction.guildId)) {
@@ -22,65 +28,99 @@ export const event = {
 				}
 			}
 
-			if (!client.getUser(interaction.user.id)) {
-				const user = new User(interactionLogger, interaction.user);
-				await user.init();
-			}
-
 			const commandObject = client.getCommand(interaction.commandName);
 
 			try {
 				await commandObject?.execute(interactionLogger, client, interaction);
-			} catch (e) {
+			} catch (error) {
 				interactionLogger.error(`Error executing ${interaction.commandName}`, {
-					cause: e
+					cause: error
 				});
 
-				if (interaction.replied || interaction.deferred) await interaction.editReply("There was an error while executing this command!");
-				else await interaction.reply({
-					content: "There was an error while executing this command!",
-					flags: MessageFlags.Ephemeral
-				});
+				try {
+					let fetchedReply;
+					try {
+						if (interaction.replied || interaction.deferred) fetchedReply = await interaction.fetchReply();
+					} catch (error) {
+						interactionLogger.debug("Failed to fetch reply", {
+							cause: error
+						})
+					}
+
+					if (fetchedReply) await fetchedReply.edit("There was an error while executing this command!");
+					else await interaction.followUp({
+						content: "There was an error while executing this command!",
+						flags: MessageFlags.Ephemeral
+					});
+				} catch (error) {
+					interactionLogger.error("Failed to send error response", {
+						cause: error
+					});
+				}
 			}
-
-			return;
-		}
-
-		if (interaction.isMessageComponent()) {
-			const componentObject = client.getComponent(interaction.customId);
+		} else if (interaction.isMessageComponent()) {
+			const [customId, ...options] = parseCustomId(interaction.customId);
+			const componentObject = client.getComponent(customId);
 
 			try {
-				await componentObject?.execute(interactionLogger, client, interaction);
-			} catch (e) {
-				interactionLogger.error(`Error handling component ${interaction.customId}`, {
-					cause: e
+				await componentObject?.execute(interactionLogger, client, interaction, ...options);
+			} catch (error) {
+				interactionLogger.error(`Error handling component ${customId}`, {
+					cause: error
 				});
 
-				if (interaction.replied || interaction.deferred) await interaction.editReply("There was an error while interacting with this component!");
-				else await interaction.reply({
-					content: "There was an error while interacting with this component!",
-					flags: MessageFlags.Ephemeral
-				});
+				try {
+					let fetchedReply;
+					try {
+						if (interaction.replied || interaction.deferred) fetchedReply = await interaction.fetchReply();
+					} catch (error) {
+						interactionLogger.debug("Failed to fetch reply", {
+							cause: error
+						})
+					}
+
+					if (fetchedReply) await fetchedReply.edit("There was an error while interacting with this component!");
+					else await interaction.followUp({
+						content: "There was an error while interacting with this component!",
+						flags: MessageFlags.Ephemeral
+					});
+				} catch (error) {
+					interactionLogger.error("Failed to send error response", {
+						cause: error
+					});
+				}
 			}
-
-			return;
-		}
-
-		if (interaction.isModalSubmit()) {
-			const modalObject = client.getModal(interaction.customId);
+		} else if (interaction.isModalSubmit()) {
+			const [customId, ...options] = parseCustomId(interaction.customId);
+			const modalObject = client.getModal(customId);
 
 			try {
-				await modalObject?.execute(interactionLogger, client, interaction);
-			} catch (e) {
-				interactionLogger.error(`Error handling modal ${interaction.customId}`, {
-					cause: e
+				await modalObject?.execute(interactionLogger, client, interaction, ...options);
+			} catch (error) {
+				interactionLogger.error(`Error handling modal ${customId}`, {
+					cause: error
 				});
 
-				if (interaction.replied || interaction.deferred) await interaction.editReply("There was an error while submitting this modal!");
-				else await interaction.reply({
-					content: "There was an error while submitting this modal!",
-					flags: MessageFlags.Ephemeral
-				});
+				try {
+					let fetchedReply;
+					try {
+						if (interaction.replied || interaction.deferred) fetchedReply = await interaction.fetchReply();
+					} catch (error) {
+						interactionLogger.debug("Failed to fetch reply", {
+							cause: error
+						})
+					}
+
+					if (fetchedReply) await fetchedReply.edit("There was an error while submitting this modal!");
+					else await interaction.followUp({
+						content: "There was an error while submitting this modal!",
+						flags: MessageFlags.Ephemeral
+					});
+				} catch (error) {
+					interactionLogger.error("Failed to send error response", {
+						cause: error
+					});
+				}
 			}
 		}
 	}

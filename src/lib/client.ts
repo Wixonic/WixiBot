@@ -6,25 +6,27 @@ import type { Logger } from "./logger.ts";
 import type { ClientSettings } from "./settings.ts";
 import type { User } from "./user.ts";
 
-export interface Command {
+export type AnyCommandInteraction = ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction;
+
+export interface Command<InteractionType extends AnyCommandInteraction = AnyCommandInteraction> {
 	data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder | ContextMenuCommandBuilder;
-	execute: (logger: Logger, client: Client, interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction) => Promise<void>;
+	execute: (logger: Logger, client: Client, interaction: InteractionType) => Promise<void>;
 };
 
 export interface Component {
 	customId: string | RegExp;
-	execute: (logger: Logger, client: Client, interaction: MessageComponentInteraction) => Promise<void>;
+	execute: (logger: Logger, client: Client, interaction: MessageComponentInteraction, ...options: string[]) => Promise<void>;
 };
 
 export interface Modal {
 	customId: string | RegExp;
-	execute: (logger: Logger, client: Client, interaction: ModalSubmitInteraction) => Promise<void>;
+	execute: (logger: Logger, client: Client, interaction: ModalSubmitInteraction, ...options: string[]) => Promise<void>;
 };
 
 export interface Job {
 	cron: string;
 	name: string;
-	execute: (logger: Logger) => void;
+	execute: (logger: Logger) => void | Promise<void>;
 };
 
 export class Client extends EventEmitter {
@@ -37,6 +39,7 @@ export class Client extends EventEmitter {
 	#modals = new Set<Modal>();
 	#guilds = new Map<string, Guild>();
 	#users = new Map<string, User>();
+	#jobs = new Map<string, AbortController>();
 
 	async init(logger: Logger, settings: ClientSettings) {
 		this.#logger = logger;
@@ -73,9 +76,24 @@ export class Client extends EventEmitter {
 	};
 
 	async destroy() {
+		this.stopJobs();
 		await this.#discordClient?.destroy();
 		this.#discordClient = null;
 		this.#settings = null;
+	};
+
+	stopJobs() {
+		const logger = this.#logger?.clone(() => "[Jobs]");
+		const count = this.#jobs.size;
+
+		for (const [name, controller] of this.#jobs) {
+			controller.abort();
+			logger?.debug(`Stopped job ${name}.`);
+		}
+
+		this.#jobs.clear();
+
+		if (count > 0) logger?.debug(`Stopped ${count} active job${count === 1 ? "" : "s"}.`);
 	};
 
 	get discord() {
@@ -131,7 +149,6 @@ export class Client extends EventEmitter {
 
 	addGuild(guild: Guild) {
 		this.#guilds.set(guild.id, guild);
-		this.#logger.debug(`[Guilds] Registered guild ${guild.name} (${guild.id})`);
 	};
 
 	getModal(customId: string) {
@@ -147,7 +164,6 @@ export class Client extends EventEmitter {
 
 	addUser(user: User) {
 		this.#users.set(user.id, user);
-		this.#logger.debug(`[Users] Registered user ${user.username} (${user.id})`);
 	};
 
 	async loadCommands() {
@@ -243,16 +259,44 @@ export class Client extends EventEmitter {
 
 					if ("job" in module) {
 						const job: Job = module.job;
-						Deno.cron(job.name, job.cron, () => job.execute(logger));
-						count++;
+
+						if (this.#jobs.has(job.name)) {
+							logger.warn(`Skipped job ${job.name}: already active.`);
+							continue;
+						}
+
+						const controller = new AbortController();
+
+						try {
+							Deno.cron(job.name, job.cron, {
+								signal: controller.signal
+							}, async () => {
+								try {
+									await job.execute(logger);
+								} catch (error) {
+									logger.error(`Failed to execute job ${job.name}`, {
+										cause: error
+									});
+								}
+							});
+
+							this.#jobs.set(job.name, controller);
+							count++;
+							logger.debug(`Registered job ${job.name} (${job.cron}).`);
+						} catch (error) {
+							controller.abort();
+							logger.error(`Failed to register job ${job.name}`, {
+								cause: error
+							});
+						}
 					}
 				}
 			}
 
 			logger.debug(`Loaded ${count} job${count === 1 ? "" : "s"}.`);
-		} catch (e) {
-			if (!(e instanceof Deno.errors.NotFound)) logger.error("Failed to load jobs", {
-				cause: e
+		} catch (error) {
+			if (!(error instanceof Deno.errors.NotFound)) logger.error("Failed to load jobs", {
+				cause: error
 			});
 		}
 	};
@@ -276,9 +320,9 @@ export class Client extends EventEmitter {
 			}
 
 			logger.debug(`Loaded ${count} modal${count === 1 ? "" : "s"}.`);
-		} catch (e) {
-			if (!(e instanceof Deno.errors.NotFound)) logger.error("Failed to load modals", {
-				cause: e
+		} catch (error) {
+			if (!(error instanceof Deno.errors.NotFound)) logger.error("Failed to load modals", {
+				cause: error
 			});
 		}
 	};

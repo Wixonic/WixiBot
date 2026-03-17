@@ -28,6 +28,11 @@ export const displayCommand = (command: ApplicationCommand) => {
 	return entry.join("\n");
 };
 
+export const parseCustomId = (customId: string): [string, ...string[]] => {
+	const [baseId, ...options] = customId.split(":");
+	return [baseId ?? "", ...options];
+};
+
 export const parseDuration = (input: string): number | null => {
 	const durationRegex = /(\d+)\s*(seconds?|secs?|s|minutes?|mins?|m|hours?|h|days?|d|weeks?|w|months?|mo|years?|y)/gi;
 	let milliseconds = 0;
