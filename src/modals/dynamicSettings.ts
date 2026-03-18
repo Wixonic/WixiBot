@@ -5,8 +5,8 @@ import type { Modal } from "../lib/client.ts";
 
 const getParentPath = (path: string): string => path.split("/").slice(0, -1).join("/");
 
-const ensureParentSettings = async (path: string, interaction: Parameters<Modal["execute"]>[1], logger: Parameters<Modal["execute"]>[0]) => {
-	const scope = await resolveDynamicSettingsScopeContextFor(logger, path, interaction);
+const ensureParentSettings = async (path: string, interaction: Parameters<Modal["execute"]>[1]) => {
+	const scope = await resolveDynamicSettingsScopeContextFor(path, interaction);
 	if (!scope) return null;
 
 	const context = resolveDynamicSettingsPath(scope, path);
@@ -43,14 +43,14 @@ const ensureParentSettings = async (path: string, interaction: Parameters<Modal[
 
 export const modal = {
 	customId: "settings",
-	async execute(logger, interaction, ...options) {
+	async execute(_logger, interaction, ...options) {
 		switch (options[0]) {
 			case "value": {
 				const type = options[1];
 				const targetPath = options[2] ?? "";
 				if (type !== "string" && type !== "number") throw new Error("Unsupported settings modal type");
 
-				const resolved = await ensureParentSettings(targetPath, interaction, logger);
+				const resolved = await ensureParentSettings(targetPath, interaction);
 				if (!resolved) throw new Error("Could not resolve setting parent");
 
 				const targetSetting = resolved.context.targetSetting;
@@ -94,7 +94,7 @@ export const modal = {
 
 				await interaction.reply({
 					components: [
-						await generateDynamicSettingsComponentFor(logger, getParentPath(targetPath), interaction)
+						await generateDynamicSettingsComponentFor(getParentPath(targetPath), interaction)
 					],
 					flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
 				});

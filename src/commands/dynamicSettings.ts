@@ -24,10 +24,10 @@ export const command = {
 			InteractionContextType.PrivateChannel
 		]),
 
-	async execute(logger, interaction) {
+	async execute(_logger, interaction) {
 		await interaction.reply({
 			components: [
-				await generateDynamicSettingsComponentFor(logger, "", interaction)
+				await generateDynamicSettingsComponentFor("", interaction)
 			],
 			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
 		});

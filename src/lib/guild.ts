@@ -1,6 +1,7 @@
 import type { Guild as DiscordGuild } from "discord.js";
 import path from "node:path";
 
+import { ChannelType } from "discord.js";
 import { client } from "./client.ts";
 import type { DynamicSettingsSchema } from "./dynamicSettings.ts";
 import type { Logger } from "./logger.ts";
@@ -9,10 +10,12 @@ import { sendChunks } from "./utils.ts";
 export interface GuildSettings {
 	channels: {
 		logs?: string;
-		ticket?: string;
+	};
+	tickets: {
+		channel?: string;
+		category?: string;
 	};
 };
-
 export const guildSettingsSchema: DynamicSettingsSchema = {
 	description: "Guild-specific settings",
 	type: "object",
@@ -29,12 +32,28 @@ export const guildSettingsSchema: DynamicSettingsSchema = {
 					type: "channel",
 					description: "The channel where I will send error reports and other logs. If not set, I will DM the server owner instead.",
 					default: null
-				},
-				ticket: {
-					key: "ticket",
+				}
+			}
+		},
+		tickets: {
+			key: "tickets",
+			name: "Tickets",
+			description: "Settings related to support tickets",
+			type: "object",
+			children: {
+				channel: {
+					key: "channel",
 					name: "Ticket channel",
 					type: "channel",
+					channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement],
 					description: "The channel where I will create support tickets. If not set, I will create them in the current channel.",
+					default: null
+				},
+				category: {
+					key: "category",
+					name: "Ticket category",
+					type: "section",
+					description: "The category where support ticket channels will be created.",
 					default: null
 				}
 			}
@@ -46,7 +65,8 @@ export class Guild {
 	#discordGuild: DiscordGuild;
 	#storagePath: string;
 	#settings: GuildSettings = {
-		channels: {}
+		channels: {},
+		tickets: {}
 	};
 	#logger: Logger;
 

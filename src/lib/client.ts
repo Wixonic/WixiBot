@@ -14,10 +14,10 @@ import {
 } from "discord.js";
 import EventEmitter from "node:events";
 
-import type { Guild } from "./guild.ts";
+import { Guild } from "./guild.ts";
 import type { Logger } from "./logger.ts";
 import type { ClientSettings } from "./settings.ts";
-import type { User } from "./user.ts";
+import { User } from "./user.ts";
 
 export type AnyCommandInteraction = ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction;
 
@@ -158,8 +158,19 @@ export class Client extends EventEmitter {
 		});
 	};
 
-	getGuild(id: string) {
-		return this.#guilds.get(id);
+	async getGuild(id: string) {
+		let guild = this.#guilds.get(id);
+
+		if (!guild) {
+			const discordGuild = await this.#discordClient?.guilds.fetch(id).catch(() => null);
+			if (!discordGuild) return null;
+
+			guild = new Guild(this.#logger.clone(() => `[Guild ${id}]`), discordGuild);
+			await guild.init();
+			this.addGuild(guild);
+		}
+
+		return guild;
 	};
 
 	addGuild(guild: Guild) {
@@ -173,8 +184,19 @@ export class Client extends EventEmitter {
 		});
 	};
 
-	getUser(id: string) {
-		return this.#users.get(id);
+	async getUser(id: string) {
+		let user = this.#users.get(id);
+
+		if (!user) {
+			const discordUser = await this.#discordClient?.users.fetch(id).catch(() => null);
+			if (!discordUser) return null;
+
+			user = new User(this.#logger.clone(() => `[User ${id}]`), discordUser);
+			await user.init();
+			this.addUser(user);
+		}
+
+		return user;
 	};
 
 	addUser(user: User) {

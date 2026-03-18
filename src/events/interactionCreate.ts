@@ -1,7 +1,6 @@
 import { Events, MessageFlags, type Interaction } from "discord.js";
 
 import { client } from "../lib/client.ts";
-import { Guild } from "../lib/guild.ts";
 import type { Logger } from "../lib/logger.ts";
 import { User } from "../lib/user.ts";
 import { parseCustomId } from "../lib/utils.ts";
@@ -19,15 +18,6 @@ export const event = {
 		}
 
 		if (interaction.isChatInputCommand() || interaction.isMessageContextMenuCommand() || interaction.isUserContextMenuCommand()) {
-			if (interaction.guildId && !client.getGuild(interaction.guildId)) {
-				const discordGuild = interaction.guild ?? await client.discord?.guilds.fetch(interaction.guildId).catch(() => null);
-
-				if (discordGuild) {
-					const guild = new Guild(interactionLogger, discordGuild);
-					await guild.init();
-				}
-			}
-
 			const commandObject = client.getCommand(interaction.commandName);
 
 			try {

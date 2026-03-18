@@ -56,10 +56,17 @@ export const command = {
 
 			case "ticket": {
 				if (interaction.guild) {
-					const guild = client.getGuild(interaction.guild.id);
+					const guildId = interaction.guildId;
+					if (!guildId) {
+						await interaction.deleteReply();
+						throw new Error("Guild context expected");
+					}
+
+					const guild = await client.getGuild(guildId);
+
 					if (guild) {
 						const channel = interaction.options.getChannel("channel", true) as GuildTextBasedChannel;
-						const ticketChannel = await interaction.guild.channels.fetch(guild.settings.channels.ticket ?? "-1").catch(() => null);
+						const ticketChannel = await interaction.guild.channels.fetch(guild.settings.tickets.channel ?? "-1").catch(() => null);
 
 						if (!ticketChannel || !ticketChannel.isTextBased() || !ticketChannel.isSendable()) {
 							const settingsCommandId = await client.getCommandId("settings");

@@ -36,7 +36,7 @@ export const event = {
 				if (user) {
 					try {
 						await user.send(`Thanks for supporting my creator!
-To unlock all supporter perks, please join the Discord server: ${settings.links?.join ?? "<https://go.wixonic.fr/discord>"}`);
+To unlock all supporter perks, please join the Discord server: ${settings.discord.invite ?? "<https://go.wixonic.fr/discord>"}`);
 						logger.info(`Sent join - server DM to ${entitlement.userId} after funding purchase.`);
 					} catch (error) {
 						logger.error(`Failed to DM ${entitlement.userId} after funding purchase.`, {

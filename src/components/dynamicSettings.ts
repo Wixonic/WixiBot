@@ -16,7 +16,13 @@ import {
 	UserSelectMenuBuilder
 } from "discord.js";
 
-import { generateDynamicSettingsComponentFor, resolveDynamicSettingsPath, resolveDynamicSettingsScopeContextFor, type DynamicSetting } from "../lib/dynamicSettings.ts";
+import {
+	generateDynamicSettingsComponentFor,
+	resolveDynamicSettingsPath,
+	resolveDynamicSettingsScopeContextFor,
+	type DynamicChannelSetting,
+	type DynamicSetting
+} from "../lib/dynamicSettings.ts";
 import type { Component } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
 
@@ -30,8 +36,8 @@ const normalizeSettingsPath = (path: string): string => {
 	return withoutTrailingSlash;
 };
 
-const ensureParentSettings = async (path: string, setting: DynamicSetting, interaction: MessageComponentInteraction, logger: Logger) => {
-	const scope = await resolveDynamicSettingsScopeContextFor(logger, path, interaction);
+const ensureParentSettings = async (path: string, setting: DynamicSetting, interaction: MessageComponentInteraction) => {
+	const scope = await resolveDynamicSettingsScopeContextFor(path, interaction);
 	if (!scope) return null;
 
 	const context = resolveDynamicSettingsPath(scope, path);
@@ -68,7 +74,7 @@ const ensureParentSettings = async (path: string, setting: DynamicSetting, inter
 
 export const component = {
 	customId: "settings",
-	async execute(logger: Logger, interaction: MessageComponentInteraction, ...options: string[]) {
+	async execute(_logger: Logger, interaction: MessageComponentInteraction, ...options: string[]) {
 		switch (options[0]) {
 			case "path": {
 				const targetPath = normalizeSettingsPath(options[1] ?? "");
@@ -78,7 +84,7 @@ export const component = {
 					case "view": {
 						await interaction.update({
 							components: [
-								await generateDynamicSettingsComponentFor(logger, targetPath, interaction)
+								await generateDynamicSettingsComponentFor(targetPath, interaction)
 							],
 							flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
 						});
@@ -86,14 +92,14 @@ export const component = {
 					}
 
 					case "reset": {
-						const scope = await resolveDynamicSettingsScopeContextFor(logger, targetPath, interaction);
+						const scope = await resolveDynamicSettingsScopeContextFor(targetPath, interaction);
 						if (!scope) throw new Error("Settings scope is invalid");
 
 						const context = resolveDynamicSettingsPath(scope, targetPath);
 						if (!context || !context.targetSetting || !context.targetKey) {
 							await interaction.update({
 								components: [
-									await generateDynamicSettingsComponentFor(logger, getParentPath(targetPath), interaction)
+									await generateDynamicSettingsComponentFor(getParentPath(targetPath), interaction)
 								],
 								flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
 							});
@@ -110,7 +116,7 @@ export const component = {
 
 						await interaction.update({
 							components: [
-								await generateDynamicSettingsComponentFor(logger, parentPath, interaction)
+								await generateDynamicSettingsComponentFor(parentPath, interaction)
 							],
 							flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
 						});
@@ -118,14 +124,14 @@ export const component = {
 					}
 
 					case "edit": {
-						const scope = await resolveDynamicSettingsScopeContextFor(logger, targetPath, interaction);
+						const scope = await resolveDynamicSettingsScopeContextFor(targetPath, interaction);
 						if (!scope) throw new Error("Settings scope is invalid");
 
 						const context = resolveDynamicSettingsPath(scope, targetPath);
 						if (!context || !context.targetSetting || !context.targetKey) {
 							await interaction.update({
 								components: [
-									await generateDynamicSettingsComponentFor(logger, getParentPath(targetPath), interaction)
+									await generateDynamicSettingsComponentFor(getParentPath(targetPath), interaction)
 								],
 								flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
 							});
@@ -166,19 +172,38 @@ export const component = {
 							}
 
 							case "channel": {
+								const DEFAULT_CHANNEL_TYPES = [ChannelType.GuildText, ChannelType.GuildAnnouncement];
+								const channelSetting = targetSetting as DynamicChannelSetting;
+								const channelTypes = channelSetting.channelTypes ?? DEFAULT_CHANNEL_TYPES;
+
 								container.addActionRowComponents((component) => component
 									.addComponents([
 										new ChannelSelectMenuBuilder()
 											.setCustomId(`settings:edit:set:channel:${targetPath}`)
 											.setPlaceholder("Select a channel")
-											.setChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
+											.setChannelTypes(...channelTypes)
+											.setMinValues(1)
+											.setMaxValues(1)
+									])
+								);
+								break;
+
+
+							}
+
+							case "section": {
+								container.addActionRowComponents((component) => component
+									.addComponents([
+										new ChannelSelectMenuBuilder()
+											.setCustomId(`settings:edit:set:section:${targetPath}`)
+											.setPlaceholder("Select a category")
+											.setChannelTypes(ChannelType.GuildCategory)
 											.setMinValues(1)
 											.setMaxValues(1)
 									])
 								);
 								break;
 							}
-
 							case "role": {
 								container.addActionRowComponents((component) => component
 									.addComponents([
@@ -249,13 +274,13 @@ export const component = {
 						const type = options[2] as DynamicSetting["type"];
 						const targetPath = normalizeSettingsPath(options[3] ?? "");
 
-						const scope = await resolveDynamicSettingsScopeContextFor(logger, targetPath, interaction);
+						const scope = await resolveDynamicSettingsScopeContextFor(targetPath, interaction);
 						if (!scope) throw new Error("Settings scope is invalid");
 
 						const context = resolveDynamicSettingsPath(scope, targetPath);
 						if (!context || !context.targetSetting || !context.targetKey || context.targetSetting.type !== type) throw new Error("Setting path is invalid");
 
-						const parentResolved = await ensureParentSettings(targetPath, context.targetSetting, interaction, logger);
+						const parentResolved = await ensureParentSettings(targetPath, context.targetSetting, interaction);
 						if (!parentResolved) throw new Error("Could not resolve parent settings");
 
 						let value: unknown;
@@ -271,14 +296,17 @@ export const component = {
 						} else if (type === "user") {
 							if (!interaction.isUserSelectMenu()) throw new Error("Expected user select menu");
 							value = interaction.values[0] ?? null;
-						} else throw new Error("Unsupported direct set type");
 
+						} else if (type === "section") {
+							if (!interaction.isChannelSelectMenu()) throw new Error("Expected channel select menu");
+							value = interaction.values[0] ?? null;
+						} else throw new Error("Unsupported direct set type");
 						parentResolved.parentSettings[parentResolved.context.targetKey!] = value;
 						await parentResolved.scope.save();
 
 						await interaction.update({
 							components: [
-								await generateDynamicSettingsComponentFor(logger, getParentPath(targetPath), interaction)
+								await generateDynamicSettingsComponentFor(getParentPath(targetPath), interaction)
 							],
 							flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
 						});
@@ -287,13 +315,13 @@ export const component = {
 
 					case "default": {
 						const targetPath = normalizeSettingsPath(options[2] ?? "");
-						const scope = await resolveDynamicSettingsScopeContextFor(logger, targetPath, interaction);
+						const scope = await resolveDynamicSettingsScopeContextFor(targetPath, interaction);
 						if (!scope) throw new Error("Settings scope is invalid");
 
 						const context = resolveDynamicSettingsPath(scope, targetPath);
 						if (!context || !context.targetSetting || !context.targetKey || context.targetSetting.type === "object") throw new Error("Setting path is invalid");
 
-						const parentResolved = await ensureParentSettings(targetPath, context.targetSetting, interaction, logger);
+						const parentResolved = await ensureParentSettings(targetPath, context.targetSetting, interaction);
 						if (!parentResolved) throw new Error("Could not resolve parent settings");
 
 						parentResolved.parentSettings[parentResolved.context.targetKey!] = context.targetSetting.default;
@@ -301,7 +329,7 @@ export const component = {
 
 						await interaction.update({
 							components: [
-								await generateDynamicSettingsComponentFor(logger, getParentPath(targetPath), interaction)
+								await generateDynamicSettingsComponentFor(getParentPath(targetPath), interaction)
 							],
 							flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
 						});

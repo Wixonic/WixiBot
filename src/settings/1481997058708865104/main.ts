@@ -9,6 +9,7 @@ export const settings: ClientSettings = {
 	},
 	discord: {
 		clientId: "1481997058708865104",
+		invite: "https://discord.gg/BcXFAVKJZQ",
 		options: {},
 		publicKey: "cce0d2008060481b589e8d8a7c4ef73dd5278aab48a23f37f72ee94887469638",
 		roles: {
@@ -23,7 +24,6 @@ export const settings: ClientSettings = {
 	},
 	links: {
 		funding: "https://discord.gg/2QB7QkPtrA",
-		help: "https://discord.gg/wVHSFqG85J",
-		join: "https://discord.gg/BcXFAVKJZQ"
+		help: "https://discord.gg/wVHSFqG85J"
 	}
 };

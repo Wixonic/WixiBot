@@ -13,6 +13,7 @@ export interface DiscordSkuSettings {
 
 export interface DiscordSettings {
 	clientId: string;
+	invite?: string;
 	options: Omit<ClientOptions, "intents">;
 	publicKey: string;
 	roles: Record<string, string>;
@@ -24,7 +25,6 @@ export interface DiscordSettings {
 export interface ClientLinksSettings {
 	funding?: string;
 	help?: string;
-	join?: string;
 };
 
 export interface ClientSettings {

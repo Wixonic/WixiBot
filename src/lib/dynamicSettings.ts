@@ -10,9 +10,8 @@ import {
 } from "discord.js";
 
 import { client } from "../lib/client.ts";
-import { Guild, guildSettingsSchema } from "../lib/guild.ts";
-import type { Logger } from "../lib/logger.ts";
-import { User, userSettingsSchema } from "../lib/user.ts";
+import { guildSettingsSchema } from "../lib/guild.ts";
+import { userSettingsSchema } from "../lib/user.ts";
 
 interface BaseDynamicSetting<Type extends string> {
 	description?: string;
@@ -36,7 +35,9 @@ export interface DynamicObjectSetting extends DynamicChildSetting<"object">, Dyn
 
 export interface DynamicBooleanSetting extends DynamicValueSetting<"boolean", boolean> { };
 
-export interface DynamicChannelSetting extends DynamicValueSetting<"channel", string | null> { };
+export interface DynamicChannelSetting extends DynamicValueSetting<"channel", string | null> {
+	channelTypes?: number[];
+};
 
 export interface DynamicNumberSetting extends DynamicValueSetting<"number", number | null> {
 	min?: number;
@@ -49,6 +50,8 @@ export interface DynamicStringSetting extends DynamicValueSetting<"string", stri
 
 export interface DynamicUserSetting extends DynamicValueSetting<"user", string | null> { };
 
+export interface DynamicSectionSetting extends DynamicValueSetting<"section", string | null> { };
+
 export type DynamicSetting =
 	DynamicObjectSetting |
 	DynamicBooleanSetting |
@@ -56,7 +59,8 @@ export type DynamicSetting =
 	DynamicNumberSetting |
 	DynamicRoleSetting |
 	DynamicStringSetting |
-	DynamicUserSetting;
+	DynamicUserSetting |
+	DynamicSectionSetting;
 
 export type DynamicSettingsSchema = DynamicRootObjectSetting;
 
@@ -82,6 +86,7 @@ const valueFormatters: Record<Exclude<DynamicSetting["type"], "object">, (value:
 	channel: (value) => typeof value === "string" && value.length > 0 ? `<#${value}>` : "Not set",
 	number: (value) => typeof value === "number" ? `\`${value}\`` : "Not set",
 	role: (value) => typeof value === "string" && value.length > 0 ? `<@&${value}>` : "Not set",
+	section: (value) => typeof value === "string" && value.length > 0 ? `<#${value}>` : "Not set",
 	string: (value) => typeof value === "string" && value.length > 0 ? `\`${value}\`` : "Not set",
 	user: (value) => typeof value === "string" && value.length > 0 ? `<@${value}>` : "Not set"
 };
@@ -100,13 +105,10 @@ const isSettingDefaultValue = (setting: DynamicSetting, value: unknown): boolean
 	return value === valueSetting.default;
 };
 
-export const resolveDynamicSettingsScopeContextFor = async (logger: Logger, path: string, interaction: ChatInputCommandInteraction | MessageComponentInteraction | ModalSubmitInteraction): Promise<DynamicSettingsScopeContext | null> => {
+export const resolveDynamicSettingsScopeContextFor = async (path: string, interaction: ChatInputCommandInteraction | MessageComponentInteraction | ModalSubmitInteraction): Promise<DynamicSettingsScopeContext | null> => {
 	if (path.startsWith("/User")) {
-		let user = client.getUser(interaction.user.id);
-		if (!user) {
-			user = new User(logger, interaction.user);
-			await user.init();
-		}
+		const user = await client.getUser(interaction.user.id);
+		if (!user) return null;
 
 		return {
 			scopePath: "/User",
@@ -121,14 +123,8 @@ export const resolveDynamicSettingsScopeContextFor = async (logger: Logger, path
 		const hasPermission = interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild, true);
 		if (hasPermission === false) return null;
 
-		let guild = client.getGuild(interaction.guildId);
-		if (!guild) {
-			const discordGuild = interaction.guild ?? await client.discord?.guilds.fetch(interaction.guildId).catch(() => null);
-			if (!discordGuild) return null;
-
-			guild = new Guild(logger, discordGuild);
-			await guild.init();
-		}
+		const guild = await client.getGuild(interaction.guildId);
+		if (!guild) return null;
 
 		return {
 			scopePath: "/Guild",
@@ -261,7 +257,7 @@ ${child.description}` : ""}${currentValueText}`)
 	return container;
 };
 
-export const generateDynamicSettingsComponentFor = async (logger: Logger, path: string, interaction: ChatInputCommandInteraction | MessageComponentInteraction | ModalSubmitInteraction) => {
+export const generateDynamicSettingsComponentFor = async (path: string, interaction: ChatInputCommandInteraction | MessageComponentInteraction | ModalSubmitInteraction) => {
 	const showGuildSettings = interaction.guild && interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild, true);
 
 	const backPath = path.split("/").slice(0, -1).join("/");
@@ -297,7 +293,7 @@ Choose a category below.`))
 			);
 	}
 
-	const scope = await resolveDynamicSettingsScopeContextFor(logger, path, interaction);
+	const scope = await resolveDynamicSettingsScopeContextFor(path, interaction);
 	if (scope && (scope.scopePath !== "/Guild" || showGuildSettings)) {
 		const scopeContainer = generateDynamicSettingsScopeComponentFor(path, scope, backButton);
 

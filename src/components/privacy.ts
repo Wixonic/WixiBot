@@ -51,7 +51,12 @@ export const component = {
 		switch (options[0]) {
 			case "request": {
 				if (interaction.isButton()) {
-					const user = client.getUser(interaction.user.id)!;
+					const user = await client.getUser(interaction.user.id);
+					if (!user) {
+						await interaction.deleteReply();
+						throw new Error("User not found");
+					}
+
 					const attachmentName = `U-${interaction.user.id}.zip`;
 
 					try {
@@ -117,7 +122,11 @@ Please note that we may need to verify your identity before processing your requ
 			}
 
 			case "delete": {
-				const user = client.getUser(interaction.user.id)!;
+				const user = await client.getUser(interaction.user.id);
+				if (!user) {
+					await interaction.deleteReply();
+					throw new Error("User not found");
+				}
 
 				switch (options[1]) {
 					case "confirmation": {
