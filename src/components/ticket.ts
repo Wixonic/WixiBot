@@ -12,63 +12,93 @@ import { client, type Component } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
 import type { TicketData } from "../lib/user.ts";
 
-const ticketMessages = (interaction: MessageComponentInteraction, ticketId: string, reason: string) => {
+type TicketMessageData = Pick<TicketData, "id" | "reason"> & Partial<Pick<TicketData, "interactions" | "date">>;
+
+const ticketMessages = (interaction: MessageComponentInteraction, ticket: TicketMessageData) => {
+	const reasons: Record<string, string> = {
+		"server": `<@${interaction.user.id}> has an issue on the server.`,
+		"discord": `<@${interaction.user.id}> has an issue on Discord in general.`,
+		"command": `<@${interaction.user.id}> needs help with a command.`,
+		"application": `<@${interaction.user.id}> has a question about ${interaction.client.user?.username} in general.`,
+		"privacy": `<@${interaction.user.id}> has a question about privacy.`,
+		"bug": `<@${interaction.user.id}> found a bug.`,
+		"github": `<@${interaction.user.id}> wants to contribute on GitHub.`,
+		"contribute": `<@${interaction.user.id}> wants to contribute.`
+	};
+
+	const ticketChannelMessageContent = new ContainerBuilder();
+	const channelMessageContent = new ContainerBuilder();
+
+	ticketChannelMessageContent.addTextDisplayComponents((component) => component
+		.setContent(`# Ticket\n\n${reasons[ticket.reason ?? ""] ?? `<@${interaction.user.id}> opened a support ticket.`}`)
+	);
+	channelMessageContent.addTextDisplayComponents((component) => component
+		.setContent(`# Ticket\n\n${reasons[ticket.reason ?? ""] ?? `<@${interaction.user.id}> opened a support ticket.`}`)
+	);
+
+	if (ticket.interactions?.claimedBy) {
+		ticketChannelMessageContent.addTextDisplayComponents((component) => component
+			.setContent(`<@${ticket.interactions?.claimedBy}> has claimed this ticket.`)
+		);
+
+		channelMessageContent.addTextDisplayComponents((component) => component
+			.setContent(`<@${ticket.interactions?.claimedBy}> has claimed this ticket.`)
+		);
+	}
+
+	if (ticket.interactions?.closedBy) {
+		ticketChannelMessageContent.addTextDisplayComponents((component) => component
+			.setContent(`< @${ticket.interactions?.closedBy}> has closed this ticket.`)
+		);
+
+		channelMessageContent.addTextDisplayComponents((component) => component
+			.setContent(`< @${ticket.interactions?.closedBy}> has closed this ticket.`)
+		);
+	}
+
+	ticketChannelMessageContent.addActionRowComponents((component) => component
+		.addComponents([
+			new ButtonBuilder()
+				.setCustomId(`ticket: resolve:${ticket.id} `)
+				.setLabel("Mark as resolved")
+				.setStyle(ButtonStyle.Success),
+			new ButtonBuilder()
+				.setCustomId(`ticket: close:${ticket.id} `)
+				.setLabel("Close")
+				.setStyle(ButtonStyle.Danger)
+		])
+	);
+	channelMessageContent.addActionRowComponents((component) => component
+		.addComponents([
+			new ButtonBuilder()
+				.setCustomId(`ticket:view:${ticket.id}`)
+				.setLabel("View")
+				.setStyle(ButtonStyle.Secondary)
+		])
+	);
+
+	const viewedBy = ticket.interactions?.viewedBy ?? [];
+	if (viewedBy.length > 0) ticketChannelMessageContent.addTextDisplayComponents((component) => component
+		.setContent(`-# This ticket has been viewed by: ${viewedBy.map((id) => `<@${id}>`).join(", ")}`)
+	);
+
+	ticketChannelMessageContent.addTextDisplayComponents((component) => component
+		.setContent(`-# Ticket ID: ${ticket.id} - Created at <t:${Math.floor(new Date(ticket?.date ?? new Date()).getTime() / 1000)}:F>`)
+	);
+	channelMessageContent.addTextDisplayComponents((component) => component
+		.setContent(`-# Ticket ID: ${ticket.id} - Created at <t:${Math.floor(new Date(ticket?.date ?? new Date()).getTime() / 1000)}:F>`)
+	);
+
 	return [
-		new ContainerBuilder()
-			.addTextDisplayComponents((component) => component
-				.setContent(`# Ticket\n\n${{
-					"server": `<@${interaction.user.id}> has an issue on the server.`,
-					"discord": `<@${interaction.user.id}> has an issue on Discord in general.`,
-					"command": `<@${interaction.user.id}> needs help with a command.`,
-					"application": `<@${interaction.user.id}> has a question about ${interaction.client.user?.username} in general.`,
-					"privacy": `<@${interaction.user.id}> has a question about privacy.`,
-					"bug": `<@${interaction.user.id}> found a bug.`,
-					"github": `<@${interaction.user.id}> wants to contribute on GitHub.`,
-					"contribute": `<@${interaction.user.id}> wants to contribute.`
-				}[reason] ?? `<@${interaction.user.id}> opened a support ticket.`}`))
-			.addActionRowComponents((component) => component
-				.addComponents([
-					new ButtonBuilder()
-						.setCustomId(`ticket:resolve:${ticketId}`)
-						.setLabel("Mark as resolved")
-						.setStyle(ButtonStyle.Success),
-					new ButtonBuilder()
-						.setCustomId(`ticket:close:${ticketId}`)
-						.setLabel("Close")
-						.setStyle(ButtonStyle.Danger)
-				])
-			),
-		new ContainerBuilder()
-			.addTextDisplayComponents((component) => component
-				.setContent(`# Ticket\n\n${{
-					"server": `<@${interaction.user.id}> has an issue on the server.`,
-					"discord": `<@${interaction.user.id}> has an issue on Discord in general.`,
-					"command": `<@${interaction.user.id}> needs help with a command.`,
-					"application": `<@${interaction.user.id}> has a question about ${interaction.client.user?.username} in general.`,
-					"privacy": `<@${interaction.user.id}> has a question about privacy.`,
-					"bug": `<@${interaction.user.id}> found a bug.`,
-					"github": `<@${interaction.user.id}> wants to contribute on GitHub.`,
-					"contribute": `<@${interaction.user.id}> wants to contribute.`
-				}[reason] ?? `<@${interaction.user.id}> opened a support ticket.`}`))
-			.addActionRowComponents((component) => component
-				.addComponents([
-					new ButtonBuilder()
-						.setCustomId(`ticket:resolve:${ticketId}`)
-						.setLabel("Mark as resolved")
-						.setStyle(ButtonStyle.Success),
-					new ButtonBuilder()
-						.setCustomId(`ticket:close:${ticketId}`)
-						.setLabel("Close")
-						.setStyle(ButtonStyle.Danger)
-				])
-			)
+		ticketChannelMessageContent,
+		channelMessageContent
 	];
 };
 
 const updateTicketMessages = async (logger: Logger, interaction: MessageComponentInteraction, ticket: TicketData, logChannelId: string): Promise<void> => {
 	if (!interaction.guild) return;
 
-	const [ticketMessageContent, channelMessageContent] = ticketMessages(interaction, ticket.id, ticket.reason ?? "");
+	const [ticketMessageContent, channelMessageContent] = ticketMessages(interaction, ticket);
 
 	const ticketChannel = await interaction.guild.channels.fetch(ticket.channel).catch(() => null);
 	if (ticketChannel?.isTextBased()) {
@@ -120,6 +150,11 @@ export const component = {
 					throw new Error("Expected a string select menu interaction");
 				}
 
+				if (interaction.values[0] === "reset") {
+					await interaction.deleteReply();
+					return;
+				}
+
 				const guild = await client.getGuild(interaction.guildId ?? "-1");
 				if (!guild) {
 					await interaction.deleteReply();
@@ -135,7 +170,7 @@ export const component = {
 				}
 
 				const ticketChannel = await interaction.guild.channels.create({
-					name: `ticket-${id}`,
+					name: `ticket - ${id} `,
 					type: ChannelType.GuildText,
 					parent: guild.settings.tickets.category,
 					permissionOverwrites: [
@@ -156,7 +191,7 @@ export const component = {
 					]
 				});
 
-				const [ticketChannelMessageContent, channelMessageContent] = ticketMessages(interaction, id, interaction.values[0]);
+				const [ticketChannelMessageContent, channelMessageContent] = ticketMessages(interaction, { id, reason: interaction.values[0] });
 
 				const ticketChannelMessage = await ticketChannel.send({
 					components: [
@@ -184,7 +219,7 @@ export const component = {
 				}, interaction.values[0]);
 
 				await interaction.editReply({
-					content: `Your ticket has been created in <#${ticket.channel}>.`
+					content: `Your ticket has been created in <#${ticket.channel} >.`
 				});
 				break;
 			}
@@ -220,9 +255,7 @@ export const component = {
 				await user.saveTicket(ticket);
 
 				const guild = await client.getGuild(interaction.guildId ?? "-1");
-				if (guild) {
-					await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
-				}
+				if (guild) await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
 
 				await interaction.deleteReply();
 				break;
@@ -271,9 +304,7 @@ export const component = {
 				}
 
 				const guild = await client.getGuild(interaction.guildId ?? "-1");
-				if (guild) {
-					await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
-				}
+				if (guild) await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
 
 				await interaction.deleteReply();
 				break;
@@ -310,9 +341,7 @@ export const component = {
 				await user.saveTicket(ticket);
 
 				const guild = await client.getGuild(interaction.guildId ?? "-1");
-				if (guild) {
-					await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
-				}
+				if (guild) await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
 
 				await interaction.deleteReply();
 				break;
@@ -349,9 +378,7 @@ export const component = {
 				await user.saveTicket(ticket);
 
 				const guild = await client.getGuild(interaction.guildId ?? "-1");
-				if (guild) {
-					await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
-				}
+				if (guild) await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
 
 				await interaction.deleteReply();
 				break;

@@ -17,7 +17,11 @@ export const event = {
 			await user.init();
 		}
 
+		interactionLogger.debug(`Received interaction by ${interaction.user.username} (${interaction.user.id})`);
+
 		if (interaction.isChatInputCommand() || interaction.isMessageContextMenuCommand() || interaction.isUserContextMenuCommand()) {
+			interactionLogger.debug(`Executing command ${interaction.commandName} (${interaction.commandId})`);
+
 			const commandObject = client.getCommand(interaction.commandName);
 
 			try {
@@ -53,6 +57,8 @@ export const event = {
 				}
 			}
 		} else if (interaction.isMessageComponent()) {
+			interactionLogger.debug(`Executing component ${interaction.customId}`);
+
 			const [customId, ...options] = parseCustomId(interaction.customId);
 			const componentObject = client.getComponent(customId);
 
@@ -89,6 +95,8 @@ export const event = {
 				}
 			}
 		} else if (interaction.isModalSubmit()) {
+			interactionLogger.debug(`Executing modal ${interaction.customId}`);
+
 			const [customId, ...options] = parseCustomId(interaction.customId);
 			const modalObject = client.getModal(customId);
 

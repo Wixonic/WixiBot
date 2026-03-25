@@ -111,6 +111,9 @@ Our support team will review your request and get back to you as soon as possibl
 												.setPlaceholder("Select a reason")
 												.addOptions([
 													new StringSelectMenuOptionBuilder()
+														.setLabel("Select a reason")
+														.setValue("reset"),
+													new StringSelectMenuOptionBuilder()
 														.setLabel(`I have an issue on ${guildName}`)
 														.setValue("server"),
 													new StringSelectMenuOptionBuilder()
