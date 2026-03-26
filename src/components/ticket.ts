@@ -29,6 +29,14 @@ const ticketMessages = (interaction: MessageComponentInteraction, ticket: Ticket
 	const ticketChannelMessageContent = new ContainerBuilder();
 	const channelMessageContent = new ContainerBuilder();
 
+	if (ticket.state === "Resolved") {
+		ticketChannelMessageContent.setAccentColor(0x008800);
+		channelMessageContent.setAccentColor(0x008800);
+	} else if (ticket.state === "Closed") {
+		ticketChannelMessageContent.setAccentColor(0xFF0000);
+		channelMessageContent.setAccentColor(0xFF0000);
+	}
+
 	ticketChannelMessageContent.addTextDisplayComponents((component) => component
 		.setContent(`# Ticket\n\n${reasons[ticket.reason ?? ""] ?? `<@${ticket.interactions.createdBy}> opened a support ticket.`}`)
 	);
@@ -54,9 +62,7 @@ const ticketMessages = (interaction: MessageComponentInteraction, ticket: Ticket
 		channelMessageContent.addTextDisplayComponents((component) => component
 			.setContent(`<@${ticket.interactions.closedBy}> has closed this ticket.`)
 		);
-	}
-
-	if (ticket.state != "Closed") {
+	} else {
 		ticketChannelMessageContent.addActionRowComponents((component) => component
 			.addComponents([
 				new ButtonBuilder()
