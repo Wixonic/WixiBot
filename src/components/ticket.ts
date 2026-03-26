@@ -12,7 +12,7 @@ import { client, type Component } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
 import type { TicketData } from "../lib/user.ts";
 
-type TicketMessageData = Pick<TicketData, "id" | "reason"> & Partial<Pick<TicketData, "interactions" | "date">>;
+type TicketMessageData = Pick<TicketData, "id" | "reason"> & Partial<Pick<TicketData, "interactions" | "date" | "state">>;
 
 const ticketMessages = (interaction: MessageComponentInteraction, ticket: TicketMessageData) => {
 	const reasons: Record<string, string> = {
@@ -48,26 +48,28 @@ const ticketMessages = (interaction: MessageComponentInteraction, ticket: Ticket
 
 	if (ticket.interactions?.closedBy) {
 		ticketChannelMessageContent.addTextDisplayComponents((component) => component
-			.setContent(`< @${ticket.interactions?.closedBy}> has closed this ticket.`)
+			.setContent(`<@${ticket.interactions?.closedBy}> has closed this ticket.`)
 		);
 
 		channelMessageContent.addTextDisplayComponents((component) => component
-			.setContent(`< @${ticket.interactions?.closedBy}> has closed this ticket.`)
+			.setContent(`<@${ticket.interactions?.closedBy}> has closed this ticket.`)
 		);
 	}
 
-	ticketChannelMessageContent.addActionRowComponents((component) => component
-		.addComponents([
-			new ButtonBuilder()
-				.setCustomId(`ticket: resolve:${ticket.id} `)
-				.setLabel("Mark as resolved")
-				.setStyle(ButtonStyle.Success),
-			new ButtonBuilder()
-				.setCustomId(`ticket: close:${ticket.id} `)
-				.setLabel("Close")
-				.setStyle(ButtonStyle.Danger)
-		])
-	);
+	if (ticket.state != "Closed") {
+		ticketChannelMessageContent.addActionRowComponents((component) => component
+			.addComponents([
+				new ButtonBuilder()
+					.setCustomId(`ticket:resolve:${ticket.id}`)
+					.setLabel("Mark as resolved")
+					.setStyle(ButtonStyle.Success),
+				new ButtonBuilder()
+					.setCustomId(`ticket:close:${ticket.id}`)
+					.setLabel("Close")
+					.setStyle(ButtonStyle.Danger)
+			])
+		);
+	}
 	channelMessageContent.addActionRowComponents((component) => component
 		.addComponents([
 			new ButtonBuilder()
@@ -83,10 +85,10 @@ const ticketMessages = (interaction: MessageComponentInteraction, ticket: Ticket
 	);
 
 	ticketChannelMessageContent.addTextDisplayComponents((component) => component
-		.setContent(`-# Ticket ID: ${ticket.id} - Created at <t:${Math.floor(new Date(ticket?.date ?? new Date()).getTime() / 1000)}:F>`)
+		.setContent(`-# Ticket ID: \`${ticket.id}\` - Created <t:${Math.floor(new Date(ticket?.date ?? new Date()).getTime() / 1000)}:F>`)
 	);
 	channelMessageContent.addTextDisplayComponents((component) => component
-		.setContent(`-# Ticket ID: ${ticket.id} - Created at <t:${Math.floor(new Date(ticket?.date ?? new Date()).getTime() / 1000)}:F>`)
+		.setContent(`-# Ticket ID: \`${ticket.id}\` - Created <t:${Math.floor(new Date(ticket?.date ?? new Date()).getTime() / 1000)}:F>`)
 	);
 
 	return [
@@ -111,7 +113,9 @@ const updateTicketMessages = async (logger: Logger, interaction: MessageComponen
 				});
 			}
 		} catch (error) {
-			logger.warn("Failed to update ticket channel message", { cause: error });
+			logger.warn("Failed to update ticket channel message", {
+				cause: error
+			});
 		}
 	}
 
@@ -126,7 +130,9 @@ const updateTicketMessages = async (logger: Logger, interaction: MessageComponen
 				});
 			}
 		} catch (error) {
-			logger.warn("Failed to update log channel message", { cause: error });
+			logger.warn("Failed to update log channel message", {
+				cause: error
+			});
 		}
 	}
 };
@@ -219,7 +225,7 @@ export const component = {
 				}, interaction.values[0]);
 
 				await interaction.editReply({
-					content: `Your ticket has been created in <#${ticket.channel} >.`
+					content: `Your ticket has been created in <#${ticket.channel}>.`
 				});
 				break;
 			}
