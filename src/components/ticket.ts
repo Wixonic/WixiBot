@@ -9,8 +9,8 @@ import {
 } from "discord.js";
 
 import { client, type Component } from "../lib/client.ts";
+import type { TicketData } from "../lib/guild.ts";
 import type { Logger } from "../lib/logger.ts";
-import type { TicketData } from "../lib/user.ts";
 
 type TicketMessageData = Pick<TicketData, "id" | "reason"> & Partial<Pick<TicketData, "interactions" | "date" | "state">>;
 
@@ -213,13 +213,7 @@ export const component = {
 					flags: MessageFlags.IsComponentsV2
 				});
 
-				const user = await client.getUser(interaction.user.id);
-				if (!user) {
-					await interaction.deleteReply();
-					throw new Error("User not found");
-				}
-
-				const ticket = await user.createTicket(id, ticketChannel.id, {
+				const ticket = await guild.createTicket(id, ticketChannel.id, {
 					channel: ticketChannelMessage.id,
 					guild: channelMessage.id
 				}, interaction.values[0]);
@@ -242,13 +236,13 @@ export const component = {
 					throw new Error("Ticket ID not provided");
 				}
 
-				const user = await client.getUser(interaction.user.id);
-				if (!user) {
+				const guild = await client.getGuild(interaction.guildId ?? "-1");
+				if (!guild) {
 					await interaction.deleteReply();
-					throw new Error("User not found");
+					throw new Error("Guild not found");
 				}
 
-				const ticket = await user.loadTicket(ticketId);
+				const ticket = await guild.loadTicket(ticketId);
 				if (!ticket) {
 					await interaction.editReply({
 						content: "Ticket not found."
@@ -258,9 +252,8 @@ export const component = {
 
 				ticket.interactions.claimedBy = interaction.user.id;
 				ticket.state = "Claimed";
-				await user.saveTicket(ticket);
+				await guild.saveTicket(ticket);
 
-				const guild = await client.getGuild(interaction.guildId ?? "-1");
 				if (guild) await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
 
 				await interaction.deleteReply();
@@ -279,13 +272,13 @@ export const component = {
 					throw new Error("Ticket ID not provided");
 				}
 
-				const user = await client.getUser(interaction.user.id);
-				if (!user) {
+				const guild = await client.getGuild(interaction.guildId ?? "-1");
+				if (!guild) {
 					await interaction.deleteReply();
-					throw new Error("User not found");
+					throw new Error("Guild not found");
 				}
 
-				const ticket = await user.loadTicket(ticketId);
+				const ticket = await guild.loadTicket(ticketId);
 				if (!ticket) {
 					await interaction.editReply({ content: "Ticket not found." });
 					return;
@@ -294,7 +287,7 @@ export const component = {
 				const alreadyViewed = ticket.interactions.viewedBy.includes(interaction.user.id);
 				if (!alreadyViewed) {
 					ticket.interactions.viewedBy.push(interaction.user.id);
-					await user.saveTicket(ticket);
+					await guild.saveTicket(ticket);
 
 					const channel = await interaction.guild.channels.fetch(interaction.channelId).catch(() => null);
 					if (channel?.isTextBased() && "permissionOverwrites" in channel) {
@@ -309,7 +302,6 @@ export const component = {
 					}
 				}
 
-				const guild = await client.getGuild(interaction.guildId ?? "-1");
 				if (guild) await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
 
 				await interaction.deleteReply();
@@ -328,13 +320,13 @@ export const component = {
 					throw new Error("Ticket ID not provided");
 				}
 
-				const user = await client.getUser(interaction.user.id);
-				if (!user) {
+				const guild = await client.getGuild(interaction.guildId ?? "-1");
+				if (!guild) {
 					await interaction.deleteReply();
-					throw new Error("User not found");
+					throw new Error("Guild not found");
 				}
 
-				const ticket = await user.loadTicket(ticketId);
+				const ticket = await guild.loadTicket(ticketId);
 				if (!ticket) {
 					await interaction.editReply({
 						content: "Ticket not found."
@@ -344,9 +336,8 @@ export const component = {
 
 				ticket.interactions.closedBy = interaction.user.id;
 				ticket.state = "Closed";
-				await user.saveTicket(ticket);
+				await guild.saveTicket(ticket);
 
-				const guild = await client.getGuild(interaction.guildId ?? "-1");
 				if (guild) await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
 
 				await interaction.deleteReply();
@@ -365,13 +356,13 @@ export const component = {
 					throw new Error("Ticket ID not provided");
 				}
 
-				const user = await client.getUser(interaction.user.id);
-				if (!user) {
+				const guild = await client.getGuild(interaction.guildId ?? "-1");
+				if (!guild) {
 					await interaction.deleteReply();
-					throw new Error("User not found");
+					throw new Error("Guild not found");
 				}
 
-				const ticket = await user.loadTicket(ticketId);
+				const ticket = await guild.loadTicket(ticketId);
 				if (!ticket) {
 					await interaction.editReply({
 						content: "Ticket not found."
@@ -381,9 +372,8 @@ export const component = {
 
 				ticket.interactions.closedBy = interaction.user.id;
 				ticket.state = "Resolved";
-				await user.saveTicket(ticket);
+				await guild.saveTicket(ticket);
 
-				const guild = await client.getGuild(interaction.guildId ?? "-1");
 				if (guild) await updateTicketMessages(logger, interaction, ticket, guild.settings.tickets.channel ?? "-1");
 
 				await interaction.deleteReply();

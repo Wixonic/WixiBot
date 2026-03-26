@@ -15,25 +15,6 @@ export const userSettingsSchema: DynamicSettingsSchema = {
 	children: {}
 };
 
-export type TicketState = "Waiting" | "Claimed" | "Resolved" | "Closed";
-
-export interface TicketData {
-	id: string;
-	date: string;
-	reason?: string;
-	state: TicketState;
-	channel: string;
-	interactions: {
-		claimedBy?: string;
-		closedBy?: string;
-		viewedBy: string[];
-	};
-	messages: {
-		channel: string;
-		guild: string;
-	};
-};
-
 export class User {
 	#discordUser: DiscordUser;
 	#storagePath: string;
@@ -73,41 +54,6 @@ export class User {
 		}
 	};
 
-	async createTicket(ticketId: string, channel: string, messages: { channel: string; guild: string }, reason?: string): Promise<TicketData> {
-		const ticketData: TicketData = {
-			id: ticketId,
-			date: new Date().toISOString(),
-			reason,
-			state: "Waiting",
-			channel: channel!,
-			interactions: {
-				viewedBy: []
-			},
-			messages: messages!
-		};
-
-		await this.saveTicket(ticketData);
-		return ticketData;
-	};
-
-	async saveTicket(ticket: TicketData): Promise<void> {
-		const ticketsDir = path.join(this.#storagePath, "tickets");
-		await Deno.mkdir(ticketsDir, { recursive: true });
-		await Deno.writeTextFile(
-			path.join(ticketsDir, `${ticket.id}.json`),
-			JSON.stringify(ticket, null, "\t")
-		);
-	};
-
-	async loadTicket(ticketId: string): Promise<TicketData | null> {
-		try {
-			const content = await Deno.readTextFile(path.join(this.#storagePath, "tickets", `${ticketId}.json`));
-			return JSON.parse(content) as TicketData;
-		} catch (error) {
-			if (error instanceof Deno.errors.NotFound) return null;
-			throw error;
-		}
-	};
 
 	async saveSettings() {
 		await Deno.mkdir(this.#storagePath.split("/").slice(0, -1).join("/"), {

@@ -16,6 +16,25 @@ export interface GuildSettings {
 		category?: string;
 	};
 };
+
+export type TicketState = "Waiting" | "Claimed" | "Resolved" | "Closed";
+
+export interface TicketData {
+	id: string;
+	date: string;
+	reason?: string;
+	state: TicketState;
+	channel: string;
+	interactions: {
+		claimedBy?: string;
+		closedBy?: string;
+		viewedBy: string[];
+	};
+	messages: {
+		channel: string;
+		guild: string;
+	};
+};
 export const guildSettingsSchema: DynamicSettingsSchema = {
 	description: "Guild-specific settings",
 	type: "object",
@@ -126,6 +145,42 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 
 	async saveSettings() {
 		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings, null, "\t"));
+	};
+
+	async createTicket(ticketId: string, channel: string, messages: { channel: string; guild: string }, reason?: string): Promise<TicketData> {
+		const ticketData: TicketData = {
+			id: ticketId,
+			date: new Date().toISOString(),
+			reason,
+			state: "Waiting",
+			channel,
+			interactions: {
+				viewedBy: []
+			},
+			messages
+		};
+
+		await this.saveTicket(ticketData);
+		return ticketData;
+	};
+
+	async saveTicket(ticket: TicketData): Promise<void> {
+		const ticketsDir = path.join(this.#storagePath, "tickets");
+		await Deno.mkdir(ticketsDir, { recursive: true });
+		await Deno.writeTextFile(
+			path.join(ticketsDir, `${ticket.id}.json`),
+			JSON.stringify(ticket, null, "\t")
+		);
+	};
+
+	async loadTicket(ticketId: string): Promise<TicketData | null> {
+		try {
+			const content = await Deno.readTextFile(path.join(this.#storagePath, "tickets", `${ticketId}.json`));
+			return JSON.parse(content) as TicketData;
+		} catch (error) {
+			if (error instanceof Deno.errors.NotFound) return null;
+			throw error;
+		}
 	};
 
 	reportError(message: string, error: unknown) {
