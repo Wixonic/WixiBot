@@ -12,47 +12,47 @@ import { client, type Component } from "../lib/client.ts";
 import type { TicketData } from "../lib/guild.ts";
 import type { Logger } from "../lib/logger.ts";
 
-type TicketMessageData = Pick<TicketData, "id" | "reason"> & Partial<Pick<TicketData, "interactions" | "date" | "state">>;
+type TicketMessageData = Pick<TicketData, "interactions" | "id" | "reason"> & Partial<Pick<TicketData, "interactions" | "date" | "state">>;
 
 const ticketMessages = (interaction: MessageComponentInteraction, ticket: TicketMessageData) => {
 	const reasons: Record<string, string> = {
-		"server": `<@${interaction.user.id}> has an issue on the server.`,
-		"discord": `<@${interaction.user.id}> has an issue on Discord in general.`,
-		"command": `<@${interaction.user.id}> needs help with a command.`,
-		"application": `<@${interaction.user.id}> has a question about ${interaction.client.user?.username} in general.`,
-		"privacy": `<@${interaction.user.id}> has a question about privacy.`,
-		"bug": `<@${interaction.user.id}> found a bug.`,
-		"github": `<@${interaction.user.id}> wants to contribute on GitHub.`,
-		"contribute": `<@${interaction.user.id}> wants to contribute.`
+		"server": `<@${ticket.interactions.createdBy}> has an issue on the server.`,
+		"discord": `<@${ticket.interactions.createdBy}> has an issue on Discord in general.`,
+		"command": `<@${ticket.interactions.createdBy}> needs help with a command.`,
+		"application": `<@${ticket.interactions.createdBy}> has a question about ${interaction.client.user?.username} in general.`,
+		"privacy": `<@${ticket.interactions.createdBy}> has a question about privacy.`,
+		"bug": `<@${ticket.interactions.createdBy}> found a bug.`,
+		"github": `<@${ticket.interactions.createdBy}> wants to contribute on GitHub.`,
+		"contribute": `<@${ticket.interactions.createdBy}> wants to contribute.`
 	};
 
 	const ticketChannelMessageContent = new ContainerBuilder();
 	const channelMessageContent = new ContainerBuilder();
 
 	ticketChannelMessageContent.addTextDisplayComponents((component) => component
-		.setContent(`# Ticket\n\n${reasons[ticket.reason ?? ""] ?? `<@${interaction.user.id}> opened a support ticket.`}`)
+		.setContent(`# Ticket\n\n${reasons[ticket.reason ?? ""] ?? `<@${ticket.interactions.createdBy}> opened a support ticket.`}`)
 	);
 	channelMessageContent.addTextDisplayComponents((component) => component
-		.setContent(`# Ticket\n\n${reasons[ticket.reason ?? ""] ?? `<@${interaction.user.id}> opened a support ticket.`}`)
+		.setContent(`# Ticket\n\n${reasons[ticket.reason ?? ""] ?? `<@${ticket.interactions.createdBy}> opened a support ticket.`}`)
 	);
 
-	if (ticket.interactions?.claimedBy) {
+	if (ticket.interactions.claimedBy) {
 		ticketChannelMessageContent.addTextDisplayComponents((component) => component
-			.setContent(`<@${ticket.interactions?.claimedBy}> has claimed this ticket.`)
+			.setContent(`<@${ticket.interactions.claimedBy}> has claimed this ticket.`)
 		);
 
 		channelMessageContent.addTextDisplayComponents((component) => component
-			.setContent(`<@${ticket.interactions?.claimedBy}> has claimed this ticket.`)
+			.setContent(`<@${ticket.interactions.claimedBy}> has claimed this ticket.`)
 		);
 	}
 
-	if (ticket.interactions?.closedBy) {
+	if (ticket.interactions.closedBy) {
 		ticketChannelMessageContent.addTextDisplayComponents((component) => component
-			.setContent(`<@${ticket.interactions?.closedBy}> has closed this ticket.`)
+			.setContent(`<@${ticket.interactions.closedBy}> has closed this ticket.`)
 		);
 
 		channelMessageContent.addTextDisplayComponents((component) => component
-			.setContent(`<@${ticket.interactions?.closedBy}> has closed this ticket.`)
+			.setContent(`<@${ticket.interactions.closedBy}> has closed this ticket.`)
 		);
 	}
 
@@ -79,9 +79,8 @@ const ticketMessages = (interaction: MessageComponentInteraction, ticket: Ticket
 		])
 	);
 
-	const viewedBy = ticket.interactions?.viewedBy ?? [];
-	if (viewedBy.length > 0) ticketChannelMessageContent.addTextDisplayComponents((component) => component
-		.setContent(`-# This ticket has been viewed by: ${viewedBy.map((id) => `<@${id}>`).join(", ")}`)
+	if (ticket.interactions.viewedBy.length > 0) ticketChannelMessageContent.addTextDisplayComponents((component) => component
+		.setContent(`-# This ticket has been viewed by: ${ticket.interactions.viewedBy.map((id) => `<@${id}>`).join(", ")}`)
 	);
 
 	ticketChannelMessageContent.addTextDisplayComponents((component) => component
@@ -197,7 +196,14 @@ export const component = {
 					]
 				});
 
-				const [ticketChannelMessageContent, channelMessageContent] = ticketMessages(interaction, { id, reason: interaction.values[0] });
+				const [ticketChannelMessageContent, channelMessageContent] = ticketMessages(interaction, {
+					id,
+					reason: interaction.values[0],
+					interactions: {
+						createdBy: interaction.user.id,
+						viewedBy: []
+					}
+				});
 
 				const ticketChannelMessage = await ticketChannel.send({
 					components: [

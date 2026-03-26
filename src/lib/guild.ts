@@ -26,6 +26,7 @@ export interface TicketData {
 	state: TicketState;
 	channel: string;
 	interactions: {
+		createdBy: string;
 		claimedBy?: string;
 		closedBy?: string;
 		viewedBy: string[];
