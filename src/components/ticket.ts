@@ -219,7 +219,7 @@ export const component = {
 					flags: MessageFlags.IsComponentsV2
 				});
 
-				const ticket = await guild.createTicket(id, ticketChannel.id, {
+				const ticket = await guild.createTicket(id, ticketChannel.id, interaction.user.id, {
 					channel: ticketChannelMessage.id,
 					guild: channelMessage.id
 				}, interaction.values[0]);

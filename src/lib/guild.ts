@@ -148,7 +148,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings, null, "\t"));
 	};
 
-	async createTicket(ticketId: string, channel: string, messages: { channel: string; guild: string }, reason?: string): Promise<TicketData> {
+	async createTicket(ticketId: string, channel: string, createdBy: string, messages: { channel: string; guild: string }, reason?: string): Promise<TicketData> {
 		const ticketData: TicketData = {
 			id: ticketId,
 			date: new Date().toISOString(),
@@ -156,6 +156,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 			state: "Waiting",
 			channel,
 			interactions: {
+				createdBy,
 				viewedBy: []
 			},
 			messages
