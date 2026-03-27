@@ -1,21 +1,12 @@
-import type { Guild as DiscordGuild } from "discord.js";
+import type { APIInteractionGuildMember, Guild as DiscordGuild, GuildMember, Message } from "discord.js";
 import path from "node:path";
 
-import { ChannelType } from "discord.js";
+import { ButtonBuilder, ButtonStyle, ChannelType, ContainerBuilder } from "discord.js";
 import { client } from "./client.ts";
 import type { DynamicSettingsSchema } from "./dynamicSettings.ts";
 import type { Logger } from "./logger.ts";
 import { sendChunks } from "./utils.ts";
-
-export interface GuildSettings {
-	channels: {
-		logs?: string;
-	};
-	tickets: {
-		channel?: string;
-		category?: string;
-	};
-};
+import { component } from "../components/dynamicSettings.ts";
 
 export type TicketState = "Waiting" | "Claimed" | "Resolved" | "Closed";
 
@@ -36,6 +27,47 @@ export interface TicketData {
 		guild: string;
 	};
 };
+
+export type ReportType = "Message" | "User";
+
+interface BaseReportData {
+	date: string;
+	type: ReportType;
+	by: string | null;
+	reason?: string;
+};
+
+export interface MessageReportData extends BaseReportData {
+	type: "Message";
+	message: {
+		id: string;
+		channelId: string;
+		guildId: string;
+		content: string;
+	};
+};
+
+export interface UserReportData extends BaseReportData {
+	type: "User";
+	user: string;
+};
+
+export type ReportData = MessageReportData | UserReportData;
+
+export interface GuildSettings {
+	channels: {
+		logs?: string;
+	};
+	moderation: {
+		reports?: string;
+		warnings?: string;
+	};
+	tickets: {
+		channel?: string;
+		category?: string;
+	};
+};
+
 export const guildSettingsSchema: DynamicSettingsSchema = {
 	description: "Guild-specific settings",
 	type: "object",
@@ -51,6 +83,28 @@ export const guildSettingsSchema: DynamicSettingsSchema = {
 					name: "Logs channel",
 					type: "channel",
 					description: "The channel where I will send error reports and other logs. If not set, I will DM the server owner instead.",
+					default: null
+				}
+			}
+		},
+		moderation: {
+			key: "moderation",
+			name: "Moderation",
+			description: "Settings related to moderation",
+			type: "object",
+			children: {
+				reports: {
+					key: "reports",
+					name: "Reports channel",
+					type: "channel",
+					description: "The channel where I will send moderation reports.",
+					default: null
+				},
+				warnings: {
+					key: "warnings",
+					name: "Warnings channel",
+					type: "channel",
+					description: "The channel where I will send warning notifications.",
 					default: null
 				}
 			}
@@ -86,6 +140,7 @@ export class Guild {
 	#storagePath: string;
 	#settings: GuildSettings = {
 		channels: {},
+		moderation: {},
 		tickets: {}
 	};
 	#logger: Logger;
@@ -148,6 +203,22 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings, null, "\t"));
 	};
 
+	async #notifyOwnerFallback(content: string, purpose: string) {
+		try {
+			const owner = await this.#discordGuild.fetchOwner();
+			const settingsCommandId = await client.getCommandId("settings", this.id);
+			const settingsCommandText = settingsCommandId ? `</settings:${settingsCommandId}>` : "`/settings`";
+
+			let purposeText = purpose;
+			if (purpose === "logs") purposeText = "error logging";
+
+			await sendChunks(`${content}
+
+> **Tip**: You can configure a ${purposeText} channel so that I can send you reports directly in your server instead of DMs.
+> Use ${settingsCommandText} to set it up!`, owner.send.bind(owner));
+		} catch (error) { }
+	};
+
 	async createTicket(ticketId: string, channel: string, createdBy: string, messages: { channel: string; guild: string }, reason?: string): Promise<TicketData> {
 		const ticketData: TicketData = {
 			id: ticketId,
@@ -167,10 +238,10 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 	};
 
 	async saveTicket(ticket: TicketData): Promise<void> {
-		const ticketsDir = path.join(this.#storagePath, "tickets");
-		await Deno.mkdir(ticketsDir, { recursive: true });
+		const ticketsDirectory = path.join(this.#storagePath, "tickets");
+		await Deno.mkdir(ticketsDirectory, { recursive: true });
 		await Deno.writeTextFile(
-			path.join(ticketsDir, `${ticket.id}.json`),
+			path.join(ticketsDirectory, `${ticket.id}.json`),
 			JSON.stringify(ticket, null, "\t")
 		);
 	};
@@ -185,6 +256,160 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		}
 	};
 
+	async warn(target: GuildMember, by: GuildMember | APIInteractionGuildMember | null, reason: string) {
+		const moderationDirectory = path.join(this.#storagePath, "moderation", target.id, "warnings");
+
+		await Deno.mkdir(moderationDirectory, {
+			recursive: true
+		});
+
+		await Deno.writeTextFile(path.join(moderationDirectory, `${Date.now()}.json`), JSON.stringify({
+			date: new Date().toISOString(),
+			reason,
+			by: by?.user.id || null
+		}));
+
+		const content = `User <@${target.id}> has been warned${by ? ` by <@${by.user.id}>` : ""}.\nReason: ${reason}`;
+
+		if (this.settings.moderation.warnings) {
+			const channel = await this.#discordGuild.channels.fetch(this.settings.moderation.warnings);
+			if (channel && channel.isTextBased()) {
+				await channel.send(content);
+			} else this.reportError("Configured warnings channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.warnings}`));
+		} else this.#notifyOwnerFallback(`A user was warned in your server **${this.name}**:\n${content}`, "warnings");
+	};
+
+	async reportMessage(message: Message, by: GuildMember | APIInteractionGuildMember | null, reason?: string) {
+		const moderationDirectory = path.join(this.#storagePath, "moderation", message.author.id, "reports");
+
+		await Deno.mkdir(moderationDirectory, {
+			recursive: true
+		});
+
+		await Deno.writeTextFile(path.join(moderationDirectory, `${Date.now()}.json`), JSON.stringify({
+			date: new Date().toISOString(),
+			type: "Message",
+			message: {
+				id: message.id,
+				channelId: message.channelId,
+				guildId: message.guildId,
+				content: message.content
+			},
+			by: by?.user.id || null,
+			reason
+		}));
+
+		if (this.settings.moderation.reports) {
+			const channel = await this.#discordGuild.channels.fetch(this.settings.moderation.reports);
+			if (channel && channel.isTextBased()) {
+				await channel.send({
+					components: [
+						new ContainerBuilder()
+							.addTextDisplayComponents((component) => component
+								.setContent(`# Message report${by ? ` by ${by.user.id}` : ""}
+Target: https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id} by <@${message.author.id}>
+Reason: ${reason || "No reason provided"}`)
+							)
+							.addActionRowComponents((component) => component
+								.addComponents([
+									new ButtonBuilder()
+										.setCustomId(`report:message:reply:${message.id}`)
+										.setLabel("Reply")
+										.setStyle(ButtonStyle.Primary),
+									new ButtonBuilder()
+										.setCustomId(`report:message:close:${message.id}`)
+										.setLabel("Close report")
+										.setStyle(ButtonStyle.Secondary),
+								])
+							)
+							.addActionRowComponents((component) => component
+								.addComponents([
+									new ButtonBuilder()
+										.setCustomId(`report:message:reply:${message.id}`)
+										.setLabel("Delete message")
+										.setStyle(ButtonStyle.Danger),
+									new ButtonBuilder()
+										.setCustomId(`report:message:warn:${message.id}`)
+										.setLabel("Warn user")
+										.setStyle(ButtonStyle.Danger),
+									new ButtonBuilder()
+										.setCustomId(`report:message:ban:${message.id}`)
+										.setLabel("Ban user")
+										.setStyle(ButtonStyle.Danger)
+								])
+							)
+					]
+				});
+
+				await message.forward(channel);
+			} else this.reportError("Configured reports channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.reports}`));
+		} else this.#notifyOwnerFallback(`A message was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
+Target: https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id} by <@${message.author.id}>
+Reason: ${reason || "No reason provided"}`, "reports");
+	};
+
+	async reportUser(user: GuildMember, by: GuildMember | APIInteractionGuildMember | null, reason?: string) {
+		const moderationDirectory = path.join(this.#storagePath, "moderation", user.id, "reports");
+
+		await Deno.mkdir(moderationDirectory, {
+			recursive: true
+		});
+
+		await Deno.writeTextFile(path.join(moderationDirectory, `${Date.now()}.json`), JSON.stringify({
+			date: new Date().toISOString(),
+			type: "User",
+			user: user.id,
+			by: by?.user.id || null,
+			reason
+		}));
+
+		if (this.settings.moderation.reports) {
+			const channel = await this.#discordGuild.channels.fetch(this.settings.moderation.reports);
+			if (channel && channel.isTextBased()) {
+				await channel.send({
+					components: [
+						new ContainerBuilder()
+							.addTextDisplayComponents((component) => component
+								.setContent(`# User report${by ? ` by ${by.user.id}` : ""}
+- Target: <@${user.id}>
+- Reason: ${reason || "No reason provided"}`)
+							)
+							.addActionRowComponents((component) => component
+								.addComponents([
+									new ButtonBuilder()
+										.setCustomId(`report:user:reply:${user.id}`)
+										.setLabel("Reply")
+										.setStyle(ButtonStyle.Primary),
+									new ButtonBuilder()
+										.setCustomId(`report:user:close:${user.id}`)
+										.setLabel("Close report")
+										.setStyle(ButtonStyle.Secondary),
+								])
+							)
+							.addActionRowComponents((component) => component
+								.addComponents([
+									new ButtonBuilder()
+										.setCustomId(`report:user:reply:${user.id}`)
+										.setLabel("Reply")
+										.setStyle(ButtonStyle.Primary),
+									new ButtonBuilder()
+										.setCustomId(`report:user:warn:${user.id}`)
+										.setLabel("Warn user")
+										.setStyle(ButtonStyle.Danger),
+									new ButtonBuilder()
+										.setCustomId(`report:user:ban:${user.id}`)
+										.setLabel("Ban user")
+										.setStyle(ButtonStyle.Danger)
+								])
+							)
+					]
+				});
+			} else this.reportError("Configured reports channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.reports}`));
+		} else this.#notifyOwnerFallback(`A user was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
+- Target: <@${user.id}>
+- Reason: ${reason || "No reason provided"}`, "reports");
+	};
+
 	reportError(message: string, error: unknown) {
 		this.#logger.error(message, {
 			cause: error
@@ -193,24 +418,17 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		if (this.#settings.channels.logs) {
 			const channel = this.#discordGuild.channels.cache.get(this.#settings.channels.logs);
 
-			if (channel && channel.isTextBased()) sendChunks(`An error occurred:
+			if (channel && channel.isTextBased()) return sendChunks(`An error occurred:
 					\`\`\`
 ${String(message)}
 ${error instanceof Error ? error.stack : String(error)}
 \`\`\``, channel.send.bind(channel)).catch(() => { });
-		} else this.#discordGuild.fetchOwner()
-			.then(async (owner) => {
-				const settingsCommandId = await client.getCommandId("settings", this.id);
-				const settingsCommandText = settingsCommandId ? `</settings:${settingsCommandId}>` : "`/settings`";
+		}
 
-				sendChunks(`An error occurred in your server **${this.name}**:
+		this.#notifyOwnerFallback(`An error occurred in your server **${this.name}**:
 \`\`\`
 ${String(message)}
 ${error instanceof Error ? error.stack : String(error)}
-\`\`\`
-
-> **Tip**: You can configure an error logging channel so that I can send you reports directly in your server instead of DMs.
-> Use ${settingsCommandText} to set it up!`, owner.send.bind(owner)).catch(() => { });
-			}).catch(() => { });
+\`\`\``, "logs");
 	};
 };
