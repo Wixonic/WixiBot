@@ -1,12 +1,19 @@
 import type { APIInteractionGuildMember, Guild as DiscordGuild, GuildMember, Message } from "discord.js";
 import path from "node:path";
 
-import { ButtonBuilder, ButtonStyle, ChannelType, ContainerBuilder } from "discord.js";
+import {
+	ButtonBuilder,
+	ButtonStyle,
+	ChannelType,
+	ContainerBuilder,
+	MessageFlags,
+	SeparatorSpacingSize
+} from "discord.js";
+
 import { client } from "./client.ts";
 import type { DynamicSettingsSchema } from "./dynamicSettings.ts";
 import type { Logger } from "./logger.ts";
 import { sendChunks } from "./utils.ts";
-import { component } from "../components/dynamicSettings.ts";
 
 export type TicketState = "Waiting" | "Claimed" | "Resolved" | "Closed";
 
@@ -269,14 +276,20 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 			by: by?.user.id || null
 		}));
 
-		const content = `User <@${target.id}> has been warned${by ? ` by <@${by.user.id}>` : ""}.\nReason: ${reason}`;
-
 		if (this.settings.moderation.warnings) {
 			const channel = await this.#discordGuild.channels.fetch(this.settings.moderation.warnings);
 			if (channel && channel.isTextBased()) {
-				await channel.send(content);
+				await channel.send({
+					components: [
+						new ContainerBuilder()
+							.addTextDisplayComponents((component) => component
+								.setContent(`User <@${target.id}> has been warned${by ? ` by <@${by.user.id}>` : ""}.\nReason: ${reason}`)
+							)
+					],
+					flags: MessageFlags.IsComponentsV2
+				});
 			} else this.reportError("Configured warnings channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.warnings}`));
-		} else this.#notifyOwnerFallback(`A user was warned in your server **${this.name}**:\n${content}`, "warnings");
+		} else this.#notifyOwnerFallback(`A user was warned in your server **${this.name}**:\n${`User <@${target.id}> has been warned${by ? ` by <@${by.user.id}>` : ""}.\nReason: ${reason}`}`, "warnings");
 	};
 
 	async reportMessage(message: Message, by: GuildMember | APIInteractionGuildMember | null, reason?: string) {
@@ -306,7 +319,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 					components: [
 						new ContainerBuilder()
 							.addTextDisplayComponents((component) => component
-								.setContent(`# Message report${by ? ` by ${by.user.id}` : ""}
+								.setContent(`# Message report${by ? ` by <@${by.user.id}>` : ""}
 Target: https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id} by <@${message.author.id}>
 Reason: ${reason || "No reason provided"}`)
 							)
@@ -322,10 +335,13 @@ Reason: ${reason || "No reason provided"}`)
 										.setStyle(ButtonStyle.Secondary),
 								])
 							)
+							.addSeparatorComponents((component) => component
+								.setSpacing(SeparatorSpacingSize.Small)
+							)
 							.addActionRowComponents((component) => component
 								.addComponents([
 									new ButtonBuilder()
-										.setCustomId(`report:message:reply:${message.id}`)
+										.setCustomId(`report:message:delete:${message.id}`)
 										.setLabel("Delete message")
 										.setStyle(ButtonStyle.Danger),
 									new ButtonBuilder()
@@ -338,7 +354,8 @@ Reason: ${reason || "No reason provided"}`)
 										.setStyle(ButtonStyle.Danger)
 								])
 							)
-					]
+					],
+					flags: MessageFlags.IsComponentsV2
 				});
 
 				await message.forward(channel);
@@ -370,7 +387,7 @@ Reason: ${reason || "No reason provided"}`, "reports");
 					components: [
 						new ContainerBuilder()
 							.addTextDisplayComponents((component) => component
-								.setContent(`# User report${by ? ` by ${by.user.id}` : ""}
+								.setContent(`# User report${by ? ` by <@${by.user.id}>` : ""}
 - Target: <@${user.id}>
 - Reason: ${reason || "No reason provided"}`)
 							)
@@ -386,23 +403,23 @@ Reason: ${reason || "No reason provided"}`, "reports");
 										.setStyle(ButtonStyle.Secondary),
 								])
 							)
+							.addSeparatorComponents((component) => component
+								.setSpacing(SeparatorSpacingSize.Small)
+							)
 							.addActionRowComponents((component) => component
 								.addComponents([
-									new ButtonBuilder()
-										.setCustomId(`report:user:reply:${user.id}`)
-										.setLabel("Reply")
-										.setStyle(ButtonStyle.Primary),
 									new ButtonBuilder()
 										.setCustomId(`report:user:warn:${user.id}`)
 										.setLabel("Warn user")
 										.setStyle(ButtonStyle.Danger),
 									new ButtonBuilder()
-										.setCustomId(`report:user:ban:${user.id}`)
-										.setLabel("Ban user")
+										.setCustomId(`report:user:timeout:${user.id}`)
+										.setLabel("Timeout user")
 										.setStyle(ButtonStyle.Danger)
 								])
 							)
-					]
+					],
+					flags: MessageFlags.IsComponentsV2
 				});
 			} else this.reportError("Configured reports channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.reports}`));
 		} else this.#notifyOwnerFallback(`A user was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
