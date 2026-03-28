@@ -46,14 +46,21 @@ export const command = {
 		const to = interaction.options.getChannel("to", true) as StageChannel | VoiceChannel;
 
 		const members = from.members;
-
 		const failed = [];
-		for (const member of members.values()) {
-			try {
-				await member.voice.setChannel(to);
-			} catch (error) {
-				logger.warn(`Failed to move member ${member.user.username} (${member.user.id}) from ${from.name} (${from.id}) to ${to.name} (${to.id})${interaction.guild ? ` in ${interaction.guild.name} (${interaction.guild.id})` : ""}`, error);
-				failed.push(member);
+
+		const movePromises = Array.from(members.values()).map(member => 
+			member.voice.setChannel(to)
+				.then(() => ({ status: "fulfilled" as const, member }))
+				.catch(error => {
+					logger.warn(`Failed to move member ${member.user.username} (${member.user.id}) from ${from.name} (${from.id}) to ${to.name} (${to.id})${interaction.guild ? ` in ${interaction.guild.name} (${interaction.guild.id})` : ""}`, error);
+					return { status: "rejected" as const, member };
+				})
+		);
+
+		const results = await Promise.allSettled(movePromises);
+		for (const result of results) {
+			if (result.status === "fulfilled" && result.value.status === "rejected") {
+				failed.push(result.value.member);
 			}
 		}
 

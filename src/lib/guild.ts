@@ -151,6 +151,7 @@ export class Guild {
 		tickets: {}
 	};
 	#logger: Logger;
+	#lastAccessed: number = Date.now();
 
 	constructor(logger: Logger, discordGuild: DiscordGuild) {
 		this.#discordGuild = discordGuild;
@@ -161,6 +162,9 @@ export class Guild {
 	get id() { return this.#discordGuild.id; };
 	get name() { return this.#discordGuild.name; };
 	get settings() { return this.#settings; };
+	get lastAccessed() { return this.#lastAccessed; };
+
+	touch() { this.#lastAccessed = Date.now(); };
 
 	async init() {
 		this.#logger.debug("Initializing guild...");

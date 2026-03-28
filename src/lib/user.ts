@@ -20,6 +20,7 @@ export class User {
 	#storagePath: string;
 	#settings: UserSettings = {};
 	#logger: Logger;
+	#lastAccessed: number = Date.now();
 
 	constructor(logger: Logger, discordUser: DiscordUser) {
 		this.#discordUser = discordUser;
@@ -31,6 +32,9 @@ export class User {
 	get path() { return this.#storagePath; };
 	get username() { return this.#discordUser.username; };
 	get settings() { return this.#settings; };
+	get lastAccessed() { return this.#lastAccessed; };
+
+	touch() { this.#lastAccessed = Date.now(); };
 
 	async init() {
 		this.#logger.debug("Initializing user...");

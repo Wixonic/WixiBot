@@ -170,6 +170,7 @@ export class Client extends EventEmitter {
 			this.addGuild(guild);
 		}
 
+		guild.touch();
 		return guild;
 	};
 
@@ -196,11 +197,36 @@ export class Client extends EventEmitter {
 			this.addUser(user);
 		}
 
+		user.touch();
 		return user;
 	};
 
 	addUser(user: User) {
 		this.#users.set(user.id, user);
+	};
+
+	sweep() {
+		const threshold = Date.now() - 15 * 60 * 1000;
+		let usersSwept = 0;
+		let guildsSwept = 0;
+
+		for (const [id, user] of this.#users) {
+			if (user.lastAccessed < threshold) {
+				this.#users.delete(id);
+				usersSwept++;
+			}
+		}
+
+		for (const [id, guild] of this.#guilds) {
+			if (guild.lastAccessed < threshold) {
+				this.#guilds.delete(id);
+				guildsSwept++;
+			}
+		}
+
+		if (usersSwept > 0 || guildsSwept > 0) {
+			this.#logger.debug(`Swept ${usersSwept} users and ${guildsSwept} guilds.`);
+		}
 	};
 
 	async loadCommands() {
