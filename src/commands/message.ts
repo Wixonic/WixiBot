@@ -2,14 +2,21 @@ import {
 	ApplicationIntegrationType,
 	ChannelType,
 	type ChatInputCommandInteraction,
+	CheckboxBuilder,
 	ContainerBuilder,
 	type GuildTextBasedChannel,
 	InteractionContextType,
+	LabelBuilder,
 	MessageFlags,
+	ModalBuilder,
 	PermissionFlagsBits,
+	RadioGroupBuilder,
+	RadioGroupOptionBuilder,
 	SlashCommandBuilder,
 	StringSelectMenuBuilder,
-	StringSelectMenuOptionBuilder
+	StringSelectMenuOptionBuilder,
+	TextInputBuilder,
+	TextInputStyle
 } from "discord.js";
 
 import { client, type Command } from "../lib/client.ts";
@@ -42,15 +49,51 @@ export const command = {
 		),
 
 	async execute(_logger, interaction) {
-		await interaction.deferReply({
-			flags: MessageFlags.Ephemeral
-		});
+		if (interaction.options.getSubcommand(true) !== "as") {
+			await interaction.deferReply({
+				flags: MessageFlags.Ephemeral
+			});
+		}
 
 		switch (interaction.options.getSubcommand(true)) {
 			case "as": {
-				await interaction.editReply({
-					content: "This subcommand is not implemented yet."
-				});
+				const modal = new ModalBuilder()
+					.setCustomId("message:as")
+					.setTitle("Send Message");
+
+				const content = new LabelBuilder()
+					.setLabel("Message Content")
+					.setTextInputComponent(
+						new TextInputBuilder()
+							.setCustomId("content")
+							.setStyle(TextInputStyle.Paragraph)
+							.setPlaceholder("Enter the message content here...")
+							.setRequired(true)
+					);
+
+				const style = new LabelBuilder()
+					.setLabel("Message Style")
+					.setRadioGroupComponent(
+						new RadioGroupBuilder()
+							.setCustomId("style")
+							.setOptions([
+								new RadioGroupOptionBuilder().setLabel("Raw Message").setValue("raw").setDefault(true)
+							])
+							.setRequired(true)
+					);
+
+				const ephemeral = new LabelBuilder()
+					.setLabel("Ephemeral")
+					.setDescription("Send as an ephemeral message?")
+					.setCheckboxComponent(
+						new CheckboxBuilder()
+							.setCustomId("ephemeral")
+							.setDefault(false)
+					);
+
+				await interaction.showModal(modal
+					.addLabelComponents(content, style, ephemeral)
+				);
 				break;
 			}
 

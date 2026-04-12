@@ -1,26 +1,26 @@
 {
-	"name": "wixibot",
-	"displayName": "WixiBot",
-	"description": "WixiLand's Discord Application",
-	"author": "Wixonic <contact@wixonic.fr> (https://wixonic.fr)",
-	"version": "1.0.0",
-	"license": "Wix Non-Commercial License",
-	"repository": "github:Wixonic/WixiBot",
-	"exports": "./src/main.ts",
-	"tasks": {
-		"start": "deno run --allow-all src/main.ts",
-		"deploy": "deno run --allow-all src/deploy.ts",
-		"dev:start": "CLIENT=dev deno run --allow-all src/main.ts",
-		"dev:deploy": "CLIENT=dev deno run --allow-all src/deploy.ts"
-	},
-	"imports": {
-		"discord.js": "npm:discord.js@14.25.1",
-		"@lmstudio/sdk": "npm:@lmstudio/sdk@1.5.0"
-	},
-	"compilerOptions": {
-		"strict": true
-	},
-	"unstable": [
-		"cron"
-	]
+  "name": "wixibot",
+  "displayName": "WixiBot",
+  "description": "WixiLand's Discord Application",
+  "author": "Wixonic <contact@wixonic.fr> (https://wixonic.fr)",
+  "version": "1.0.0",
+  "license": "Wix Non-Commercial License",
+  "repository": "github:Wixonic/WixiBot",
+  "exports": "./src/main.ts",
+  "tasks": {
+    "start": "deno run --allow-all src/main.ts",
+    "deploy": "deno run --allow-all src/deploy.ts",
+    "dev:start": "CLIENT=dev deno run --allow-all src/main.ts",
+    "dev:deploy": "CLIENT=dev deno run --allow-all src/deploy.ts"
+  },
+  "imports": {
+    "discord.js": "npm:discord.js@14.26.2",
+    "@lmstudio/sdk": "npm:@lmstudio/sdk@1.5.0"
+  },
+  "compilerOptions": {
+    "strict": true
+  },
+  "unstable": [
+    "cron"
+  ]
 }
