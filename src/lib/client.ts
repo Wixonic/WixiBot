@@ -78,7 +78,7 @@ export class Client extends EventEmitter {
 			}
 		});
 
-		this.#discordClient.on("error", (e) => this.emit("error", e));
+		this.#discordClient.on("error", (error) => this.emit("error", error));
 
 		await this.loadCommands();
 		await this.loadComponents();
