@@ -71,7 +71,7 @@ export const command = {
 							.setRequired(true)
 					);
 
-				const style = new LabelBuilder()
+				/* const style = new LabelBuilder()
 					.setLabel("Message Style")
 					.setRadioGroupComponent(
 						new RadioGroupBuilder()
@@ -80,7 +80,7 @@ export const command = {
 								new RadioGroupOptionBuilder().setLabel("Raw Message").setValue("raw").setDefault(true)
 							])
 							.setRequired(true)
-					);
+					); */
 
 				const ephemeral = new LabelBuilder()
 					.setLabel("Ephemeral")
@@ -92,7 +92,7 @@ export const command = {
 					);
 
 				await interaction.showModal(modal
-					.addLabelComponents(content, style, ephemeral)
+					.addLabelComponents(content, /* style, */ ephemeral)
 				);
 				break;
 			}

@@ -16,12 +16,12 @@ export const modal = {
 
 				const content = interaction.fields.getTextInputValue("content");
 
-				switch (interaction.fields.getRadioGroup("style")) {
-					default:
-						await interaction.editReply({
-							content: content
-						});
-				}
+				/* switch (interaction.fields.getRadioGroup("style")) {
+					default: */
+				await interaction.editReply({
+					content: content
+				});
+				// }
 				break;
 			}
 
