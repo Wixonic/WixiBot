@@ -38,7 +38,7 @@ export const event = {
 					} catch (error) {
 						interactionLogger.debug("Failed to fetch reply", {
 							cause: error
-						})
+						});
 					}
 
 					if (fetchedReply) await fetchedReply.edit("There was an error while executing this command!");
@@ -76,7 +76,7 @@ export const event = {
 					} catch (error) {
 						interactionLogger.debug("Failed to fetch reply", {
 							cause: error
-						})
+						});
 					}
 
 					if (fetchedReply) await fetchedReply.edit("There was an error while interacting with this component!");

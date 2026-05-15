@@ -1,15 +1,48 @@
-import type { Presence, User as DiscordUser } from "discord.js";
+import type { Activity, PresenceStatus, Presence, User as DiscordUser, Guild } from "discord.js";
 import path from "node:path";
 
 import { client } from "./client.ts";
 import type { DynamicSettingsSchema } from "./dynamicSettings.ts";
 import type { Logger } from "./logger.ts";
 
+export type Achievement = {
+	id: string;
+	name: string;
+	description: string;
+};
+
+export interface UserActivity {
+	activity: {
+		activities?: Activity[];
+		status?: PresenceStatus;
+	} | null;
+	changed: boolean;
+	date: Date;
+
+	guilds: Record<string, {
+		achievements: Achievement[];
+
+		messages: {
+			sent: number;
+			mentions: number;
+			reactions: {
+				added: number;
+				received: number;
+			};
+		};
+
+		voice: Record<string, {
+			time: number;
+			joins: number;
+		}>;
+	}>;
+};
+
 export interface UserSettings {
 	activity: {
 		record?: boolean;
 		replay?: boolean;
-	}
+	};
 };
 
 export const userSettingsSchema: DynamicSettingsSchema = {
@@ -42,12 +75,19 @@ export const userSettingsSchema: DynamicSettingsSchema = {
 };
 
 export class User {
+	#currentActivity: UserActivity = {
+		activity: null,
+		changed: false,
+		date: new Date(),
+		guilds: {}
+	};
 	#discordUser: DiscordUser;
+	#logger: Logger;
 	#storagePath: string;
 	#settings: UserSettings = {
 		activity: {}
 	};
-	#logger: Logger;
+
 	#lastAccessed: number = Date.now();
 
 	constructor(logger: Logger, discordUser: DiscordUser) {
@@ -88,21 +128,50 @@ export class User {
 		this.touch();
 	};
 
-	recordActivity(_guild: string, _presence: Presence | null) {
-		// Placeholder for recording logic
-		this.touch();
+	setPresence(presence: Partial<Presence> | null) {
+		if (this.settings.activity.record) {
+			this.#currentActivity.activity = {
+				activities: presence?.activities,
+				status: presence?.status
+			};
+			this.#currentActivity.changed = true;
+
+			this.touch();
+		}
 	};
 
-	sendReplay() {
+	async recordActivity() {
+		if (!this.#currentActivity.changed && this.settings.activity.record) {
+			this.#logger.debug("Changes detected, recording activity...");
+			await Deno.mkdir(path.join(this.#storagePath, "activity"), {
+				recursive: true
+			});
+			await Deno.writeTextFile(path.join(this.#storagePath, "activity", `${Date.now()}.json`), JSON.stringify({
+				...this.#currentActivity,
+				date: this.#currentActivity.date.getTime()
+			}));
+
+			this.#currentActivity = {
+				activity: null,
+				changed: false,
+				date: new Date(),
+				guilds: {}
+			};
+
+			this.touch();
+		}
+	};
+
+	async sendReplay() {
 		// Placeholder for replay logic
 		this.touch();
 	};
 
 	async saveSettings() {
-		await Deno.mkdir(this.#storagePath.split("/").slice(0, -1).join("/"), {
+		await Deno.mkdir(this.#storagePath, {
 			recursive: true
 		});
-		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings, null, "\t"));
+		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings));
 
 		this.touch();
 	};

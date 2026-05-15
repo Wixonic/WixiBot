@@ -32,9 +32,10 @@ export const job: Job = {
 				}));
 
 				for (const { member, user } of userPackages) {
-					if (user && user.settings.activity.record != false) {
+					if (user && user.settings.activity.record) {
 						checked++;
-						user.recordActivity(guild.id, member.presence);
+						user.setPresence(member.presence);
+						await user.recordActivity();
 					}
 				}
 			}

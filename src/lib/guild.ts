@@ -211,7 +211,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 	};
 
 	async saveSettings() {
-		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings, null, "\t"));
+		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings));
 	};
 
 	async #notifyOwnerFallback(content: string, purpose: string) {
@@ -227,7 +227,11 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 
 > **Tip**: You can configure a ${purposeText} channel so that I can send you reports directly in your server instead of DMs.
 > Use ${settingsCommandText} to set it up!`, owner.send.bind(owner));
-		} catch (error) { }
+		} catch (error) {
+			this.#logger.warn("Failed to notify guild owner. DMs might be closed.", {
+				cause: error
+			});
+		}
 	};
 
 	async createTicket(ticketId: string, channel: string, createdBy: string, messages: { channel: string; guild: string }, reason?: string): Promise<TicketData> {
@@ -251,10 +255,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 	async saveTicket(ticket: TicketData): Promise<void> {
 		const ticketsDirectory = path.join(this.#storagePath, "tickets");
 		await Deno.mkdir(ticketsDirectory, { recursive: true });
-		await Deno.writeTextFile(
-			path.join(ticketsDirectory, `${ticket.id}.json`),
-			JSON.stringify(ticket, null, "\t")
-		);
+		await Deno.writeTextFile(path.join(ticketsDirectory, `${ticket.id}.json`), JSON.stringify(ticket));
 	};
 
 	async loadTicket(ticketId: string): Promise<TicketData | null> {
