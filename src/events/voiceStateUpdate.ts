@@ -1,42 +1,33 @@
-import { Events, type VoiceState } from "discord.js";
+import { Events, ChannelType, type VoiceState } from "discord.js";
 import { client } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
 
-const voiceJoinCache = new Map<string, number>();
+const stageJoinCache = new Set<string>();
 
 export const event = {
 	type: Events.VoiceStateUpdate,
 	once: false,
 
-	async execute(logger: Logger, oldState: VoiceState, newState: VoiceState) {
+	async execute(_logger: Logger, oldState: VoiceState, newState: VoiceState) {
 		const member = newState.member || oldState.member;
 		if (!member || member.user.bot) return;
 
 		const guildId = newState.guild.id;
 		const userId = member.id;
-		const cacheKey = `${guildId}-${userId}`;
 
-		// User joined a voice channel
-		if (!oldState.channelId && newState.channelId) voiceJoinCache.set(cacheKey, Date.now());
-		else if (oldState.channelId && !newState.channelId) { // User left a voice channel
-			const joinTime = voiceJoinCache.get(cacheKey);
-			if (joinTime) {
-				const duration = Date.now() - joinTime;
-				voiceJoinCache.delete(cacheKey);
+		if (newState.channel?.type === ChannelType.GuildStageVoice && oldState.channelId !== newState.channelId) {
+			const cacheKey = `${guildId}-${userId}-${newState.channelId}`;
+
+			if (!stageJoinCache.has(cacheKey)) {
+				stageJoinCache.add(cacheKey);
 
 				const user = await client.getUser(userId);
-				if (user && user.settings.activity.record) user.addActivity(guildId, "message", oldState.channelId, duration);
-			}
-		} else if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) { // User moved channels
-			const joinTime = voiceJoinCache.get(cacheKey);
-			if (joinTime) {
-				const duration = Date.now() - joinTime;
+				if (user && user.settings.activity.record) {
+					user.addActivity(guildId, "stageEvent").catch(e => _logger.error("Failed to add stage activity", { cause: e }));
+				}
 
-				const user = await client.getUser(userId);
-				if (user && user.settings.activity.record) user.addActivity(guildId, "voice" as any, oldState.channelId, duration);
+				setTimeout(() => stageJoinCache.delete(cacheKey), 24 * 60 * 60 * 1000);
 			}
-
-			voiceJoinCache.set(cacheKey, Date.now());
 		}
 	}
 };

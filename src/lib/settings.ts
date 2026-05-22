@@ -4,6 +4,7 @@ import index from "../settings/index.json" with { type: "json" };
 export interface GeminiSettings {
 	enabled: boolean;
 	apiKey: string;
+	model?: string;
 }
 
 export interface LMStudioSettings {

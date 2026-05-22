@@ -1,8 +1,5 @@
-import type { GuildMember } from "discord.js";
-
 import { client, type Job } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
-import type { User } from "../lib/user.ts";
 
 export const job: Job = {
 	cron: "* * * * *", // Every minute
@@ -12,29 +9,21 @@ export const job: Job = {
 			logger.debug("Running presence check...");
 			let checked = 0;
 
-			for (const guild of client.discord.guilds.cache.values()) {
-				let members;
-				try {
-					members = await guild.members.fetch();
-				} catch (error) {
-					logger.error(`Failed to fetch members for guild ${guild.id}`, {
-						cause: error
-					});
-					continue;
-				}
+			for (const user of client.users) {
+				if (user.settings.activity.record) {
+					checked++;
 
-				const userPackages: { discordMember: GuildMember; user: User | null }[] = [];
-				for (const discordMember of members.values()) {
-					const user = await client.getUser(discordMember.id);
-					userPackages.push({ discordMember, user });
-				}
-
-				for (const { discordMember, user } of userPackages) {
-					if (user && user.settings.activity.record) {
-						checked++;
-						user.setPresence(discordMember.presence);
-						await user.recordActivity();
+					let presence = null;
+					for (const guild of client.discord.guilds.cache.values()) {
+						const member = guild.members.cache.get(user.id);
+						if (member?.presence) {
+							presence = member.presence;
+							break;
+						}
 					}
+
+					if (presence) user.setPresence(presence);
+					await user.recordActivity();
 				}
 			}
 

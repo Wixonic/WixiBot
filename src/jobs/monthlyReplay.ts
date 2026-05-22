@@ -1,7 +1,5 @@
 import { client, type Job } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
-import { ai } from "../lib/ai.ts";
-import { sendChunks } from "../lib/utils.ts";
 
 export const job: Job = {
 	cron: "0 0 1 * *",
@@ -11,7 +9,7 @@ export const job: Job = {
 			logger.info("Running monthly AI replay generation...");
 
 			const targetMonth = new Date();
-			targetMonth.setMonth(targetMonth.getMonth() - 1);
+			// targetMonth.setMonth(targetMonth.getMonth() - 1);
 
 			let sentCount = 0;
 			const usersPath = "./storage/users/";

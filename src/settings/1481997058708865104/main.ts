@@ -6,12 +6,13 @@ export const settings: ClientSettings = {
 		provider: "lmstudio",
 		gemini: {
 			enabled: true,
+			model: "gemini-flash-lite-latest",
 			apiKey: secrets.geminiApiKey || ""
 		},
 		lmstudio: {
 			enabled: true,
-			model: "gemma-4-e4b",
-			baseUrl: "http://127.0.0.1:1234"
+			model: "qwen3.5-4b-mlx",
+			baseUrl: "ws://127.0.0.1:1234"
 		}
 	},
 	discord: {

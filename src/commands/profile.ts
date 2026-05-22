@@ -9,7 +9,7 @@ import {
 
 import type { Command } from "../lib/client.ts";
 import { client } from "../lib/client.ts";
-import { checkAchievements, achievements } from "../lib/progression.ts";
+import { checkNewAchievements, achievements } from "../lib/progression.ts";
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -36,9 +36,9 @@ export const command = {
 
 		const stats = await user.getTotalStats();
 		const level = await user.getLevel();
-		const unlockedAchIds = await checkAchievements(user);
+		const unlockedAchievementIds = await checkNewAchievements(user);
 
-		const achievementsText = unlockedAchIds.length > 0 ? unlockedAchIds.map((id) => achievements.find(a => a.id === id)?.name).join(", ") : "No achievements unlocked for now.";
+		const achievementsText = unlockedAchievementIds.length > 0 ? unlockedAchievementIds.map((id) => achievements.find(a => a.id === id)?.name).join(", ") : "No achievements unlocked for now.";
 
 		const embed = new EmbedBuilder()
 			.setTitle(`${user.username}'${user.username.endsWith("s") ? "" : "s"} Profile`)
@@ -46,8 +46,9 @@ export const command = {
 			.setDescription("Here are your stats and achievements. Keep being active to level up and unlock more achievements!")
 			.addFields(
 				{ name: "Level", value: `**${level}** (Total XP: ${stats.totalXp})`, inline: false },
+				{ name: "Streak", value: user.data.streak ? `${user.data.streak} days` + (user.data.bestStreak && user.data.bestStreak > user.data.streak ? ` (Best: ${user.data.bestStreak})` : "") : "None", inline: true },
 				{ name: "Messages", value: `${stats.totalMessages}`, inline: true },
-				{ name: "Voice Time", value: `${stats.totalVoiceMinutes} min`, inline: true },
+				{ name: "Stage Events", value: `${stats.totalStageEvents}`, inline: true },
 				{ name: "Forum Posts", value: `${stats.totalForumPosts}`, inline: true },
 				{ name: "Reactions", value: `${stats.totalReactions}`, inline: true },
 				{ name: "Unlocked Achievements", value: achievementsText, inline: false }

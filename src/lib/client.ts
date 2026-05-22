@@ -10,7 +10,8 @@ import {
 	type SlashCommandBuilder,
 	type SlashCommandOptionsOnlyBuilder,
 	type SlashCommandSubcommandsOnlyBuilder,
-	type UserContextMenuCommandInteraction
+	type UserContextMenuCommandInteraction,
+	Partials
 } from "discord.js";
 import EventEmitter from "node:events";
 
@@ -68,7 +69,13 @@ export class Client extends EventEmitter {
 				GatewayIntentBits.GuildPresences,
 				GatewayIntentBits.GuildMessages,
 				GatewayIntentBits.GuildVoiceStates,
-				GatewayIntentBits.MessageContent
+				GatewayIntentBits.MessageContent,
+				GatewayIntentBits.GuildMessageReactions
+			],
+			partials: [
+				Partials.Message,
+				Partials.Reaction,
+				Partials.User
 			],
 			presence: {
 				activities: [{
@@ -204,6 +211,10 @@ export class Client extends EventEmitter {
 
 	addUser(user: User) {
 		this.#users.set(user.id, user);
+	}
+
+	get users() {
+		return Array.from(this.#users.values());
 	}
 
 	sweep() {

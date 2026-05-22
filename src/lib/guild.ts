@@ -65,6 +65,7 @@ export interface GuildSettings {
 	channels: {
 		logs?: string;
 		welcome?: string;
+		bot?: string;
 	};
 	moderation: {
 		reports?: string;
@@ -98,6 +99,13 @@ export const guildSettingsSchema: DynamicSettingsSchema = {
 					name: "Welcome channel",
 					type: "channel",
 					description: "The channel where I will send welcome messages when new members join.",
+					default: null
+				},
+				bot: {
+					key: "bot",
+					name: "Bot commands channel",
+					type: "channel",
+					description: "The channel where I will send notifications like level ups and achievements.",
 					default: null
 				}
 			}
