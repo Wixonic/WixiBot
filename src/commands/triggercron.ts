@@ -7,12 +7,13 @@ import {
 } from "discord.js";
 
 import type { Command } from "../lib/client.ts";
+import { getSettings } from "../lib/settings.ts";
 
 export const command = {
 	data: new SlashCommandBuilder()
 		.setName("triggercron")
 		.setDescription("Manually trigger a cron job (Admin only).")
-		.addStringOption(option => 
+		.addStringOption(option =>
 			option.setName("job")
 				.setDescription("The name of the job to trigger.")
 				.setRequired(true)
@@ -28,7 +29,7 @@ export const command = {
 		]),
 
 	async execute(_logger, interaction) {
-		if (interaction.user.id !== "1020454688467980308") {
+		if (interaction.user.id !== getSettings().discord.ownerId) {
 			await interaction.reply({ content: "You do not have permission to use this command.", flags: MessageFlags.Ephemeral });
 			return;
 		}
@@ -42,16 +43,16 @@ export const command = {
 
 			if ("job" in module) {
 				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-				
+
 				await module.job.execute(_logger);
-				
+
 				await interaction.followUp(`Successfully executed job: **${jobName}**.`);
 			} else {
 				await interaction.reply({ content: `Job **${jobName}** not found or invalid.`, flags: MessageFlags.Ephemeral });
 			}
 		} catch (error) {
 			_logger.error(`Failed to manually trigger job ${jobName}`, { cause: error });
-			
+
 			if (interaction.deferred) {
 				await interaction.followUp(`Failed to execute job: **${jobName}**. Check logs for details.`);
 			} else {

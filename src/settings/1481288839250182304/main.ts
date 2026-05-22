@@ -16,6 +16,7 @@ export const settings: ClientSettings = {
 		}
 	},
 	discord: {
+		ownerId: "1020454688467980308",
 		clientId: "1481288839250182304",
 		invite: "https://discord.gg/BcXFAVKJZQ",
 		options: {},

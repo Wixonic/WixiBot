@@ -24,6 +24,7 @@ export interface DiscordSkuSettings {
 }
 
 export interface DiscordSettings {
+	ownerId: string;
 	clientId: string;
 	invite?: string;
 	options: Omit<ClientOptions, "intents">;
