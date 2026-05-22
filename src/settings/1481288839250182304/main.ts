@@ -3,9 +3,16 @@ import { secrets } from "./secrets.ts";
 
 export const settings: ClientSettings = {
 	ai: {
-		enabled: true,
-		model: "qwen3.5-4b-mlx",
-		maxTokens: 512
+		provider: "lmstudio",
+		gemini: {
+			enabled: true,
+			apiKey: secrets.geminiApiKey || ""
+		},
+		lmstudio: {
+			enabled: true,
+			model: "gemma-4-e4b",
+			baseUrl: "http://127.0.0.1:1234"
+		}
 	},
 	discord: {
 		clientId: "1481288839250182304",
@@ -17,7 +24,7 @@ export const settings: ClientSettings = {
 			supporter: "1483120012297375868"
 		},
 		sku: {
-			funding: "1483116808193183765",
+			funding: "1483116808193183765"
 		},
 		token: secrets.token,
 		webhookUrl: secrets.webhookUrl

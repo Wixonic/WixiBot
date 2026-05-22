@@ -3,21 +3,28 @@ import { secrets } from "./secrets.ts";
 
 export const settings: ClientSettings = {
 	ai: {
-		enabled: true,
-		model: "qwen3.5-4b-mlx",
-		maxTokens: 512
+		provider: "lmstudio",
+		gemini: {
+			enabled: true,
+			apiKey: secrets.geminiApiKey || ""
+		},
+		lmstudio: {
+			enabled: true,
+			model: "gemma-4-e4b",
+			baseUrl: "http://127.0.0.1:1234"
+		}
 	},
 	discord: {
 		clientId: "1481997058708865104",
-		invite: "https://discord.gg/BcXFAVKJZQ",
+		invite: "https://discord.gg/2QB7QkPtrA",
 		options: {},
-		publicKey: "cce0d2008060481b589e8d8a7c4ef73dd5278aab48a23f37f72ee94887469638",
+		publicKey: "1456ca1215b0de8e3488737cc5bc6e872b22591e0a2dbbb425c28e83fec67c4b",
 		roles: {
-			booster: "1040743271288295436",
-			supporter: "1483085157572284549"
+			booster: "1482062545894150174",
+			supporter: "1482062568602243163"
 		},
 		sku: {
-			funding: "1483114250791817310"
+			funding: "1482063851505356870"
 		},
 		token: secrets.token,
 		webhookUrl: secrets.webhookUrl

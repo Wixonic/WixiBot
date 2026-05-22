@@ -50,19 +50,21 @@ const main = async () => {
 				await client.init(logger, settings);
 				logger.info(`Client connected as ${client.user?.username}.`);
 
+				const abortController = new AbortController();
 				await new Promise((_, reject) => {
 					globalThis.addEventListener("error", (event: ErrorEvent) => {
 						event.preventDefault();
 						reject(event.error);
-					}, { once: true });
+					}, { once: true, signal: abortController.signal });
 
 					globalThis.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
 						event.preventDefault();
 						reject(event.reason);
-					}, { once: true });
+					}, { once: true, signal: abortController.signal });
 
-					client.once("error", reject);
-				});
+					client.on("error", reject);
+					abortController.signal.addEventListener("abort", () => client.off("error", reject));
+				}).finally(() => abortController.abort());
 			} catch (error) {
 				logger.error("Failed to start client", {
 					cause: error

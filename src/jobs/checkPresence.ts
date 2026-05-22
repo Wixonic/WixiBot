@@ -23,18 +23,16 @@ export const job: Job = {
 					continue;
 				}
 
-				const userPackages = await Promise.all(members.map(async (member): Promise<{
-					member: GuildMember;
-					user: User | null;
-				}> => {
-					const user = await client.getUser(member.id);
-					return { member, user };
-				}));
+				const userPackages: { discordMember: GuildMember; user: User | null }[] = [];
+				for (const discordMember of members.values()) {
+					const user = await client.getUser(discordMember.id);
+					userPackages.push({ discordMember, user });
+				}
 
-				for (const { member, user } of userPackages) {
+				for (const { discordMember, user } of userPackages) {
 					if (user && user.settings.activity.record) {
 						checked++;
-						user.setPresence(member.presence);
+						user.setPresence(discordMember.presence);
 						await user.recordActivity();
 					}
 				}

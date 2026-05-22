@@ -87,14 +87,14 @@ export class Client extends EventEmitter {
 		await this.loadJobs();
 
 		await this.#discordClient.login(settings.discord.token);
-	};
+	}
 
 	async destroy() {
 		this.stopJobs();
 		await this.#discordClient?.destroy();
 		this.#discordClient = null;
 		this.#settings = null;
-	};
+	}
 
 	stopJobs() {
 		const logger = this.#logger?.clone(() => "[Jobs]");
@@ -108,23 +108,23 @@ export class Client extends EventEmitter {
 		this.#jobs.clear();
 
 		if (count > 0) logger?.debug(`Stopped ${count} active job${count === 1 ? "" : "s"}.`);
-	};
+	}
 
 	get discord() {
 		return this.#discordClient;
-	};
+	}
 
 	get settings() {
 		return this.#settings;
-	};
+	}
 
 	get user() {
 		return this.#discordClient?.user ?? null;
-	};
+	}
 
 	getCommand(name: string) {
 		return this.#commands.get(name);
-	};
+	}
 
 	async getCommandId(name: string, guildId?: string): Promise<string | null> {
 		if (this.#discordClient?.application) {
@@ -150,14 +150,14 @@ export class Client extends EventEmitter {
 		}
 
 		return null;
-	};
+	}
 
 	getComponent(customId: string) {
 		return Array.from(this.#components).find((component) => {
 			if (component.customId instanceof RegExp) return component.customId.test(customId);
 			return component.customId === customId || customId.startsWith(`${component.customId}:`);
 		});
-	};
+	}
 
 	async getGuild(id: string) {
 		let guild = this.#guilds.get(id);
@@ -173,18 +173,18 @@ export class Client extends EventEmitter {
 
 		guild.touch();
 		return guild;
-	};
+	}
 
 	addGuild(guild: Guild) {
 		this.#guilds.set(guild.id, guild);
-	};
+	}
 
 	getModal(customId: string) {
 		return Array.from(this.#modals).find((modal) => {
 			if (modal.customId instanceof RegExp) return modal.customId.test(customId);
 			return modal.customId === customId || customId.startsWith(`${modal.customId}:`);
 		});
-	};
+	}
 
 	async getUser(id: string) {
 		let user = this.#users.get(id);
@@ -200,11 +200,11 @@ export class Client extends EventEmitter {
 
 		user.touch();
 		return user;
-	};
+	}
 
 	addUser(user: User) {
 		this.#users.set(user.id, user);
-	};
+	}
 
 	sweep() {
 		const threshold = Date.now() - 15 * 60 * 1000;
@@ -228,7 +228,7 @@ export class Client extends EventEmitter {
 		if (usersSwept > 0 || guildsSwept > 0) {
 			this.#logger.debug(`Swept ${usersSwept} users and ${guildsSwept} guilds.`);
 		}
-	};
+	}
 
 	async loadCommands() {
 		const logger = this.#logger.clone(() => "[Commands]");
@@ -255,7 +255,7 @@ export class Client extends EventEmitter {
 				cause: error
 			});
 		}
-	};
+	}
 
 	async loadComponents() {
 		const logger = this.#logger.clone(() => "[Components]");
@@ -280,7 +280,7 @@ export class Client extends EventEmitter {
 				cause: error
 			});
 		}
-	};
+	}
 
 	async loadEvents() {
 		const logger = this.#logger.clone(() => "[Events]");
@@ -308,7 +308,7 @@ export class Client extends EventEmitter {
 				cause: error
 			});
 		}
-	};
+	}
 
 	async loadJobs() {
 		const logger = this.#logger.clone(() => "[Jobs]");
@@ -363,7 +363,7 @@ export class Client extends EventEmitter {
 				cause: error
 			});
 		}
-	};
+	}
 
 	async loadModals() {
 		const logger = this.#logger.clone(() => "[Modals]");
@@ -389,7 +389,7 @@ export class Client extends EventEmitter {
 				cause: error
 			});
 		}
-	};
+	}
 
 };
 

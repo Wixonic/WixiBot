@@ -64,6 +64,7 @@ export type ReportData = MessageReportData | UserReportData;
 export interface GuildSettings {
 	channels: {
 		logs?: string;
+		welcome?: string;
 	};
 	moderation: {
 		reports?: string;
@@ -90,6 +91,13 @@ export const guildSettingsSchema: DynamicSettingsSchema = {
 					name: "Logs channel",
 					type: "channel",
 					description: "The channel where I will send error reports and other logs. If not set, I will DM the server owner instead.",
+					default: null
+				},
+				welcome: {
+					key: "welcome",
+					name: "Welcome channel",
+					type: "channel",
+					description: "The channel where I will send welcome messages when new members join.",
 					default: null
 				}
 			}
@@ -157,20 +165,20 @@ export class Guild {
 		this.#discordGuild = discordGuild;
 		this.#logger = logger.clone(`[G-${discordGuild.id}]`);
 		this.#storagePath = `./storage/guilds/${discordGuild.id}/`;
-	};
+	}
 
-	get id() { return this.#discordGuild.id; };
-	get name() { return this.#discordGuild.name; };
-	get settings() { return this.#settings; };
-	get lastAccessed() { return this.#lastAccessed; };
+	get id() { return this.#discordGuild.id; }
+	get name() { return this.#discordGuild.name; }
+	get settings() { return this.#settings; }
+	get lastAccessed() { return this.#lastAccessed; }
 
-	touch() { this.#lastAccessed = Date.now(); };
+	touch() { this.#lastAccessed = Date.now(); }
 
 	async init() {
 		this.#logger.debug("Initializing guild...");
 
 		try {
-			await Deno.mkdir(this.#storagePath.split("/").slice(0, -1).join("/"), { recursive: true });
+			await Deno.mkdir(path.dirname(this.#storagePath), { recursive: true });
 			try {
 				const content = await Deno.readTextFile(path.join(this.#storagePath, "settings.json"));
 				this.#settings = JSON.parse(content);
@@ -208,11 +216,11 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		}
 
 		client.addGuild(this);
-	};
+	}
 
 	async saveSettings() {
 		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings));
-	};
+	}
 
 	async #notifyOwnerFallback(content: string, purpose: string) {
 		try {
@@ -232,7 +240,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 				cause: error
 			});
 		}
-	};
+	}
 
 	async createTicket(ticketId: string, channel: string, createdBy: string, messages: { channel: string; guild: string }, reason?: string): Promise<TicketData> {
 		const ticketData: TicketData = {
@@ -250,13 +258,13 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 
 		await this.saveTicket(ticketData);
 		return ticketData;
-	};
+	}
 
 	async saveTicket(ticket: TicketData): Promise<void> {
 		const ticketsDirectory = path.join(this.#storagePath, "tickets");
 		await Deno.mkdir(ticketsDirectory, { recursive: true });
 		await Deno.writeTextFile(path.join(ticketsDirectory, `${ticket.id}.json`), JSON.stringify(ticket));
-	};
+	}
 
 	async loadTicket(ticketId: string): Promise<TicketData | null> {
 		try {
@@ -266,7 +274,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 			if (error instanceof Deno.errors.NotFound) return null;
 			throw error;
 		}
-	};
+	}
 
 	async warn(target: GuildMember, by: GuildMember | APIInteractionGuildMember | null, reason: string) {
 		const moderationDirectory = path.join(this.#storagePath, "moderation", target.id, "warnings");
@@ -295,7 +303,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 				});
 			} else this.reportError("Configured warnings channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.warnings}`));
 		} else this.#notifyOwnerFallback(`A user was warned in your server **${this.name}**:\n${`User <@${target.id}> has been warned${by ? ` by <@${by.user.id}>` : ""}.\nReason: ${reason}`}`, "warnings");
-	};
+	}
 
 	async reportMessage(message: Message, by: GuildMember | APIInteractionGuildMember | null, reason?: string) {
 		const moderationDirectory = path.join(this.#storagePath, "moderation", message.author.id, "reports");
@@ -368,10 +376,10 @@ Reason: ${reason || "No reason provided"}`)
 		} else this.#notifyOwnerFallback(`A message was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
 Target: https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id} by <@${message.author.id}>
 Reason: ${reason || "No reason provided"}`, "reports");
-	};
+	}
 
-	async reportUser(user: GuildMember, by: GuildMember | APIInteractionGuildMember | null, reason?: string) {
-		const moderationDirectory = path.join(this.#storagePath, "moderation", user.id, "reports");
+	async reportUser(discordMember: GuildMember, by: GuildMember | APIInteractionGuildMember | null, reason?: string) {
+		const moderationDirectory = path.join(this.#storagePath, "moderation", discordMember.id, "reports");
 
 		await Deno.mkdir(moderationDirectory, {
 			recursive: true
@@ -380,7 +388,7 @@ Reason: ${reason || "No reason provided"}`, "reports");
 		await Deno.writeTextFile(path.join(moderationDirectory, `${Date.now()}.json`), JSON.stringify({
 			date: new Date().toISOString(),
 			type: "User",
-			user: user.id,
+			user: discordMember.id,
 			by: by?.user.id || null,
 			reason
 		}));
@@ -393,17 +401,17 @@ Reason: ${reason || "No reason provided"}`, "reports");
 						new ContainerBuilder()
 							.addTextDisplayComponents((component) => component
 								.setContent(`# User report${by ? ` by <@${by.user.id}>` : ""}
-- Target: <@${user.id}>
+- Target: <@${discordMember.id}>
 - Reason: ${reason || "No reason provided"}`)
 							)
 							.addActionRowComponents((component) => component
 								.addComponents([
 									new ButtonBuilder()
-										.setCustomId(`report:user:reply:${user.id}`)
+										.setCustomId(`report:user:reply:${discordMember.id}`)
 										.setLabel("Reply")
 										.setStyle(ButtonStyle.Primary),
 									new ButtonBuilder()
-										.setCustomId(`report:user:close:${user.id}`)
+										.setCustomId(`report:user:close:${discordMember.id}`)
 										.setLabel("Close report")
 										.setStyle(ButtonStyle.Secondary),
 								])
@@ -414,11 +422,11 @@ Reason: ${reason || "No reason provided"}`, "reports");
 							.addActionRowComponents((component) => component
 								.addComponents([
 									new ButtonBuilder()
-										.setCustomId(`report:user:warn:${user.id}`)
+										.setCustomId(`report:user:warn:${discordMember.id}`)
 										.setLabel("Warn user")
 										.setStyle(ButtonStyle.Danger),
 									new ButtonBuilder()
-										.setCustomId(`report:user:timeout:${user.id}`)
+										.setCustomId(`report:user:timeout:${discordMember.id}`)
 										.setLabel("Timeout user")
 										.setStyle(ButtonStyle.Danger)
 								])
@@ -428,9 +436,9 @@ Reason: ${reason || "No reason provided"}`, "reports");
 				});
 			} else this.reportError("Configured reports channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.reports}`));
 		} else this.#notifyOwnerFallback(`A user was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
-- Target: <@${user.id}>
+- Target: <@${discordMember.id}>
 - Reason: ${reason || "No reason provided"}`, "reports");
-	};
+	}
 
 	reportError(message: string, error: unknown) {
 		this.#logger.error(message, {
@@ -452,5 +460,5 @@ ${error instanceof Error ? error.stack : String(error)}
 ${String(message)}
 ${error instanceof Error ? error.stack : String(error)}
 \`\`\``, "logs");
-	};
+	}
 };

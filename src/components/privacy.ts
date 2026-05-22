@@ -37,7 +37,9 @@ const createUserStorageArchive = async (user: User): Promise<Uint8Array> => {
 			|| "Failed to create ZIP archive"
 		);
 	} finally {
-		await Deno.remove(directory, { recursive: true }).catch(() => { });
+		await Deno.remove(directory, { recursive: true }).catch((error) => {
+			if (!(error instanceof Deno.errors.NotFound)) throw error;
+		});
 	}
 };
 
