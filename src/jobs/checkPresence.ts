@@ -27,7 +27,7 @@ export const job: Job = {
 				}
 			}
 
-			logger.info(`Presence check complete: ${checked} checked.`);
+			if (checked > 0) logger.info(`Presence check complete: ${checked} checked.`);
 		} else logger.warn("Skipped presence check: Discord client unavailable.");
 	}
 };

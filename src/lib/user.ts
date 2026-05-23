@@ -261,22 +261,28 @@ export class User {
 
 		if (stats.totalMessages > 0 || stats.totalStageEvents > 0 || stats.totalForumPosts > 0 || stats.totalReactions > 0 || (this.#data.streak && this.#data.streak > 0)) {
 			try {
-				const replayText = await ai.generateReplay(this.id, {
-					messages: stats.totalMessages,
-					stageEvents: stats.totalStageEvents,
-					forumPosts: stats.totalForumPosts,
-					reactions: stats.totalReactions,
-					achievements: stats.achievements,
-					streak: this.#data.streak || 0,
-					bestStreak: this.#data.bestStreak || 0
-				});
+				const channel = await this.#discordUser.dmChannel?.fetch();
+				if (channel) {
+					const replayText = await ai.generateReplay(channel, this.id, {
+						messages: stats.totalMessages,
+						stageEvents: stats.totalStageEvents,
+						forumPosts: stats.totalForumPosts,
+						reactions: stats.totalReactions,
+						achievements: stats.achievements,
+						streak: this.#data.streak || 0,
+						bestStreak: this.#data.bestStreak || 0
+					});
 
-				const discordUser = await client.discord?.users.fetch(this.id);
-				if (discordUser) {
-					await sendChunks(`## Your Monthly Replay!\n\n${replayText}`, discordUser.send.bind(discordUser));
-					this.touch();
-					return true;
+					const discordUser = await client.discord?.users.fetch(this.id);
+					if (discordUser) {
+						await sendChunks(`## Your Monthly Replay!\n\n${replayText}`, discordUser.send.bind(discordUser));
+						this.touch();
+						return true;
+					}
 				}
+
+				this.#logger.warn("Cannot send replay: DM channel not available.");
+				return false;
 			} catch (error) {
 				this.reportError("Failed to generate or send replay", error);
 			}
