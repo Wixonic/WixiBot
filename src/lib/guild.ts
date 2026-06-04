@@ -405,7 +405,9 @@ Reason: ${reason || "No reason provided"}`)
 					flags: MessageFlags.IsComponentsV2
 				});
 
-				await message.forward(channel);
+				await message.forward(channel).catch(() => {
+					channel.send({ content: "> *Failed to forward the original message (likely due to NSFW restrictions).*\\n> *Please use the target link above to view the message if it hasn't been deleted.*" }).catch(() => {});
+				});
 			} else this.reportError("Configured reports channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.reports}`));
 		} else this.#notifyOwnerFallback(`A message was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
 Target: https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id} by <@${message.author.id}>

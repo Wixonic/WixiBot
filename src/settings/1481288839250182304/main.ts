@@ -3,14 +3,14 @@ import { secrets } from "./secrets.ts";
 
 export const settings: ClientSettings = {
 	ai: {
-		provider: "lmstudio",
+		provider: "gemini",
 		gemini: {
 			enabled: true,
 			model: "gemini-flash-lite-latest",
 			apiKey: secrets.geminiApiKey || ""
 		},
 		lmstudio: {
-			enabled: true,
+			enabled: false,
 			model: "qwen3.5-4b-mlx",
 			baseUrl: "ws://127.0.0.1:1234"
 		}

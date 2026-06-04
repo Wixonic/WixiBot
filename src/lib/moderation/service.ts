@@ -19,6 +19,7 @@ export interface ModerationResult {
 const SYSTEM_PROMPT = `You are a strict Discord automated moderator.
 Your job is to analyze the user's latest message (including any attached images) in the context of the conversation and classify it.
 You MUST output according to the requested JSON schema.
+You MUST respond FAST, with less than 500 words.
 
 Rules for classification (action):
 - "strictly_forbidden": The message or image clearly violates standard Discord rules (e.g., explicit adult content, doxxing, severe hate speech). You are 100% sure.
@@ -43,7 +44,7 @@ const RESPONSE_SCHEMA = {
 		},
 		reason: {
 			type: "string",
-			description: "A short sentence explaining why you chose this action (in French)."
+			description: "A SHORT sentence explaining why you chose this action."
 		}
 	},
 	required: ["action", "reason"]
@@ -69,7 +70,7 @@ export async function analyzeMessage(message: Message): Promise<ModerationResult
 						parts.push({
 							inlineData: {
 								data: base64,
-								mimeType: attachment.contentType
+								mimeType: attachment.contentType || undefined
 							}
 						});
 					}
@@ -80,18 +81,20 @@ export async function analyzeMessage(message: Message): Promise<ModerationResult
 			prompt = parts;
 		}
 
+		logger.info(`Starting AI moderation analysis for message ${message.id} from ${message.author.username} (${attachments.length} attachments)`);
 		const response = await ai.generateCompletion(prompt, SYSTEM_PROMPT, "application/json", RESPONSE_SCHEMA);
 		const result = JSON.parse(response.trim()) as ModerationResult;
+		logger.info(`Moderation result for message ${message.id}: ${result.action} (${result.reason || "No reason"})`);
 
 		const validActions = ["strictly_forbidden", "strictly_illegal_inappropriate", "urgent_problem", "probably_inappropriate", "safe"];
 		if (!validActions.includes(result.action)) {
 			logger.warn(`AI returned invalid moderation action: ${result.action}`);
-			return { action: "safe" };
+			return { action: "safe", reason: "AI returned invalid action, defaulting to safe." };
 		}
 
 		return result;
 	} catch (error) {
 		logger.error("Error during AI moderation analysis:", error);
-		return { action: "safe" };
+		return { action: "safe", reason: "Error during analysis, defaulting to safe." };
 	}
 }

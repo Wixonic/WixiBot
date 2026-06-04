@@ -117,7 +117,15 @@ Congratulate them on their achievements if they unlocked any.`;
 
 		try {
 			if (this.provider === "gemini" && this.geminiClient) {
-				const config: any = { systemInstruction: systemPrompt };
+				const config: any = {
+					systemInstruction: systemPrompt,
+					safetySettings: [
+						{ category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+						{ category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+						{ category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+						{ category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+					]
+				};
 				if (responseMimeType) config.responseMimeType = responseMimeType;
 				if (responseSchema) config.responseSchema = responseSchema;
 
@@ -134,20 +142,40 @@ Congratulate them on their achievements if they unlocked any.`;
 			} else if (this.provider === "lmstudio" && this.lmstudioClient) {
 				const model = await this.lmstudioClient.llm.model(getSettings().ai?.lmstudio?.model!);
 				const respondOptions: any = {};
-				if (responseMimeType === "application/json") respondOptions.responseFormat = { type: "json_schema", jsonSchema: responseSchema || { type: "object" } };
-
-				let content: any = prompt;
-				if (Array.isArray(prompt)) {
-					content = prompt.map((el: any) => {
-						if (el.text) return { type: "text", text: el.text };
-						if (el.inlineData) return { type: "image_url", image_url: { url: `data:${el.inlineData.mimeType};base64,${el.inlineData.data}` } };
-						return el;
-					});
+				if (responseMimeType === "application/json") {
+					respondOptions.responseFormat = { type: "json_schema", jsonSchema: responseSchema || { type: "object" } };
+					respondOptions.maxTokens = 8192;
 				}
+
+				let contentText: string = "";
+				const images: any[] = [];
+
+				if (Array.isArray(prompt)) {
+					contentText = prompt.map((part) => part.text ? part.text : "").filter(Boolean).join("\n");
+
+					for (let i = 0; i < prompt.length; i++) {
+						const part = prompt[i];
+						if (part.inlineData && this.lmstudioClient.files) {
+							let ext = "png";
+							if (part.inlineData.mimeType) {
+								if (part.inlineData.mimeType.includes("jpeg") || part.inlineData.mimeType.includes("jpg")) ext = "jpg";
+								else if (part.inlineData.mimeType.includes("gif")) ext = "gif";
+								else if (part.inlineData.mimeType.includes("webp")) ext = "webp";
+							}
+							const handle = await this.lmstudioClient.files.prepareImageBase64(`image_${Date.now()}_${i}.${ext}`, part.inlineData.data);
+							images.push(handle);
+						}
+					}
+				} else {
+					contentText = prompt;
+				}
+
+				const messageInput: any = { role: "user", content: contentText };
+				if (images.length > 0) messageInput.images = images;
 
 				const response = await model.respond([
 					{ role: "system", content: systemPrompt },
-					{ role: "user", content }
+					messageInput
 				], respondOptions);
 
 				if (!response.content) throw new Error("LM Studio returned an empty response.");
