@@ -66,10 +66,13 @@ export interface GuildSettings {
 		logs?: string;
 		welcome?: string;
 		bot?: string;
+		supporters?: string;
 	};
 	moderation: {
 		reports?: string;
 		warnings?: string;
+		ignoredChannels?: string[];
+		lowRiskChannels?: string[];
 	};
 	tickets: {
 		channel?: string;
@@ -107,6 +110,13 @@ export const guildSettingsSchema: DynamicSettingsSchema = {
 					type: "channel",
 					description: "The channel where I will send notifications like level ups and achievements.",
 					default: null
+				},
+				supporters: {
+					key: "supporters",
+					name: "New supporters channel",
+					type: "channel",
+					description: "The channel where I will announce new supporters and boosts.",
+					default: null
 				}
 			}
 		},
@@ -128,6 +138,22 @@ export const guildSettingsSchema: DynamicSettingsSchema = {
 					name: "Warnings channel",
 					type: "channel",
 					description: "The channel where I will send warning notifications.",
+					default: null
+				},
+				ignoredChannels: {
+					key: "ignoredChannels",
+					name: "Ignored channels",
+					type: "channel",
+					multiple: true,
+					description: "Channels or categories where moderation will be completely disabled.",
+					default: null
+				},
+				lowRiskChannels: {
+					key: "lowRiskChannels",
+					name: "Low risk channels",
+					type: "channel",
+					multiple: true,
+					description: "Channels or categories where moderation will be lighter (no auto warn, no deletion).",
 					default: null
 				}
 			}
@@ -468,5 +494,22 @@ ${error instanceof Error ? error.stack : String(error)}
 ${String(message)}
 ${error instanceof Error ? error.stack : String(error)}
 \`\`\``, "logs");
+	}
+
+	async publishFundingAnnouncement(userId: string, type: "boost" | "supporter"): Promise<boolean> {
+		const channelId = this.settings.channels.supporters || this.settings.channels.bot || this.settings.channels.welcome;
+		const channel = channelId ? this.#discordGuild.channels.cache.get(channelId) : this.#discordGuild.systemChannel;
+
+		if (channel && channel.isTextBased()) {
+			try {
+				if (type === "boost") await channel.send(`<@${userId}> just boosted the server! Thank you for the support!`);
+				else if (type === "supporter") await channel.send(`<@${userId}> is now a server supporter, which means they paid more than you!\nThank you so much for the support! It really means a lot and keeps me turned on!`);
+				return true;
+			} catch (error) {
+				this.reportError(`Failed to send announcement for ${userId}`, error);
+				return false;
+			}
+		}
+		return false;
 	}
 };

@@ -23,7 +23,7 @@ export class AIService {
 	private lmstudioClient: LMStudioClient | null = null;
 	private initialized = false;
 	private systemPrompt = `You are a friendly Discord Bot called WixiBot.
-If the user asks, you are powered by WixAI, and therefore you can make mistakes.
+If the user asks (and only if the user asks), you are powered by WixAI, and therefore you can make mistakes.
 
 You should respond with a friendly and enthusiastic tone.
 You can use light Discord markdown to make the message more engaging, but avoid using emojis.`;
@@ -100,29 +100,7 @@ Congratulate them on their achievements if they unlocked any.`;
 
 		try {
 			const systemPrompt = systemPromptOverride || this.systemPrompt;
-			let rawResponse = "";
-
-			if (this.provider === "gemini" && this.geminiClient) {
-				const response = await this.geminiClient.models.generateContent({
-					model: getSettings().ai?.gemini?.model!,
-					config: {
-						systemInstruction: systemPrompt
-					},
-					contents: prompt
-				});
-
-				if (!response.text) throw new Error("Gemini returned an empty response.");
-				rawResponse = response.text;
-			} else if (this.provider === "lmstudio" && this.lmstudioClient) {
-				const model = await this.lmstudioClient.llm.model(getSettings().ai?.lmstudio?.model!);
-				const response = await model.respond([
-					{ role: "system", content: systemPrompt },
-					{ role: "user", content: prompt }
-				]);
-
-				if (!response.content) throw new Error("LM Studio returned an empty response.");
-				rawResponse = response.nonReasoningContent;
-			} else throw new Error("AI configuration is invalid or disabled.");
+			const rawResponse = await this.generateCompletion(prompt, systemPrompt);
 
 			await sendChunks(this.safeResponse(rawResponse), async (chunk) => {
 				await channel.send(chunk);
@@ -131,6 +109,53 @@ Congratulate them on their achievements if they unlocked any.`;
 			logger.error("AI Message Generation Error:", error);
 		} finally {
 			clearInterval(typingInterval);
+		}
+	}
+
+	async generateCompletion(prompt: string | any[], systemPrompt: string, responseMimeType?: string, responseSchema?: any): Promise<string> {
+		this.init();
+
+		try {
+			if (this.provider === "gemini" && this.geminiClient) {
+				const config: any = { systemInstruction: systemPrompt };
+				if (responseMimeType) config.responseMimeType = responseMimeType;
+				if (responseSchema) config.responseSchema = responseSchema;
+
+				const contents = Array.isArray(prompt) ? prompt : [prompt];
+
+				const response = await this.geminiClient.models.generateContent({
+					model: getSettings().ai?.gemini?.model!,
+					config,
+					contents
+				});
+
+				if (!response.text) throw new Error("Gemini returned an empty response.");
+				return response.text;
+			} else if (this.provider === "lmstudio" && this.lmstudioClient) {
+				const model = await this.lmstudioClient.llm.model(getSettings().ai?.lmstudio?.model!);
+				const respondOptions: any = {};
+				if (responseMimeType === "application/json") respondOptions.responseFormat = { type: "json_schema", jsonSchema: responseSchema || { type: "object" } };
+
+				let content: any = prompt;
+				if (Array.isArray(prompt)) {
+					content = prompt.map((el: any) => {
+						if (el.text) return { type: "text", text: el.text };
+						if (el.inlineData) return { type: "image_url", image_url: { url: `data:${el.inlineData.mimeType};base64,${el.inlineData.data}` } };
+						return el;
+					});
+				}
+
+				const response = await model.respond([
+					{ role: "system", content: systemPrompt },
+					{ role: "user", content }
+				], respondOptions);
+
+				if (!response.content) throw new Error("LM Studio returned an empty response.");
+				return response.nonReasoningContent || response.content;
+			} else throw new Error("AI configuration is invalid or disabled.");
+		} catch (error) {
+			logger.error("AI Completion Error:", error);
+			throw error;
 		}
 	}
 }

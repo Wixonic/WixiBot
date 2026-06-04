@@ -57,6 +57,7 @@ export interface UserData {
 	bestStreak?: number;
 	lastActiveDate?: string;
 	bonusXp?: number;
+	announceFunding?: boolean;
 };
 
 export const userSettingsSchema: DynamicSettingsSchema = {

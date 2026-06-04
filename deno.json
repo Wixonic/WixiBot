@@ -4,7 +4,7 @@
 	"description": "WixiLand's Discord Application",
 	"author": "Wixonic <contact@wixonic.fr> (https://wixonic.fr)",
 	"version": "2.0.0.α.2",
-	"license": "Wix Non-Commercial License",
+	"license": "Wixonic Non-Commercial License",
 	"repository": "github:Wixonic/WixiBot",
 	"exports": "./src/main.ts",
 	"tasks": {
@@ -16,7 +16,8 @@
 	"imports": {
 		"discord.js": "npm:discord.js@14.26.2",
 		"@lmstudio/sdk": "npm:@lmstudio/sdk@1.5.0",
-		"@google/genai": "npm:@google/genai@2.6.0"
+		"@google/genai": "npm:@google/genai@2.6.0",
+		"std/": "https://deno.land/std@0.203.0/"
 	},
 	"compilerOptions": {
 		"strict": true

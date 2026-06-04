@@ -35,8 +35,9 @@ export interface DynamicObjectSetting extends DynamicChildSetting<"object">, Dyn
 
 export interface DynamicBooleanSetting extends DynamicValueSetting<"boolean", boolean> { };
 
-export interface DynamicChannelSetting extends DynamicValueSetting<"channel", string | null> {
+export interface DynamicChannelSetting extends DynamicValueSetting<"channel", string | string[] | null> {
 	channelTypes?: number[];
+	multiple?: boolean;
 };
 
 export interface DynamicNumberSetting extends DynamicValueSetting<"number", number | null> {
@@ -50,7 +51,9 @@ export interface DynamicStringSetting extends DynamicValueSetting<"string", stri
 
 export interface DynamicUserSetting extends DynamicValueSetting<"user", string | null> { };
 
-export interface DynamicSectionSetting extends DynamicValueSetting<"section", string | null> { };
+export interface DynamicSectionSetting extends DynamicValueSetting<"section", string | string[] | null> {
+	multiple?: boolean;
+};
 
 export type DynamicSetting =
 	DynamicObjectSetting |
@@ -83,10 +86,19 @@ export interface DynamicSettingsPathContext {
 
 const valueFormatters: Record<Exclude<DynamicSetting["type"], "object">, (value: unknown) => string> = {
 	boolean: (value) => value ? "Enabled" : "Disabled",
-	channel: (value) => typeof value === "string" && value.length > 0 ? `<#${value}>` : "Not set",
+	channel: (value) => {
+		if (Array.isArray(value)) return value.length > 0 ? value.map(v => `<#${v}>`).join(", ") : "Not set";
+		return typeof value === "string" && value.length > 0 ? `<#${value}>` : "Not set";
+	},
 	number: (value) => typeof value === "number" ? `\`${value}\`` : "Not set",
-	role: (value) => typeof value === "string" && value.length > 0 ? `<@&${value}>` : "Not set",
-	section: (value) => typeof value === "string" && value.length > 0 ? `<#${value}>` : "Not set",
+	role: (value) => {
+		if (Array.isArray(value)) return value.length > 0 ? value.map(v => `<@&${v}>`).join(", ") : "Not set";
+		return typeof value === "string" && value.length > 0 ? `<@&${value}>` : "Not set";
+	},
+	section: (value) => {
+		if (Array.isArray(value)) return value.length > 0 ? value.map(v => `<#${v}>`).join(", ") : "Not set";
+		return typeof value === "string" && value.length > 0 ? `<#${value}>` : "Not set";
+	},
 	string: (value) => typeof value === "string" && value.length > 0 ? `\`${value}\`` : "Not set",
 	user: (value) => typeof value === "string" && value.length > 0 ? `<@${value}>` : "Not set"
 };

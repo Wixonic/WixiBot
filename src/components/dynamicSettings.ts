@@ -183,7 +183,7 @@ export const component = {
 											.setPlaceholder("Select a channel")
 											.setChannelTypes(...channelTypes)
 											.setMinValues(1)
-											.setMaxValues(1)
+											.setMaxValues(channelSetting.multiple ? 25 : 1)
 									])
 								);
 								break;
@@ -199,7 +199,7 @@ export const component = {
 											.setPlaceholder("Select a category")
 											.setChannelTypes(ChannelType.GuildCategory)
 											.setMinValues(1)
-											.setMaxValues(1)
+											.setMaxValues((targetSetting as any).multiple ? 25 : 1)
 									])
 								);
 								break;
@@ -289,17 +289,21 @@ export const component = {
 							value = interaction.values[0] === "true";
 						} else if (type === "channel") {
 							if (!interaction.isChannelSelectMenu()) throw new Error("Expected channel select menu");
-							value = interaction.values[0] ?? null;
+							const isMultiple = (context.targetSetting as any).multiple;
+							value = isMultiple ? interaction.values : (interaction.values[0] ?? null);
 						} else if (type === "role") {
 							if (!interaction.isRoleSelectMenu()) throw new Error("Expected role select menu");
-							value = interaction.values[0] ?? null;
+							const isMultiple = (context.targetSetting as any).multiple;
+							value = isMultiple ? interaction.values : (interaction.values[0] ?? null);
 						} else if (type === "user") {
 							if (!interaction.isUserSelectMenu()) throw new Error("Expected user select menu");
-							value = interaction.values[0] ?? null;
+							const isMultiple = (context.targetSetting as any).multiple;
+							value = isMultiple ? interaction.values : (interaction.values[0] ?? null);
 
 						} else if (type === "section") {
 							if (!interaction.isChannelSelectMenu()) throw new Error("Expected channel select menu");
-							value = interaction.values[0] ?? null;
+							const isMultiple = (context.targetSetting as any).multiple;
+							value = isMultiple ? interaction.values : (interaction.values[0] ?? null);
 						} else throw new Error("Unsupported direct set type");
 						parentResolved.parentSettings[parentResolved.context.targetKey!] = value;
 						await parentResolved.scope.save();
