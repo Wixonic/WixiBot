@@ -5,7 +5,7 @@ export const settings: ClientSettings = {
 	ai: {
 		provider: "gemini",
 		gemini: {
-			enabled: true,
+			enabled: false,
 			model: "gemini-flash-lite-latest",
 			apiKey: secrets.geminiApiKey || ""
 		},
