@@ -5,7 +5,7 @@ import type { Logger } from "../lib/logger.ts";
 export const component = {
 	customId: "announce",
 
-	async execute(logger: Logger, interaction: MessageComponentInteraction, type: string, action: string, guildId: string) {
+	async execute(_logger: Logger, interaction: MessageComponentInteraction, type: string, action: string, guildId: string) {
 		const user = await client.getUser(interaction.user.id);
 		if (user) {
 			user.data.announceFunding = action === "yes";
