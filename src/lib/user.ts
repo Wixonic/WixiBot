@@ -372,7 +372,7 @@ export class User {
 	async getLevel() {
 		const stats = await this.getTotalStats();
 		// Dynamic level formula
-		return Math.floor(Math.sqrt(stats.totalXp / 20));
+		return Math.floor(Math.sqrt(stats.totalXp / 50));
 	}
 
 	async addActivity(guildId: string, type: "message" | "mention" | "reactionAdd" | "reactionReceive" | "forumPost" | "stageEvent") {
@@ -388,17 +388,14 @@ export class User {
 			yesterdayDate.setDate(yesterdayDate.getDate() - 1);
 			const yesterday = yesterdayDate.toISOString().split("T")[0];
 
-			if (!this.#data.lastActiveDate || this.#data.lastActiveDate < yesterday) {
-				this.#data.streak = 1;
-			} else if (this.#data.lastActiveDate === yesterday) {
+			if (!this.#data.lastActiveDate || this.#data.lastActiveDate < yesterday) this.#data.streak = 1;
+			else if (this.#data.lastActiveDate === yesterday) {
 				this.#data.streak = (this.#data.streak || 1) + 1;
 				const bonus = Math.min(this.#data.streak * 5, 50);
 				this.#data.bonusXp = (this.#data.bonusXp || 0) + bonus;
 			}
 
-			if (!this.#data.bestStreak || (this.#data.streak && this.#data.streak > this.#data.bestStreak)) {
-				this.#data.bestStreak = this.#data.streak;
-			}
+			if (!this.#data.bestStreak || (this.#data.streak && this.#data.streak > this.#data.bestStreak)) this.#data.bestStreak = this.#data.streak;
 
 			this.#data.lastActiveDate = today;
 			streakChanged = true;
