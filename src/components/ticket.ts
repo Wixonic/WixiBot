@@ -105,18 +105,23 @@ const ticketMessages = (interaction: MessageComponentInteraction, ticket: Ticket
 };
 
 const createTicketHeaderAttachment = async (interaction: MessageComponentInteraction, ticket: TicketMessageData) => {
-	const creatorUser = await interaction.client.users.fetch(ticket.interactions.createdBy).catch(() => null);
-	const claimedUser = ticket.interactions.claimedBy ? await interaction.client.users.fetch(ticket.interactions.claimedBy).catch(() => null) : null;
+	const creatorMember = interaction.guild ? await interaction.guild.members.fetch(ticket.interactions.createdBy).catch(() => null) : null;
+	const creatorUser = creatorMember?.user ?? (await interaction.client.users.fetch(ticket.interactions.createdBy).catch(() => null));
+	const creatorDisplayName = creatorMember?.displayName ?? creatorUser?.globalName ?? creatorUser?.username ?? ticket.interactions.createdBy;
+
+	const claimedMember = (ticket.interactions.claimedBy && interaction.guild) ? await interaction.guild.members.fetch(ticket.interactions.claimedBy).catch(() => null) : null;
+	const claimedUser = claimedMember?.user ?? (ticket.interactions.claimedBy ? await interaction.client.users.fetch(ticket.interactions.claimedBy).catch(() => null) : null);
+	const claimedDisplayName = claimedMember?.displayName ?? claimedUser?.globalName ?? claimedUser?.username;
 
 	const buffer = await generateRichPicture({
 		type: RichPictureType.TicketHeader,
 		data: {
 			ticketId: ticket.id,
-			creatorUsername: creatorUser ? creatorUser.username : ticket.interactions.createdBy,
+			creatorUsername: creatorDisplayName,
 			creatorAvatarUrl: creatorUser ? creatorUser.displayAvatarURL({ extension: "png", size: 256 }) : undefined,
 			reason: ticket.reason || "General support ticket",
 			state: ticket.state || "Waiting",
-			claimedByUsername: claimedUser ? claimedUser.username : undefined,
+			claimedByUsername: claimedDisplayName,
 			createdAtFormatted: new Date(ticket.date || Date.now()).toLocaleDateString()
 		}
 	});
@@ -137,8 +142,7 @@ const updateTicketMessages = async (logger: Logger, interaction: MessageComponen
 			if (ticketMessage) {
 				await ticketMessage.edit({
 					files: [attachment],
-					components: [ticketMessageContent],
-					flags: MessageFlags.IsComponentsV2
+					components: [ticketMessageContent]
 				});
 			}
 		} catch (error) {
@@ -154,8 +158,7 @@ const updateTicketMessages = async (logger: Logger, interaction: MessageComponen
 			const logMessage = await logChannel.messages.fetch(ticket.messages.guild).catch(() => null);
 			if (logMessage) {
 				await logMessage.edit({
-					components: [channelMessageContent],
-					flags: MessageFlags.IsComponentsV2
+					components: [channelMessageContent]
 				});
 			}
 		} catch (error) {
@@ -242,8 +245,7 @@ export const component = {
 					files: [attachment],
 					components: [
 						ticketChannelMessageContent
-					],
-					flags: MessageFlags.IsComponentsV2
+					]
 				});
 
 				const channelMessage = await channel.send({

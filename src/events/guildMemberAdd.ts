@@ -41,14 +41,14 @@ export const event = {
 					const buffer = await generateRichPicture({
 						type: RichPictureType.WelcomeMember,
 						data: {
-							username: discordMember.user.username,
+							username: discordMember.displayName,
 							avatarUrl: discordMember.user.displayAvatarURL({ extension: "png", size: 256 }),
 							serverName: discordMember.guild.name,
 							memberCount: discordMember.guild.memberCount
 						}
 					});
 					const attachment = new AttachmentBuilder(buffer, { name: "welcome.png" });
-					await channel.send({ content: `<@${discordMember.id}>`, files: [attachment] });
+					await channel.send({ content: `<@${discordMember.id}>, welcome to the server!`, files: [attachment] });
 				} catch (error) {
 					logger.error(`Failed to send welcome message to ${discordMember.guild.id}`, { cause: error });
 				}

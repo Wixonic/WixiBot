@@ -73,12 +73,19 @@ export const command = {
 } satisfies Command<ChatInputCommandInteraction>;
 
 async function sendLeaderboard(interaction: ChatInputCommandInteraction, top10: any[]) {
-	const entries = top10.map((user, index) => ({
-		rank: index + 1,
-		username: user.username,
-		level: user.level,
-		xp: user.xp,
-		streak: user.streak
+	const entries = await Promise.all(top10.map(async (user, index) => {
+		let displayName = user.username;
+		if (interaction.guild) {
+			const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+			if (member) displayName = member.displayName;
+		}
+		return {
+			rank: index + 1,
+			username: displayName,
+			level: user.level,
+			xp: user.xp,
+			streak: user.streak
+		};
 	}));
 
 	const pictureBuffer = await generateRichPicture({

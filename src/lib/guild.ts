@@ -331,14 +331,14 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 				const buffer = await generateRichPicture({
 					type: RichPictureType.Warn,
 					data: {
-						targetUsername: target.user.username,
+						targetUsername: target.displayName,
 						targetAvatarUrl: target.user.displayAvatarURL({ extension: "png", size: 256 }),
-						moderatorUsername: by ? ("user" in by ? by.user.username : undefined) : undefined,
+						moderatorUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reason
 					}
 				});
 				const attachment = new AttachmentBuilder(buffer, { name: "warn.png" });
-				await channel.send({ files: [attachment] });
+				await channel.send({ content: `<@${target.id}>, you received a warning!`, files: [attachment] });
 			} else this.reportError("Configured warnings channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.warnings}`));
 		} else this.#notifyOwnerFallback(`A user was warned in your server **${this.name}**:\n${`User <@${target.id}> has been warned${by ? ` by <@${by.user.id}>` : ""}.\nReason: ${reason}`}`, "warnings");
 	}
@@ -366,12 +366,13 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		if (this.settings.moderation.reports) {
 			const channel = await this.#discordGuild.channels.fetch(this.settings.moderation.reports);
 			if (channel && channel.isTextBased()) {
+				const authorDisplayName = message.member?.displayName ?? message.author.displayName ?? message.author.username;
 				const buffer = await generateRichPicture({
 					type: RichPictureType.ReportMessage,
 					data: {
-						targetUsername: message.author.username,
+						targetUsername: authorDisplayName,
 						targetAvatarUrl: message.author.displayAvatarURL({ extension: "png", size: 256 }),
-						reporterUsername: by ? ("user" in by ? by.user.username : undefined) : undefined,
+						reporterUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reportType: "Message",
 						reason: reason || "No reason provided",
 						contentSnippet: message.content
@@ -448,9 +449,9 @@ Reason: ${reason || "No reason provided"}`, "reports");
 				const buffer = await generateRichPicture({
 					type: RichPictureType.ReportUser,
 					data: {
-						targetUsername: discordMember.user.username,
+						targetUsername: discordMember.displayName,
 						targetAvatarUrl: discordMember.user.displayAvatarURL({ extension: "png", size: 256 }),
-						reporterUsername: by ? ("user" in by ? by.user.username : undefined) : undefined,
+						reporterUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reportType: "User",
 						reason: reason || "No reason provided"
 					}

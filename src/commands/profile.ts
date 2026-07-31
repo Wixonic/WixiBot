@@ -15,7 +15,12 @@ import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 export const command = {
 	data: new SlashCommandBuilder()
 		.setName("profile")
-		.setDescription("Display your profile, stats, and level.")
+		.setDescription("Display a profile, stats, and level.")
+		.addUserOption((option) => option
+			.setName("user")
+			.setDescription("The user whose profile you want to view.")
+			.setRequired(false)
+		)
 		.setIntegrationTypes([
 			ApplicationIntegrationType.GuildInstall,
 			ApplicationIntegrationType.UserInstall
@@ -29,9 +34,17 @@ export const command = {
 	async execute(_logger, interaction) {
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-		const user = await client.getUser(interaction.user.id);
+		const targetUser = interaction.options.getUser("user") ?? interaction.user;
+		if (targetUser.bot) {
+			await interaction.followUp("Bots do not have profiles.");
+			return;
+		}
+
+		const targetMember = interaction.options.getMember("user") ?? interaction.member;
+
+		const user = await client.getUser(targetUser.id);
 		if (!user) {
-			await interaction.followUp("Unable to load your profile.");
+			await interaction.followUp("Unable to load profile for this user.");
 			return;
 		}
 
@@ -39,11 +52,13 @@ export const command = {
 		const level = await user.getLevel();
 		const unlockedAchievementIds = await checkNewAchievements(user);
 
+		const displayName = targetMember && "displayName" in targetMember ? (targetMember.displayName as string) : (targetUser.globalName ?? user.displayName);
+
 		const pictureBuffer = await generateRichPicture({
 			type: RichPictureType.Profile,
 			data: {
-				username: user.username,
-				avatarUrl: interaction.user.displayAvatarURL({ extension: "png", size: 256 }),
+				username: displayName,
+				avatarUrl: targetUser.displayAvatarURL({ extension: "png", size: 256 }),
 				level,
 				xp: stats.totalXp,
 				streak: user.data.streak,

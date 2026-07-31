@@ -129,6 +129,7 @@ export class User {
 	get id() { this.touch(); return this.#discordUser.id; }
 	get path() { this.touch(); return this.#storagePath; }
 	get username() { this.touch(); return this.#discordUser.username; }
+	get displayName() { this.touch(); return this.#discordUser.globalName ?? this.#discordUser.username; }
 	get settings() {
 		return this.#settings;
 	}
@@ -137,6 +138,18 @@ export class User {
 		return this.#data;
 	}
 	get lastAccessed() { this.touch(); return this.#lastAccessed; }
+
+	async getGuildDisplayName(guildId: string): Promise<string> {
+		this.touch();
+		try {
+			const guild = await client.discord?.guilds.fetch(guildId);
+			const member = await guild?.members.fetch(this.#discordUser.id);
+			if (member) return member.displayName;
+		} catch {
+			// Fallback
+		}
+		return this.displayName;
+	}
 
 	touch() { this.#lastAccessed = Date.now(); }
 
@@ -413,13 +426,14 @@ export class User {
 					const botChannel = await discordGuild?.channels.fetch(botChannelId);
 
 					if (botChannel && botChannel.isTextBased()) {
+						const displayName = await this.getGuildDisplayName(guildId);
 						const files = [];
 
 						if (newLevel > oldLevel) {
 							const levelUpBuffer = await generateRichPicture({
 								type: RichPictureType.LevelUp,
 								data: {
-									username: this.username,
+									username: displayName,
 									avatarUrl: this.#discordUser.displayAvatarURL({ extension: "png", size: 256 }),
 									oldLevel,
 									newLevel
@@ -435,7 +449,7 @@ export class User {
 									const achievementBuffer = await generateRichPicture({
 										type: RichPictureType.Achievement,
 										data: {
-											username: this.username,
+											username: displayName,
 											avatarUrl: this.#discordUser.displayAvatarURL({ extension: "png", size: 256 }),
 											achievementName: achievement.name,
 											achievementDescription: achievement.description
@@ -446,7 +460,14 @@ export class User {
 							}
 						}
 
-						if (files.length > 0) await botChannel.send({ files });
+						if (files.length > 0) {
+							let content = `<@${this.#discordUser.id}>`;
+							if (newLevel > oldLevel && unlockedAchievementIds.length > 0) content += ", you leveled up and unlocked an achievement!";
+							else if (newLevel > oldLevel) content += ", you leveled up!";
+							else content += ", you unlocked an achievement!";
+
+							await botChannel.send({ content, files });
+						}
 					}
 				}
 			} catch (error) {
