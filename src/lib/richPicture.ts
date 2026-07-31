@@ -206,12 +206,12 @@ const drawTextPatternIconWatermark = async (
 		let svg = await Deno.readTextFile(`./src/assets/icons/${iconName}.svg`);
 		svg = svg.replace(/<rect[^>]*\/>/g, "");
 		svg = svg.replace(/<svg /, `<svg width="${size}" height="${size}" `);
-		svg = svg.replace(/path /g, `path fill="#FFFFFF" `);
+		svg = svg.replace(/path /g, `path fill="${accentColor}" `);
 		const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
 		const image = await loadImage(dataUrl);
 
 		ctx.save();
-		ctx.globalAlpha = 0.08;
+		ctx.globalAlpha = 0.05;
 		(ctx as any).drawImage(image, x, y, size, size);
 		ctx.restore();
 
@@ -240,7 +240,7 @@ const drawTextPatternIconWatermark = async (
 		(offscreenContext as any).drawImage(image, padding, padding, size, size);
 
 		ctx.save();
-		ctx.globalAlpha = 0.55;
+		ctx.globalAlpha = 0.1;
 		(ctx as any).drawImage(offscreen, x - padding, y - padding, size + padding * 2, size + padding * 2);
 		ctx.restore();
 	} catch {
