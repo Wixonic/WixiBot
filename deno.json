@@ -11,9 +11,11 @@
 		"start": "deno run --allow-all src/main.ts",
 		"deploy": "deno run --allow-all src/deploy.ts",
 		"dev:start": "CLIENT=dev deno run --allow-all src/main.ts",
-		"dev:deploy": "CLIENT=dev deno run --allow-all src/deploy.ts"
+		"dev:deploy": "CLIENT=dev deno run --allow-all src/deploy.ts",
+		"test:richpicture": "deno run --allow-all src/scripts/testRichPicture.ts"
 	},
 	"imports": {
+		"@napi-rs/canvas": "npm:@napi-rs/canvas@^1.0.3",
 		"discord.js": "npm:discord.js@14.26.2",
 		"@lmstudio/sdk": "npm:@lmstudio/sdk@1.5.0",
 		"@google/genai": "npm:@google/genai@2.6.0",

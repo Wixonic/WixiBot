@@ -1,13 +1,14 @@
 import {
 	ApplicationIntegrationType,
+	AttachmentBuilder,
 	type ChatInputCommandInteraction,
 	InteractionContextType,
-	SlashCommandBuilder,
-	EmbedBuilder
+	SlashCommandBuilder
 } from "discord.js";
 
 import type { Command } from "../lib/client.ts";
 import { client } from "../lib/client.ts";
+import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 
 let leaderboardCache: { data: any[], expires: number } | null = null;
 
@@ -72,21 +73,20 @@ export const command = {
 } satisfies Command<ChatInputCommandInteraction>;
 
 async function sendLeaderboard(interaction: ChatInputCommandInteraction, top10: any[]) {
-	const embed = new EmbedBuilder()
-		.setTitle("Global Leaderboard (Top XP)")
-		.setColor(0xFFD700)
-		.setTimestamp();
+	const entries = top10.map((user, index) => ({
+		rank: index + 1,
+		username: user.username,
+		level: user.level,
+		xp: user.xp,
+		streak: user.streak
+	}));
 
-	if (top10.length === 0) {
-		embed.setDescription("No users found.");
-	} else {
-		const description = top10.map((user, index) => {
-			const prefix = `${index + 1}.`;
-			const streakText = user.streak >= 3 ? ` | Streak: ${user.streak}` : "";
-			return `${prefix} **${user.username}** - Level ${user.level} (${user.xp} XP)${streakText}`;
-		}).join("\n\n");
-		embed.setDescription(description);
-	}
+	const pictureBuffer = await generateRichPicture({
+		type: RichPictureType.Leaderboard,
+		data: { entries }
+	});
 
-	await interaction.followUp({ embeds: [embed] });
+	const attachment = new AttachmentBuilder(pictureBuffer, { name: "leaderboard.png" });
+
+	await interaction.followUp({ files: [attachment] });
 }

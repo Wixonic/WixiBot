@@ -1,4 +1,5 @@
 import {
+	AttachmentBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	ChannelType,
@@ -11,6 +12,7 @@ import {
 import { client, type Component } from "../lib/client.ts";
 import type { TicketData } from "../lib/guild.ts";
 import type { Logger } from "../lib/logger.ts";
+import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 
 type TicketMessageData = Pick<TicketData, "interactions" | "id" | "reason"> & Partial<Pick<TicketData, "interactions" | "date" | "state">>;
 
@@ -102,10 +104,31 @@ const ticketMessages = (interaction: MessageComponentInteraction, ticket: Ticket
 	];
 };
 
+const createTicketHeaderAttachment = async (interaction: MessageComponentInteraction, ticket: TicketMessageData) => {
+	const creatorUser = await interaction.client.users.fetch(ticket.interactions.createdBy).catch(() => null);
+	const claimedUser = ticket.interactions.claimedBy ? await interaction.client.users.fetch(ticket.interactions.claimedBy).catch(() => null) : null;
+
+	const buffer = await generateRichPicture({
+		type: RichPictureType.TicketHeader,
+		data: {
+			ticketId: ticket.id,
+			creatorUsername: creatorUser ? creatorUser.username : ticket.interactions.createdBy,
+			creatorAvatarUrl: creatorUser ? creatorUser.displayAvatarURL({ extension: "png", size: 256 }) : undefined,
+			reason: ticket.reason || "General support ticket",
+			state: ticket.state || "Waiting",
+			claimedByUsername: claimedUser ? claimedUser.username : undefined,
+			createdAtFormatted: new Date(ticket.date || Date.now()).toLocaleDateString()
+		}
+	});
+
+	return new AttachmentBuilder(buffer, { name: `ticket-${ticket.id}.png` });
+};
+
 const updateTicketMessages = async (logger: Logger, interaction: MessageComponentInteraction, ticket: TicketData, logChannelId: string): Promise<void> => {
 	if (!interaction.guild) return;
 
 	const [ticketMessageContent, channelMessageContent] = ticketMessages(interaction, ticket);
+	const attachment = await createTicketHeaderAttachment(interaction, ticket);
 
 	const ticketChannel = await interaction.guild.channels.fetch(ticket.channel).catch(() => null);
 	if (ticketChannel?.isTextBased()) {
@@ -113,6 +136,7 @@ const updateTicketMessages = async (logger: Logger, interaction: MessageComponen
 			const ticketMessage = await ticketChannel.messages.fetch(ticket.messages.channel).catch(() => null);
 			if (ticketMessage) {
 				await ticketMessage.edit({
+					files: [attachment],
 					components: [ticketMessageContent],
 					flags: MessageFlags.IsComponentsV2
 				});
@@ -202,16 +226,20 @@ export const component = {
 					]
 				});
 
-				const [ticketChannelMessageContent, channelMessageContent] = ticketMessages(interaction, {
+				const ticketData: TicketMessageData = {
 					id,
 					reason: interaction.values[0],
 					interactions: {
 						createdBy: interaction.user.id,
 						viewedBy: []
 					}
-				});
+				};
+
+				const [ticketChannelMessageContent, channelMessageContent] = ticketMessages(interaction, ticketData);
+				const attachment = await createTicketHeaderAttachment(interaction, ticketData);
 
 				const ticketChannelMessage = await ticketChannel.send({
+					files: [attachment],
 					components: [
 						ticketChannelMessageContent
 					],

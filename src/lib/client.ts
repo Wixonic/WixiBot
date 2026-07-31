@@ -40,6 +40,7 @@ export interface Modal {
 export interface Job {
 	cron: string;
 	name: string;
+	enabled?: boolean;
 	execute: (logger: Logger) => void | Promise<void>;
 };
 
@@ -334,6 +335,11 @@ export class Client extends EventEmitter {
 
 					if ("job" in module) {
 						const job: Job = module.job;
+
+						if (job.enabled === false) {
+							logger.debug(`Skipped disabled job ${job.name}.`);
+							continue;
+						}
 
 						if (this.#jobs.has(job.name)) {
 							logger.warn(`Skipped job ${job.name}: already active.`);

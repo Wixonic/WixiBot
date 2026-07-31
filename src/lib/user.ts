@@ -1,4 +1,4 @@
-import { EmbedBuilder, type Activity, type PresenceStatus, type Presence, type User as DiscordUser } from "discord.js";
+import { AttachmentBuilder, EmbedBuilder, type Activity, type PresenceStatus, type Presence, type User as DiscordUser } from "discord.js";
 import path from "node:path";
 
 import { client } from "./client.ts";
@@ -7,6 +7,7 @@ import type { Logger } from "./logger.ts";
 import { ai } from "./ai.ts";
 import { sendChunks } from "./utils.ts";
 import { checkNewAchievements, achievements } from "./progression.ts";
+import { generateRichPicture, RichPictureType } from "./richPicture.ts";
 
 export type Achievement = {
 	id: string;
@@ -255,40 +256,8 @@ export class User {
 		}
 	}
 
-	async sendReplay(targetMonth?: Date): Promise<boolean> {
-		this.#logger.debug("Replay generation requested...");
-
-		const stats = await this.getAggregatedStats(targetMonth);
-
-		if (stats.totalMessages > 0 || stats.totalStageEvents > 0 || stats.totalForumPosts > 0 || stats.totalReactions > 0 || (this.#data.streak && this.#data.streak > 0)) {
-			try {
-				const channel = await this.#discordUser.dmChannel?.fetch();
-				if (channel) {
-					const replayText = await ai.generateReplay(channel, this.id, {
-						messages: stats.totalMessages,
-						stageEvents: stats.totalStageEvents,
-						forumPosts: stats.totalForumPosts,
-						reactions: stats.totalReactions,
-						achievements: stats.achievements,
-						streak: this.#data.streak || 0,
-						bestStreak: this.#data.bestStreak || 0
-					});
-
-					const discordUser = await client.discord?.users.fetch(this.id);
-					if (discordUser) {
-						await sendChunks(`## Your Monthly Replay!\n\n${replayText}`, discordUser.send.bind(discordUser));
-						this.touch();
-						return true;
-					}
-				}
-
-				this.#logger.warn("Cannot send replay: DM channel not available.");
-				return false;
-			} catch (error) {
-				this.reportError("Failed to generate or send replay", error);
-			}
-		}
-
+	async sendReplay(_targetMonth?: Date): Promise<boolean> {
+		this.#logger.debug("Replay generation disabled.");
 		this.touch();
 		return false;
 	}
@@ -444,30 +413,40 @@ export class User {
 					const botChannel = await discordGuild?.channels.fetch(botChannelId);
 
 					if (botChannel && botChannel.isTextBased()) {
-						const embeds = [];
+						const files = [];
 
 						if (newLevel > oldLevel) {
-							embeds.push(new EmbedBuilder()
-								.setTitle("Level Up!")
-								.setDescription(`<@${this.id}> just reached level **${newLevel}**!`)
-								.setColor(0x5865F2)
-							);
+							const levelUpBuffer = await generateRichPicture({
+								type: RichPictureType.LevelUp,
+								data: {
+									username: this.username,
+									avatarUrl: this.#discordUser.displayAvatarURL({ extension: "png", size: 256 }),
+									oldLevel,
+									newLevel
+								}
+							});
+							files.push(new AttachmentBuilder(levelUpBuffer, { name: "levelup.png" }));
 						}
 
 						if (unlockedAchievementIds.length > 0) {
-							const achievementsText = unlockedAchievementIds.map((id) => {
-								const achievement = achievements.find((achievement) => achievement.id === id);
-								return `**${achievement?.name}** : ${achievement?.description}`;
-							}).join("\n");
-
-							embeds.push(new EmbedBuilder()
-								.setTitle("Achievement Unlocked!")
-								.setDescription(`<@${this.id}> unlocked:\n\n${achievementsText}`)
-								.setColor(0xFFD700)
-							);
+							for (const id of unlockedAchievementIds) {
+								const achievement = achievements.find((a) => a.id === id);
+								if (achievement) {
+									const achievementBuffer = await generateRichPicture({
+										type: RichPictureType.Achievement,
+										data: {
+											username: this.username,
+											avatarUrl: this.#discordUser.displayAvatarURL({ extension: "png", size: 256 }),
+											achievementName: achievement.name,
+											achievementDescription: achievement.description
+										}
+									});
+									files.push(new AttachmentBuilder(achievementBuffer, { name: `achievement-${id}.png` }));
+								}
+							}
 						}
 
-						if (embeds.length > 0) await botChannel.send({ embeds });
+						if (files.length > 0) await botChannel.send({ files });
 					}
 				}
 			} catch (error) {

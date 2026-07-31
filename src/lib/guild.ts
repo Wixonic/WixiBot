@@ -2,6 +2,7 @@ import type { APIInteractionGuildMember, Guild as DiscordGuild, GuildMember, Mes
 import path from "node:path";
 
 import {
+	AttachmentBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	ChannelType,
@@ -14,6 +15,7 @@ import { client } from "./client.ts";
 import type { DynamicSettingsSchema } from "./dynamicSettings.ts";
 import type { Logger } from "./logger.ts";
 import { sendChunks } from "./utils.ts";
+import { generateRichPicture, RichPictureType } from "./richPicture.ts";
 
 export type TicketState = "Waiting" | "Claimed" | "Resolved" | "Closed";
 
@@ -326,15 +328,17 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		if (this.settings.moderation.warnings) {
 			const channel = await this.#discordGuild.channels.fetch(this.settings.moderation.warnings);
 			if (channel && channel.isTextBased()) {
-				await channel.send({
-					components: [
-						new ContainerBuilder()
-							.addTextDisplayComponents((component) => component
-								.setContent(`User <@${target.id}> has been warned${by ? ` by <@${by.user.id}>` : ""}.\nReason: ${reason}`)
-							)
-					],
-					flags: MessageFlags.IsComponentsV2
+				const buffer = await generateRichPicture({
+					type: RichPictureType.Warn,
+					data: {
+						targetUsername: target.user.username,
+						targetAvatarUrl: target.user.displayAvatarURL({ extension: "png", size: 256 }),
+						moderatorUsername: by ? ("user" in by ? by.user.username : undefined) : undefined,
+						reason
+					}
 				});
+				const attachment = new AttachmentBuilder(buffer, { name: "warn.png" });
+				await channel.send({ files: [attachment] });
 			} else this.reportError("Configured warnings channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.warnings}`));
 		} else this.#notifyOwnerFallback(`A user was warned in your server **${this.name}**:\n${`User <@${target.id}> has been warned${by ? ` by <@${by.user.id}>` : ""}.\nReason: ${reason}`}`, "warnings");
 	}
@@ -362,14 +366,23 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		if (this.settings.moderation.reports) {
 			const channel = await this.#discordGuild.channels.fetch(this.settings.moderation.reports);
 			if (channel && channel.isTextBased()) {
+				const buffer = await generateRichPicture({
+					type: RichPictureType.ReportMessage,
+					data: {
+						targetUsername: message.author.username,
+						targetAvatarUrl: message.author.displayAvatarURL({ extension: "png", size: 256 }),
+						reporterUsername: by ? ("user" in by ? by.user.username : undefined) : undefined,
+						reportType: "Message",
+						reason: reason || "No reason provided",
+						contentSnippet: message.content
+					}
+				});
+				const attachment = new AttachmentBuilder(buffer, { name: "report_message.png" });
+
 				await channel.send({
+					files: [attachment],
 					components: [
 						new ContainerBuilder()
-							.addTextDisplayComponents((component) => component
-								.setContent(`# Message report${by ? ` by <@${by.user.id}>` : ""}
-Target: https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id} by <@${message.author.id}>
-Reason: ${reason || "No reason provided"}`)
-							)
 							.addActionRowComponents((component) => component
 								.addComponents([
 									new ButtonBuilder()
@@ -432,14 +445,22 @@ Reason: ${reason || "No reason provided"}`, "reports");
 		if (this.settings.moderation.reports) {
 			const channel = await this.#discordGuild.channels.fetch(this.settings.moderation.reports);
 			if (channel && channel.isTextBased()) {
+				const buffer = await generateRichPicture({
+					type: RichPictureType.ReportUser,
+					data: {
+						targetUsername: discordMember.user.username,
+						targetAvatarUrl: discordMember.user.displayAvatarURL({ extension: "png", size: 256 }),
+						reporterUsername: by ? ("user" in by ? by.user.username : undefined) : undefined,
+						reportType: "User",
+						reason: reason || "No reason provided"
+					}
+				});
+				const attachment = new AttachmentBuilder(buffer, { name: "report_user.png" });
+
 				await channel.send({
+					files: [attachment],
 					components: [
 						new ContainerBuilder()
-							.addTextDisplayComponents((component) => component
-								.setContent(`# User report${by ? ` by <@${by.user.id}>` : ""}
-- Target: <@${discordMember.id}>
-- Reason: ${reason || "No reason provided"}`)
-							)
 							.addActionRowComponents((component) => component
 								.addComponents([
 									new ButtonBuilder()
@@ -504,8 +525,21 @@ ${error instanceof Error ? error.stack : String(error)}
 
 		if (channel && channel.isTextBased()) {
 			try {
-				if (type === "boost") await channel.send(`<@${userId}> just boosted the server! Thank you for the support!`);
-				else if (type === "supporter") await channel.send(`<@${userId}> is now a server supporter, which means they paid more than you!\nThank you so much for the support! It really means a lot and keeps me turned on!`);
+				const discordMember = await this.#discordGuild.members.fetch(userId).catch(() => null);
+				const username = discordMember ? discordMember.user.username : userId;
+				const avatarUrl = discordMember ? discordMember.user.displayAvatarURL({ extension: "png", size: 256 }) : undefined;
+
+				const buffer = await generateRichPicture({
+					type: type === "boost" ? RichPictureType.Boost : RichPictureType.Supporter,
+					data: {
+						username,
+						avatarUrl,
+						type: type === "boost" ? "Boost" : "Supporter"
+					}
+				});
+				const attachment = new AttachmentBuilder(buffer, { name: `${type}.png` });
+
+				await channel.send({ content: `<@${userId}>`, files: [attachment] });
 				return true;
 			} catch (error) {
 				this.reportError(`Failed to send announcement for ${userId}`, error);

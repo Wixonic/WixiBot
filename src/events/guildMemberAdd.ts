@@ -1,8 +1,9 @@
-import { Events, type GuildMember } from "discord.js";
+import { AttachmentBuilder, Events, type GuildMember } from "discord.js";
 
 import { client } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
 import { getSettings } from "../lib/settings.ts";
+import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 
 export const event = {
 	type: Events.GuildMemberAdd,
@@ -37,7 +38,17 @@ export const event = {
 			const channel = await discordMember.guild.channels.fetch(guild.settings.channels.welcome);
 			if (channel && channel.isTextBased()) {
 				try {
-					await channel.send(`<@${discordMember.id}> joined the server.`);
+					const buffer = await generateRichPicture({
+						type: RichPictureType.WelcomeMember,
+						data: {
+							username: discordMember.user.username,
+							avatarUrl: discordMember.user.displayAvatarURL({ extension: "png", size: 256 }),
+							serverName: discordMember.guild.name,
+							memberCount: discordMember.guild.memberCount
+						}
+					});
+					const attachment = new AttachmentBuilder(buffer, { name: "welcome.png" });
+					await channel.send({ content: `<@${discordMember.id}>`, files: [attachment] });
 				} catch (error) {
 					logger.error(`Failed to send welcome message to ${discordMember.guild.id}`, { cause: error });
 				}
