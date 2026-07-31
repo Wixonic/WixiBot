@@ -1,8 +1,8 @@
 import { createCanvas, GlobalFonts, loadImage, type CanvasRenderingContext2D } from "@napi-rs/canvas";
 
 try {
-	GlobalFonts.registerFromPath("/Users/wix/Documents/GitHub/Website/websites/assets/raw/font/OpenSans/regular.woff2", "OpenSans");
-	GlobalFonts.registerFromPath("/Users/wix/Documents/GitHub/Website/websites/assets/raw/font/RamettoOne/regular.woff2", "RamettoOne");
+	GlobalFonts.registerFromPath("./src/assets/fonts/OpenSans.woff2", "OpenSans");
+	GlobalFonts.registerFromPath("./src/assets/fonts/RamettoOne.woff2", "RamettoOne");
 } catch {
 	// Fallback to system fonts
 }
