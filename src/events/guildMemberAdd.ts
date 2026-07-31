@@ -42,7 +42,7 @@ export const event = {
 						type: RichPictureType.WelcomeMember,
 						data: {
 							username: discordMember.displayName,
-							avatarUrl: discordMember.user.displayAvatarURL({ extension: "png", size: 256 }),
+							avatarUrl: discordMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
 							serverName: discordMember.guild.name,
 							memberCount: discordMember.guild.memberCount
 						}

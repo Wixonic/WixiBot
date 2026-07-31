@@ -58,7 +58,7 @@ export const command = {
 			type: RichPictureType.Profile,
 			data: {
 				username: displayName,
-				avatarUrl: targetUser.displayAvatarURL({ extension: "png", size: 256 }),
+				avatarUrl: targetUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
 				level,
 				xp: stats.totalXp,
 				streak: user.data.streak,

@@ -39,6 +39,10 @@ const ticketMessages = (interaction: MessageComponentInteraction, ticket: Ticket
 		channelMessageContent.setAccentColor(0xFF0000);
 	}
 
+	ticketChannelMessageContent.addMediaGalleryComponents((gallery) => gallery
+		.addItems((item) => item.setURL(`attachment://ticket-${ticket.id}.png`))
+	);
+
 	ticketChannelMessageContent.addTextDisplayComponents((component) => component
 		.setContent(`# Ticket\n\n${reasons[ticket.reason ?? ""] ?? `<@${ticket.interactions.createdBy}> opened a support ticket.`}`)
 	);
@@ -118,7 +122,7 @@ const createTicketHeaderAttachment = async (interaction: MessageComponentInterac
 		data: {
 			ticketId: ticket.id,
 			creatorUsername: creatorDisplayName,
-			creatorAvatarUrl: creatorUser ? creatorUser.displayAvatarURL({ extension: "png", size: 256 }) : undefined,
+			creatorAvatarUrl: creatorUser ? creatorUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }) : undefined,
 			reason: ticket.reason || "General support ticket",
 			state: ticket.state || "Waiting",
 			claimedByUsername: claimedDisplayName,
@@ -142,7 +146,8 @@ const updateTicketMessages = async (logger: Logger, interaction: MessageComponen
 			if (ticketMessage) {
 				await ticketMessage.edit({
 					files: [attachment],
-					components: [ticketMessageContent]
+					components: [ticketMessageContent],
+					flags: MessageFlags.IsComponentsV2
 				});
 			}
 		} catch (error) {
@@ -158,7 +163,8 @@ const updateTicketMessages = async (logger: Logger, interaction: MessageComponen
 			const logMessage = await logChannel.messages.fetch(ticket.messages.guild).catch(() => null);
 			if (logMessage) {
 				await logMessage.edit({
-					components: [channelMessageContent]
+					components: [channelMessageContent],
+					flags: MessageFlags.IsComponentsV2
 				});
 			}
 		} catch (error) {
@@ -245,7 +251,8 @@ export const component = {
 					files: [attachment],
 					components: [
 						ticketChannelMessageContent
-					]
+					],
+					flags: MessageFlags.IsComponentsV2
 				});
 
 				const channelMessage = await channel.send({

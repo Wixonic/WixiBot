@@ -75,13 +75,28 @@ export const command = {
 async function sendLeaderboard(interaction: ChatInputCommandInteraction, top10: any[]) {
 	const entries = await Promise.all(top10.map(async (user, index) => {
 		let displayName = user.username;
+		let avatarUrl: string | undefined = undefined;
+
 		if (interaction.guild) {
 			const member = await interaction.guild.members.fetch(user.id).catch(() => null);
-			if (member) displayName = member.displayName;
+			if (member) {
+				displayName = member.displayName;
+				avatarUrl = member.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true });
+			}
 		}
+
+		if (!avatarUrl) {
+			const discordUser = await client.discord?.users.fetch(user.id).catch(() => null);
+			if (discordUser) {
+				avatarUrl = discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true });
+				if (displayName === user.username) displayName = discordUser.globalName ?? discordUser.username;
+			}
+		}
+
 		return {
 			rank: index + 1,
 			username: displayName,
+			avatarUrl,
 			level: user.level,
 			xp: user.xp,
 			streak: user.streak

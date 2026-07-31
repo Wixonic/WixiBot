@@ -332,7 +332,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 					type: RichPictureType.Warn,
 					data: {
 						targetUsername: target.displayName,
-						targetAvatarUrl: target.user.displayAvatarURL({ extension: "png", size: 256 }),
+						targetAvatarUrl: target.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
 						moderatorUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reason
 					}
@@ -371,7 +371,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 					type: RichPictureType.ReportMessage,
 					data: {
 						targetUsername: authorDisplayName,
-						targetAvatarUrl: message.author.displayAvatarURL({ extension: "png", size: 256 }),
+						targetAvatarUrl: message.author.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
 						reporterUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reportType: "Message",
 						reason: reason || "No reason provided",
@@ -384,6 +384,9 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 					files: [attachment],
 					components: [
 						new ContainerBuilder()
+							.addMediaGalleryComponents((gallery) => gallery
+								.addItems((item) => item.setURL("attachment://report_message.png"))
+							)
 							.addActionRowComponents((component) => component
 								.addComponents([
 									new ButtonBuilder()
@@ -450,7 +453,7 @@ Reason: ${reason || "No reason provided"}`, "reports");
 					type: RichPictureType.ReportUser,
 					data: {
 						targetUsername: discordMember.displayName,
-						targetAvatarUrl: discordMember.user.displayAvatarURL({ extension: "png", size: 256 }),
+						targetAvatarUrl: discordMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
 						reporterUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reportType: "User",
 						reason: reason || "No reason provided"
@@ -462,6 +465,9 @@ Reason: ${reason || "No reason provided"}`, "reports");
 					files: [attachment],
 					components: [
 						new ContainerBuilder()
+							.addMediaGalleryComponents((gallery) => gallery
+								.addItems((item) => item.setURL("attachment://report_user.png"))
+							)
 							.addActionRowComponents((component) => component
 								.addComponents([
 									new ButtonBuilder()

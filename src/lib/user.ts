@@ -434,7 +434,7 @@ export class User {
 								type: RichPictureType.LevelUp,
 								data: {
 									username: displayName,
-									avatarUrl: this.#discordUser.displayAvatarURL({ extension: "png", size: 256 }),
+									avatarUrl: this.#discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
 									oldLevel,
 									newLevel
 								}
@@ -450,7 +450,7 @@ export class User {
 										type: RichPictureType.Achievement,
 										data: {
 											username: displayName,
-											avatarUrl: this.#discordUser.displayAvatarURL({ extension: "png", size: 256 }),
+											avatarUrl: this.#discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
 											achievementName: achievement.name,
 											achievementDescription: achievement.description
 										}
