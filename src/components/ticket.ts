@@ -14,9 +14,9 @@ import type { TicketData } from "../lib/guild.ts";
 import type { Logger } from "../lib/logger.ts";
 import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 
-type TicketMessageData = Pick<TicketData, "interactions" | "id" | "reason"> & Partial<Pick<TicketData, "interactions" | "date" | "state">>;
+export type TicketMessageData = Pick<TicketData, "interactions" | "id" | "reason"> & Partial<Pick<TicketData, "interactions" | "date" | "state">>;
 
-const ticketMessages = (interaction: MessageComponentInteraction, ticket: TicketMessageData) => {
+export const ticketMessages = (interaction: MessageComponentInteraction, ticket: TicketMessageData) => {
 	const reasons: Record<string, string> = {
 		"server": `<@${ticket.interactions.createdBy}> has an issue on the server.`,
 		"discord": `<@${ticket.interactions.createdBy}> has an issue on Discord in general.`,
@@ -108,7 +108,7 @@ const ticketMessages = (interaction: MessageComponentInteraction, ticket: Ticket
 	];
 };
 
-const createTicketHeaderAttachment = async (interaction: MessageComponentInteraction, ticket: TicketMessageData) => {
+export const createTicketHeaderAttachment = async (interaction: MessageComponentInteraction, ticket: TicketMessageData) => {
 	const creatorMember = interaction.guild ? await interaction.guild.members.fetch(ticket.interactions.createdBy).catch(() => null) : null;
 	const creatorUser = creatorMember?.user ?? (await interaction.client.users.fetch(ticket.interactions.createdBy).catch(() => null));
 	const creatorDisplayName = creatorMember?.displayName ?? creatorUser?.globalName ?? creatorUser?.username ?? ticket.interactions.createdBy;
@@ -383,6 +383,14 @@ export const component = {
 					return;
 				}
 
+				const isCreator = interaction.user.id === ticket.interactions.createdBy;
+				const isModerator = Boolean(interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers) || interaction.memberPermissions?.has(PermissionFlagsBits.Administrator));
+
+				if (!isCreator && !isModerator) {
+					await interaction.editReply("You do not have permission to close this ticket.");
+					return;
+				}
+
 				ticket.interactions.closedBy = interaction.user.id;
 				ticket.state = "Closed";
 				await guild.saveTicket(ticket);
@@ -416,6 +424,14 @@ export const component = {
 					await interaction.editReply({
 						content: "Ticket not found."
 					});
+					return;
+				}
+
+				const isCreatorResolve = interaction.user.id === ticket.interactions.createdBy;
+				const isModeratorResolve = Boolean(interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers) || interaction.memberPermissions?.has(PermissionFlagsBits.Administrator));
+
+				if (!isCreatorResolve && !isModeratorResolve) {
+					await interaction.editReply("You do not have permission to resolve this ticket.");
 					return;
 				}
 

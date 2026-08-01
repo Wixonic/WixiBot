@@ -72,6 +72,17 @@ export const command = {
 				}
 
 				await guild.warn(member, interaction.member, interaction.options.getString("reason") || "No reason provided");
+				await interaction.editReply({ content: `User <@${member.id}> has been warned.` });
+				break;
+			}
+
+			case "info": {
+				const providedUser = interaction.options.getUser("user", true);
+				const history = await guild.getModerationHistory(providedUser.id);
+
+				const warningsList = history.warnings.length > 0 ? history.warnings.map((warn) => `- <t:${Math.floor(new Date(warn.date).getTime() / 1000)}:R>: **${warn.reason}**${warn.by ? ` (by <@${warn.by}>)` : ""}`).join("\n") : "No warnings recorded.";
+				const reportsList = history.reports.length > 0 ? history.reports.map((report) => `- <t:${Math.floor(new Date(report.date).getTime() / 1000)}:R> [${report.type}]: **${report.reason || "No reason"}**${report.by ? ` (by <@${report.by}>)` : ""}`).join("\n") : "No reports recorded.";
+				await interaction.editReply(`## Moderation History for <@${providedUser.id}>\n\n### Warnings (${history.warnings.length}):\n${warningsList}\n\n### Reports (${history.reports.length}):\n${reportsList}`);
 				break;
 			}
 

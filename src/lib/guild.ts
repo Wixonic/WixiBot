@@ -313,15 +313,16 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		}
 	}
 
-	async createTicket(ticketId: string, channel: string, createdBy: string, messages: { channel: string; guild: string }, reason?: string): Promise<TicketData> {
+	async createTicket(ticketId: string, channel: string, createdBy: string, messages: { channel: string; guild: string }, reason?: string, state: TicketState = "Waiting", claimedBy?: string): Promise<TicketData> {
 		const ticketData: TicketData = {
 			id: ticketId,
 			date: new Date().toISOString(),
 			reason,
-			state: "Waiting",
+			state,
 			channel,
 			interactions: {
 				createdBy,
+				claimedBy,
 				viewedBy: []
 			},
 			messages
@@ -373,7 +374,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 					}
 				});
 				const attachment = new AttachmentBuilder(buffer, { name: "warn.png" });
-				await channel.send({ content: `<@${target.id}>, you received a warning!`, files: [attachment] });
+				await channel.send({ files: [attachment] });
 			} else this.reportError("Configured warnings channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.warnings}`));
 		} else this.#notifyOwnerFallback(`A user was warned in your server **${this.name}**:\n${`User <@${target.id}> has been warned${by ? ` by <@${by.user.id}>` : ""}.\nReason: ${reason}`}`, "warnings");
 	}
@@ -415,17 +416,17 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 				});
 				const attachment = new AttachmentBuilder(buffer, { name: "report_message.png" });
 
+				await channel.send({ files: [attachment] });
+
+				await message.forward(channel).catch(() => channel.send("> *Failed to forward the original message (likely due to NSFW restrictions).*\n> *Please use the target link above to view the message if it hasn't been deleted.*").catch(() => { }));
+
 				await channel.send({
-					files: [attachment],
 					components: [
 						new ContainerBuilder()
-							.addMediaGalleryComponents((gallery) => gallery
-								.addItems((item) => item.setURL("attachment://report_message.png"))
-							)
 							.addActionRowComponents((component) => component
 								.addComponents([
 									new ButtonBuilder()
-										.setCustomId(`report:message:reply:${message.id}`)
+										.setCustomId(`report:message:reply:${message.author.id}:${message.id}`)
 										.setLabel("Reply")
 										.setStyle(ButtonStyle.Primary),
 									new ButtonBuilder()
@@ -440,25 +441,21 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 							.addActionRowComponents((component) => component
 								.addComponents([
 									new ButtonBuilder()
-										.setCustomId(`report:message:delete:${message.id}`)
+										.setCustomId(`report:message:delete:${message.channelId}:${message.id}`)
 										.setLabel("Delete message")
 										.setStyle(ButtonStyle.Danger),
 									new ButtonBuilder()
-										.setCustomId(`report:message:warn:${message.id}`)
+										.setCustomId(`report:message:warn:${message.author.id}:${message.id}`)
 										.setLabel("Warn user")
 										.setStyle(ButtonStyle.Danger),
 									new ButtonBuilder()
-										.setCustomId(`report:message:ban:${message.id}`)
+										.setCustomId(`report:message:ban:${message.author.id}:${message.id}`)
 										.setLabel("Ban user")
 										.setStyle(ButtonStyle.Danger)
 								])
 							)
 					],
 					flags: MessageFlags.IsComponentsV2
-				});
-
-				await message.forward(channel).catch(() => {
-					channel.send({ content: "> *Failed to forward the original message (likely due to NSFW restrictions).*\\n> *Please use the target link above to view the message if it hasn't been deleted.*" }).catch(() => {});
 				});
 			} else this.reportError("Configured reports channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.reports}`));
 		} else this.#notifyOwnerFallback(`A message was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
@@ -496,13 +493,11 @@ Reason: ${reason || "No reason provided"}`, "reports");
 				});
 				const attachment = new AttachmentBuilder(buffer, { name: "report_user.png" });
 
+				await channel.send({ files: [attachment] });
+
 				await channel.send({
-					files: [attachment],
 					components: [
 						new ContainerBuilder()
-							.addMediaGalleryComponents((gallery) => gallery
-								.addItems((item) => item.setURL("attachment://report_user.png"))
-							)
 							.addActionRowComponents((component) => component
 								.addComponents([
 									new ButtonBuilder()
@@ -537,6 +532,40 @@ Reason: ${reason || "No reason provided"}`, "reports");
 		} else this.#notifyOwnerFallback(`A user was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
 - Target: <@${discordMember.id}>
 - Reason: ${reason || "No reason provided"}`, "reports");
+	}
+
+	async getModerationHistory(targetId: string) {
+		const warnings: { date: string; reason: string; by: string | null }[] = [];
+		const reports: ReportData[] = [];
+
+		const warningsDir = path.join(this.#storagePath, "moderation", targetId, "warnings");
+		try {
+			for await (const entry of Deno.readDir(warningsDir)) {
+				if (entry.isFile && entry.name.endsWith(".json")) {
+					const content = await Deno.readTextFile(path.join(warningsDir, entry.name));
+					warnings.push(JSON.parse(content));
+				}
+			}
+		} catch (_error) {
+			// No warnings
+		}
+
+		const reportsDir = path.join(this.#storagePath, "moderation", targetId, "reports");
+		try {
+			for await (const entry of Deno.readDir(reportsDir)) {
+				if (entry.isFile && entry.name.endsWith(".json")) {
+					const content = await Deno.readTextFile(path.join(reportsDir, entry.name));
+					reports.push(JSON.parse(content));
+				}
+			}
+		} catch (_error) {
+			// No reports
+		}
+
+		warnings.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+		reports.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+		return { warnings, reports };
 	}
 
 	reportError(message: string, error: unknown) {
