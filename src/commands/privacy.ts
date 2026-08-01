@@ -45,7 +45,7 @@ However, **some data are always collected**, and can be logged in our systems.`)
 						.addComponents([
 							new ButtonBuilder()
 								.setLabel("Privacy Policy")
-								.setURL("https://discord.wixonic.fr/privacy/")
+								.setURL("https://wixonic.fr/privacy/")
 								.setStyle(ButtonStyle.Link)
 						])
 					)
