@@ -73,6 +73,7 @@ export interface GuildSettings {
 	};
 	roles?: {
 		birthday?: string;
+		active?: string;
 	};
 	moderation: {
 		reports?: string;
@@ -144,6 +145,13 @@ export const guildSettingsSchema: DynamicSettingsSchema = {
 					name: "Birthday role",
 					type: "role",
 					description: "The role automatically assigned to members on their birthday for 24 hours.",
+					default: null
+				},
+				active: {
+					key: "active",
+					name: "Active Member role",
+					type: "role",
+					description: "The role automatically assigned to active members based on recent 28-day activity.",
 					default: null
 				}
 			}

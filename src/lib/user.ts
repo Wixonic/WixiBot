@@ -63,6 +63,12 @@ export interface UserData {
 		day: number;
 		month: number;
 	};
+	stats?: {
+		totalMessages: number;
+		totalStageEvents: number;
+		totalForumPosts: number;
+		totalReactions: number;
+	};
 };
 
 export const userSettingsSchema: DynamicSettingsSchema = {
@@ -253,14 +259,57 @@ export class User {
 	async recordActivity() {
 		if (this.#currentActivity.changed && this.settings.activity.record) {
 			this.#logger.debug(`Saving activity to disk for ${this.username}...`);
-			await Deno.mkdir(path.join(this.#storagePath, "activity"), {
-				recursive: true
-			});
-			const unixTime = Math.floor(Date.now() / 1000);
-			await Deno.writeTextFile(path.join(this.#storagePath, "activity", `${unixTime}.json`), JSON.stringify({
-				...this.#currentActivity,
-				date: unixTime
-			}));
+			const activityDir = path.join(this.#storagePath, "activity");
+			await Deno.mkdir(activityDir, { recursive: true });
+
+			const now = new Date();
+			const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+			const monthFilePath = path.join(activityDir, `${yearMonth}.json`);
+
+			let monthData: any = { yearMonth, guilds: {} };
+			try {
+				const existingContent = await Deno.readTextFile(monthFilePath);
+				monthData = JSON.parse(existingContent);
+			} catch (error) {
+				if (!(error instanceof Deno.errors.NotFound)) this.#logger.error("Failed to read monthly activity file", { cause: error });
+			}
+
+			this.#data.stats ??= { totalMessages: 0, totalStageEvents: 0, totalForumPosts: 0, totalReactions: 0 };
+
+			for (const guildId in this.#currentActivity.guilds) {
+				const currentGuild = this.#currentActivity.guilds[guildId];
+				monthData.guilds[guildId] ??= { achievements: [], messages: { sent: 0, mentions: 0, reactions: { added: 0, received: 0 } }, stageEvents: { attended: 0 }, forum: { posts: 0 } };
+				const targetGuild = monthData.guilds[guildId];
+
+				const sent = currentGuild.messages?.sent || 0;
+				const mentions = currentGuild.messages?.mentions || 0;
+				const added = currentGuild.messages?.reactions?.added || 0;
+				const received = currentGuild.messages?.reactions?.received || 0;
+				const posts = currentGuild.forum?.posts || 0;
+				const attended = currentGuild.stageEvents?.attended || 0;
+
+				targetGuild.messages.sent += sent;
+				targetGuild.messages.mentions += mentions;
+				targetGuild.messages.reactions.added += added;
+				targetGuild.messages.reactions.received += received;
+				targetGuild.forum.posts += posts;
+				targetGuild.stageEvents.attended += attended;
+
+				this.#data.stats.totalMessages += sent;
+				this.#data.stats.totalForumPosts += posts;
+				this.#data.stats.totalStageEvents += attended;
+				this.#data.stats.totalReactions += (added + received);
+
+				if (currentGuild.achievements) {
+					targetGuild.achievements ??= [];
+					targetGuild.achievements.push(...currentGuild.achievements);
+				}
+			}
+
+			const tmpMonthPath = `${monthFilePath}.tmp`;
+			await Deno.writeTextFile(tmpMonthPath, JSON.stringify(monthData));
+			await Deno.rename(tmpMonthPath, monthFilePath);
+			await this.saveData();
 
 			this.#currentActivity = {
 				activity: this.#currentActivity.activity,
@@ -279,6 +328,48 @@ export class User {
 		return false;
 	}
 
+	async getRecentStats(days = 28) {
+		let totalMessages = 0;
+		let totalStageEvents = 0;
+		let totalForumPosts = 0;
+		let totalReactions = 0;
+
+		const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+
+		try {
+			const activityPath = path.join(this.#storagePath, "activity");
+			for await (const dirEntry of Deno.readDir(activityPath)) {
+				if (dirEntry.isFile && dirEntry.name.endsWith(".json")) {
+					const content = await Deno.readTextFile(path.join(activityPath, dirEntry.name));
+					const activity: any = JSON.parse(content);
+
+					const timestamp = typeof activity.date === "number" && activity.date < 3000000000 ? activity.date * 1000 : Number(activity.date) || 0;
+					if (!activity.date || timestamp >= cutoff || dirEntry.name.length === 7) {
+						for (const guildId in activity.guilds) {
+							const guildData = activity.guilds[guildId];
+							totalMessages += guildData.messages?.sent || 0;
+							totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
+							totalForumPosts += guildData.forum?.posts || 0;
+							totalStageEvents += guildData.stageEvents?.attended || 0;
+						}
+					}
+				}
+			}
+		} catch (error) {
+			if (!(error instanceof Deno.errors.NotFound)) this.#logger.error("Failed to read recent activity", { cause: error });
+		}
+
+		for (const guildId in this.#currentActivity.guilds) {
+			const guildData = this.#currentActivity.guilds[guildId];
+			totalMessages += guildData.messages?.sent || 0;
+			totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
+			totalForumPosts += guildData.forum?.posts || 0;
+			totalStageEvents += guildData.stageEvents?.attended || 0;
+		}
+
+		return { totalMessages, totalStageEvents, totalForumPosts, totalReactions };
+	}
+
 	async getAggregatedStats(targetMonth?: Date) {
 		let totalMessages = 0;
 		let totalStageEvents = 0;
@@ -293,11 +384,9 @@ export class User {
 					const content = await Deno.readTextFile(path.join(activityPath, dirEntry.name));
 					const activity: UserActivity = JSON.parse(content);
 
-					// Handle both milliseconds (old format) and seconds (new format)
 					const timestamp = typeof activity.date === "number" && activity.date < 2000000000000 && activity.date < 3000000000 ? activity.date * 1000 : activity.date;
 					const activityDate = new Date(timestamp);
 
-					// Filter by month if requested
 					if (targetMonth && (activityDate.getMonth() !== targetMonth.getMonth() || activityDate.getFullYear() !== targetMonth.getFullYear())) continue;
 
 					for (const guildId in activity.guilds) {
@@ -320,7 +409,6 @@ export class User {
 			}
 		}
 
-		// Also add the current activity if we are not filtering by an old month
 		if (!targetMonth || (targetMonth.getMonth() === new Date().getMonth() && targetMonth.getFullYear() === new Date().getFullYear())) {
 			for (const guildId in this.#currentActivity.guilds) {
 				const guildData = this.#currentActivity.guilds[guildId];
@@ -339,6 +427,26 @@ export class User {
 	}
 
 	async getTotalStats() {
+		if (this.#data.stats) {
+			let totalMessages = this.#data.stats.totalMessages || 0;
+			let totalStageEvents = this.#data.stats.totalStageEvents || 0;
+			let totalForumPosts = this.#data.stats.totalForumPosts || 0;
+			let totalReactions = this.#data.stats.totalReactions || 0;
+
+			for (const guildId in this.#currentActivity.guilds) {
+				const g = this.#currentActivity.guilds[guildId];
+				totalMessages += g.messages?.sent || 0;
+				totalStageEvents += g.stageEvents?.attended || 0;
+				totalForumPosts += g.forum?.posts || 0;
+				totalReactions += (g.messages?.reactions?.added || 0) + (g.messages?.reactions?.received || 0);
+			}
+
+			let totalXp = (totalMessages * 10) + (totalStageEvents * 2500) + (totalForumPosts * 250) + (totalReactions * 1);
+			if (this.#data.bonusXp) totalXp += this.#data.bonusXp;
+
+			return { totalMessages, totalStageEvents, totalForumPosts, totalReactions, totalXp, achievements: [] };
+		}
+
 		if (!this.#statsCache || Date.now() - this.#statsCache.lastUpdate > 60000) {
 			const stats = await this.getAggregatedStats();
 
@@ -357,7 +465,6 @@ export class User {
 
 	async getLevel() {
 		const stats = await this.getTotalStats();
-		// Dynamic level formula
 		return Math.floor(Math.sqrt(stats.totalXp / 50));
 	}
 
@@ -482,27 +589,25 @@ export class User {
 
 	async saveSettings() {
 		try {
-			await Deno.mkdir(this.#storagePath, {
-				recursive: true
-			});
-			await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings, null, "\t"));
+			await Deno.mkdir(this.#storagePath, { recursive: true });
+			const tmpPath = path.join(this.#storagePath, "settings.json.tmp");
+			const targetPath = path.join(this.#storagePath, "settings.json");
+			await Deno.writeTextFile(tmpPath, JSON.stringify(this.#settings, null, "\t"));
+			await Deno.rename(tmpPath, targetPath);
 		} catch (error) {
-			this.#logger.error("Failed to save user settings", {
-				cause: error
-			});
+			this.#logger.error("Failed to save user settings", { cause: error });
 		}
 	}
 
 	async saveData() {
 		try {
-			await Deno.mkdir(this.#storagePath, {
-				recursive: true
-			});
-			await Deno.writeTextFile(path.join(this.#storagePath, "data.json"), JSON.stringify(this.#data, null, "\t"));
+			await Deno.mkdir(this.#storagePath, { recursive: true });
+			const tmpPath = path.join(this.#storagePath, "data.json.tmp");
+			const targetPath = path.join(this.#storagePath, "data.json");
+			await Deno.writeTextFile(tmpPath, JSON.stringify(this.#data, null, "\t"));
+			await Deno.rename(tmpPath, targetPath);
 		} catch (error) {
-			this.#logger.error("Failed to save user data", {
-				cause: error
-			});
+			this.#logger.error("Failed to save user data", { cause: error });
 		}
 	}
 

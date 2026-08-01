@@ -12,7 +12,8 @@
 		"deploy": "deno run --allow-all src/deploy.ts",
 		"dev:start": "CLIENT=dev deno run --allow-all src/main.ts",
 		"dev:deploy": "CLIENT=dev deno run --allow-all src/deploy.ts",
-		"test:richpicture": "deno run --allow-all src/scripts/testRichPicture.ts"
+		"test:richpicture": "deno run --allow-all src/scripts/testRichPicture.ts",
+		"migrate:activity": "deno run --allow-all src/scripts/migrateActivityStorage.ts"
 	},
 	"imports": {
 		"@napi-rs/canvas": "npm:@napi-rs/canvas@^1.0.3",

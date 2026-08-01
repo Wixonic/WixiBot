@@ -55,6 +55,7 @@ export class Client extends EventEmitter {
 	#guilds = new Map<string, Guild>();
 	#users = new Map<string, User>();
 	#jobs = new Map<string, AbortController>();
+	#loadedJobs = new Map<string, Job>();
 
 	async init(logger: Logger, settings: ClientSettings) {
 		this.#logger = logger;
@@ -218,6 +219,22 @@ export class Client extends EventEmitter {
 		return Array.from(this.#users.values());
 	}
 
+	get jobs() {
+		return Array.from(this.#loadedJobs.values());
+	}
+
+	getJob(name: string) {
+		return this.#loadedJobs.get(name);
+	}
+
+	async runJob(name: string, customLogger?: Logger) {
+		const job = this.#loadedJobs.get(name);
+		if (!job) return false;
+		const logger = customLogger ?? this.#logger.clone(() => `[Job ${name}]`);
+		await job.execute(logger);
+		return true;
+	}
+
 	sweep() {
 		const threshold = Date.now() - 15 * 60 * 1000;
 		let usersSwept = 0;
@@ -362,6 +379,7 @@ export class Client extends EventEmitter {
 							});
 
 							this.#jobs.set(job.name, controller);
+							this.#loadedJobs.set(job.name, job);
 							count++;
 							logger.debug(`Registered job ${job.name} (${job.cron}).`);
 						} catch (error) {
