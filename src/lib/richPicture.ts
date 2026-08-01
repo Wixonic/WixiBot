@@ -134,7 +134,7 @@ const AccentColors: Record<RichPictureType, string> = {
 	[RichPictureType.ReportMessage]: "#FF3B30",
 	[RichPictureType.ReportUser]: "#FF3B30",
 	[RichPictureType.TicketHeader]: "#34C759",
-	[RichPictureType.Birthday]: "#FF5E7E"
+	[RichPictureType.Birthday]: "#00A2FF"
 };
 
 const FONT_MAIN = '"OpenSans", sans-serif';
