@@ -18,7 +18,8 @@ export enum RichPictureType {
 	Warn = "Warn",
 	ReportMessage = "ReportMessage",
 	ReportUser = "ReportUser",
-	TicketHeader = "TicketHeader"
+	TicketHeader = "TicketHeader",
+	Birthday = "Birthday"
 };
 
 export interface ProfileCardData {
@@ -101,6 +102,12 @@ export interface TicketHeaderCardData {
 	createdAtFormatted: string;
 };
 
+export interface BirthdayCardData {
+	username: string;
+	avatarUrl?: string;
+	serverName?: string;
+};
+
 export type RichPictureOptions =
 	| { type: RichPictureType.Profile; data: ProfileCardData }
 	| { type: RichPictureType.Leaderboard; data: LeaderboardCardData }
@@ -112,7 +119,8 @@ export type RichPictureOptions =
 	| { type: RichPictureType.Warn; data: WarnCardData }
 	| { type: RichPictureType.ReportMessage; data: ReportCardData }
 	| { type: RichPictureType.ReportUser; data: ReportCardData }
-	| { type: RichPictureType.TicketHeader; data: TicketHeaderCardData };
+	| { type: RichPictureType.TicketHeader; data: TicketHeaderCardData }
+	| { type: RichPictureType.Birthday; data: BirthdayCardData };
 
 const AccentColors: Record<RichPictureType, string> = {
 	[RichPictureType.Profile]: "#FFA200",
@@ -125,7 +133,8 @@ const AccentColors: Record<RichPictureType, string> = {
 	[RichPictureType.Warn]: "#FFA200",
 	[RichPictureType.ReportMessage]: "#FF3B30",
 	[RichPictureType.ReportUser]: "#FF3B30",
-	[RichPictureType.TicketHeader]: "#34C759"
+	[RichPictureType.TicketHeader]: "#34C759",
+	[RichPictureType.Birthday]: "#FF5E7E"
 };
 
 const FONT_MAIN = '"OpenSans", sans-serif';
@@ -260,7 +269,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 	else if (type === RichPictureType.Leaderboard) {
 		const count = (options.data as LeaderboardCardData).entries.length;
 		baseHeight = 160 + count * 68;
-	} else if (type === RichPictureType.LevelUp || type === RichPictureType.WelcomeMember || type === RichPictureType.Boost || type === RichPictureType.Supporter) baseHeight = 240;
+	} else if (type === RichPictureType.LevelUp || type === RichPictureType.WelcomeMember || type === RichPictureType.Boost || type === RichPictureType.Supporter || type === RichPictureType.Birthday) baseHeight = 240;
 	else if (type === RichPictureType.Achievement) baseHeight = 260;
 	else if (type === RichPictureType.TicketHeader || type === RichPictureType.Warn || type === RichPictureType.ReportMessage || type === RichPictureType.ReportUser) baseHeight = 340;
 
@@ -304,6 +313,9 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			break;
 		case RichPictureType.Supporter:
 			await drawTextPatternIconWatermark(ctx, "hand-heart", "SUPPORTER", accentColor, cardX, cardY, cardW, cardH, 180);
+			break;
+		case RichPictureType.Birthday:
+			await drawTextPatternIconWatermark(ctx, "cake", "HAPPY BIRTHDAY", accentColor, cardX, cardY, cardW, cardH, 180);
 			break;
 		case RichPictureType.Warn:
 			await drawTextPatternIconWatermark(ctx, "shield-warning", "WARNING", accentColor, cardX, cardY, cardW, cardH, 130, cardY + 15);
@@ -533,6 +545,29 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.font = `20px ${FONT_MAIN}`;
 			const countText = data.memberCount ? ` • Member #${data.memberCount}` : "";
 			ctx.fillText(`Joined ${data.serverName}${countText}`, cardX + 180, cardY + 156);
+
+			break;
+		}
+
+		case RichPictureType.Birthday: {
+			const data = options.data as BirthdayCardData;
+
+			await drawCircularAvatar(ctx, data.avatarUrl, cardX + 45, cardY + 40, 110, data.username[0]);
+
+			await drawSvgIcon(ctx, "cake", accentColor, cardX + 180, cardY + 49, 22);
+			ctx.fillStyle = accentColor;
+			ctx.font = `18px ${FONT_ACCENT}`;
+			ctx.textAlign = "left";
+			ctx.fillText("HAPPY BIRTHDAY!", cardX + 210, cardY + 67);
+
+			ctx.fillStyle = "#FFFFFF";
+			ctx.font = `bold 38px ${FONT_MAIN}`;
+			ctx.fillText(data.username, cardX + 180, cardY + 116);
+
+			ctx.fillStyle = "#A1A1A6";
+			ctx.font = `20px ${FONT_MAIN}`;
+			const subText = "Wishing you a wonderful birthday!";
+			ctx.fillText(subText, cardX + 180, cardY + 156);
 
 			break;
 		}

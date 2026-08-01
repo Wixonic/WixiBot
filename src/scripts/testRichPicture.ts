@@ -140,6 +140,15 @@ const samples = [
 				createdAtFormatted: "31/07/2026 23:45"
 			}
 		}
+	},
+	{
+		filename: "12_birthday.png",
+		options: {
+			type: RichPictureType.Birthday,
+			data: {
+				username: "Wixonic"
+			}
+		}
 	}
 ];
 

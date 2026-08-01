@@ -69,6 +69,10 @@ export interface GuildSettings {
 		welcome?: string;
 		bot?: string;
 		supporters?: string;
+		birthday?: string;
+	};
+	roles?: {
+		birthday?: string;
 	};
 	moderation: {
 		reports?: string;
@@ -118,6 +122,28 @@ export const guildSettingsSchema: DynamicSettingsSchema = {
 					name: "New supporters channel",
 					type: "channel",
 					description: "The channel where I will announce new supporters and boosts.",
+					default: null
+				},
+				birthday: {
+					key: "birthday",
+					name: "Birthday channel",
+					type: "channel",
+					description: "The channel where I will announce member birthdays.",
+					default: null
+				}
+			}
+		},
+		roles: {
+			key: "roles",
+			name: "Roles",
+			description: "Settings related to special roles",
+			type: "object",
+			children: {
+				birthday: {
+					key: "birthday",
+					name: "Birthday role",
+					type: "role",
+					description: "The role automatically assigned to members on their birthday for 24 hours.",
 					default: null
 				}
 			}
@@ -191,6 +217,7 @@ export class Guild {
 	#storagePath: string;
 	#settings: GuildSettings = {
 		channels: {},
+		roles: {},
 		moderation: {},
 		tickets: {}
 	};
