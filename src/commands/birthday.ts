@@ -1,6 +1,5 @@
 import {
 	ApplicationIntegrationType,
-	AttachmentBuilder,
 	type ChatInputCommandInteraction,
 	InteractionContextType,
 	MessageFlags,
@@ -9,7 +8,6 @@ import {
 
 import type { Command } from "../lib/client.ts";
 import { client } from "../lib/client.ts";
-import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 
 const getMonthName = (month: number) => new Date(0, month - 1, 1).toLocaleString("en-US", { month: "long" });
 
