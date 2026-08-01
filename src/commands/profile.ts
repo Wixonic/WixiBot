@@ -9,7 +9,6 @@ import {
 
 import type { Command } from "../lib/client.ts";
 import { client } from "../lib/client.ts";
-import { checkNewAchievements } from "../lib/progression.ts";
 import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 
 export const command = {
@@ -50,7 +49,6 @@ export const command = {
 
 		const stats = await user.getTotalStats();
 		const level = await user.getLevel();
-		const unlockedAchievementIds = await checkNewAchievements(user);
 
 		const displayName = targetMember && "displayName" in targetMember ? (targetMember.displayName as string) : (targetUser.globalName ?? user.displayName);
 
@@ -67,12 +65,11 @@ export const command = {
 				stageEvents: stats.totalStageEvents,
 				forumPosts: stats.totalForumPosts,
 				reactions: stats.totalReactions,
-				achievementsCount: unlockedAchievementIds.length
+				achievementsCount: user.data.unlockedAchievements?.length ?? 0
 			}
 		});
 
 		const attachment = new AttachmentBuilder(pictureBuffer, { name: "profile.png" });
-
 		await interaction.followUp({ files: [attachment] });
 	}
 } satisfies Command<ChatInputCommandInteraction>;
