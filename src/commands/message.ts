@@ -10,8 +10,6 @@ import {
 	MessageFlags,
 	ModalBuilder,
 	PermissionFlagsBits,
-	RadioGroupBuilder,
-	RadioGroupOptionBuilder,
 	SlashCommandBuilder,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
@@ -29,8 +27,7 @@ export const command = {
 			ApplicationIntegrationType.GuildInstall
 		])
 		.setContexts([
-			InteractionContextType.Guild,
-			InteractionContextType.BotDM
+			InteractionContextType.Guild
 		])
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.addSubcommand((subcommand) => subcommand

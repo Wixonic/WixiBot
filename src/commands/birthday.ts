@@ -55,8 +55,8 @@ export const command = {
 			ApplicationIntegrationType.UserInstall
 		])
 		.setContexts([
-			InteractionContextType.Guild,
 			InteractionContextType.BotDM,
+			InteractionContextType.Guild,
 			InteractionContextType.PrivateChannel
 		]),
 
@@ -120,7 +120,8 @@ export const command = {
 		}
 
 		if (subcommand === "upcoming") {
-			await interaction.deferReply();
+			if (interaction.context === InteractionContextType.Guild) await interaction.deferReply();
+			else await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 			const usersWithBirthdays: { displayName: string; day: number; month: number; timestamp: number }[] = [];
 			const now = new Date();

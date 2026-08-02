@@ -17,13 +17,10 @@ export const command = {
 		.setName("leaderboard")
 		.setDescription("Displays the leaderboard of the most active members (Top XP).")
 		.setIntegrationTypes([
-			ApplicationIntegrationType.GuildInstall,
-			ApplicationIntegrationType.UserInstall
+			ApplicationIntegrationType.GuildInstall
 		])
 		.setContexts([
-			InteractionContextType.Guild,
-			InteractionContextType.BotDM,
-			InteractionContextType.PrivateChannel
+			InteractionContextType.Guild
 		]),
 
 	async execute(_logger, interaction) {

@@ -20,8 +20,8 @@ export const command = {
 			ApplicationIntegrationType.UserInstall
 		])
 		.setContexts([
-			InteractionContextType.Guild,
 			InteractionContextType.BotDM,
+			InteractionContextType.Guild,
 			InteractionContextType.PrivateChannel
 		]),
 

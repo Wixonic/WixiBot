@@ -17,13 +17,14 @@ export const command = {
 		.setName("move")
 		.setDescription("Move all users from a channel to another")
 		.setIntegrationTypes([
-			ApplicationIntegrationType.GuildInstall
+			ApplicationIntegrationType.GuildInstall,
+			ApplicationIntegrationType.UserInstall
 		])
 		.setContexts([
-			InteractionContextType.Guild
+			InteractionContextType.Guild,
+			InteractionContextType.PrivateChannel
 		])
 		.setDefaultMemberPermissions(PermissionFlagsBits.MoveMembers)
-
 		.addChannelOption((option) => option
 			.setName("from")
 			.setDescription("The channel to move users from")
@@ -48,7 +49,7 @@ export const command = {
 		const members = from.members;
 		const failed = [];
 
-		const movePromises = Array.from(members.values()).map(member => 
+		const movePromises = Array.from(members.values()).map(member =>
 			member.voice.setChannel(to)
 				.then(() => ({ status: "fulfilled" as const, member }))
 				.catch(error => {
