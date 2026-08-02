@@ -120,7 +120,7 @@ export const command = {
 		}
 
 		if (subcommand === "upcoming") {
-			if (interaction.context === InteractionContextType.Guild) await interaction.deferReply();
+			if (interaction.guild) await interaction.deferReply();
 			else await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 			const usersWithBirthdays: { displayName: string; day: number; month: number; timestamp: number }[] = [];
