@@ -140,6 +140,13 @@ export const guildSettingsSchema: DynamicSettingsSchema = {
 			description: "Settings related to special roles",
 			type: "object",
 			children: {
+				active: {
+					key: "active",
+					name: "Active Member role",
+					type: "role",
+					description: "The role automatically assigned to active members based on recent 28-day activity.",
+					default: null
+				},
 				birthday: {
 					key: "birthday",
 					name: "Birthday role",
@@ -147,11 +154,11 @@ export const guildSettingsSchema: DynamicSettingsSchema = {
 					description: "The role automatically assigned to members on their birthday for 24 hours.",
 					default: null
 				},
-				active: {
-					key: "active",
-					name: "Active Member role",
+				server_booster: {
+					key: "server_booster",
+					name: "Server Booster role",
 					type: "role",
-					description: "The role automatically assigned to active members based on recent 28-day activity.",
+					description: "The role automatically assigned to members who have boosted the server.",
 					default: null
 				}
 			}

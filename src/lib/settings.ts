@@ -1,27 +1,19 @@
 import type { ClientOptions } from "discord.js";
 import index from "../settings/index.json" with { type: "json" };
 
-export interface GeminiSettings {
-	enabled: boolean;
-	apiKey: string;
-	model?: string;
-}
-
-export interface LMStudioSettings {
-	enabled: boolean;
-	model: string;
-	baseUrl: string;
-}
-
 export interface AISettings {
-	provider: "gemini" | "lmstudio";
-	gemini?: GeminiSettings;
-	lmstudio?: LMStudioSettings;
-}
+	apiKey: string;
+	baseURL: string;
+	models: {
+		default: string;
+		deep_research?: string;
+		summary?: string;
+	};
+};
 
 export interface DiscordSkuSettings {
 	funding?: string;
-}
+};
 
 export interface DiscordSettings {
 	clientId: string;
@@ -32,18 +24,18 @@ export interface DiscordSettings {
 	sku: DiscordSkuSettings;
 	token: string;
 	webhookUrl: URL;
-}
+};
 
 export interface ClientLinksSettings {
 	funding?: string;
 	help?: string;
-}
+};
 
 export interface ClientSettings {
 	ai?: AISettings;
 	discord: DiscordSettings;
 	links?: ClientLinksSettings;
-}
+};
 
 export type ClientType = keyof typeof index;
 

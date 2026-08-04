@@ -1,12 +1,10 @@
-import { AttachmentBuilder, EmbedBuilder, type Activity, type PresenceStatus, type Presence, type User as DiscordUser } from "discord.js";
+import { AttachmentBuilder, type PresenceStatus, type Presence, type User as DiscordUser } from "discord.js";
 import path from "node:path";
 
+import { achievements, checkNewAchievements } from "./achievements.ts";
 import { client } from "./client.ts";
 import type { DynamicSettingsSchema } from "./dynamicSettings.ts";
 import type { Logger } from "./logger.ts";
-import { ai } from "./ai.ts";
-import { sendChunks } from "./utils.ts";
-import { checkNewAchievements, achievements } from "./progression.ts";
 import { generateRichPicture, RichPictureType } from "./richPicture.ts";
 
 export type Achievement = {
@@ -98,6 +96,16 @@ export const userSettingsSchema: DynamicSettingsSchema = {
 			}
 		}
 	}
+};
+
+export interface UserReplayStats {
+	messages: number;
+	stageEvents: number;
+	forumPosts: number;
+	reactions: number;
+	achievements: string[];
+	streak: number;
+	bestStreak: number;
 };
 
 export class User {

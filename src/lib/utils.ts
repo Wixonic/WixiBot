@@ -46,6 +46,16 @@ export const displayCommand = (command: ApplicationCommand) => {
 	return entry.join("\n");
 };
 
+/**
+ * Combine paths, similar to {@link https://nodejs.org/api/path.html#pathjoinpaths Node.js path.join} method
+ */
+export const join = (...parts: string[]): string => parts.map((part, index) => {
+	part = String(part);
+
+	if (index === 0) return part.trim().replace(/[\/]*$/g, "");
+	else return part.trim().replace(/^[\/]*|[\/]*$/g, "");
+}).filter(Boolean).join("/");
+
 export const parseCustomId = (customId: string): [string, ...string[]] => {
 	const [baseId, ...options] = customId.split(":");
 	return [baseId ?? "", ...options];

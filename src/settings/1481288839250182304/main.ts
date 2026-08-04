@@ -3,16 +3,10 @@ import { secrets } from "./secrets.ts";
 
 export const settings: ClientSettings = {
 	ai: {
-		provider: "gemini",
-		gemini: {
-			enabled: true,
-			model: "gemini-flash-lite-latest",
-			apiKey: secrets.geminiApiKey || ""
-		},
-		lmstudio: {
-			enabled: false,
-			model: "qwen3.5-4b-mlx",
-			baseUrl: "ws://127.0.0.1:1234"
+		apiKey: secrets.ai?.apiKey,
+		baseURL: "http://127.0.0.1:8888",
+		models: {
+			default: "unsloth/gemma-4-E2B-it-qat-GGUF:UD-Q4_K_XL"
 		}
 	},
 	discord: {
@@ -21,7 +15,6 @@ export const settings: ClientSettings = {
 		options: {},
 		publicKey: "fd9e008cca4da07f95dda81cc8f0f6a9e2ba621edd6598ccb90e2cbce1588324",
 		roles: {
-			booster: "1483120012297375868",
 			supporter: "1483120012297375868"
 		},
 		sku: {
