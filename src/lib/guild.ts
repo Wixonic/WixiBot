@@ -640,7 +640,7 @@ ${error instanceof Error ? error.stack : String(error)}
 					getContent: async () => {
 						const fundingCommandId = await client.getCommandId("funding", this.id);
 						const commandText = fundingCommandId ? `</funding:${fundingCommandId}>` : "`/funding`";
-						return `Hi! This channel is for new boosters and supporters that wants to support my creator's work!\n\nIf you want to support us, use the ${commandText} command to learn more!`;
+						return `Hi! This channel is for displaying new server boosters and supporters that wants or wanted to support my creator's work!\n\nIf you want to support us, use the ${commandText} command to learn more!`;
 					}
 				});
 				await this.supportersStickyMessage.init();
