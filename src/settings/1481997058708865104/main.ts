@@ -19,7 +19,7 @@ export const settings: ClientSettings = {
 			supporter: "1483085157572284549"
 		},
 		sku: {
-			funding: "1482063851505356870"
+			funding: "1483114250791817310"
 		},
 		token: secrets.token,
 		webhookUrl: secrets.webhookUrl
