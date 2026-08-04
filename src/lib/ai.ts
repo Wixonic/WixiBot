@@ -71,7 +71,7 @@ export class AIService {
 
 	constructor() {
 		const settings = getSettings();
-		this.enabled = settings.ai !== undefined;
+		this.enabled = settings.ai?.enabled ?? false;
 		this.baseURL = settings.ai?.baseURL ?? "http://127.0.0.1:8888";
 	};
 

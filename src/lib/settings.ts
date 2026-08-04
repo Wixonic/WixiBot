@@ -2,6 +2,7 @@ import type { ClientOptions } from "discord.js";
 import index from "../settings/index.json" with { type: "json" };
 
 export interface AISettings {
+	enabled: boolean;
 	apiKey: string;
 	baseURL: string;
 	models: {

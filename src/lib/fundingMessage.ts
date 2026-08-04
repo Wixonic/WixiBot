@@ -35,17 +35,22 @@ Learn more about the perks of supporting me by clicking the button below!`)
 				)
 				.addTextDisplayComponents((component) => component
 					.setContent(`### On Discord
-You can either subscribe and get the <@&${settings.discord.roles.supporter}> role or boost my server and get the ${guild && guild.settings.roles?.server_booster !== undefined ? `<@&${guild.settings.roles.server_booster}>` : "booster"} role!`)
+You can either subscribe and get the <@&${settings.discord.roles.supporter}> role or boost ${guildId ? "this" : "my"} server and get the ${guild && guild.settings.roles?.server_booster !== undefined ? `<@&${guild.settings.roles.server_booster}>` : "booster"} role!`)
 				)
 				.addActionRowComponents((component) => component
 					.addComponents(
 						new ButtonBuilder()
 							.setStyle(ButtonStyle.Premium)
 							.setSKUId(fundingSku),
-						new ButtonBuilder()
-							.setStyle(ButtonStyle.Link)
-							.setLabel("Boost my server!")
-							.setURL(settings.links?.funding ?? settings.discord.invite ?? "https://go.wixonic.fr/discord")
+						guildId ?
+							new ButtonBuilder()
+								.setStyle(ButtonStyle.Link)
+								.setLabel("Boost this server!")
+								.setURL(`https://discord.com/channels/${guildId}/boosts`) :
+							new ButtonBuilder()
+								.setStyle(ButtonStyle.Link)
+								.setLabel("Join and boost my server!")
+								.setURL(settings.links?.funding ?? settings.discord.invite ?? "https://go.wixonic.fr/discord")
 					)
 				)
 				.addTextDisplayComponents((component) => component

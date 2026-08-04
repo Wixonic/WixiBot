@@ -27,33 +27,36 @@ export const event = {
 			try {
 				await commandObject?.execute(interactionLogger, interaction);
 			} catch (error) {
-				interactionLogger.error(`Error executing ${interaction.commandName}`, {
-					cause: error
-				});
+				if (error instanceof Error && error.message === "AI service is not enabled.") await interaction.editReply("AI service is not enabled for now.");
+				else {
+					interactionLogger.error(`Error executing ${interaction.commandName}`, {
+						cause: error
+					});
 
-				try {
-					let fetchedReply;
 					try {
-						if (interaction.replied || interaction.deferred) fetchedReply = await interaction.fetchReply();
+						let fetchedReply;
+						try {
+							if (interaction.replied || interaction.deferred) fetchedReply = await interaction.fetchReply();
+						} catch (error) {
+							interactionLogger.debug("Failed to fetch reply", {
+								cause: error
+							});
+						}
+
+						if (fetchedReply) await fetchedReply.edit("There was an error while executing this command!");
+						else if (interaction.replied || interaction.deferred) await interaction.followUp({
+							content: "There was an error while executing this command!",
+							flags: MessageFlags.Ephemeral
+						});
+						else await interaction.reply({
+							content: "There was an error while executing this command!",
+							flags: MessageFlags.Ephemeral
+						});
 					} catch (error) {
-						interactionLogger.debug("Failed to fetch reply", {
+						interactionLogger.error("Failed to send error response", {
 							cause: error
 						});
 					}
-
-					if (fetchedReply) await fetchedReply.edit("There was an error while executing this command!");
-					else if (interaction.replied || interaction.deferred) await interaction.followUp({
-						content: "There was an error while executing this command!",
-						flags: MessageFlags.Ephemeral
-					});
-					else await interaction.reply({
-						content: "There was an error while executing this command!",
-						flags: MessageFlags.Ephemeral
-					});
-				} catch (error) {
-					interactionLogger.error("Failed to send error response", {
-						cause: error
-					});
 				}
 			}
 		} else if (interaction.isMessageComponent()) {

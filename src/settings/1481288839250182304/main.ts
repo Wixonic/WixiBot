@@ -3,6 +3,7 @@ import { secrets } from "./secrets.ts";
 
 export const settings: ClientSettings = {
 	ai: {
+		enabled: true,
 		apiKey: secrets.ai?.apiKey,
 		baseURL: "http://127.0.0.1:8888",
 		models: {
