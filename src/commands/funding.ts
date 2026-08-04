@@ -1,21 +1,18 @@
 import {
 	ApplicationIntegrationType,
-	ButtonBuilder,
-	ButtonStyle,
 	type ChatInputCommandInteraction,
-	ContainerBuilder,
 	InteractionContextType,
 	MessageFlags,
 	SlashCommandBuilder
 } from "discord.js";
 
 import type { Command } from "../lib/client.ts";
-import { getSettings } from "../lib/settings.ts";
+import { getFundingMessage } from "../lib/fundingMessage.ts";
 
 export const command = {
 	data: new SlashCommandBuilder()
 		.setName("funding")
-		.setDescription("Support the project by making a donation and unlocking exclusive perks!")
+		.setDescription("Support my work!")
 		.setIntegrationTypes([
 			ApplicationIntegrationType.GuildInstall,
 			ApplicationIntegrationType.UserInstall
@@ -27,35 +24,18 @@ export const command = {
 		]),
 
 	async execute(_logger, interaction) {
-		const settings = getSettings();
-		const fundingSku = settings.discord.sku.funding;
+		try {
+			const fundingComponents = await getFundingMessage(interaction.guildId!);
 
-		if (fundingSku) {
 			await interaction.reply({
-				components: [
-					new ContainerBuilder()
-						.addTextDisplayComponents((component) => component
-							.setContent(`# Support my work!
-Money doesn’t grow on trees, and neither does quality content!
-If you want to support my projects, make a donation.`)
-						)
-						.addActionRowComponents((component) => component
-							.addComponents(
-								new ButtonBuilder()
-									.setStyle(ButtonStyle.Premium)
-									.setSKUId(fundingSku)
-							)
-						)
-						.addTextDisplayComponents((component) => component
-							.setContent(`In exchange for your investment, you’ll immediately unlock a series of exclusive perks.
-It’s a win-win deal!`)
-						)
-				],
+				components: fundingComponents,
 				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
 			});
-		} else await interaction.reply({
-			content: "Funding is currently unavailable. Please try again later.",
-			flags: MessageFlags.Ephemeral
-		});
+		} catch {
+			await interaction.reply({
+				content: "Funding is currently unavailable. Please try again later.",
+				flags: MessageFlags.Ephemeral
+			});
+		}
 	}
 } satisfies Command<ChatInputCommandInteraction>;

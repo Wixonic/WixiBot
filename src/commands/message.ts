@@ -18,6 +18,7 @@ import {
 } from "discord.js";
 
 import { client, type Command } from "../lib/client.ts";
+import { getFundingMessage } from "../lib/fundingMessage.ts";
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -40,6 +41,16 @@ export const command = {
 			.addChannelOption((option) => option
 				.setName("channel")
 				.setDescription("The channel to publish the ticket message in")
+				.addChannelTypes(ChannelType.GuildAnnouncement, ChannelType.GuildText)
+				.setRequired(true)
+			)
+		)
+		.addSubcommand((subcommand) => subcommand
+			.setName("funding")
+			.setDescription("Publish the funding message in the specified channel.")
+			.addChannelOption((option) => option
+				.setName("channel")
+				.setDescription("The channel to publish the funding message in")
 				.addChannelTypes(ChannelType.GuildAnnouncement, ChannelType.GuildText)
 				.setRequired(true)
 			)
@@ -200,7 +211,35 @@ Our support team will review your request and get back to you as soon as possibl
 					await interaction.deleteReply();
 					throw new Error("Guild context expected");
 				}
+			}
 
+			case "funding": {
+				if (interaction.guild) {
+					const guildId = interaction.guildId;
+					if (!guildId) {
+						await interaction.deleteReply();
+						throw new Error("Guild context expected");
+					}
+
+					const guild = await client.getGuild(guildId);
+
+					if (guild) {
+						const channel = interaction.options.getChannel("channel", true) as GuildTextBasedChannel;
+
+						const fundingComponents = await getFundingMessage(guildId);
+						await channel.send({
+							components: fundingComponents,
+							flags: MessageFlags.IsComponentsV2 | MessageFlags.SuppressNotifications
+						});
+					} else {
+						await interaction.deleteReply();
+						throw new Error("Guild not found")
+					}
+				} else {
+					await interaction.deleteReply();
+					throw new Error("Guild context expected");
+				}
+				break;
 			}
 
 			default: {

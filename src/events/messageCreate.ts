@@ -8,7 +8,12 @@ export const event = {
 	once: false,
 
 	async execute(_logger: Logger, message: Message) {
-		if (message.author.bot || !message.guildId) return;
+		if (!message.guildId) return;
+
+		const guild = await client.getGuild(message.guildId);
+		if (guild) await guild.handleStickyMessage(message);
+
+		if (message.author.bot) return;
 
 		const user = await client.getUser(message.author.id);
 		if (user && user.settings.activity.record) {
