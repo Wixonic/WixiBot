@@ -2,7 +2,6 @@ import { Events, MessageFlags, type Interaction } from "discord.js";
 
 import { client } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
-import { User } from "../lib/user.ts";
 import { parseCustomId } from "../lib/utils.ts";
 
 export const event = {
@@ -12,10 +11,7 @@ export const event = {
 	async execute(logger: Logger, interaction: Interaction) {
 		const interactionLogger = logger.clone(() => `[I-${interaction.id}]`);
 
-		if (!client.getUser(interaction.user.id)) {
-			const user = new User(interactionLogger, interaction.user);
-			await user.init();
-		}
+		await client.getUser(interaction.user.id);
 
 		interactionLogger.debug(`Received interaction by ${interaction.user.username} (${interaction.user.id})`);
 

@@ -109,7 +109,7 @@ export interface UserReplayStats {
 };
 
 export class User {
-	#currentActivity: UserActivity = {
+	private currentActivity: UserActivity = {
 		activity: null,
 		changed: false,
 		date: new Date(),
@@ -117,7 +117,7 @@ export class User {
 	};
 
 	// Cache for total aggregated stats
-	#statsCache: {
+	private statsCache: {
 		lastUpdate: number;
 		totalXp: number;
 		totalMessages: number;
@@ -125,61 +125,54 @@ export class User {
 		totalForumPosts: number;
 		totalReactions: number;
 	} | null = null;
-	#discordUser: DiscordUser;
-	#logger: Logger;
-	#storagePath: string;
-	#settings: UserSettings = {
+	private discordUser: DiscordUser;
+	private logger: Logger;
+	private storagePath: string;
+	data: UserData = {};
+
+	settings: UserSettings = {
 		activity: {
 			record: true,
 			replay: true
 		}
 	};
-	#data: UserData = {};
-
-	#lastAccessed: number = Date.now();
+	lastAccessed: number = Date.now();
 
 	constructor(logger: Logger, discordUser: DiscordUser) {
-		this.#discordUser = discordUser;
-		this.#logger = logger.clone(`[U-${discordUser.id}]`);
-		this.#storagePath = `./storage/users/${discordUser.id}/`;
-	}
+		this.discordUser = discordUser;
+		this.logger = logger.clone(`[U-${discordUser.id}]`);
+		this.storagePath = `./storage/users/${discordUser.id}/`;
+	};
 
-	get id() { this.touch(); return this.#discordUser.id; }
-	get path() { this.touch(); return this.#storagePath; }
-	get username() { this.touch(); return this.#discordUser.username; }
-	get displayName() { this.touch(); return this.#discordUser.globalName ?? this.#discordUser.username; }
-	get settings() {
-		return this.#settings;
-	}
-
-	get data() {
-		return this.#data;
-	}
-	get lastAccessed() { this.touch(); return this.#lastAccessed; }
+	get id() { return this.discordUser.id; }
+	get username() { return this.discordUser.username; }
+	get displayName() { return this.discordUser.globalName ?? this.discordUser.username; }
 
 	async getGuildDisplayName(guildId: string): Promise<string> {
-		this.touch();
 		try {
 			const guild = await client.discord?.guilds.fetch(guildId);
-			const member = await guild?.members.fetch(this.#discordUser.id);
+			const member = await guild?.members.fetch(this.discordUser.id);
 			if (member) return member.displayName;
 		} catch {
 			// Fallback
 		}
-		return this.displayName;
-	}
 
-	touch() { this.#lastAccessed = Date.now(); }
+		this.touch();
+
+		return this.displayName;
+	};
+
+	touch() { this.lastAccessed = Date.now(); }
 
 	async init() {
-		this.#logger.debug("Initializing user...");
+		this.logger.debug("Initializing user...");
 		client.addUser(this);
 
 		try {
 			try {
-				const content = await Deno.readTextFile(path.join(this.#storagePath, "settings.json"));
+				const content = await Deno.readTextFile(path.join(this.storagePath, "settings.json"));
 				const parsed = JSON.parse(content);
-				this.#settings = {
+				this.settings = {
 					...parsed,
 					activity: {
 						record: true,
@@ -187,38 +180,38 @@ export class User {
 						...(parsed.activity || {})
 					}
 				};
-				this.#logger.debug("Loaded existing user settings.");
+				this.logger.debug("Loaded existing user settings.");
 			} catch (error) {
 				if (error instanceof Deno.errors.NotFound) {
 					await this.saveSettings();
-					this.#logger.debug("Created new user settings.");
+					this.logger.debug("Created new user settings.");
 				} else throw error;
 			}
 		} catch (error) {
-			this.#logger.error("Failed to initialize user storage (settings.json)", {
+			this.logger.error("Failed to initialize user storage (settings.json)", {
 				cause: error
 			});
 		}
 
 		try {
 			try {
-				const content = await Deno.readTextFile(path.join(this.#storagePath, "data.json"));
-				this.#data = JSON.parse(content);
-				this.#logger.debug("Loaded existing user data.");
+				const content = await Deno.readTextFile(path.join(this.storagePath, "data.json"));
+				this.data = JSON.parse(content);
+				this.logger.debug("Loaded existing user data.");
 			} catch (error) {
 				if (error instanceof Deno.errors.NotFound) {
 					await this.saveData();
-					this.#logger.debug("Created new user data.");
+					this.logger.debug("Created new user data.");
 				} else throw error;
 			}
 		} catch (error) {
-			this.#logger.error("Failed to initialize user storage (data.json)", {
+			this.logger.error("Failed to initialize user storage (data.json)", {
 				cause: error
 			});
 		}
 
 		try {
-			const activityPath = path.join(this.#storagePath, "activity");
+			const activityPath = path.join(this.storagePath, "activity");
 			let latestFile = "";
 			for await (const dirEntry of Deno.readDir(activityPath)) {
 				if (dirEntry.isFile && dirEntry.name.endsWith(".json")) {
@@ -229,15 +222,15 @@ export class User {
 				const content = await Deno.readTextFile(path.join(activityPath, latestFile));
 				const savedActivity = JSON.parse(content);
 				if (savedActivity && savedActivity.activity) {
-					this.#currentActivity.activity = savedActivity.activity;
+					this.currentActivity.activity = savedActivity.activity;
 				}
 			}
-		} catch (error) {
+		} catch {
 			// Ignore if activity directory doesn't exist yet
 		}
 
 		this.touch();
-	}
+	};
 
 	setPresence(presence: Partial<Presence> | null) {
 		if (this.settings.activity.record) {
@@ -254,20 +247,20 @@ export class User {
 				status: presence?.status || "offline"
 			};
 
-			if (JSON.stringify(this.#currentActivity.activity) !== JSON.stringify(newActivity)) {
-				this.#logger.debug(`Presence changed for ${this.username}. Old: ${JSON.stringify(this.#currentActivity.activity)} New: ${JSON.stringify(newActivity)}`);
-				this.#currentActivity.activity = newActivity;
-				this.#currentActivity.changed = true;
+			if (JSON.stringify(this.currentActivity.activity) !== JSON.stringify(newActivity)) {
+				this.logger.debug(`Presence changed for ${this.username}. Old: ${JSON.stringify(this.currentActivity.activity)} New: ${JSON.stringify(newActivity)}`);
+				this.currentActivity.activity = newActivity;
+				this.currentActivity.changed = true;
 			}
 
 			this.touch();
 		}
-	}
+	};
 
 	async recordActivity() {
-		if (this.#currentActivity.changed && this.settings.activity.record) {
-			this.#logger.debug(`Saving activity to disk for ${this.username}...`);
-			const activityDir = path.join(this.#storagePath, "activity");
+		if (this.currentActivity.changed && this.settings.activity.record) {
+			this.logger.debug(`Saving activity to disk for ${this.username}...`);
+			const activityDir = path.join(this.storagePath, "activity");
 			await Deno.mkdir(activityDir, { recursive: true });
 
 			const now = new Date();
@@ -279,13 +272,13 @@ export class User {
 				const existingContent = await Deno.readTextFile(monthFilePath);
 				monthData = JSON.parse(existingContent);
 			} catch (error) {
-				if (!(error instanceof Deno.errors.NotFound)) this.#logger.error("Failed to read monthly activity file", { cause: error });
+				if (!(error instanceof Deno.errors.NotFound)) this.logger.error("Failed to read monthly activity file", { cause: error });
 			}
 
-			this.#data.stats ??= { totalMessages: 0, totalStageEvents: 0, totalForumPosts: 0, totalReactions: 0 };
+			this.data.stats ??= { totalMessages: 0, totalStageEvents: 0, totalForumPosts: 0, totalReactions: 0 };
 
-			for (const guildId in this.#currentActivity.guilds) {
-				const currentGuild = this.#currentActivity.guilds[guildId];
+			for (const guildId in this.currentActivity.guilds) {
+				const currentGuild = this.currentActivity.guilds[guildId];
 				monthData.guilds[guildId] ??= { achievements: [], messages: { sent: 0, mentions: 0, reactions: { added: 0, received: 0 } }, stageEvents: { attended: 0 }, forum: { posts: 0 } };
 				const targetGuild = monthData.guilds[guildId];
 
@@ -303,10 +296,10 @@ export class User {
 				targetGuild.forum.posts += posts;
 				targetGuild.stageEvents.attended += attended;
 
-				this.#data.stats.totalMessages += sent;
-				this.#data.stats.totalForumPosts += posts;
-				this.#data.stats.totalStageEvents += attended;
-				this.#data.stats.totalReactions += (added + received);
+				this.data.stats.totalMessages += sent;
+				this.data.stats.totalForumPosts += posts;
+				this.data.stats.totalStageEvents += attended;
+				this.data.stats.totalReactions += (added + received);
 
 				if (currentGuild.achievements) {
 					targetGuild.achievements ??= [];
@@ -319,8 +312,8 @@ export class User {
 			await Deno.rename(tmpMonthPath, monthFilePath);
 			await this.saveData();
 
-			this.#currentActivity = {
-				activity: this.#currentActivity.activity,
+			this.currentActivity = {
+				activity: this.currentActivity.activity,
 				changed: false,
 				date: new Date(),
 				guilds: {}
@@ -328,13 +321,13 @@ export class User {
 
 			this.touch();
 		}
-	}
+	};
 
 	async sendReplay(_targetMonth?: Date): Promise<boolean> {
-		this.#logger.debug("Replay generation disabled.");
+		this.logger.debug("Replay generation disabled.");
 		this.touch();
 		return false;
-	}
+	};
 
 	async getRecentStats(days = 28) {
 		let totalMessages = 0;
@@ -345,7 +338,7 @@ export class User {
 		const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
 
 		try {
-			const activityPath = path.join(this.#storagePath, "activity");
+			const activityPath = path.join(this.storagePath, "activity");
 			for await (const dirEntry of Deno.readDir(activityPath)) {
 				if (dirEntry.isFile && dirEntry.name.endsWith(".json")) {
 					const content = await Deno.readTextFile(path.join(activityPath, dirEntry.name));
@@ -364,19 +357,20 @@ export class User {
 				}
 			}
 		} catch (error) {
-			if (!(error instanceof Deno.errors.NotFound)) this.#logger.error("Failed to read recent activity", { cause: error });
+			if (!(error instanceof Deno.errors.NotFound)) this.logger.error("Failed to read recent activity", { cause: error });
 		}
 
-		for (const guildId in this.#currentActivity.guilds) {
-			const guildData = this.#currentActivity.guilds[guildId];
+		for (const guildId in this.currentActivity.guilds) {
+			const guildData = this.currentActivity.guilds[guildId];
 			totalMessages += guildData.messages?.sent || 0;
 			totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
 			totalForumPosts += guildData.forum?.posts || 0;
 			totalStageEvents += guildData.stageEvents?.attended || 0;
 		}
 
+		this.touch();
 		return { totalMessages, totalStageEvents, totalForumPosts, totalReactions };
-	}
+	};
 
 	async getAggregatedStats(targetMonth?: Date) {
 		let totalMessages = 0;
@@ -386,7 +380,7 @@ export class User {
 		const monthlyAchievements: string[] = [];
 
 		try {
-			const activityPath = path.join(this.#storagePath, "activity");
+			const activityPath = path.join(this.storagePath, "activity");
 			for await (const dirEntry of Deno.readDir(activityPath)) {
 				if (dirEntry.isFile && dirEntry.name.endsWith(".json")) {
 					const content = await Deno.readTextFile(path.join(activityPath, dirEntry.name));
@@ -413,13 +407,13 @@ export class User {
 			}
 		} catch (error) {
 			if (!(error instanceof Deno.errors.NotFound)) {
-				this.#logger.error("Failed to read activity history", { cause: error });
+				this.logger.error("Failed to read activity history", { cause: error });
 			}
 		}
 
 		if (!targetMonth || (targetMonth.getMonth() === new Date().getMonth() && targetMonth.getFullYear() === new Date().getFullYear())) {
-			for (const guildId in this.#currentActivity.guilds) {
-				const guildData = this.#currentActivity.guilds[guildId];
+			for (const guildId in this.currentActivity.guilds) {
+				const guildData = this.currentActivity.guilds[guildId];
 				totalMessages += guildData.messages?.sent || 0;
 				totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
 				totalForumPosts += guildData.forum?.posts || 0;
@@ -431,18 +425,19 @@ export class User {
 			}
 		}
 
+		this.touch();
 		return { totalMessages, totalStageEvents, totalForumPosts, totalReactions, achievements: monthlyAchievements };
-	}
+	};
 
 	async getTotalStats() {
-		if (this.#data.stats) {
-			let totalMessages = this.#data.stats.totalMessages || 0;
-			let totalStageEvents = this.#data.stats.totalStageEvents || 0;
-			let totalForumPosts = this.#data.stats.totalForumPosts || 0;
-			let totalReactions = this.#data.stats.totalReactions || 0;
+		if (this.data.stats) {
+			let totalMessages = this.data.stats.totalMessages || 0;
+			let totalStageEvents = this.data.stats.totalStageEvents || 0;
+			let totalForumPosts = this.data.stats.totalForumPosts || 0;
+			let totalReactions = this.data.stats.totalReactions || 0;
 
-			for (const guildId in this.#currentActivity.guilds) {
-				const g = this.#currentActivity.guilds[guildId];
+			for (const guildId in this.currentActivity.guilds) {
+				const g = this.currentActivity.guilds[guildId];
 				totalMessages += g.messages?.sent || 0;
 				totalStageEvents += g.stageEvents?.attended || 0;
 				totalForumPosts += g.forum?.posts || 0;
@@ -450,61 +445,63 @@ export class User {
 			}
 
 			let totalXp = (totalMessages * 10) + (totalStageEvents * 2500) + (totalForumPosts * 250) + (totalReactions * 1);
-			if (this.#data.bonusXp) totalXp += this.#data.bonusXp;
+			if (this.data.bonusXp) totalXp += this.data.bonusXp;
 
+			this.touch();
 			return { totalMessages, totalStageEvents, totalForumPosts, totalReactions, totalXp, achievements: [] };
 		}
 
-		if (!this.#statsCache || Date.now() - this.#statsCache.lastUpdate > 60000) {
+		if (!this.statsCache || Date.now() - this.statsCache.lastUpdate > 60000) {
 			const stats = await this.getAggregatedStats();
 
 			let totalXp = (stats.totalMessages * 10) + (stats.totalStageEvents * 2500) + (stats.totalForumPosts * 250) + (stats.totalReactions * 1);
-			if (this.#data.bonusXp) totalXp += this.#data.bonusXp;
+			if (this.data.bonusXp) totalXp += this.data.bonusXp;
 
-			this.#statsCache = {
+			this.statsCache = {
 				lastUpdate: Date.now(),
 				totalXp,
 				...stats
 			};
 		}
 
-		return this.#statsCache;
-	}
+		this.touch();
+		return this.statsCache;
+	};
 
 	async getLevel() {
 		const stats = await this.getTotalStats();
 		return Math.floor(Math.sqrt(stats.totalXp / 50));
-	}
+	};
 
 	async addActivity(guildId: string, type: "message" | "mention" | "reactionAdd" | "reactionReceive" | "forumPost" | "stageEvent") {
-		this.#logger.debug(`Recording activity [${type}] for ${this.username}`);
+		this.logger.debug(`Recording activity [${type}] for ${this.username}`);
 		const oldLevel = await this.getLevel();
 
 		const todayDate = new Date();
 		const today = todayDate.toISOString().split("T")[0];
 
 		let streakChanged = false;
-		if (this.#data.lastActiveDate !== today) {
+		if (this.data.lastActiveDate !== today) {
 			const yesterdayDate = new Date();
 			yesterdayDate.setDate(yesterdayDate.getDate() - 1);
 			const yesterday = yesterdayDate.toISOString().split("T")[0];
 
-			if (!this.#data.lastActiveDate || this.#data.lastActiveDate < yesterday) this.#data.streak = 1;
-			else if (this.#data.lastActiveDate === yesterday) {
-				this.#data.streak = (this.#data.streak || 1) + 1;
-				const bonus = Math.min(this.#data.streak * 5, 50);
-				this.#data.bonusXp = (this.#data.bonusXp || 0) + bonus;
+			if (!this.data.lastActiveDate || this.data.lastActiveDate < yesterday) this.data.streak = 1;
+			else if (this.data.lastActiveDate === yesterday) {
+				this.data.streak = (this.data.streak || 1) + 1;
+				const bonus = Math.min(this.data.streak * 5, 50);
+				this.data.bonusXp = (this.data.bonusXp || 0) + bonus;
 			}
 
-			if (!this.#data.bestStreak || (this.#data.streak && this.#data.streak > this.#data.bestStreak)) this.#data.bestStreak = this.#data.streak;
+			if (!this.data.bestStreak || (this.data.streak && this.data.streak > this.data.bestStreak)) this.data.bestStreak = this.data.streak;
 
-			this.#data.lastActiveDate = today;
+			this.data.lastActiveDate = today;
 			streakChanged = true;
 		}
 
-		this.#currentActivity.guilds[guildId] ??= { achievements: [], messages: { sent: 0, mentions: 0, reactions: { added: 0, received: 0 } }, stageEvents: { attended: 0 }, forum: { posts: 0 } };
+		this.currentActivity.guilds[guildId] ??= { achievements: [], messages: { sent: 0, mentions: 0, reactions: { added: 0, received: 0 } }, stageEvents: { attended: 0 }, forum: { posts: 0 } };
 
-		const guildActivity = this.#currentActivity.guilds[guildId];
+		const guildActivity = this.currentActivity.guilds[guildId];
 
 		if (type === "message") guildActivity.messages.sent++;
 		if (type === "mention") guildActivity.messages.mentions++;
@@ -513,9 +510,9 @@ export class User {
 		if (type === "forumPost") guildActivity.forum.posts++;
 		if (type === "stageEvent") guildActivity.stageEvents.attended++;
 
-		this.#currentActivity.changed = true;
-		if (this.#statsCache) this.#statsCache.lastUpdate = 0;
-		if (this.#statsCache && streakChanged) this.#statsCache.lastUpdate = 0;
+		this.currentActivity.changed = true;
+		if (this.statsCache) this.statsCache.lastUpdate = 0;
+		if (this.statsCache && streakChanged) this.statsCache.lastUpdate = 0;
 		this.touch();
 
 		const newLevel = await this.getLevel();
@@ -523,8 +520,8 @@ export class User {
 
 		if (newLevel > oldLevel || unlockedAchievementIds.length > 0 || streakChanged) {
 			if (unlockedAchievementIds.length > 0) {
-				this.#data.unlockedAchievements ??= [];
-				this.#data.unlockedAchievements.push(...unlockedAchievementIds);
+				this.data.unlockedAchievements ??= [];
+				this.data.unlockedAchievements.push(...unlockedAchievementIds);
 
 				for (const id of unlockedAchievementIds) {
 					const achievement = achievements.find((achievement) => achievement.id === id);
@@ -553,7 +550,7 @@ export class User {
 								type: RichPictureType.LevelUp,
 								data: {
 									username: displayName,
-									avatarUrl: this.#discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+									avatarUrl: this.discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
 									oldLevel,
 									newLevel
 								}
@@ -569,7 +566,7 @@ export class User {
 										type: RichPictureType.Achievement,
 										data: {
 											username: displayName,
-											avatarUrl: this.#discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+											avatarUrl: this.discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
 											achievementName: achievement.name,
 											achievementDescription: achievement.description
 										}
@@ -580,7 +577,7 @@ export class User {
 						}
 
 						if (files.length > 0) {
-							let content = `<@${this.#discordUser.id}>`;
+							let content = `<@${this.discordUser.id}>`;
 							if (newLevel > oldLevel && unlockedAchievementIds.length > 0) content += ", you leveled up and unlocked an achievement!";
 							else if (newLevel > oldLevel) content += ", you leveled up!";
 							else content += ", you unlocked an achievement!";
@@ -590,52 +587,56 @@ export class User {
 					}
 				}
 			} catch (error) {
-				this.#logger.error("Failed to send level up/achievement notification", { cause: error });
+				this.logger.error("Failed to send level up/achievement notification", { cause: error });
 			}
 		}
-	}
+	};
 
 	async saveSettings() {
 		try {
-			await Deno.mkdir(this.#storagePath, { recursive: true });
-			const tmpPath = path.join(this.#storagePath, "settings.json.tmp");
-			const targetPath = path.join(this.#storagePath, "settings.json");
-			await Deno.writeTextFile(tmpPath, JSON.stringify(this.#settings, null, "\t"));
+			await Deno.mkdir(this.storagePath, { recursive: true });
+			const tmpPath = path.join(this.storagePath, "settings.json.tmp");
+			const targetPath = path.join(this.storagePath, "settings.json");
+			await Deno.writeTextFile(tmpPath, JSON.stringify(this.settings, null, "\t"));
 			await Deno.rename(tmpPath, targetPath);
 		} catch (error) {
-			this.#logger.error("Failed to save user settings", { cause: error });
+			this.logger.error("Failed to save user settings", { cause: error });
 		}
-	}
+
+		this.touch();
+	};
 
 	async saveData() {
 		try {
-			await Deno.mkdir(this.#storagePath, { recursive: true });
-			const tmpPath = path.join(this.#storagePath, "data.json.tmp");
-			const targetPath = path.join(this.#storagePath, "data.json");
-			await Deno.writeTextFile(tmpPath, JSON.stringify(this.#data, null, "\t"));
+			await Deno.mkdir(this.storagePath, { recursive: true });
+			const tmpPath = path.join(this.storagePath, "data.json.tmp");
+			const targetPath = path.join(this.storagePath, "data.json");
+			await Deno.writeTextFile(tmpPath, JSON.stringify(this.data, null, "\t"));
 			await Deno.rename(tmpPath, targetPath);
 		} catch (error) {
-			this.#logger.error("Failed to save user data", { cause: error });
+			this.logger.error("Failed to save user data", { cause: error });
 		}
-	}
-
-	async delete(): Promise<void> {
-		await Deno.remove(this.#storagePath, {
-			recursive: true
-		});
-		this.#settings = {
-			activity: {}
-		};
-		this.#data = {};
 
 		this.touch();
-	}
+	};
+
+	async delete(): Promise<void> {
+		await Deno.remove(this.storagePath, {
+			recursive: true
+		});
+		this.settings = {
+			activity: {}
+		};
+		this.data = {};
+
+		this.touch();
+	};
 
 	reportError(message: string, error: unknown) {
-		this.#logger.error(message, {
+		this.logger.error(message, {
 			cause: error
 		});
 
 		this.touch();
-	}
+	};
 };

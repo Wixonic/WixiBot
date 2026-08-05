@@ -230,47 +230,46 @@ export const guildSettingsSchema: DynamicSettingsSchema = {
 };
 
 export class Guild {
-	#discordGuild: DiscordGuild;
-	#storagePath: string;
-	#settings: GuildSettings = {
+	private discordGuild: DiscordGuild;
+	private storagePath: string;
+	private logger: Logger;
+	private supportersStickyMessage: StickyMessage | null = null;
+
+	lastAccessed: number = Date.now();
+	settings: GuildSettings = {
 		channels: {},
 		roles: {},
 		moderation: {},
 		tickets: {}
 	};
-	#logger: Logger;
-	#lastAccessed: number = Date.now();
-	private supportersStickyMessage: StickyMessage | null = null;
 
 	constructor(logger: Logger, discordGuild: DiscordGuild) {
-		this.#discordGuild = discordGuild;
-		this.#logger = logger.clone(`[G-${discordGuild.id}]`);
-		this.#storagePath = `./storage/guilds/${discordGuild.id}/`;
-	}
+		this.discordGuild = discordGuild;
+		this.logger = logger.clone(`[G-${discordGuild.id}]`);
+		this.storagePath = `./storage/guilds/${discordGuild.id}/`;
+	};
 
-	get id() { return this.#discordGuild.id; }
-	get name() { return this.#discordGuild.name; }
-	get settings() { return this.#settings; }
-	get lastAccessed() { return this.#lastAccessed; }
+	get id() { return this.discordGuild.id; }
+	get name() { return this.discordGuild.name; }
 
-	touch() { this.#lastAccessed = Date.now(); }
+	touch() { this.lastAccessed = Date.now(); }
 
 	async init() {
-		this.#logger.debug("Initializing guild...");
+		this.logger.debug("Initializing guild...");
 
 		try {
-			await Deno.mkdir(path.dirname(this.#storagePath), { recursive: true });
+			await Deno.mkdir(path.dirname(this.storagePath), { recursive: true });
 			try {
-				const content = await Deno.readTextFile(path.join(this.#storagePath, "settings.json"));
-				this.#settings = JSON.parse(content);
-				this.#logger.debug("Loaded existing guild settings.");
+				const content = await Deno.readTextFile(path.join(this.storagePath, "settings.json"));
+				this.settings = JSON.parse(content);
+				this.logger.debug("Loaded existing guild settings.");
 			} catch (error) {
 				if (error instanceof Deno.errors.NotFound) {
 					await this.saveSettings();
-					this.#logger.debug("Created new guild settings.");
+					this.logger.debug("Created new guild settings.");
 
 					try {
-						const owner = await this.#discordGuild.fetchOwner();
+						const owner = await this.discordGuild.fetchOwner();
 
 						const helpCommandId = await client.getCommandId("help", this.id);
 						const settingsCommandId = await client.getCommandId("settings", this.id);
@@ -284,28 +283,30 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 > **Tip**: You can configure an error logging channel and a moderation channel so that I can send you reports directly in your server instead of DMs.
 > Use ${settingsCommandText} to set it up!`, owner.send.bind(owner));
 					} catch (error) {
-						this.#logger.warn("Failed to notify guild owner. DMs might be closed.", {
+						this.logger.warn("Failed to notify guild owner. DMs might be closed.", {
 							cause: error
 						});
 					}
 				} else throw error;
 			}
 		} catch (error) {
-			this.#logger.error("Failed to initialize guild storage", {
+			this.logger.error("Failed to initialize guild storage", {
 				cause: error
 			});
 		}
 
 		client.addGuild(this);
-	}
+		this.touch();
+	};
 
 	async saveSettings() {
-		await Deno.writeTextFile(path.join(this.#storagePath, "settings.json"), JSON.stringify(this.#settings));
-	}
+		await Deno.writeTextFile(path.join(this.storagePath, "settings.json"), JSON.stringify(this.settings));
+		this.touch();
+	};
 
-	async #notifyOwnerFallback(content: string, purpose: string) {
+	private async notifyOwnerFallback(content: string, purpose: string) {
 		try {
-			const owner = await this.#discordGuild.fetchOwner();
+			const owner = await this.discordGuild.fetchOwner();
 			const settingsCommandId = await client.getCommandId("settings", this.id);
 			const settingsCommandText = settingsCommandId ? `</settings:${settingsCommandId}>` : "`/settings`";
 
@@ -317,11 +318,11 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 > **Tip**: You can configure a ${purposeText} channel so that I can send you reports directly in your server instead of DMs.
 > Use ${settingsCommandText} to set it up!`, owner.send.bind(owner));
 		} catch (error) {
-			this.#logger.warn("Failed to notify guild owner. DMs might be closed.", {
+			this.logger.warn("Failed to notify guild owner. DMs might be closed.", {
 				cause: error
 			});
 		}
-	}
+	};
 
 	async createTicket(ticketId: string, channel: string, createdBy: string, messages: { channel: string; guild: string }, reason?: string, state: TicketState = "Waiting", claimedBy?: string): Promise<TicketData> {
 		const ticketData: TicketData = {
@@ -339,27 +340,30 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		};
 
 		await this.saveTicket(ticketData);
+		this.touch();
 		return ticketData;
-	}
+	};
 
 	async saveTicket(ticket: TicketData): Promise<void> {
-		const ticketsDirectory = path.join(this.#storagePath, "tickets");
+		const ticketsDirectory = path.join(this.storagePath, "tickets");
 		await Deno.mkdir(ticketsDirectory, { recursive: true });
 		await Deno.writeTextFile(path.join(ticketsDirectory, `${ticket.id}.json`), JSON.stringify(ticket));
-	}
+		this.touch();
+	};
 
 	async loadTicket(ticketId: string): Promise<TicketData | null> {
 		try {
-			const content = await Deno.readTextFile(path.join(this.#storagePath, "tickets", `${ticketId}.json`));
+			const content = await Deno.readTextFile(path.join(this.storagePath, "tickets", `${ticketId}.json`));
+			this.touch();
 			return JSON.parse(content) as TicketData;
 		} catch (error) {
 			if (error instanceof Deno.errors.NotFound) return null;
 			throw error;
 		}
-	}
+	};
 
 	async warn(target: GuildMember, by: GuildMember | APIInteractionGuildMember | null, reason: string) {
-		const moderationDirectory = path.join(this.#storagePath, "moderation", target.id, "warnings");
+		const moderationDirectory = path.join(this.storagePath, "moderation", target.id, "warnings");
 
 		await Deno.mkdir(moderationDirectory, {
 			recursive: true
@@ -372,7 +376,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		}));
 
 		if (this.settings.moderation.warnings) {
-			const channel = await this.#discordGuild.channels.fetch(this.settings.moderation.warnings);
+			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.warnings);
 			if (channel && channel.isTextBased()) {
 				const buffer = await generateRichPicture({
 					type: RichPictureType.Warn,
@@ -386,11 +390,12 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 				const attachment = new AttachmentBuilder(buffer, { name: "warn.png" });
 				await channel.send({ files: [attachment] });
 			} else this.reportError("Configured warnings channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.warnings}`));
-		} else this.#notifyOwnerFallback(`A user was warned in your server **${this.name}**:\n${`User <@${target.id}> has been warned${by ? ` by <@${by.user.id}>` : ""}.\nReason: ${reason}`}`, "warnings");
-	}
+		} else this.notifyOwnerFallback(`A user was warned in your server **${this.name}**:\n${`User <@${target.id}> has been warned${by ? ` by <@${by.user.id}>` : ""}.\nReason: ${reason}`}`, "warnings");
+		this.touch();
+	};
 
 	async reportMessage(message: Message, by: GuildMember | APIInteractionGuildMember | null, reason?: string) {
-		const moderationDirectory = path.join(this.#storagePath, "moderation", message.author.id, "reports");
+		const moderationDirectory = path.join(this.storagePath, "moderation", message.author.id, "reports");
 
 		await Deno.mkdir(moderationDirectory, {
 			recursive: true
@@ -410,7 +415,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		}));
 
 		if (this.settings.moderation.reports) {
-			const channel = await this.#discordGuild.channels.fetch(this.settings.moderation.reports);
+			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.reports);
 			if (channel && channel.isTextBased()) {
 				const authorDisplayName = message.member?.displayName ?? message.author.displayName ?? message.author.username;
 				const buffer = await generateRichPicture({
@@ -468,13 +473,14 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 					flags: MessageFlags.IsComponentsV2
 				});
 			} else this.reportError("Configured reports channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.reports}`));
-		} else this.#notifyOwnerFallback(`A message was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
+		} else this.notifyOwnerFallback(`A message was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
 Target: https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id} by <@${message.author.id}>
 Reason: ${reason || "No reason provided"}`, "reports");
-	}
+		this.touch();
+	};
 
-	async reportUser(discordMember: GuildMember, by: GuildMember | APIInteractionGuildMember | null, reason?: string) {
-		const moderationDirectory = path.join(this.#storagePath, "moderation", discordMember.id, "reports");
+	private async reportUser(discordMember: GuildMember, by: GuildMember | APIInteractionGuildMember | null, reason?: string) {
+		const moderationDirectory = path.join(this.storagePath, "moderation", discordMember.id, "reports");
 
 		await Deno.mkdir(moderationDirectory, {
 			recursive: true
@@ -489,7 +495,7 @@ Reason: ${reason || "No reason provided"}`, "reports");
 		}));
 
 		if (this.settings.moderation.reports) {
-			const channel = await this.#discordGuild.channels.fetch(this.settings.moderation.reports);
+			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.reports);
 			if (channel && channel.isTextBased()) {
 				const buffer = await generateRichPicture({
 					type: RichPictureType.ReportUser,
@@ -539,16 +545,17 @@ Reason: ${reason || "No reason provided"}`, "reports");
 					flags: MessageFlags.IsComponentsV2
 				});
 			} else this.reportError("Configured reports channel not found or not text-based", new Error(`Channel ID: ${this.settings.moderation.reports}`));
-		} else this.#notifyOwnerFallback(`A user was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
+		} else this.notifyOwnerFallback(`A user was reported in your server **${this.name}**${by ? ` by <@${by.user.id}>` : ""}:
 - Target: <@${discordMember.id}>
 - Reason: ${reason || "No reason provided"}`, "reports");
-	}
+		this.touch();
+	};
 
 	async getModerationHistory(targetId: string) {
 		const warnings: { date: string; reason: string; by: string | null }[] = [];
 		const reports: ReportData[] = [];
 
-		const warningsDir = path.join(this.#storagePath, "moderation", targetId, "warnings");
+		const warningsDir = path.join(this.storagePath, "moderation", targetId, "warnings");
 		try {
 			for await (const entry of Deno.readDir(warningsDir)) {
 				if (entry.isFile && entry.name.endsWith(".json")) {
@@ -560,7 +567,7 @@ Reason: ${reason || "No reason provided"}`, "reports");
 			// No warnings
 		}
 
-		const reportsDir = path.join(this.#storagePath, "moderation", targetId, "reports");
+		const reportsDir = path.join(this.storagePath, "moderation", targetId, "reports");
 		try {
 			for await (const entry of Deno.readDir(reportsDir)) {
 				if (entry.isFile && entry.name.endsWith(".json")) {
@@ -575,16 +582,17 @@ Reason: ${reason || "No reason provided"}`, "reports");
 		warnings.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 		reports.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+		this.touch();
 		return { warnings, reports };
-	}
+	};
 
-	reportError(message: string, error: unknown) {
-		this.#logger.error(message, {
+	private reportError(message: string, error: unknown) {
+		this.logger.error(message, {
 			cause: error
 		});
 
-		if (this.#settings.channels.logs) {
-			const channel = this.#discordGuild.channels.cache.get(this.#settings.channels.logs);
+		if (this.settings.channels.logs) {
+			const channel = this.discordGuild.channels.cache.get(this.settings.channels.logs);
 
 			if (channel && channel.isTextBased()) return sendChunks(`An error occurred:
 					\`\`\`
@@ -593,20 +601,21 @@ ${error instanceof Error ? error.stack : String(error)}
 \`\`\``, channel.send.bind(channel)).catch(() => { });
 		}
 
-		this.#notifyOwnerFallback(`An error occurred in your server **${this.name}**:
+		this.notifyOwnerFallback(`An error occurred in your server **${this.name}**:
 \`\`\`
 ${String(message)}
 ${error instanceof Error ? error.stack : String(error)}
 \`\`\``, "logs");
-	}
+		this.touch();
+	};
 
 	async publishFundingAnnouncement(userId: string, type: "boost" | "supporter"): Promise<boolean> {
 		const channelId = this.settings.channels.supporters || this.settings.channels.bot || this.settings.channels.welcome;
-		const channel = channelId ? this.#discordGuild.channels.cache.get(channelId) : this.#discordGuild.systemChannel;
+		const channel = channelId ? this.discordGuild.channels.cache.get(channelId) : this.discordGuild.systemChannel;
 
 		if (channel && channel.isTextBased()) {
 			try {
-				const discordMember = await this.#discordGuild.members.fetch(userId).catch(() => null);
+				const discordMember = await this.discordGuild.members.fetch(userId).catch(() => null);
 				const username = discordMember ? discordMember.user.username : userId;
 				const avatarUrl = discordMember ? discordMember.user.displayAvatarURL({ extension: "png", size: 256 }) : undefined;
 
@@ -621,21 +630,24 @@ ${error instanceof Error ? error.stack : String(error)}
 				const attachment = new AttachmentBuilder(buffer, { name: `${type}.png` });
 
 				await channel.send({ content: `<@${userId}>`, files: [attachment] });
+				this.touch();
 				return true;
 			} catch (error) {
 				this.reportError(`Failed to send announcement for ${userId}`, error);
+				this.touch();
 				return false;
 			}
 		}
+		this.touch();
 		return false;
-	}
+	};
 
 	async handleStickyMessage(message: Message) {
 		const supportersChannelId = this.settings.channels.supporters;
 		if (supportersChannelId && message.channelId === supportersChannelId) {
 			if (!this.supportersStickyMessage) {
 				this.supportersStickyMessage = new StickyMessage({
-					storagePath: this.#storagePath,
+					storagePath: this.storagePath,
 					key: "supporters",
 					getContent: async () => {
 						const fundingCommandId = await client.getCommandId("funding", this.id);
@@ -648,5 +660,6 @@ ${error instanceof Error ? error.stack : String(error)}
 
 			await this.supportersStickyMessage.handleMessage(message);
 		}
-	}
+		this.touch();
+	};
 };
