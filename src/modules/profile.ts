@@ -12,6 +12,8 @@ export const handler: Handler = {
 		console.log("Profile request for user ID:", userId);
 		if (!userId) return new Response("Missing user ID", { status: 400 });
 
+		if (userId !== "1020454688467980308") return new Response("Unauthorized", { status: 403 });
+
 		const user = await client.getUser(userId);
 		if (!user) return new Response("User not found", { status: 404 });
 
@@ -19,7 +21,12 @@ export const handler: Handler = {
 			id: user.id,
 			username: user.username,
 			displayName: user.displayName,
-			avatar: user.avatar()
+			avatar: user.avatar("webp", 256, true),
+			avatarDecoration: user.avatarDecoration(true),
+			presence: {
+				activities: user.presence?.activities || [],
+				status: user.presence?.status || "offline",
+			}
 		});
 	}
 };

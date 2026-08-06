@@ -1,4 +1,4 @@
-import { AttachmentBuilder, type PresenceStatus, type Presence, type User as DiscordUser } from "discord.js";
+import { type Activity, AttachmentBuilder, type Presence, type PresenceStatus, type User as DiscordUser } from "discord.js";
 import path from "node:path";
 
 import { achievements, checkNewAchievements } from "./achievements.ts";
@@ -14,9 +14,17 @@ export type Achievement = {
 	description: string;
 };
 
+export interface UserMappedActivity {
+	name: string;
+	type: number;
+	state?: string;
+	details?: string;
+	applicationId?: string;
+};
+
 export interface UserActivity {
-	activity: {
-		activities?: any[];
+	presence: {
+		activities?: Activity[];
 		status?: PresenceStatus;
 	} | null;
 	changed: boolean;
@@ -111,7 +119,7 @@ export interface UserReplayStats {
 
 export class User {
 	private currentActivity: UserActivity = {
-		activity: null,
+		presence: null,
 		changed: false,
 		date: new Date(),
 		guilds: {}
@@ -128,6 +136,7 @@ export class User {
 	} | null = null;
 	private discord: DiscordUser;
 	private logger: Logger;
+
 	storagePath: string;
 	data: UserData = {};
 
@@ -148,7 +157,15 @@ export class User {
 	get id() { return this.discord.id; }
 	get username() { return this.discord.username; }
 	get displayName() { return this.discord.globalName ?? this.discord.username; }
-	avatar(extension: "webp" | "png" | "jpg" | "jpeg" | "gif" = "webp", size = 512, animated = true) { return this.discord.displayAvatarURL({ extension, size, forceStatic: !animated }); };
+	avatar(extension?: "webp" | "png" | "jpg" | "jpeg" | "gif", size?: number, animated = true): string {
+		const url = new URL(this.discord.displayAvatarURL({ extension, size, forceStatic: !animated }));
+		if (animated) url.searchParams.set("animated", "true");
+		return url.toString();
+	};
+	avatarDecoration(animated = true): string | null {
+		return this.discord.avatarDecorationData?.skuId ? `https://cdn.discordapp.com/media/v1/collectibles-shop/${this.discord.avatarDecorationData?.skuId}/${animated ? "animated" : "static"}` : null;
+	};
+	get presence() { return this.currentActivity.presence; }
 
 	async getGuildDisplayName(guildId?: string): Promise<string> {
 		if (guildId) {
@@ -215,61 +232,53 @@ export class User {
 		}
 
 		try {
-			const activityPath = path.join(this.storagePath, "activity");
+			const presencePath = path.join(this.storagePath, "activity");
 			let latestFile = "";
-			for await (const dirEntry of Deno.readDir(activityPath)) {
-				if (dirEntry.isFile && dirEntry.name.endsWith(".json")) {
-					if (dirEntry.name > latestFile) latestFile = dirEntry.name;
+			for await (const directoryEntry of Deno.readDir(presencePath)) {
+				if (directoryEntry.isFile && directoryEntry.name.endsWith(".json")) {
+					if (directoryEntry.name > latestFile) latestFile = directoryEntry.name;
 				}
 			}
+
 			if (latestFile) {
-				const content = await Deno.readTextFile(path.join(activityPath, latestFile));
-				const savedActivity = JSON.parse(content);
-				if (savedActivity && savedActivity.activity) {
-					this.currentActivity.activity = savedActivity.activity;
-				}
+				const content = await Deno.readTextFile(path.join(presencePath, latestFile));
+				const savedPresence = JSON.parse(content);
+				if (savedPresence && savedPresence.presence) this.currentActivity.presence = savedPresence.presence;
 			}
 		} catch {
-			// Ignore if activity directory doesn't exist yet
+			// Ignore if presence directory doesn't exist yet
 		}
 
 		this.touch();
 	};
 
 	setPresence(presence: Partial<Presence> | null) {
-		if (this.settings.activity.record) {
-			const mappedActivities = (presence?.activities || []).map(activity => ({
-				name: activity.name,
-				type: activity.type,
-				state: activity.state,
-				details: activity.details,
-				applicationId: activity.applicationId
-			})).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+		const newPresence = {
+			activities: presence?.activities || [],
+			status: presence?.status || "offline"
+		};
 
-			const newActivity = {
-				activities: mappedActivities,
-				status: presence?.status || "offline"
-			};
+		if (JSON.stringify(this.currentActivity.presence) !== JSON.stringify(newPresence)) {
+			this.currentActivity.presence = newPresence;
 
-			if (JSON.stringify(this.currentActivity.activity) !== JSON.stringify(newActivity)) {
-				this.logger.debug(`Presence changed for ${this.username}. Old: ${JSON.stringify(this.currentActivity.activity)} New: ${JSON.stringify(newActivity)}`);
-				this.currentActivity.activity = newActivity;
+			if (this.settings.activity.record) {
+				this.logger.debug(`Presence changed for ${this.username}.Old: ${JSON.stringify(this.currentActivity.presence)} New: ${JSON.stringify(newPresence)} `);
 				this.currentActivity.changed = true;
-			}
-
-			this.touch();
+			} else this.currentActivity.changed = false;
 		}
+
+		this.touch();
 	};
 
 	async recordActivity() {
 		if (this.currentActivity.changed && this.settings.activity.record) {
 			this.logger.debug(`Saving activity to disk for ${this.username}...`);
-			const activityDir = path.join(this.storagePath, "activity");
-			await Deno.mkdir(activityDir, { recursive: true });
+			const activityDirectory = path.join(this.storagePath, "activity");
+			await Deno.mkdir(activityDirectory, { recursive: true });
 
 			const now = new Date();
-			const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-			const monthFilePath = path.join(activityDir, `${yearMonth}.json`);
+			const yearMonth = `${now.getFullYear()} -${String(now.getMonth() + 1).padStart(2, "0")} `;
+			const monthFilePath = path.join(activityDirectory, `${yearMonth}.json`);
 
 			let monthData: any = { yearMonth, guilds: {} };
 			try {
@@ -300,6 +309,15 @@ export class User {
 				targetGuild.forum.posts += posts;
 				targetGuild.stageEvents.attended += attended;
 
+				/** @type {UserMappedActivity[]} */
+				const mappedActivities = (this.currentActivity.presence?.activities || []).map((activity) => ({
+					name: activity.name,
+					type: activity.type,
+					state: activity.state,
+					details: activity.details,
+					applicationId: activity.applicationId
+				})).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
 				this.data.stats.totalMessages += sent;
 				this.data.stats.totalForumPosts += posts;
 				this.data.stats.totalStageEvents += attended;
@@ -317,7 +335,7 @@ export class User {
 			await this.saveData();
 
 			this.currentActivity = {
-				activity: this.currentActivity.activity,
+				presence: this.currentActivity.presence,
 				changed: false,
 				date: new Date(),
 				guilds: {}
@@ -328,7 +346,7 @@ export class User {
 	};
 
 	async sendReplay(_targetMonth?: Date): Promise<boolean> {
-		this.logger.debug("Replay generation disabled.");
+		this.logger.debug("Replay generation is disabled for now.");
 		this.touch();
 		return false;
 	};
@@ -343,13 +361,13 @@ export class User {
 
 		try {
 			const activityPath = path.join(this.storagePath, "activity");
-			for await (const dirEntry of Deno.readDir(activityPath)) {
-				if (dirEntry.isFile && dirEntry.name.endsWith(".json")) {
-					const content = await Deno.readTextFile(path.join(activityPath, dirEntry.name));
+			for await (const directoryEntry of Deno.readDir(activityPath)) {
+				if (directoryEntry.isFile && directoryEntry.name.endsWith(".json")) {
+					const content = await Deno.readTextFile(path.join(activityPath, directoryEntry.name));
 					const activity: any = JSON.parse(content);
 
 					const timestamp = typeof activity.date === "number" && activity.date < 3000000000 ? activity.date * 1000 : Number(activity.date) || 0;
-					if (!activity.date || timestamp >= cutoff || dirEntry.name.length === 7) {
+					if (!activity.date || timestamp >= cutoff || directoryEntry.name.length === 7) {
 						for (const guildId in activity.guilds) {
 							const guildData = activity.guilds[guildId];
 							totalMessages += guildData.messages?.sent || 0;
@@ -385,9 +403,9 @@ export class User {
 
 		try {
 			const activityPath = path.join(this.storagePath, "activity");
-			for await (const dirEntry of Deno.readDir(activityPath)) {
-				if (dirEntry.isFile && dirEntry.name.endsWith(".json")) {
-					const content = await Deno.readTextFile(path.join(activityPath, dirEntry.name));
+			for await (const directoryEntry of Deno.readDir(activityPath)) {
+				if (directoryEntry.isFile && directoryEntry.name.endsWith(".json")) {
+					const content = await Deno.readTextFile(path.join(activityPath, directoryEntry.name));
 					const activity: UserActivity = JSON.parse(content);
 
 					const timestamp = typeof activity.date === "number" && activity.date < 2000000000000 && activity.date < 3000000000 ? activity.date * 1000 : activity.date;
@@ -441,11 +459,11 @@ export class User {
 			let totalReactions = this.data.stats.totalReactions || 0;
 
 			for (const guildId in this.currentActivity.guilds) {
-				const g = this.currentActivity.guilds[guildId];
-				totalMessages += g.messages?.sent || 0;
-				totalStageEvents += g.stageEvents?.attended || 0;
-				totalForumPosts += g.forum?.posts || 0;
-				totalReactions += (g.messages?.reactions?.added || 0) + (g.messages?.reactions?.received || 0);
+				const guildData = this.currentActivity.guilds[guildId];
+				totalMessages += guildData.messages?.sent || 0;
+				totalStageEvents += guildData.stageEvents?.attended || 0;
+				totalForumPosts += guildData.forum?.posts || 0;
+				totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
 			}
 
 			let totalXp = (totalMessages * 10) + (totalStageEvents * 2500) + (totalForumPosts * 250) + (totalReactions * 1);
@@ -478,7 +496,7 @@ export class User {
 	};
 
 	async addActivity(guildId: string, type: "message" | "mention" | "reactionAdd" | "reactionReceive" | "forumPost" | "stageEvent") {
-		this.logger.debug(`Recording activity [${type}] for ${this.username}`);
+		this.logger.debug(`Recording activity[${type}]for ${this.username}`);
 		const oldLevel = await this.getLevel();
 
 		const todayDate = new Date();
@@ -575,13 +593,13 @@ export class User {
 											achievementDescription: achievement.description
 										}
 									});
-									files.push(new AttachmentBuilder(achievementBuffer, { name: `achievement-${id}.png` }));
+									files.push(new AttachmentBuilder(achievementBuffer, { name: `achievement - ${id}.png` }));
 								}
 							}
 						}
 
 						if (files.length > 0) {
-							let content = `<@${this.discord.id}>`;
+							let content = `< @${this.discord.id}> `;
 							if (newLevel > oldLevel && unlockedAchievementIds.length > 0) content += ", you leveled up and unlocked an achievement!";
 							else if (newLevel > oldLevel) content += ", you leveled up!";
 							else content += ", you unlocked an achievement!";
