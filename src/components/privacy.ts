@@ -79,14 +79,10 @@ Please find the archive attached below.`)
 										.setSpacing(SeparatorSpacingSize.Large)
 									)
 									.addTextDisplayComponents((component) => component
-										.setContent("If you only want to request or delete your data saved by the Application, use the button below.")
+										.setContent("If you only want to delete your data saved by the Application, use the button below.")
 									)
 									.addActionRowComponents((component) => component
 										.addComponents([
-											new ButtonBuilder()
-												.setCustomId("privacy:request")
-												.setLabel("Request my data")
-												.setStyle(ButtonStyle.Primary),
 											new ButtonBuilder()
 												.setCustomId("privacy:delete")
 												.setLabel("Delete my data")
@@ -97,7 +93,7 @@ Please find the archive attached below.`)
 										.setSpacing(SeparatorSpacingSize.Large)
 									)
 									.addTextDisplayComponents((component) => component
-										.setContent(`If you want to **delete** or **request all your data**, contact us at <privacy@wixonic.fr>.
+										.setContent(`If you want to **delete** or **request all your data**, including data from other services, contact us at <privacy@wixonic.fr>.
 We will process your request as soon as possible.
 Please note that we may need to verify your identity before processing your request, and that we may need to keep some data for legal purposes.`)
 									)
@@ -146,7 +142,7 @@ Please note that we may need to verify your identity before processing your requ
 													.setSpacing(SeparatorSpacingSize.Large)
 												)
 												.addTextDisplayComponents((component) => component
-													.setContent("Keep in mind that interacting with the Application later will collect new data.")
+													.setContent("Keep in mind that interacting with the Application later will collect new data.\nIf you don't want to have your data collected again, please leave WixiLand and request a deletion from Direct Messages.")
 												)
 										],
 										flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
@@ -154,7 +150,7 @@ Please note that we may need to verify your identity before processing your requ
 								} catch (error) {
 									user.reportError("Failed to delete user data", error);
 									await interaction.editReply({
-										content: "An error occurred while deleting your data. Please try again later."
+										content: "An error occurred while deleting your data. Please try again later or contact support."
 									});
 								}
 							} else {

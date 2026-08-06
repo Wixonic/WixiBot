@@ -71,7 +71,7 @@ However, **some data are always collected**, and can be logged in our systems.`)
 						.setSpacing(SeparatorSpacingSize.Large)
 					)
 					.addTextDisplayComponents((component) => component
-						.setContent(`If you want to **delete** or **request all your data**, contact us at <privacy@wixonic.fr>.
+						.setContent(`If you want to **delete** or **request all your data**, including data from other services, contact us at <privacy@wixonic.fr>.
 We will process your request as soon as possible.
 Please note that we may need to verify your identity before processing your request, and that we may need to keep some data for legal purposes.`)
 					)
