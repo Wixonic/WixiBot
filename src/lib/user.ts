@@ -125,9 +125,9 @@ export class User {
 		totalForumPosts: number;
 		totalReactions: number;
 	} | null = null;
-	private discordUser: DiscordUser;
+	private discord: DiscordUser;
 	private logger: Logger;
-	private storagePath: string;
+	storagePath: string;
 	data: UserData = {};
 
 	settings: UserSettings = {
@@ -139,22 +139,25 @@ export class User {
 	lastAccessed: number = Date.now();
 
 	constructor(logger: Logger, discordUser: DiscordUser) {
-		this.discordUser = discordUser;
+		this.discord = discordUser;
 		this.logger = logger.clone(`[U-${discordUser.id}]`);
 		this.storagePath = `./storage/users/${discordUser.id}/`;
 	};
 
-	get id() { return this.discordUser.id; }
-	get username() { return this.discordUser.username; }
-	get displayName() { return this.discordUser.globalName ?? this.discordUser.username; }
+	get id() { return this.discord.id; }
+	get username() { return this.discord.username; }
+	get displayName() { return this.discord.globalName ?? this.discord.username; }
+	avatar(extension: "webp" | "png" | "jpg" | "jpeg" | "gif" = "webp", size = 512, animated = true) { return this.discord.displayAvatarURL({ extension, size, forceStatic: !animated }); };
 
-	async getGuildDisplayName(guildId: string): Promise<string> {
-		try {
-			const guild = await client.discord?.guilds.fetch(guildId);
-			const member = await guild?.members.fetch(this.discordUser.id);
-			if (member) return member.displayName;
-		} catch {
-			// Fallback
+	async getGuildDisplayName(guildId?: string): Promise<string> {
+		if (guildId) {
+			try {
+				const guild = await client.discord?.guilds.fetch(guildId);
+				const member = await guild?.members.fetch(this.discord.id);
+				if (member) return member.displayName;
+			} catch {
+				// Fallback
+			}
 		}
 
 		this.touch();
@@ -162,7 +165,7 @@ export class User {
 		return this.displayName;
 	};
 
-	touch() { this.lastAccessed = Date.now(); }
+	touch() { this.lastAccessed = Date.now(); };
 
 	async init() {
 		this.logger.debug("Initializing user...");
@@ -550,7 +553,7 @@ export class User {
 								type: RichPictureType.LevelUp,
 								data: {
 									username: displayName,
-									avatarUrl: this.discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+									avatarUrl: this.avatar("png", 256, false),
 									oldLevel,
 									newLevel
 								}
@@ -566,7 +569,7 @@ export class User {
 										type: RichPictureType.Achievement,
 										data: {
 											username: displayName,
-											avatarUrl: this.discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+											avatarUrl: this.avatar("png", 256, false),
 											achievementName: achievement.name,
 											achievementDescription: achievement.description
 										}
@@ -577,7 +580,7 @@ export class User {
 						}
 
 						if (files.length > 0) {
-							let content = `<@${this.discordUser.id}>`;
+							let content = `<@${this.discord.id}>`;
 							if (newLevel > oldLevel && unlockedAchievementIds.length > 0) content += ", you leveled up and unlocked an achievement!";
 							else if (newLevel > oldLevel) content += ", you leveled up!";
 							else content += ", you unlocked an achievement!";

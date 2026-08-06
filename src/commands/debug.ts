@@ -55,13 +55,13 @@ export const command = {
 
 		if (subcommand === "job-list") {
 			const jobs = client.jobs;
-			if (jobs.length === 0) {
+			if (jobs.size === 0) {
 				await interaction.followUp("No jobs currently registered.");
 				return;
 			}
 
-			const list = jobs.map((job) => `- **${job.name}** (\`${job.cron}\`) - ${job.enabled === false ? "Disabled" : "Active"}`).join("\n");
-			await interaction.followUp(`## Registered Background Jobs (${jobs.length}):\n\n${list}`);
+			const list = Array.from(jobs.values()).map((job) => `- **${job.name}** (\`${job.cron}\`) - ${job.enabled === false ? "Disabled" : "Active"}`).join("\n");
+			await interaction.followUp(`## Registered Background Jobs (${jobs.size}):\n\n${list}`);
 			return;
 		}
 

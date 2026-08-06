@@ -53,11 +53,14 @@ However, **some data are always collected**, and can be logged in our systems.`)
 						.setSpacing(SeparatorSpacingSize.Large)
 					)
 					.addTextDisplayComponents((component) => component
-						.setContent(`
-If you want to delete your data saved by the Application, use the button below.`)
+						.setContent("If you only want to request or delete your data saved by the Application, use the button below.")
 					)
 					.addActionRowComponents((component) => component
 						.addComponents([
+							new ButtonBuilder()
+								.setCustomId("privacy:request")
+								.setLabel("Request my data")
+								.setStyle(ButtonStyle.Primary),
 							new ButtonBuilder()
 								.setCustomId("privacy:delete")
 								.setLabel("Delete my data")

@@ -16,7 +16,7 @@ import type { Logger } from "../lib/logger.ts";
 import type { User } from "../lib/user.ts";
 
 const createUserStorageArchive = async (user: User): Promise<Uint8Array> => {
-	await Deno.stat(user.path);
+	await Deno.stat(user.storagePath);
 
 	const directory = await Deno.makeTempDir();
 	const archivePath = `${directory}/U-${user.id}.zip`;
@@ -24,7 +24,7 @@ const createUserStorageArchive = async (user: User): Promise<Uint8Array> => {
 	try {
 		const result = await new Deno.Command("zip", {
 			args: ["-r", "-q", archivePath, "."],
-			cwd: user.path,
+			cwd: user.storagePath,
 			stdout: "piped",
 			stderr: "piped"
 		}).output();

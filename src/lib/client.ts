@@ -16,7 +16,7 @@ import {
 import EventEmitter from "node:events";
 
 import { Guild } from "./guild.ts";
-import type { Logger } from "./logger.ts";
+import { logger as defaultLogger, type Logger } from "./logger.ts";
 import type { ClientSettings } from "./settings.ts";
 import { User } from "./user.ts";
 
@@ -45,25 +45,25 @@ export interface Job {
 };
 
 export class Client extends EventEmitter {
-	#discordClient: DiscordClient | null = null;
-	#logger!: Logger;
-	#settings: ClientSettings | null = null;
+	discord: DiscordClient | null = null;
+	private logger: Logger = defaultLogger;
+	private settings: ClientSettings | null = null;
 
-	#commands = new Map<string, Command>();
-	#components = new Set<Component>();
-	#modals = new Set<Modal>();
-	#guilds = new Map<string, Guild>();
-	#users = new Map<string, User>();
-	#jobs = new Map<string, AbortController>();
-	#loadedJobs = new Map<string, Job>();
+	private commands = new Map<string, Command>();
+	private components = new Set<Component>();
+	private modals = new Set<Modal>();
+	private guilds = new Map<string, Guild>();
+	users = new Map<string, User>();
+	jobs = new Map<string, Job>();
+	private jobControllers = new Map<string, AbortController>();
 
 	async init(logger: Logger, settings: ClientSettings) {
-		this.#logger = logger;
-		this.#settings = settings;
+		this.logger = logger;
+		this.settings = settings;
 
 		logger.debug("Initializing Discord client...");
 
-		this.#discordClient = new DiscordClient({
+		this.discord = new DiscordClient({
 			...settings.discord.options,
 			intents: [
 				GatewayIntentBits.Guilds,
@@ -87,7 +87,7 @@ export class Client extends EventEmitter {
 			}
 		});
 
-		this.#discordClient.on("error", (error) => this.emit("error", error));
+		this.discord.on("error", (error) => this.emit("error", error));
 
 		await this.loadCommands();
 		await this.loadComponents();
@@ -95,55 +95,47 @@ export class Client extends EventEmitter {
 		await this.loadModals();
 		await this.loadJobs();
 
-		await this.#discordClient.login(settings.discord.token);
-	}
+		await this.discord.login(settings.discord.token);
+	};
 
 	async destroy() {
 		this.stopJobs();
-		await this.#discordClient?.destroy();
-		this.#discordClient = null;
-		this.#settings = null;
-	}
+		await this.discord?.destroy();
+		this.discord = null;
+		this.settings = null;
+	};
 
 	stopJobs() {
-		const logger = this.#logger?.clone(() => "[Jobs]");
-		const count = this.#jobs.size;
+		const logger = this.logger?.clone(() => "[Jobs]");
+		const count = this.jobControllers.size;
 
-		for (const [name, controller] of this.#jobs) {
+		for (const [name, controller] of this.jobControllers) {
 			controller.abort();
 			logger?.debug(`Stopped job ${name}.`);
 		}
 
-		this.#jobs.clear();
+		this.jobControllers.clear();
 
 		if (count > 0) logger?.debug(`Stopped ${count} active job${count === 1 ? "" : "s"}.`);
-	}
-
-	get discord() {
-		return this.#discordClient;
-	}
-
-	get settings() {
-		return this.#settings;
-	}
+	};
 
 	get user() {
-		return this.#discordClient?.user ?? null;
-	}
+		return this.discord?.user ?? null;
+	};
 
 	getCommand(name: string) {
-		return this.#commands.get(name);
-	}
+		return this.commands.get(name);
+	};
 
 	async getCommandId(name: string, guildId?: string): Promise<string | null> {
-		if (this.#discordClient?.application) {
+		if (this.discord?.application) {
 			try {
-				const globalCommands = await this.#discordClient.application.commands.fetch();
+				const globalCommands = await this.discord.application.commands.fetch();
 				const globalCommand = globalCommands.find((command) => command.name === name);
 				if (globalCommand) return globalCommand.id;
 
 				if (guildId) {
-					const guild = await this.#discordClient.guilds.fetch(guildId).catch(() => null);
+					const guild = await this.discord.guilds.fetch(guildId).catch(() => null);
 
 					if (guild) {
 						const localCommands = await guild.commands.fetch();
@@ -152,127 +144,127 @@ export class Client extends EventEmitter {
 					}
 				}
 			} catch (error) {
-				this.#logger.error(`Failed to fetch command ID for ${name}`, { cause: error });
+				this.logger.error(`Failed to fetch command ID for ${name}`, { cause: error });
 			}
 
 			return null;
 		}
 
 		return null;
-	}
+	};
 
 	getComponent(customId: string) {
-		return Array.from(this.#components).find((component) => {
+		return Array.from(this.components).find((component) => {
 			if (component.customId instanceof RegExp) return component.customId.test(customId);
 			return component.customId === customId || customId.startsWith(`${component.customId}:`);
 		});
-	}
+	};
 
 	async getGuild(id: string) {
-		let guild = this.#guilds.get(id);
+		let guild = this.guilds.get(id);
 
 		if (!guild) {
-			const discordGuild = await this.#discordClient?.guilds.fetch(id).catch(() => null);
-			if (!discordGuild) return null;
+			try {
+				const discordGuild = await this.discord?.guilds.fetch(id);
+				if (!discordGuild) throw new Error(`Client is not ready`);
 
-			guild = new Guild(this.#logger.clone(() => `[Guild ${id}]`), discordGuild);
-			await guild.init();
-			this.addGuild(guild);
+				guild = new Guild(this.logger.clone(() => `[Guild ${id}]`), discordGuild);
+				await guild.init();
+				this.addGuild(guild);
+			} catch (error) {
+				this.logger.warn(`Failed to fetch guild ${id}`, { cause: error });
+				return null;
+			}
 		}
 
 		guild.touch();
 		return guild;
-	}
+	};
 
 	addGuild(guild: Guild) {
-		this.#guilds.set(guild.id, guild);
-	}
+		this.guilds.set(guild.id, guild);
+	};
 
 	getModal(customId: string) {
-		return Array.from(this.#modals).find((modal) => {
+		return Array.from(this.modals).find((modal) => {
 			if (modal.customId instanceof RegExp) return modal.customId.test(customId);
 			return modal.customId === customId || customId.startsWith(`${modal.customId}:`);
 		});
-	}
+	};
 
 	async getUser(id: string) {
-		let user = this.#users.get(id);
+		let user = this.users.get(id);
 
 		if (!user) {
-			const discordUser = await this.#discordClient?.users.fetch(id).catch(() => null);
-			if (!discordUser) return null;
+			try {
+				const discordUser = await this.discord?.users.fetch(id);
+				if (!discordUser) throw new Error(`Client is not ready`);
 
-			user = new User(this.#logger.clone(() => `[User ${id}]`), discordUser);
-			await user.init();
-			this.addUser(user);
+				user = new User(this.logger.clone(() => `[User ${id}]`), discordUser);
+				await user.init();
+				this.addUser(user);
+			} catch (error) {
+				this.logger.warn(`Failed to fetch user ${id}`, { cause: error });
+				return null;
+			}
 		}
 
 		user.touch();
 		return user;
-	}
+	};
 
 	addUser(user: User) {
-		this.#users.set(user.id, user);
-	}
-
-	get users() {
-		return Array.from(this.#users.values());
-	}
-
-	get jobs() {
-		return Array.from(this.#loadedJobs.values());
-	}
+		this.users.set(user.id, user);
+	};
 
 	getJob(name: string) {
-		return this.#loadedJobs.get(name);
-	}
+		return this.jobs.get(name);
+	};
 
 	async runJob(name: string, customLogger?: Logger) {
-		const job = this.#loadedJobs.get(name);
+		const job = this.jobs.get(name);
 		if (!job) return false;
-		const logger = customLogger ?? this.#logger.clone(() => `[Job ${name}]`);
+		const logger = customLogger ?? this.logger.clone(() => `[Job ${name}]`);
 		await job.execute(logger);
 		return true;
-	}
+	};
 
 	sweep() {
 		const threshold = Date.now() - 15 * 60 * 1000;
 		let usersSwept = 0;
 		let guildsSwept = 0;
 
-		for (const [id, user] of this.#users) {
+		for (const [id, user] of this.users) {
 			if (user.lastAccessed < threshold) {
-				this.#users.delete(id);
+				this.users.delete(id);
 				usersSwept++;
 			}
 		}
 
-		for (const [id, guild] of this.#guilds) {
+		for (const [id, guild] of this.guilds) {
 			if (guild.lastAccessed < threshold) {
-				this.#guilds.delete(id);
+				this.guilds.delete(id);
 				guildsSwept++;
 			}
 		}
 
-		if (usersSwept > 0 || guildsSwept > 0) {
-			this.#logger.debug(`Swept ${usersSwept} users and ${guildsSwept} guilds.`);
-		}
-	}
+		if (usersSwept > 0 || guildsSwept > 0) this.logger.debug(`Swept ${usersSwept} users and ${guildsSwept} guilds.`);
+	};
 
 	async loadCommands() {
-		const logger = this.#logger.clone(() => "[Commands]");
+		const logger = this.logger.clone(() => "[Commands]");
 
 		try {
 			let count = 0;
 
-			for await (const entry of Deno.readDir("./src/commands")) {
+			for await (const entry of Deno.readDir(new URL("../commands", import.meta.url))) {
 				if (entry.isFile && (entry.name.endsWith(".ts") || entry.name.endsWith(".js"))) {
 					const moduleUrl = new URL(`../commands/${entry.name}`, import.meta.url).href;
 					const module = await import(moduleUrl);
 
 					if ("command" in module) {
 						const command = module.command;
-						this.#commands.set(command.data.name, command);
+						this.commands.set(command.data.name, command);
 						count++;
 					}
 				}
@@ -284,20 +276,20 @@ export class Client extends EventEmitter {
 				cause: error
 			});
 		}
-	}
+	};
 
 	async loadComponents() {
-		const logger = this.#logger.clone(() => "[Components]");
+		const logger = this.logger.clone(() => "[Components]");
 
 		try {
 			let count = 0;
 
-			for await (const entry of Deno.readDir("./src/components")) {
+			for await (const entry of Deno.readDir(new URL("../components", import.meta.url))) {
 				if (entry.isFile && (entry.name.endsWith(".ts") || entry.name.endsWith(".js"))) {
 					const moduleUrl = new URL(`../components/${entry.name}`, import.meta.url).href;
 					const module = await import(moduleUrl);
 					if ("component" in module) {
-						this.#components.add(module.component);
+						this.components.add(module.component);
 						count++;
 					}
 				}
@@ -309,23 +301,23 @@ export class Client extends EventEmitter {
 				cause: error
 			});
 		}
-	}
+	};
 
 	async loadEvents() {
-		const logger = this.#logger.clone(() => "[Events]");
+		const logger = this.logger.clone(() => "[Events]");
 
 		try {
 			let count = 0;
 
-			for await (const entry of Deno.readDir("./src/events")) {
+			for await (const entry of Deno.readDir(new URL("../events", import.meta.url))) {
 				if (entry.isFile && (entry.name.endsWith(".ts") || entry.name.endsWith(".js"))) {
 					const moduleUrl = new URL(`../events/${entry.name}`, import.meta.url).href;
 					const module = await import(moduleUrl);
 
 					if ("event" in module) {
 						const event = module.event;
-						if (event.once) this.#discordClient?.once(event.type, (...args) => event.execute(logger, ...args));
-						else this.#discordClient?.on(event.type, (...args) => event.execute(logger, ...args));
+						if (event.once) this.discord?.once(event.type, (...args) => event.execute(logger, ...args));
+						else this.discord?.on(event.type, (...args) => event.execute(logger, ...args));
 						count++;
 					}
 				}
@@ -337,15 +329,15 @@ export class Client extends EventEmitter {
 				cause: error
 			});
 		}
-	}
+	};
 
 	async loadJobs() {
-		const logger = this.#logger.clone(() => "[Jobs]");
+		const logger = this.logger.clone(() => "[Jobs]");
 
 		try {
 			let count = 0;
 
-			for await (const entry of Deno.readDir("./src/jobs")) {
+			for await (const entry of Deno.readDir(new URL("../jobs", import.meta.url))) {
 				if (entry.isFile && (entry.name.endsWith(".ts") || entry.name.endsWith(".js"))) {
 					const moduleUrl = new URL(`../jobs/${entry.name}`, import.meta.url).href;
 					const module = await import(moduleUrl);
@@ -358,7 +350,7 @@ export class Client extends EventEmitter {
 							continue;
 						}
 
-						if (this.#jobs.has(job.name)) {
+						if (this.jobControllers.has(job.name)) {
 							logger.warn(`Skipped job ${job.name}: already active.`);
 							continue;
 						}
@@ -378,8 +370,8 @@ export class Client extends EventEmitter {
 								}
 							});
 
-							this.#jobs.set(job.name, controller);
-							this.#loadedJobs.set(job.name, job);
+							this.jobControllers.set(job.name, controller);
+							this.jobs.set(job.name, job);
 							count++;
 							logger.debug(`Registered job ${job.name} (${job.cron}).`);
 						} catch (error) {
@@ -398,21 +390,21 @@ export class Client extends EventEmitter {
 				cause: error
 			});
 		}
-	}
+	};
 
 	async loadModals() {
-		const logger = this.#logger.clone(() => "[Modals]");
+		const logger = this.logger.clone(() => "[Modals]");
 
 		try {
 			let count = 0;
 
-			for await (const entry of Deno.readDir("./src/modals")) {
+			for await (const entry of Deno.readDir(new URL("../modals", import.meta.url))) {
 				if (entry.isFile && (entry.name.endsWith(".ts") || entry.name.endsWith(".js"))) {
 					const moduleUrl = new URL(`../modals/${entry.name}`, import.meta.url).href;
 					const module = await import(moduleUrl);
 
 					if ("modal" in module) {
-						this.#modals.add(module.modal);
+						this.modals.add(module.modal);
 						count++;
 					}
 				}
@@ -424,8 +416,7 @@ export class Client extends EventEmitter {
 				cause: error
 			});
 		}
-	}
-
+	};
 };
 
 export const client = new Client();

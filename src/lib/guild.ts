@@ -258,7 +258,7 @@ export class Guild {
 		this.logger.debug("Initializing guild...");
 
 		try {
-			await Deno.mkdir(path.dirname(this.storagePath), { recursive: true });
+			await Deno.mkdir(this.storagePath, { recursive: true });
 			try {
 				const content = await Deno.readTextFile(path.join(this.storagePath, "settings.json"));
 				this.settings = JSON.parse(content);
@@ -300,7 +300,8 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 	};
 
 	async saveSettings() {
-		await Deno.writeTextFile(path.join(this.storagePath, "settings.json"), JSON.stringify(this.settings));
+		await Deno.mkdir(this.storagePath, { recursive: true });
+		await Deno.writeTextFile(path.join(this.storagePath, "settings.json"), JSON.stringify(this.settings, null, "\t"));
 		this.touch();
 	};
 
@@ -479,7 +480,7 @@ Reason: ${reason || "No reason provided"}`, "reports");
 		this.touch();
 	};
 
-	private async reportUser(discordMember: GuildMember, by: GuildMember | APIInteractionGuildMember | null, reason?: string) {
+	async reportUser(discordMember: GuildMember, by: GuildMember | APIInteractionGuildMember | null, reason?: string) {
 		const moderationDirectory = path.join(this.storagePath, "moderation", discordMember.id, "reports");
 
 		await Deno.mkdir(moderationDirectory, {
@@ -616,7 +617,7 @@ ${error instanceof Error ? error.stack : String(error)}
 		if (channel && channel.isTextBased()) {
 			try {
 				const discordMember = await this.discordGuild.members.fetch(userId).catch(() => null);
-				const username = discordMember ? discordMember.user.username : userId;
+				const username = discordMember ? discordMember.displayName : userId;
 				const avatarUrl = discordMember ? discordMember.user.displayAvatarURL({ extension: "png", size: 256 }) : undefined;
 
 				const buffer = await generateRichPicture({

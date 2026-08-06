@@ -48,7 +48,7 @@ export const command = {
 			const level = await user.getLevel();
 			return {
 				id: user.id,
-				username: user.username,
+				username: await user.getGuildDisplayName(interaction.guildId ?? undefined),
 				xp: stats.totalXp,
 				level,
 				streak: user.data.streak || 0
@@ -71,23 +71,18 @@ export const command = {
 
 async function sendLeaderboard(interaction: ChatInputCommandInteraction, top10: any[]) {
 	const entries = await Promise.all(top10.map(async (user, index) => {
-		let displayName = user.username;
+		const botUser = await client.getUser(user.id);
+		let displayName = botUser ? await botUser.getGuildDisplayName(interaction.guildId ?? undefined) : user.username;
 		let avatarUrl: string | undefined = undefined;
 
 		if (interaction.guild) {
 			const member = await interaction.guild.members.fetch(user.id).catch(() => null);
-			if (member) {
-				displayName = member.displayName;
-				avatarUrl = member.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true });
-			}
+			if (member) avatarUrl = member.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true });
 		}
 
 		if (!avatarUrl) {
 			const discordUser = await client.discord?.users.fetch(user.id).catch(() => null);
-			if (discordUser) {
-				avatarUrl = discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true });
-				if (displayName === user.username) displayName = discordUser.globalName ?? discordUser.username;
-			}
+			if (discordUser) avatarUrl = discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true });
 		}
 
 		return {

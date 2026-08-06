@@ -9,7 +9,7 @@ export const job: Job = {
 			logger.debug("Running presence check...");
 			let checked = 0;
 
-			for (const user of client.users) {
+			for (const user of client.users.values()) {
 				if (user.settings.activity.record) {
 					checked++;
 

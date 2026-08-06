@@ -114,8 +114,9 @@ export const command = {
 			}
 
 			const user = await client.getUser(targetUser.id);
-			if (!user || !user.data.birthday) await interaction.followUp(targetUser.id === interaction.user.id ? "You haven't set your birthday yet! Use `/birthday set` to set it." : `${targetUser.username} has not set their birthday yet.`);
-			else await interaction.followUp(`<@${user.id}>${user.displayName.endsWith("s") ? "'" : "'s"} birthday is on ${getMonthName(user.data.birthday.month)} ${user.data.birthday.day}.`);
+			const displayName = user ? await user.getGuildDisplayName(interaction.guildId ?? undefined) : (targetUser.globalName ?? targetUser.username);
+			if (!user || !user.data.birthday) await interaction.followUp(targetUser.id === interaction.user.id ? "You haven't set your birthday yet! Use `/birthday set` to set it." : `${displayName} has not set their birthday yet.`);
+			else await interaction.followUp(`<@${user.id}>${displayName.endsWith("s") ? "'" : "'s"} birthday is on ${getMonthName(user.data.birthday.month)} ${user.data.birthday.day}.`);
 			return;
 		}
 
@@ -147,7 +148,7 @@ export const command = {
 					if (targetDate < todayMidnight) targetDate = new Date(now.getFullYear() + 1, month - 1, day);
 
 					usersWithBirthdays.push({
-						displayName: user.displayName,
+						displayName: await user.getGuildDisplayName(interaction.guild?.id),
 						day,
 						month,
 						timestamp: targetDate.getTime()
