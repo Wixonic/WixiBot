@@ -14,7 +14,7 @@ import {
 import { client } from "./client.ts";
 import type { DynamicSettingsSchema } from "./dynamicSettings.ts";
 import type { Logger } from "./logger.ts";
-import { sendChunks } from "./utils.ts";
+import { getStoragePath, sendChunks } from "./utils.ts";
 import { generateRichPicture, RichPictureType } from "./richPicture.ts";
 import { StickyMessage } from "./stickyMessage.ts";
 
@@ -246,7 +246,7 @@ export class Guild {
 	constructor(logger: Logger, discordGuild: DiscordGuild) {
 		this.discordGuild = discordGuild;
 		this.logger = logger.clone(`[G-${discordGuild.id}]`);
-		this.storagePath = `./storage/guilds/${discordGuild.id}/`;
+		this.storagePath = getStoragePath("guilds", discordGuild.id);
 	};
 
 	get id() { return this.discordGuild.id; }

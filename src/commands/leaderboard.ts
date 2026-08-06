@@ -9,6 +9,7 @@ import {
 import type { Command } from "../lib/client.ts";
 import { client } from "../lib/client.ts";
 import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
+import { getStoragePath } from "../lib/utils.ts";
 
 let leaderboardCache: { data: any[], expires: number } | null = null;
 
@@ -32,7 +33,7 @@ export const command = {
 
 		const users = [];
 		try {
-			for await (const dirEntry of Deno.readDir("./storage/users/")) {
+			for await (const dirEntry of Deno.readDir(getStoragePath("users"))) {
 				if (dirEntry.isDirectory) {
 					const user = await client.getUser(dirEntry.name);
 					if (user) users.push(user);

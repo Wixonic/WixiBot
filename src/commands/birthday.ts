@@ -8,6 +8,7 @@ import {
 
 import type { Command } from "../lib/client.ts";
 import { client } from "../lib/client.ts";
+import { getStoragePath } from "../lib/utils.ts";
 
 const getMonthName = (month: number) => new Date(0, month - 1, 1).toLocaleString("en-US", { month: "long" });
 
@@ -129,7 +130,7 @@ export const command = {
 			const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
 			try {
-				for await (const dirEntry of Deno.readDir("./storage/users/")) {
+				for await (const dirEntry of Deno.readDir(getStoragePath("users"))) {
 					if (!dirEntry.isDirectory) continue;
 					const user = await client.getUser(dirEntry.name);
 					if (!user || !user.data.birthday) continue;

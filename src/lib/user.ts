@@ -6,6 +6,7 @@ import { client } from "./client.ts";
 import type { DynamicSettingsSchema } from "./dynamicSettings.ts";
 import type { Logger } from "./logger.ts";
 import { generateRichPicture, RichPictureType } from "./richPicture.ts";
+import { getStoragePath } from "./utils.ts";
 
 export type Achievement = {
 	id: string;
@@ -141,7 +142,7 @@ export class User {
 	constructor(logger: Logger, discordUser: DiscordUser) {
 		this.discord = discordUser;
 		this.logger = logger.clone(`[U-${discordUser.id}]`);
-		this.storagePath = `./storage/users/${discordUser.id}/`;
+		this.storagePath = getStoragePath("users", discordUser.id);
 	};
 
 	get id() { return this.discord.id; }

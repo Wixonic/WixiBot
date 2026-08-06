@@ -1,4 +1,7 @@
+import { fileURLToPath } from "node:url";
 import { type ApplicationCommand, type ApplicationCommandOption, ApplicationCommandOptionType } from "discord.js";
+
+export const getStoragePath = (...subPaths: string[]) => join(fileURLToPath(new URL("../../storage", import.meta.url)), ...subPaths);
 
 export const clone = <T>(obj: T, cloned = new WeakMap<object, unknown>()): T => {
 	if (obj === null || typeof obj !== "object") return obj;

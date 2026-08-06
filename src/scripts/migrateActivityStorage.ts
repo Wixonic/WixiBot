@@ -1,8 +1,8 @@
-import path from "node:path";
+import { getStoragePath } from "../lib/utils.ts";
 
 const migrate = async () => {
 	console.log("Starting activity storage migration...");
-	const usersDir = "./storage/users/";
+	const usersDir = getStoragePath("users");
 	let usersProcessed = 0;
 	let filesCleaned = 0;
 

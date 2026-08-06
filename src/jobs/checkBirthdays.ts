@@ -2,6 +2,7 @@ import { AttachmentBuilder } from "discord.js";
 import { client, type Job } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
 import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
+import { getStoragePath } from "../lib/utils.ts";
 
 export const job: Job = {
 	cron: "0 0 * * *",
@@ -21,7 +22,7 @@ export const job: Job = {
 		const todayBirthdayUserIds = new Set<string>();
 
 		try {
-			for await (const dirEntry of Deno.readDir("./storage/users/")) {
+			for await (const dirEntry of Deno.readDir(getStoragePath("users"))) {
 				if (!dirEntry.isDirectory) continue;
 				const user = await client.getUser(dirEntry.name);
 				if (user?.data.birthday) {
