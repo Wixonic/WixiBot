@@ -154,18 +154,25 @@ export class User {
 		this.storagePath = getStoragePath("users", discordUser.id);
 	};
 
-	get id() { return this.discord.id; }
-	get username() { return this.discord.username; }
-	get displayName() { return this.discord.globalName ?? this.discord.username; }
+	get id() { return this.discord.id };
+	get username() { return this.discord.username };
+	get displayName() { return this.discord.globalName ?? this.discord.username };
+	avatarDecoration(animated = true): string | null { return this.discord.avatarDecorationData?.skuId ? `https://cdn.discordapp.com/media/v1/collectibles-shop/${this.discord.avatarDecorationData?.skuId}/${animated ? "animated" : "static"}` : null };
+	nameplate(animated = true): { palette: string, url: string } | null { return this.discord.collectibles?.nameplate?.skuId ? { palette: this.discord.collectibles.nameplate.palette, url: `https://cdn.discordapp.com/media/v1/collectibles-shop/${this.discord.collectibles.nameplate.skuId}/${animated ? "animated" : "static"}` } : null };
+	get presence() { return this.currentActivity.presence };
+
 	avatar(extension?: "webp" | "png" | "jpg" | "jpeg" | "gif", size?: number, animated = true): string {
 		const url = new URL(this.discord.displayAvatarURL({ extension, size, forceStatic: !animated }));
 		if (animated) url.searchParams.set("animated", "true");
 		return url.toString();
 	};
-	avatarDecoration(animated = true): string | null {
-		return this.discord.avatarDecorationData?.skuId ? `https://cdn.discordapp.com/media/v1/collectibles-shop/${this.discord.avatarDecorationData?.skuId}/${animated ? "animated" : "static"}` : null;
+
+	async displayNameStyle() {
+		const response = await client.discord?.rest.get(`/users/${this.discord.id}`) as { display_name_styles?: { colors: number[], effect_id: string, font_id: string } } | null;
+		return response?.display_name_styles;
 	};
-	get presence() { return this.currentActivity.presence; }
+
+	touch() { this.lastAccessed = Date.now() };
 
 	async getGuildDisplayName(guildId?: string): Promise<string> {
 		if (guildId) {
@@ -182,8 +189,6 @@ export class User {
 
 		return this.displayName;
 	};
-
-	touch() { this.lastAccessed = Date.now(); };
 
 	async init() {
 		this.logger.debug("Initializing user...");

@@ -96,6 +96,19 @@ export class Client extends EventEmitter {
 		await this.loadJobs();
 
 		await this.discord.login(settings.discord.token);
+
+		try {
+			await this.discord.rest.patch(`/guilds/${settings.discord.primaryGuildId}/members/@me`, {
+				body: {
+					accent_color: 0xFFA200,
+					display_name_font_id: 8,
+					display_name_effect_id: 3,
+					display_name_colors: [0xFFA200]
+				}
+			});
+		} catch (error) {
+			logger.warn(`Failed to change profile style`, error);
+		}
 	};
 
 	async destroy() {

@@ -23,6 +23,8 @@ export const handler: Handler = {
 			displayName: user.displayName,
 			avatar: user.avatar("webp", 256, true),
 			avatarDecoration: user.avatarDecoration(true),
+			nameplate: user.nameplate(true),
+			displayNameStyle: await user.displayNameStyle(),
 			presence: {
 				activities: user.presence?.activities || [],
 				status: user.presence?.status || "offline",

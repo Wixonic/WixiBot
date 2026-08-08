@@ -249,10 +249,10 @@ export class Guild {
 		this.storagePath = getStoragePath("guilds", discordGuild.id);
 	};
 
-	get id() { return this.discordGuild.id; }
-	get name() { return this.discordGuild.name; }
+	get id() { return this.discordGuild.id };
+	get name() { return this.discordGuild.name };
 
-	touch() { this.lastAccessed = Date.now(); }
+	touch() { this.lastAccessed = Date.now() };
 
 	async init() {
 		this.logger.debug("Initializing guild...");

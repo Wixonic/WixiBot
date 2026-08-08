@@ -12,6 +12,7 @@ export const settings: ClientSettings = {
 	},
 	discord: {
 		clientId: "1481997058708865104",
+		primaryGuildId: "1020663521530351627",
 		invite: "https://discord.gg/BcXFAVKJZQ",
 		options: {},
 		publicKey: "1456ca1215b0de8e3488737cc5bc6e872b22591e0a2dbbb425c28e83fec67c4b",

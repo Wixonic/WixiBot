@@ -18,6 +18,7 @@ export interface DiscordSkuSettings {
 
 export interface DiscordSettings {
 	clientId: string;
+	primaryGuildId: string;
 	invite?: string;
 	options: Omit<ClientOptions, "intents">;
 	publicKey: string;
