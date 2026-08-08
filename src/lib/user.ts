@@ -604,7 +604,7 @@ export class User {
 						}
 
 						if (files.length > 0) {
-							let content = `< @${this.discord.id}> `;
+							let content = `<@${this.discord.id}> `;
 							if (newLevel > oldLevel && unlockedAchievementIds.length > 0) content += ", you leveled up and unlocked an achievement!";
 							else if (newLevel > oldLevel) content += ", you leveled up!";
 							else content += ", you unlocked an achievement!";

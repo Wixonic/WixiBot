@@ -1,11 +1,22 @@
 import { createCanvas, GlobalFonts, loadImage, type CanvasRenderingContext2D } from "@napi-rs/canvas";
+import { fileURLToPath } from "node:url";
 
 try {
-	GlobalFonts.registerFromPath("./src/assets/fonts/OpenSans.woff2", "OpenSans");
-	GlobalFonts.registerFromPath("./src/assets/fonts/RamettoOne.woff2", "RamettoOne");
+	GlobalFonts.registerFromPath(fileURLToPath(new URL("../assets/fonts/OpenSans.woff2", import.meta.url)), "OpenSans");
+	GlobalFonts.registerFromPath(fileURLToPath(new URL("../assets/fonts/RamettoOne.woff2", import.meta.url)), "RamettoOne");
 } catch {
 	// Fallback to system fonts
 }
+
+const ICONS_DIR = new URL("../assets/icons/", import.meta.url);
+
+type DrawImageContext = CanvasRenderingContext2D & {
+	drawImage: (image: unknown, dx: number, dy: number, dw: number, dh: number) => void;
+};
+
+const drawImage = (context: CanvasRenderingContext2D, image: unknown, dx: number, dy: number, dw: number, dh: number) => {
+	(context as DrawImageContext).drawImage(image, dx, dy, dw, dh);
+};
 
 export enum RichPictureType {
 	Profile = "Profile",
@@ -164,7 +175,7 @@ const drawCircularAvatar = async (ctx: CanvasRenderingContext2D, url: string | u
 	if (url) {
 		try {
 			const image = await loadImage(url);
-			(ctx as any).drawImage(image, x, y, size, size);
+			drawImage(ctx, image, x, y, size, size);
 			ctx.restore();
 			return;
 		} catch {
@@ -184,13 +195,13 @@ const drawCircularAvatar = async (ctx: CanvasRenderingContext2D, url: string | u
 
 const drawSvgIcon = async (ctx: CanvasRenderingContext2D, iconName: string, color: string, x: number, y: number, size: number) => {
 	try {
-		let svg = await Deno.readTextFile(`./src/assets/icons/${iconName}.svg`);
+		let svg = await Deno.readTextFile(new URL(`${iconName}.svg`, ICONS_DIR));
 		svg = svg.replace(/<rect[^>]*\/>/g, "");
 		svg = svg.replace(/<svg /, `<svg width="${size}" height="${size}" `);
 		svg = svg.replace(/path /g, `path fill="${color}" `);
 		const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
 		const image = await loadImage(dataUrl);
-		(ctx as any).drawImage(image, x, y, size, size);
+		drawImage(ctx, image, x, y, size, size);
 	} catch {
 		// Ignore SVG load error
 	}
@@ -212,7 +223,7 @@ const drawTextPatternIconWatermark = async (
 	const y = customY !== undefined ? customY : cardY + (cardH - size) / 2;
 
 	try {
-		let svg = await Deno.readTextFile(`./src/assets/icons/${iconName}.svg`);
+		let svg = await Deno.readTextFile(new URL(`${iconName}.svg`, ICONS_DIR));
 		svg = svg.replace(/<rect[^>]*\/>/g, "");
 		svg = svg.replace(/<svg /, `<svg width="${size}" height="${size}" `);
 		svg = svg.replace(/path /g, `path fill="${accentColor}" `);
@@ -221,7 +232,7 @@ const drawTextPatternIconWatermark = async (
 
 		ctx.save();
 		ctx.globalAlpha = 0.05;
-		(ctx as any).drawImage(image, x, y, size, size);
+		drawImage(ctx, image, x, y, size, size);
 		ctx.restore();
 
 		const padding = size;
@@ -246,11 +257,11 @@ const drawTextPatternIconWatermark = async (
 		offscreenContext.restore();
 
 		offscreenContext.globalCompositeOperation = "destination-in";
-		(offscreenContext as any).drawImage(image, padding, padding, size, size);
+		drawImage(offscreenContext, image, padding, padding, size, size);
 
 		ctx.save();
 		ctx.globalAlpha = 0.1;
-		(ctx as any).drawImage(offscreen, x - padding, y - padding, size + padding * 2, size + padding * 2);
+		drawImage(ctx, offscreen, x - padding, y - padding, size + padding * 2, size + padding * 2);
 		ctx.restore();
 	} catch {
 		// Ignore watermark error
