@@ -26,8 +26,8 @@ export const handler: Handler = {
 			nameplate: user.nameplate(true),
 			displayNameStyle: await user.displayNameStyle(),
 			presence: {
-				activities: user.presence?.activities || [],
-				status: user.presence?.status || "offline",
+				/* activities: user.presence?.activities || [], */
+				status: user.presence?.status || "offline"
 			}
 		});
 	}
