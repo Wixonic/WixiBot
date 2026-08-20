@@ -49,6 +49,14 @@ export const displayCommand = (command: ApplicationCommand) => {
 	return entry.join("\n");
 };
 
+export const formatBytes = (bytes: number): string => {
+	if (bytes === 0) return "0 B";
+	const k = 1024;
+	const sizes = ["B", "KB", "MB", "GB", "TB"];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+};
+
 /**
  * Combine paths, similar to {@link https://nodejs.org/api/path.html#pathjoinpaths Node.js path.join} method
  */

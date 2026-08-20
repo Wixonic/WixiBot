@@ -33,10 +33,19 @@ export interface ClientLinksSettings {
 	help?: string;
 };
 
+export interface StorageSettings {
+	maxCapacity?: number;
+	tokenLifetime?: number;
+	slotExpiry?: number;
+	baseUrl?: string;
+	apiUrl?: string;
+};
+
 export interface ClientSettings {
 	ai?: AISettings;
 	discord: DiscordSettings;
 	links?: ClientLinksSettings;
+	storage?: StorageSettings;
 };
 
 export type ClientType = keyof typeof index;

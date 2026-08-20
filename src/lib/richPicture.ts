@@ -1,5 +1,6 @@
 import { createCanvas, GlobalFonts, loadImage, type CanvasRenderingContext2D } from "@napi-rs/canvas";
 import { fileURLToPath } from "node:url";
+import { formatBytes } from "../lib/utils.ts";
 
 try {
 	GlobalFonts.registerFromPath(fileURLToPath(new URL("../assets/fonts/OpenSans.woff2", import.meta.url)), "OpenSans");
@@ -30,7 +31,9 @@ export enum RichPictureType {
 	ReportMessage = "ReportMessage",
 	ReportUser = "ReportUser",
 	TicketHeader = "TicketHeader",
-	Birthday = "Birthday"
+	Birthday = "Birthday",
+	StorageFile = "StorageFile",
+	StorageStats = "StorageStats"
 };
 
 export interface ProfileCardData {
@@ -119,6 +122,19 @@ export interface BirthdayCardData {
 	serverName?: string;
 };
 
+export interface StorageFileCardData {
+	name: string;
+	mimeType: string | null;
+	size: number;
+	fifoPosition: number;
+};
+
+export interface StorageStatsCardData {
+	usedSize: number;
+	maxCapacity: number;
+	totalFiles: number;
+};
+
 export type RichPictureOptions =
 	| { type: RichPictureType.Profile; data: ProfileCardData }
 	| { type: RichPictureType.Leaderboard; data: LeaderboardCardData }
@@ -131,7 +147,9 @@ export type RichPictureOptions =
 	| { type: RichPictureType.ReportMessage; data: ReportCardData }
 	| { type: RichPictureType.ReportUser; data: ReportCardData }
 	| { type: RichPictureType.TicketHeader; data: TicketHeaderCardData }
-	| { type: RichPictureType.Birthday; data: BirthdayCardData };
+	| { type: RichPictureType.Birthday; data: BirthdayCardData }
+	| { type: RichPictureType.StorageFile; data: StorageFileCardData }
+	| { type: RichPictureType.StorageStats; data: StorageStatsCardData };
 
 const AccentColors: Record<RichPictureType, string> = {
 	[RichPictureType.Profile]: "#FFA200",
@@ -145,7 +163,9 @@ const AccentColors: Record<RichPictureType, string> = {
 	[RichPictureType.ReportMessage]: "#FF3B30",
 	[RichPictureType.ReportUser]: "#FF3B30",
 	[RichPictureType.TicketHeader]: "#34C759",
-	[RichPictureType.Birthday]: "#00A2FF"
+	[RichPictureType.Birthday]: "#00A2FF",
+	[RichPictureType.StorageFile]: "#5865F2",
+	[RichPictureType.StorageStats]: "#5865F2"
 };
 
 const FONT_MAIN = '"OpenSans", sans-serif';
@@ -281,7 +301,8 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		const count = (options.data as LeaderboardCardData).entries.length;
 		baseHeight = 160 + count * 68;
 	} else if (type === RichPictureType.LevelUp || type === RichPictureType.WelcomeMember || type === RichPictureType.Boost || type === RichPictureType.Supporter || type === RichPictureType.Birthday) baseHeight = 240;
-	else if (type === RichPictureType.Achievement) baseHeight = 260;
+	else if (type === RichPictureType.Achievement || type === RichPictureType.StorageFile) baseHeight = 260;
+	else if (type === RichPictureType.StorageStats) baseHeight = 280;
 	else if (type === RichPictureType.TicketHeader || type === RichPictureType.Warn || type === RichPictureType.ReportMessage || type === RichPictureType.ReportUser) baseHeight = 340;
 
 	const canvas = createCanvas(baseWidth * scale, baseHeight * scale);
@@ -715,9 +736,127 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.fillText(data.reason, cardX + 70, cardY + 236);
 			break;
 		}
+
+		case RichPictureType.StorageFile: {
+			const data = options.data as StorageFileCardData;
+
+			ctx.fillStyle = accentColor;
+			ctx.font = `18px ${FONT_ACCENT}`;
+			ctx.textAlign = "left";
+			ctx.fillText("TEMPORARY STORAGE FILE", cardX + 45, cardY + 52);
+
+			const lastDot = data.name.lastIndexOf(".");
+			const baseName = lastDot !== -1 ? data.name.slice(0, lastDot) : data.name;
+			const extension = lastDot !== -1 ? data.name.slice(lastDot) : "";
+
+			ctx.fillStyle = "#FFFFFF";
+			ctx.font = `bold 30px ${FONT_MAIN}`;
+			ctx.fillText(baseName, cardX + 45, cardY + 98);
+
+			const baseNameWidth = ctx.measureText(baseName).width;
+			ctx.fillStyle = "#A1A1A6";
+			ctx.fillText(extension, cardX + 45 + baseNameWidth, cardY + 98);
+
+			ctx.strokeStyle = "#242428";
+			ctx.lineWidth = 1.5;
+			ctx.beginPath();
+			ctx.moveTo(cardX + 45, cardY + 124);
+			ctx.lineTo(cardX + cardW - 45, cardY + 124);
+			ctx.stroke();
+
+			const stats = [
+				{ label: "MIME TYPE", value: data.mimeType },
+				{ label: "SIZE", value: formatBytes(data.size) },
+				{ label: "FIFO POSITION", value: `#${data.fifoPosition}` }
+			];
+
+			const colWidth = (cardW - 90) / 3;
+			stats.forEach((stat, i) => {
+				const sx = cardX + 45 + i * colWidth;
+				const sy = cardY + 155;
+
+				ctx.fillStyle = "#A1A1A6";
+				ctx.font = `14px ${FONT_MAIN}`;
+				ctx.textAlign = "left";
+				ctx.fillText(stat.label, sx, sy);
+
+				ctx.fillStyle = "#FFFFFF";
+				ctx.font = `bold 22px ${FONT_MAIN}`;
+				ctx.fillText(stat.value ?? "N/A", sx, sy + 28);
+			});
+
+			break;
+		}
+
+		case RichPictureType.StorageStats: {
+			const data = options.data as StorageStatsCardData;
+
+			ctx.fillStyle = "#FFFFFF";
+			ctx.font = `28px ${FONT_ACCENT}`;
+			ctx.textAlign = "left";
+			ctx.fillText("STORAGE OCCUPANCY", cardX + 45, cardY + 52);
+
+			ctx.fillStyle = accentColor;
+			ctx.font = `18px ${FONT_ACCENT}`;
+			ctx.textAlign = "right";
+			ctx.fillText(`${data.totalFiles} ACTIVE FILES`, cardX + cardW - 45, cardY + 52);
+
+			ctx.strokeStyle = "#242428";
+			ctx.lineWidth = 1.5;
+			ctx.beginPath();
+			ctx.moveTo(cardX + 45, cardY + 78);
+			ctx.lineTo(cardX + cardW - 45, cardY + 78);
+			ctx.stroke();
+
+			const stats = [
+				{ label: "USED SPACE", value: formatBytes(data.usedSize) },
+				{ label: "TOTAL ALLOCATED", value: formatBytes(data.maxCapacity) },
+				{ label: "FREE SPACE", value: formatBytes(Math.max(0, data.maxCapacity - data.usedSize)) }
+			];
+
+			const colWidth = (cardW - 90) / 3;
+			stats.forEach((stat, i) => {
+				const sx = cardX + 45 + i * colWidth;
+				const sy = cardY + 115;
+
+				ctx.fillStyle = "#A1A1A6";
+				ctx.font = `14px ${FONT_MAIN}`;
+				ctx.textAlign = "left";
+				ctx.fillText(stat.label, sx, sy);
+
+				ctx.fillStyle = "#FFFFFF";
+				ctx.font = `bold 22px ${FONT_MAIN}`;
+				ctx.fillText(stat.value, sx, sy + 28);
+			});
+
+			const usageRatio = Math.min(1, Math.max(0, data.usedSize / Math.max(1, data.maxCapacity)));
+			const barY = cardY + 195;
+			const barWidth = cardW - 90;
+			const barHeight = 14;
+
+			ctx.fillStyle = "#A1A1A6";
+			ctx.font = `14px ${FONT_MAIN}`;
+			ctx.textAlign = "left";
+			ctx.fillText("CAPACITY USAGE", cardX + 45, barY - 10);
+
+			ctx.textAlign = "right";
+			ctx.fillText(`${(usageRatio * 100).toFixed(1)}%`, cardX + cardW - 45, barY - 10);
+
+			drawRoundedRect(ctx, cardX + 45, barY, barWidth, barHeight, 6);
+			ctx.fillStyle = "#1F1F24";
+			ctx.fill();
+
+			if (usageRatio > 0) {
+				drawRoundedRect(ctx, cardX + 45, barY, Math.max(12, barWidth * usageRatio), barHeight, 6);
+				ctx.fillStyle = accentColor;
+				ctx.fill();
+			}
+
+			break;
+		}
 	}
 
 	ctx.restore();
 
-	return canvas.toBuffer("image/png");
+	return canvas.toBuffer("image/webp");
 };

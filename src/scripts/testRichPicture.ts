@@ -142,11 +142,34 @@ const samples = [
 		}
 	},
 	{
-		filename: "12_birthday.png",
+		filename: "12_birthday.webp",
 		options: {
 			type: RichPictureType.Birthday,
 			data: {
 				username: "Wixonic"
+			}
+		}
+	},
+	{
+		filename: "13_storage_file.webp",
+		options: {
+			type: RichPictureType.StorageFile,
+			data: {
+				name: "archive_backup_2026.tar.gz",
+				mimeType: "application/gzip",
+				size: 14582912,
+				fifoPosition: 1
+			}
+		}
+	},
+	{
+		filename: "14_storage_stats.webp",
+		options: {
+			type: RichPictureType.StorageStats,
+			data: {
+				usedSize: 48500000000,
+				maxCapacity: 214748364800,
+				totalFiles: 142
 			}
 		}
 	}
@@ -156,9 +179,10 @@ for (const sample of samples) {
 	try {
 		// @ts-ignore
 		const buffer = await generateRichPicture(sample.options);
-		const filePath = path.join(outputDir, sample.filename);
+		const filename = sample.filename.endsWith(".png") ? sample.filename.replace(/\.png$/, ".webp") : sample.filename;
+		const filePath = path.join(outputDir, filename);
 		await Deno.writeFile(filePath, buffer);
-		console.log(`Saved ${sample.filename}`);
+		console.log(`Saved ${filename}`);
 	} catch (err) {
 		console.error(`Failed ${sample.filename}:`, err);
 	}

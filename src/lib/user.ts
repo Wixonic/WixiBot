@@ -334,9 +334,9 @@ export class User {
 				}
 			}
 
-			const tmpMonthPath = `${monthFilePath}.tmp`;
-			await Deno.writeTextFile(tmpMonthPath, JSON.stringify(monthData));
-			await Deno.rename(tmpMonthPath, monthFilePath);
+			const temporaryMonthPath = `${monthFilePath}.tmp`;
+			await Deno.writeTextFile(temporaryMonthPath, JSON.stringify(monthData));
+			await Deno.rename(temporaryMonthPath, monthFilePath);
 			await this.saveData();
 
 			this.currentActivity = {
@@ -570,7 +570,6 @@ export class User {
 
 					if (botChannel && botChannel.isTextBased()) {
 						const displayName = await this.getGuildDisplayName(guildId);
-						const files = [];
 
 						if (newLevel > oldLevel) {
 							const levelUpBuffer = await generateRichPicture({
@@ -582,7 +581,8 @@ export class User {
 									newLevel
 								}
 							});
-							files.push(new AttachmentBuilder(levelUpBuffer, { name: "levelup.png" }));
+							const attachment = new AttachmentBuilder(levelUpBuffer, { name: "levelup.webp" });
+							await botChannel.send({ content: `<@${this.discord.id}>, you leveled up!`, files: [attachment] });
 						}
 
 						if (unlockedAchievementIds.length > 0) {
@@ -598,18 +598,10 @@ export class User {
 											achievementDescription: achievement.description
 										}
 									});
-									files.push(new AttachmentBuilder(achievementBuffer, { name: `achievement - ${id}.png` }));
+									const attachment = new AttachmentBuilder(achievementBuffer, { name: `achievement-${id}.webp` });
+									await botChannel.send({ content: `<@${this.discord.id}>, you unlocked an achievement!`, files: [attachment] });
 								}
 							}
-						}
-
-						if (files.length > 0) {
-							let content = `<@${this.discord.id}> `;
-							if (newLevel > oldLevel && unlockedAchievementIds.length > 0) content += ", you leveled up and unlocked an achievement!";
-							else if (newLevel > oldLevel) content += ", you leveled up!";
-							else content += ", you unlocked an achievement!";
-
-							await botChannel.send({ content, files });
 						}
 					}
 				}
