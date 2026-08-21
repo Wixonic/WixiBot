@@ -36,17 +36,17 @@ export interface StorageStats {
 export const getStorageConfig = () => {
 	const isDev = Deno.env.get("CLIENT") === "dev";
 	try {
-		const s = getSettings().storage;
+		const storage = getSettings().storage;
 		return {
-			maxCapacity: s?.maxCapacity ?? 200 * 1024 * 1024 * 1024,
-			tokenLifetime: s?.tokenLifetime ?? 5 * 60 * 1000,
-			slotExpiry: s?.slotExpiry ?? 24 * 60 * 60 * 1000,
-			baseUrl: s?.baseUrl ?? (isDev ? "http://localhost:2011" : "https://onion.wixonic.fr"),
-			apiUrl: s?.apiUrl ?? (isDev ? "http://localhost:1202" : "https://api.onion.wixonic.fr")
+			maxCapacity: storage?.maxCapacity ?? 100 * 1024 * 1024 * 1024,
+			tokenLifetime: storage?.tokenLifetime ?? 5 * 60 * 1000,
+			slotExpiry: storage?.slotExpiry ?? 24 * 60 * 60 * 1000,
+			baseUrl: storage?.baseUrl ?? (isDev ? "http://localhost:2011" : "https://onion.wixonic.fr"),
+			apiUrl: storage?.apiUrl ?? (isDev ? "http://localhost:1202" : "https://api.onion.wixonic.fr")
 		};
 	} catch {
 		return {
-			maxCapacity: 200 * 1024 * 1024 * 1024,
+			maxCapacity: 100 * 1024 * 1024 * 1024,
 			tokenLifetime: 5 * 60 * 1000,
 			slotExpiry: 24 * 60 * 60 * 1000,
 			baseUrl: isDev ? "http://localhost:2011" : "https://onion.wixonic.fr",

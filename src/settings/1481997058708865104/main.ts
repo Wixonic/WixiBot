@@ -28,5 +28,8 @@ export const settings: ClientSettings = {
 	links: {
 		funding: "https://discord.gg/2QB7QkPtrA",
 		help: "https://discord.gg/wVHSFqG85J"
+	},
+	storage: {
+		maxCapacity: 180 * 1024 * 1024 * 1024
 	}
 };
