@@ -70,11 +70,6 @@ export const command = {
 				.setDescription("Secret key required to download.")
 				.setRequired(false)
 			)
-			.addStringOption((option) => option
-				.setName("name")
-				.setDescription("Custom file name.")
-				.setRequired(false)
-			)
 		)
 		.addSubcommand((subcommand) => subcommand
 			.setName("download")
@@ -120,7 +115,6 @@ export const command = {
 			const maxDownloads = interaction.options.getInteger("max_downloads");
 			const mentionable = interaction.options.getMentionable("restricted_to");
 			const secretKey = interaction.options.getString("key");
-			const customName = interaction.options.getString("name");
 
 			let expiresIn: number | null = null;
 			if (expiresInInput) {
@@ -142,7 +136,6 @@ export const command = {
 				uploaderId: interaction.user.id,
 				uploaderName: interaction.user.displayName || interaction.user.username,
 				description,
-				name: customName,
 				expiresIn,
 				maxDownloads,
 				restrictedTo

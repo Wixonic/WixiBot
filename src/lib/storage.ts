@@ -127,7 +127,6 @@ export const createSlot = async (options: {
 	uploaderId: string;
 	uploaderName: string;
 	description?: string | null;
-	name?: string | null;
 	expiresIn?: number | null;
 	maxDownloads?: number | null;
 	restrictedTo?: FileRestriction;
@@ -142,7 +141,7 @@ export const createSlot = async (options: {
 
 	const file: FileEntry = {
 		id,
-		name: options.name || `file-${id}`,
+		name: `file-${id}`,
 		size: 0,
 		mimeType: null,
 		sha256: "",
