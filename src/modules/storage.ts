@@ -15,8 +15,6 @@ export const handler: Handler = {
 	origin: config.isDevEnvironment ? "localhost:2011" : "onion.wixonic.fr",
 	path: "*",
 	handle: async (req) => {
-		if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders });
-
 		const url = new URL(req.url);
 		const pathname = url.pathname.replace(/\/+$/, "") || "/";
 		const parts = pathname.split("/").filter(Boolean);

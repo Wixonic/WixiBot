@@ -257,6 +257,8 @@ export const getStorageStats = async (): Promise<StorageStats> => {
 export const canUserDownload = (file: FileEntry, userId?: string, memberRoleIds?: string[], providedKey?: string): boolean => {
 	if (!file.restrictedTo) return true;
 
+	if (providedKey && file.uploadKey === providedKey) return true;
+
 	const hasValidToken = providedKey && file.downloadTokens[providedKey] && file.downloadTokens[providedKey] > Date.now();
 
 	if (file.restrictedTo.type === "key")
