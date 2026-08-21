@@ -109,6 +109,7 @@ export const ticketMessages = (interaction: MessageComponentInteraction, ticket:
 };
 
 export const createTicketHeaderAttachment = async (interaction: MessageComponentInteraction, ticket: TicketMessageData) => {
+	const ticketCreatorUser = await client.getUser(ticket.interactions.createdBy);
 	const creatorMember = interaction.guild ? await interaction.guild.members.fetch(ticket.interactions.createdBy).catch(() => null) : null;
 	const creatorUser = creatorMember?.user ?? (await interaction.client.users.fetch(ticket.interactions.createdBy).catch(() => null));
 	const creatorDisplayName = creatorMember?.displayName ?? creatorUser?.globalName ?? creatorUser?.username ?? ticket.interactions.createdBy;
@@ -122,7 +123,9 @@ export const createTicketHeaderAttachment = async (interaction: MessageComponent
 		data: {
 			ticketId: ticket.id,
 			creatorUsername: creatorDisplayName,
-			creatorAvatarUrl: creatorUser ? creatorUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }) : undefined,
+			creatorAvatarUrl: ticketCreatorUser?.avatar("webp", 256, false) ?? (creatorUser ? creatorUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }) : undefined),
+			creatorAvatarDecorationUrl: ticketCreatorUser?.avatarDecoration(false) ?? undefined,
+			creatorDisplayNameStyle: await ticketCreatorUser?.displayNameStyle(),
 			reason: ticket.reason || "General support ticket",
 			state: ticket.state || "Waiting",
 			claimedByUsername: claimedDisplayName,

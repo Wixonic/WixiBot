@@ -78,11 +78,14 @@ export const job: Job = {
 					try {
 						const channel = await discordGuild.channels.fetch(birthdayChannelId);
 						if (channel && channel.isTextBased() && "send" in channel) {
+							const user = await client.getUser(member.id);
 							const pictureBuffer = await generateRichPicture({
 								type: RichPictureType.Birthday,
 								data: {
 									username: member.displayName,
-									avatarUrl: member.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true })
+									avatarUrl: user?.avatar("webp", 256, false) ?? member.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+									avatarDecorationUrl: user?.avatarDecoration(false) ?? undefined,
+									displayNameStyle: await user?.displayNameStyle()
 								}
 							});
 

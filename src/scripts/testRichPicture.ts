@@ -13,6 +13,11 @@ const samples = [
 			type: RichPictureType.Profile,
 			data: {
 				username: "Wixonic",
+				displayNameStyle: {
+					font_id: "14",
+					effect_id: "2",
+					colors: [0x7052FF, 0xA855F7]
+				},
 				level: 42,
 				xp: 88450,
 				streak: 14,
@@ -31,7 +36,18 @@ const samples = [
 			type: RichPictureType.Leaderboard,
 			data: {
 				entries: [
-					{ rank: 1, username: "Wixonic", level: 42, xp: 88450, streak: 14 },
+					{
+						rank: 1,
+						username: "Wixonic",
+						displayNameStyle: {
+							font_id: "14",
+							effect_id: "2",
+							colors: [0x7052FF, 0xA855F7]
+						},
+						level: 42,
+						xp: 88450,
+						streak: 14
+					},
 					{ rank: 2, username: "AlexPro", level: 38, xp: 72100, streak: 8 },
 					{ rank: 3, username: "CyberSam", level: 31, xp: 54300 },
 					{ rank: 4, username: "LunarStar", level: 25, xp: 39800, streak: 3 },
@@ -158,7 +174,11 @@ const samples = [
 				name: "archive_backup_2026.tar.gz",
 				mimeType: "application/gzip",
 				size: 14582912,
-				fifoPosition: 1
+				fifoPosition: 1,
+				uploader: {
+					username: "Wixonic",
+					displayName: "Wixonic"
+				}
 			}
 		}
 	},

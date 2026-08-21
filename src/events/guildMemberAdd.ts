@@ -38,11 +38,14 @@ export const event = {
 			const channel = await discordMember.guild.channels.fetch(guild.settings.channels.welcome);
 			if (channel && channel.isTextBased()) {
 				try {
+					const user = await client.getUser(discordMember.id);
 					const buffer = await generateRichPicture({
 						type: RichPictureType.WelcomeMember,
 						data: {
 							username: discordMember.displayName,
-							avatarUrl: discordMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+							avatarUrl: user?.avatar("webp", 256, false) ?? discordMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+							avatarDecorationUrl: user?.avatarDecoration(false) ?? undefined,
+							displayNameStyle: await user?.displayNameStyle(),
 							serverName: discordMember.guild.name,
 							memberCount: discordMember.guild.memberCount
 						}

@@ -71,28 +71,33 @@ export const command = {
 } satisfies Command<ChatInputCommandInteraction>;
 
 async function sendLeaderboard(interaction: ChatInputCommandInteraction, top10: any[]) {
-	const entries = await Promise.all(top10.map(async (user, index) => {
-		const botUser = await client.getUser(user.id);
-		let displayName = botUser ? await botUser.getGuildDisplayName(interaction.guildId ?? undefined) : user.username;
-		let avatarUrl: string | undefined = undefined;
+	const entries = await Promise.all(top10.map(async (leaderboardUser, index) => {
+		const user = await client.getUser(leaderboardUser.id);
+		const displayName = user ? await user.getGuildDisplayName(interaction.guildId ?? undefined) : leaderboardUser.username;
+		let avatarUrl: string | undefined = user?.avatar("webp", 256, false);
+		const avatarDecorationUrl: string | undefined = user?.avatarDecoration(false) ?? undefined;
 
-		if (interaction.guild) {
-			const member = await interaction.guild.members.fetch(user.id).catch(() => null);
-			if (member) avatarUrl = member.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true });
+		if (!avatarUrl && interaction.guild) {
+			const guildMember = await interaction.guild.members.fetch(leaderboardUser.id).catch(() => null);
+			if (guildMember) avatarUrl = guildMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true });
 		}
 
 		if (!avatarUrl) {
-			const discordUser = await client.discord?.users.fetch(user.id).catch(() => null);
+			const discordUser = await client.discord?.users.fetch(leaderboardUser.id).catch(() => null);
 			if (discordUser) avatarUrl = discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true });
 		}
+
+		const displayNameStyle = await user?.displayNameStyle();
 
 		return {
 			rank: index + 1,
 			username: displayName,
 			avatarUrl,
-			level: user.level,
-			xp: user.xp,
-			streak: user.streak
+			avatarDecorationUrl,
+			displayNameStyle,
+			level: leaderboardUser.level,
+			xp: leaderboardUser.xp,
+			streak: leaderboardUser.streak
 		};
 	}));
 

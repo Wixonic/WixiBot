@@ -379,11 +379,14 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		if (this.settings.moderation.warnings) {
 			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.warnings);
 			if (channel && channel.isTextBased()) {
+				const targetUser = await client.getUser(target.id);
 				const buffer = await generateRichPicture({
 					type: RichPictureType.Warn,
 					data: {
 						targetUsername: target.displayName,
-						targetAvatarUrl: target.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+						targetAvatarUrl: targetUser?.avatar("webp", 256, false) ?? target.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+						targetAvatarDecorationUrl: targetUser?.avatarDecoration(false) ?? undefined,
+						targetDisplayNameStyle: await targetUser?.displayNameStyle(),
 						moderatorUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reason
 					}
@@ -419,11 +422,14 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.reports);
 			if (channel && channel.isTextBased()) {
 				const authorDisplayName = message.member?.displayName ?? message.author.displayName ?? message.author.username;
+				const authorUser = await client.getUser(message.author.id);
 				const buffer = await generateRichPicture({
 					type: RichPictureType.ReportMessage,
 					data: {
 						targetUsername: authorDisplayName,
-						targetAvatarUrl: message.author.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+						targetAvatarUrl: authorUser?.avatar("webp", 256, false) ?? message.author.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+						targetAvatarDecorationUrl: authorUser?.avatarDecoration(false) ?? undefined,
+						targetDisplayNameStyle: await authorUser?.displayNameStyle(),
 						reporterUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reportType: "Message",
 						reason: reason || "No reason provided",
@@ -498,11 +504,14 @@ Reason: ${reason || "No reason provided"}`, "reports");
 		if (this.settings.moderation.reports) {
 			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.reports);
 			if (channel && channel.isTextBased()) {
+				const memberUser = await client.getUser(discordMember.id);
 				const buffer = await generateRichPicture({
 					type: RichPictureType.ReportUser,
 					data: {
 						targetUsername: discordMember.displayName,
-						targetAvatarUrl: discordMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+						targetAvatarUrl: memberUser?.avatar("webp", 256, false) ?? discordMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+						targetAvatarDecorationUrl: memberUser?.avatarDecoration(false) ?? undefined,
+						targetDisplayNameStyle: await memberUser?.displayNameStyle(),
 						reporterUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reportType: "User",
 						reason: reason || "No reason provided"
@@ -617,14 +626,19 @@ ${error instanceof Error ? error.stack : String(error)}
 		if (channel && channel.isTextBased()) {
 			try {
 				const discordMember = await this.discordGuild.members.fetch(userId).catch(() => null);
+				const fundingUser = await client.getUser(userId);
 				const username = discordMember ? discordMember.displayName : userId;
-				const avatarUrl = discordMember ? discordMember.user.displayAvatarURL({ extension: "png", size: 256 }) : undefined;
+				const avatarUrl = fundingUser?.avatar("webp", 256, false) ?? (discordMember ? discordMember.user.displayAvatarURL({ extension: "png", size: 256 }) : undefined);
+				const avatarDecorationUrl = fundingUser?.avatarDecoration(false) ?? undefined;
+				const displayNameStyle = await fundingUser?.displayNameStyle();
 
 				const buffer = await generateRichPicture({
 					type: type === "boost" ? RichPictureType.Boost : RichPictureType.Supporter,
 					data: {
 						username,
 						avatarUrl,
+						avatarDecorationUrl,
+						displayNameStyle,
 						type: type === "boost" ? "Boost" : "Supporter"
 					}
 				});

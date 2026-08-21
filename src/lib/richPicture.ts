@@ -2,12 +2,28 @@ import { createCanvas, GlobalFonts, loadImage, type CanvasRenderingContext2D } f
 import { fileURLToPath } from "node:url";
 import { formatBytes } from "../lib/utils.ts";
 
-try {
-	GlobalFonts.registerFromPath(fileURLToPath(new URL("../assets/fonts/OpenSans.woff2", import.meta.url)), "OpenSans");
-	GlobalFonts.registerFromPath(fileURLToPath(new URL("../assets/fonts/RamettoOne.woff2", import.meta.url)), "RamettoOne");
-} catch {
-	// Fallback to system fonts
-}
+const registerFontSafely = (fontFilename: string, fontFamily: string) => {
+	try {
+		GlobalFonts.registerFromPath(fileURLToPath(new URL(`../assets/fonts/${fontFilename}`, import.meta.url)), fontFamily);
+	} catch {
+		// Fallback to system fonts
+	}
+};
+
+registerFontSafely("OpenSans.woff2", "OpenSans");
+registerFontSafely("RamettoOne.woff2", "RamettoOne");
+registerFontSafely("Bangers.ttf", "Bangers");
+registerFontSafely("BioRhyme.ttf", "BioRhyme");
+registerFontSafely("CherryBombOne.ttf", "Cherry Bomb One");
+registerFontSafely("Chicle.ttf", "Chicle");
+registerFontSafely("MuseoModerno.ttf", "MuseoModerno");
+registerFontSafely("MedievalSharp.ttf", "MedievalSharp");
+registerFontSafely("PixelifySans.ttf", "Pixelify Sans");
+registerFontSafely("ZillaSlab.ttf", "Zilla Slab");
+registerFontSafely("PlaypenSans.ttf", "Playpen Sans");
+registerFontSafely("Orbitron.ttf", "Orbitron");
+registerFontSafely("NewRocker.ttf", "New Rocker");
+registerFontSafely("Kalam.ttf", "Kalam");
 
 const ICONS_DIR = new URL("../assets/icons/", import.meta.url);
 
@@ -36,9 +52,17 @@ export enum RichPictureType {
 	StorageStats = "StorageStats"
 };
 
+export interface DisplayNameStyle {
+	font_id?: string | number;
+	effect_id?: string | number;
+	colors?: number[];
+};
+
 export interface ProfileCardData {
 	username: string;
 	avatarUrl?: string;
+	avatarDecorationUrl?: string;
+	displayNameStyle?: DisplayNameStyle | null;
 	level: number;
 	xp: number;
 	streak?: number;
@@ -57,6 +81,8 @@ export interface LeaderboardEntry {
 	xp: number;
 	streak?: number;
 	avatarUrl?: string;
+	avatarDecorationUrl?: string;
+	displayNameStyle?: DisplayNameStyle | null;
 };
 
 export interface LeaderboardCardData {
@@ -66,6 +92,8 @@ export interface LeaderboardCardData {
 export interface LevelUpCardData {
 	username: string;
 	avatarUrl?: string;
+	avatarDecorationUrl?: string;
+	displayNameStyle?: DisplayNameStyle | null;
 	oldLevel: number;
 	newLevel: number;
 };
@@ -73,6 +101,8 @@ export interface LevelUpCardData {
 export interface AchievementCardData {
 	username: string;
 	avatarUrl?: string;
+	avatarDecorationUrl?: string;
+	displayNameStyle?: DisplayNameStyle | null;
 	achievementName: string;
 	achievementDescription: string;
 };
@@ -80,6 +110,8 @@ export interface AchievementCardData {
 export interface WelcomeMemberCardData {
 	username: string;
 	avatarUrl?: string;
+	avatarDecorationUrl?: string;
+	displayNameStyle?: DisplayNameStyle | null;
 	serverName: string;
 	memberCount?: number;
 };
@@ -87,12 +119,16 @@ export interface WelcomeMemberCardData {
 export interface SupporterCardData {
 	username: string;
 	avatarUrl?: string;
+	avatarDecorationUrl?: string;
+	displayNameStyle?: DisplayNameStyle | null;
 	type: "Boost" | "Supporter";
 };
 
 export interface WarnCardData {
 	targetUsername: string;
 	targetAvatarUrl?: string;
+	targetAvatarDecorationUrl?: string;
+	targetDisplayNameStyle?: DisplayNameStyle | null;
 	moderatorUsername?: string;
 	reason: string;
 };
@@ -100,6 +136,8 @@ export interface WarnCardData {
 export interface ReportCardData {
 	targetUsername: string;
 	targetAvatarUrl?: string;
+	targetAvatarDecorationUrl?: string;
+	targetDisplayNameStyle?: DisplayNameStyle | null;
 	reporterUsername?: string;
 	reportType: "Message" | "User";
 	reason: string;
@@ -110,6 +148,8 @@ export interface TicketHeaderCardData {
 	ticketId: string;
 	creatorUsername: string;
 	creatorAvatarUrl?: string;
+	creatorAvatarDecorationUrl?: string;
+	creatorDisplayNameStyle?: DisplayNameStyle | null;
 	reason: string;
 	state: "Waiting" | "Claimed" | "Resolved" | "Closed";
 	claimedByUsername?: string;
@@ -119,7 +159,17 @@ export interface TicketHeaderCardData {
 export interface BirthdayCardData {
 	username: string;
 	avatarUrl?: string;
+	avatarDecorationUrl?: string;
+	displayNameStyle?: DisplayNameStyle | null;
 	serverName?: string;
+};
+
+export interface StorageFileUploader {
+	username?: string;
+	displayName?: string;
+	avatarUrl?: string;
+	avatarDecorationUrl?: string;
+	displayNameStyle?: DisplayNameStyle | null;
 };
 
 export interface StorageFileCardData {
@@ -127,6 +177,7 @@ export interface StorageFileCardData {
 	mimeType: string | null;
 	size: number;
 	fifoPosition: number;
+	uploader?: StorageFileUploader;
 };
 
 export interface StorageStatsCardData {
@@ -185,32 +236,101 @@ const drawRoundedRect = (ctx: CanvasRenderingContext2D, x: number, y: number, wi
 	ctx.closePath();
 };
 
-const drawCircularAvatar = async (ctx: CanvasRenderingContext2D, url: string | undefined, x: number, y: number, size: number, fallbackLetter = "?") => {
-	ctx.save();
-	ctx.beginPath();
-	ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-	ctx.closePath();
-	ctx.clip();
+export const drawCircularAvatar = async (
+	context: CanvasRenderingContext2D,
+	avatarUrl: string | undefined | null,
+	avatarDecorationUrl: string | undefined | null,
+	xPosition: number,
+	yPosition: number,
+	avatarSize: number,
+	fallbackLetter = "?"
+) => {
+	context.save();
+	context.beginPath();
+	context.arc(xPosition + avatarSize / 2, yPosition + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
+	context.closePath();
+	context.clip();
 
-	if (url) {
+	if (avatarUrl) {
 		try {
-			const image = await loadImage(url);
-			drawImage(ctx, image, x, y, size, size);
-			ctx.restore();
-			return;
+			const staticAvatarUrl = avatarUrl.replace(/\.gif(\?.*)?$/i, ".webp$1").replace(/([?&])animated=true/g, "");
+			const image = await loadImage(staticAvatarUrl);
+			drawImage(context, image, xPosition, yPosition, avatarSize, avatarSize);
 		} catch {
-			// Ignore image load error
+			context.fillStyle = "#2C2C2E";
+			context.fillRect(xPosition, yPosition, avatarSize, avatarSize);
+			context.fillStyle = "#FFFFFF";
+			context.font = `bold ${Math.floor(avatarSize * 0.52)}px ${FONT_ACCENT}`;
+			context.textAlign = "center";
+			context.textBaseline = "middle";
+			context.fillText(fallbackLetter.toUpperCase(), Math.floor(xPosition + avatarSize / 2), Math.floor(yPosition + avatarSize / 2 + Math.floor(avatarSize * 0.05)));
+		}
+	} else {
+		context.fillStyle = "#2C2C2E";
+		context.fillRect(xPosition, yPosition, avatarSize, avatarSize);
+		context.fillStyle = "#FFFFFF";
+		context.font = `bold ${Math.floor(avatarSize * 0.52)}px ${FONT_ACCENT}`;
+		context.textAlign = "center";
+		context.textBaseline = "middle";
+		context.fillText(fallbackLetter.toUpperCase(), Math.floor(xPosition + avatarSize / 2), Math.floor(yPosition + avatarSize / 2 + Math.floor(avatarSize * 0.05)));
+	}
+	context.restore();
+
+	if (avatarDecorationUrl) {
+		try {
+			const staticDecorationUrl = avatarDecorationUrl.replace(/\.gif(\?.*)?$/i, ".webp$1").replace(/\/animated(\?.*)?$/i, "/static$1");
+			const decorationImage = await loadImage(staticDecorationUrl);
+			const decorationSize = Math.floor(avatarSize * 1.2);
+			const decorationOffset = Math.floor((decorationSize - avatarSize) / 2);
+			drawImage(context, decorationImage, xPosition - decorationOffset, yPosition - decorationOffset, decorationSize, decorationSize);
+		} catch {
+			// Ignore decoration load error
 		}
 	}
+};
 
-	ctx.fillStyle = "#2C2C2E";
-	ctx.fillRect(x, y, size, size);
-	ctx.fillStyle = "#FFFFFF";
-	ctx.font = `bold ${Math.floor(size * 0.52)}px ${FONT_ACCENT}`;
-	ctx.textAlign = "center";
-	ctx.textBaseline = "middle";
-	ctx.fillText(fallbackLetter.toUpperCase(), Math.floor(x + size / 2), Math.floor(y + size / 2 + Math.floor(size * 0.05)));
-	ctx.restore();
+export const FONT_ID_MAP: Record<string, string> = {
+	"1": '"Bangers", sans-serif',
+	"2": '"BioRhyme", serif',
+	"3": '"Cherry Bomb One", cursive, sans-serif',
+	"4": '"Chicle", cursive, sans-serif',
+	"5": 'monospace, sans-serif',
+	"6": '"MuseoModerno", cursive, sans-serif',
+	"7": '"MedievalSharp", serif',
+	"8": '"Pixelify Sans", monospace, sans-serif',
+	"9": 'cursive, sans-serif',
+	"10": 'serif, sans-serif',
+	"12": '"Zilla Slab", serif, sans-serif',
+	"13": '"Playpen Sans", cursive, sans-serif',
+	"14": '"Orbitron", sans-serif',
+	"15": '"New Rocker", cursive, sans-serif',
+	"16": '"Kalam", cursive, sans-serif'
+};
+
+export const getStyledFont = (baseFont: string, fontId?: string | number): string => {
+	const fontKey = fontId !== undefined && fontId !== null ? String(fontId) : undefined;
+	if (!fontKey || !FONT_ID_MAP[fontKey]) return baseFont;
+	const sizeMatch = baseFont.match(/^(.*?\d+px)\s/);
+	if (sizeMatch) return `${sizeMatch[1]} ${FONT_ID_MAP[fontKey]}`;
+	return baseFont;
+};
+
+export const drawStyledUsername = (
+	context: CanvasRenderingContext2D,
+	text: string,
+	xPosition: number,
+	yPosition: number,
+	displayNameStyle: DisplayNameStyle | null | undefined,
+	baseFont: string,
+	defaultColor = "#FFFFFF",
+	textAlign: "left" | "right" | "center" | "start" | "end" = "left"
+) => {
+	context.save();
+	context.textAlign = textAlign;
+	context.font = getStyledFont(baseFont, displayNameStyle?.font_id);
+	context.fillStyle = defaultColor;
+	context.fillText(text, xPosition, yPosition);
+	context.restore();
 };
 
 const drawSvgIcon = async (ctx: CanvasRenderingContext2D, iconName: string, color: string, x: number, y: number, size: number) => {
@@ -373,12 +493,9 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 	switch (type) {
 		case RichPictureType.Profile: {
 			const data = options.data as ProfileCardData;
-			await drawCircularAvatar(ctx, data.avatarUrl, cardX + 45, cardY + 40, 115, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 40, 115, data.username[0]);
 
-			ctx.fillStyle = "#FFFFFF";
-			ctx.font = `bold 38px ${FONT_MAIN}`;
-			ctx.textAlign = "left";
-			ctx.fillText(data.username, cardX + 185, cardY + 85);
+			drawStyledUsername(ctx, data.username, cardX + 185, cardY + 85, data.displayNameStyle, `bold 38px ${FONT_MAIN}`, "#FFFFFF", "left");
 
 			ctx.fillStyle = accentColor;
 			ctx.font = `20px ${FONT_ACCENT}`;
@@ -441,23 +558,26 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			const barWidth = cardW - 90;
 			const barHeight = 12;
 
+			ctx.fillStyle = "#242428";
+			drawRoundedRect(ctx, cardX + 45, barY, barWidth, barHeight, 6);
+			ctx.fill();
+
+			if (levelProgress > 0) {
+				const progressGradient = ctx.createLinearGradient(cardX + 45, barY, cardX + 45 + barWidth, barY);
+				progressGradient.addColorStop(0, accentColor);
+				progressGradient.addColorStop(1, "#A855F7");
+				ctx.fillStyle = progressGradient;
+				drawRoundedRect(ctx, cardX + 45, barY, Math.max(12, barWidth * levelProgress), barHeight, 6);
+				ctx.fill();
+			}
+
 			ctx.fillStyle = "#A1A1A6";
-			ctx.font = `15px ${FONT_MAIN}`;
+			ctx.font = `14px ${FONT_MAIN}`;
 			ctx.textAlign = "left";
 			ctx.fillText(`PROGRESS TO LEVEL ${data.level + 1}`, cardX + 45, barY - 12);
 
 			ctx.textAlign = "right";
 			ctx.fillText(`${Math.floor(levelProgress * 100)}%`, cardX + cardW - 45, barY - 12);
-
-			drawRoundedRect(ctx, cardX + 45, barY, barWidth, barHeight, 6);
-			ctx.fillStyle = "#1F1F24";
-			ctx.fill();
-
-			if (levelProgress > 0) {
-				drawRoundedRect(ctx, cardX + 45, barY, Math.max(12, barWidth * levelProgress), barHeight, 6);
-				ctx.fillStyle = accentColor;
-				ctx.fill();
-			}
 
 			break;
 		}
@@ -494,11 +614,9 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 				ctx.textAlign = "left";
 				ctx.fillText(`#${entry.rank}`, cardX + 45, y);
 
-				await drawCircularAvatar(ctx, entry.avatarUrl, cardX + 110, y - 26, 42, entry.username[0]);
+				await drawCircularAvatar(ctx, entry.avatarUrl, entry.avatarDecorationUrl, cardX + 110, y - 26, 42, entry.username[0]);
 
-				ctx.fillStyle = "#FFFFFF";
-				ctx.font = `bold 22px ${FONT_MAIN}`;
-				ctx.fillText(entry.username, cardX + 168, y);
+				drawStyledUsername(ctx, entry.username, cardX + 168, y, entry.displayNameStyle, `bold 22px ${FONT_MAIN}`, "#FFFFFF", "left");
 
 				ctx.fillStyle = "#A1A1A6";
 				ctx.font = `18px ${FONT_MAIN}`;
@@ -513,7 +631,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.LevelUp: {
 			const data = options.data as LevelUpCardData;
 
-			await drawCircularAvatar(ctx, data.avatarUrl, cardX + 45, cardY + 40, 110, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 40, 110, data.username[0]);
 
 			await drawSvgIcon(ctx, "flame", accentColor, cardX + 180, cardY + 49, 22);
 			ctx.fillStyle = accentColor;
@@ -521,9 +639,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.textAlign = "left";
 			ctx.fillText("LEVEL UP!", cardX + 210, cardY + 68);
 
-			ctx.fillStyle = "#FFFFFF";
-			ctx.font = `bold 38px ${FONT_MAIN}`;
-			ctx.fillText(data.username, cardX + 180, cardY + 116);
+			drawStyledUsername(ctx, data.username, cardX + 180, cardY + 116, data.displayNameStyle, `bold 38px ${FONT_MAIN}`, "#FFFFFF", "left");
 
 			ctx.fillStyle = "#A1A1A6";
 			ctx.font = `20px ${FONT_MAIN}`;
@@ -535,7 +651,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.Achievement: {
 			const data = options.data as AchievementCardData;
 
-			await drawCircularAvatar(ctx, data.avatarUrl, cardX + 45, cardY + 45, 110, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 45, 110, data.username[0]);
 
 			await drawSvgIcon(ctx, "medal-military", accentColor, cardX + 180, cardY + 46, 22);
 			ctx.fillStyle = accentColor;
@@ -553,7 +669,10 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 
 			ctx.fillStyle = "#7C7C80";
 			ctx.font = `15px ${FONT_MAIN}`;
-			ctx.fillText(`Unlocked by ${data.username}`, cardX + 180, cardY + 184);
+			ctx.textAlign = "left";
+			ctx.fillText("Unlocked by ", cardX + 180, cardY + 184);
+			const unlockedByPrefixWidth = ctx.measureText("Unlocked by ").width;
+			drawStyledUsername(ctx, data.username, cardX + 180 + unlockedByPrefixWidth, cardY + 184, data.displayNameStyle, `15px ${FONT_MAIN}`, "#7C7C80", "left");
 
 			break;
 		}
@@ -561,7 +680,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.WelcomeMember: {
 			const data = options.data as WelcomeMemberCardData;
 
-			await drawCircularAvatar(ctx, data.avatarUrl, cardX + 45, cardY + 40, 110, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 40, 110, data.username[0]);
 
 			await drawSvgIcon(ctx, "hand-waving", accentColor, cardX + 180, cardY + 49, 22);
 			ctx.fillStyle = accentColor;
@@ -569,9 +688,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.textAlign = "left";
 			ctx.fillText("WELCOME TO THE SERVER", cardX + 210, cardY + 67);
 
-			ctx.fillStyle = "#FFFFFF";
-			ctx.font = `bold 38px ${FONT_MAIN}`;
-			ctx.fillText(data.username, cardX + 180, cardY + 116);
+			drawStyledUsername(ctx, data.username, cardX + 180, cardY + 116, data.displayNameStyle, `bold 38px ${FONT_MAIN}`, "#FFFFFF", "left");
 
 			ctx.fillStyle = "#A1A1A6";
 			ctx.font = `20px ${FONT_MAIN}`;
@@ -584,7 +701,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.Birthday: {
 			const data = options.data as BirthdayCardData;
 
-			await drawCircularAvatar(ctx, data.avatarUrl, cardX + 45, cardY + 40, 110, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 40, 110, data.username[0]);
 
 			await drawSvgIcon(ctx, "cake", accentColor, cardX + 180, cardY + 49, 22);
 			ctx.fillStyle = accentColor;
@@ -592,9 +709,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.textAlign = "left";
 			ctx.fillText("HAPPY BIRTHDAY!", cardX + 210, cardY + 67);
 
-			ctx.fillStyle = "#FFFFFF";
-			ctx.font = `bold 38px ${FONT_MAIN}`;
-			ctx.fillText(data.username, cardX + 180, cardY + 116);
+			drawStyledUsername(ctx, data.username, cardX + 180, cardY + 116, data.displayNameStyle, `bold 38px ${FONT_MAIN}`, "#FFFFFF", "left");
 
 			ctx.fillStyle = "#A1A1A6";
 			ctx.font = `20px ${FONT_MAIN}`;
@@ -609,7 +724,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			const data = options.data as SupporterCardData;
 			const iconName = data.type === "Boost" ? "rocket-launch" : "hand-heart";
 
-			await drawCircularAvatar(ctx, data.avatarUrl, cardX + 45, cardY + 40, 110, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 40, 110, data.username[0]);
 
 			const badgeText = data.type === "Boost" ? "SERVER BOOST" : "NEW SUPPORTER";
 			await drawSvgIcon(ctx, iconName, accentColor, cardX + 180, cardY + 49, 22);
@@ -619,9 +734,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.textAlign = "left";
 			ctx.fillText(badgeText, cardX + 210, cardY + 67);
 
-			ctx.fillStyle = "#FFFFFF";
-			ctx.font = `bold 38px ${FONT_MAIN}`;
-			ctx.fillText(data.username, cardX + 180, cardY + 116);
+			drawStyledUsername(ctx, data.username, cardX + 180, cardY + 116, data.displayNameStyle, `bold 38px ${FONT_MAIN}`, "#FFFFFF", "left");
 
 			ctx.fillStyle = "#A1A1A6";
 			ctx.font = `20px ${FONT_MAIN}`;
@@ -635,7 +748,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.Warn: {
 			const data = options.data as WarnCardData;
 
-			await drawCircularAvatar(ctx, data.targetAvatarUrl, cardX + 45, cardY + 35, 95, data.targetUsername[0]);
+			await drawCircularAvatar(ctx, data.targetAvatarUrl, data.targetAvatarDecorationUrl, cardX + 45, cardY + 35, 95, data.targetUsername[0]);
 
 			await drawSvgIcon(ctx, "shield-warning", accentColor, cardX + 160, cardY + 43, 20);
 			ctx.fillStyle = accentColor;
@@ -643,9 +756,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.textAlign = "left";
 			ctx.fillText("MEMBER WARNING", cardX + 188, cardY + 60);
 
-			ctx.fillStyle = "#FFFFFF";
-			ctx.font = `bold 30px ${FONT_MAIN}`;
-			ctx.fillText(data.targetUsername, cardX + 160, cardY + 98);
+			drawStyledUsername(ctx, data.targetUsername, cardX + 160, cardY + 98, data.targetDisplayNameStyle, `bold 30px ${FONT_MAIN}`, "#FFFFFF", "left");
 
 			ctx.fillStyle = "#A1A1A6";
 			ctx.font = `17px ${FONT_MAIN}`;
@@ -669,7 +780,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.ReportUser: {
 			const data = options.data as ReportCardData;
 
-			await drawCircularAvatar(ctx, data.targetAvatarUrl, cardX + 45, cardY + 35, 95, data.targetUsername[0]);
+			await drawCircularAvatar(ctx, data.targetAvatarUrl, data.targetAvatarDecorationUrl, cardX + 45, cardY + 35, 95, data.targetUsername[0]);
 
 			const reportTitle = data.reportType === "Message" ? "MESSAGE REPORT" : "USER REPORT";
 			await drawSvgIcon(ctx, "shield-warning", accentColor, cardX + 160, cardY + 43, 20);
@@ -681,7 +792,10 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 
 			ctx.fillStyle = "#FFFFFF";
 			ctx.font = `bold 30px ${FONT_MAIN}`;
-			ctx.fillText(`Target: @${data.targetUsername}`, cardX + 160, cardY + 98);
+			ctx.textAlign = "left";
+			ctx.fillText("Target: @", cardX + 160, cardY + 98);
+			const targetPrefixWidth = ctx.measureText("Target: @").width;
+			drawStyledUsername(ctx, data.targetUsername, cardX + 160 + targetPrefixWidth, cardY + 98, data.targetDisplayNameStyle, `bold 30px ${FONT_MAIN}`, "#FFFFFF", "left");
 
 			if (data.reporterUsername) {
 				ctx.fillStyle = "#A1A1A6";
@@ -706,7 +820,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.TicketHeader: {
 			const data = options.data as TicketHeaderCardData;
 
-			await drawCircularAvatar(ctx, data.creatorAvatarUrl, cardX + 45, cardY + 35, 95, data.creatorUsername[0]);
+			await drawCircularAvatar(ctx, data.creatorAvatarUrl, data.creatorAvatarDecorationUrl, cardX + 45, cardY + 35, 95, data.creatorUsername[0]);
 
 			await drawSvgIcon(ctx, "chats-teardrop", accentColor, cardX + 160, cardY + 43, 20);
 			ctx.fillStyle = accentColor;
@@ -716,7 +830,10 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 
 			ctx.fillStyle = "#FFFFFF";
 			ctx.font = `bold 30px ${FONT_MAIN}`;
-			ctx.fillText(`Opened by @${data.creatorUsername}`, cardX + 160, cardY + 98);
+			ctx.textAlign = "left";
+			ctx.fillText("Opened by @", cardX + 160, cardY + 98);
+			const openedByPrefixWidth = ctx.measureText("Opened by @").width;
+			drawStyledUsername(ctx, data.creatorUsername, cardX + 160 + openedByPrefixWidth, cardY + 98, data.creatorDisplayNameStyle, `bold 30px ${FONT_MAIN}`, "#FFFFFF", "left");
 
 			ctx.fillStyle = "#A1A1A6";
 			ctx.font = `17px ${FONT_MAIN}`;
@@ -740,14 +857,30 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.StorageFile: {
 			const data = options.data as StorageFileCardData;
 
+			if (data.uploader) {
+				const uploaderName = data.uploader.displayName || data.uploader.username || "Unknown";
+				const avatarSize = 64;
+				const avatarPositionX = cardX + cardW - 45 - avatarSize;
+				const avatarPositionY = cardY + 38;
+
+				await drawCircularAvatar(ctx, data.uploader.avatarUrl, data.uploader.avatarDecorationUrl, avatarPositionX, avatarPositionY, avatarSize, uploaderName[0]);
+
+				ctx.fillStyle = "#A1A1A6";
+				ctx.font = `12px ${FONT_MAIN}`;
+				ctx.textAlign = "right";
+				ctx.fillText("UPLOADED BY", avatarPositionX - 16, avatarPositionY + 26);
+
+				drawStyledUsername(ctx, uploaderName, avatarPositionX - 16, avatarPositionY + 50, data.uploader.displayNameStyle, `bold 18px ${FONT_MAIN}`, "#FFFFFF", "right");
+			}
+
 			ctx.fillStyle = accentColor;
 			ctx.font = `18px ${FONT_ACCENT}`;
 			ctx.textAlign = "left";
 			ctx.fillText("TEMPORARY STORAGE FILE", cardX + 45, cardY + 52);
 
-			const lastDot = data.name.lastIndexOf(".");
-			const baseName = lastDot !== -1 ? data.name.slice(0, lastDot) : data.name;
-			const extension = lastDot !== -1 ? data.name.slice(lastDot) : "";
+			const lastDotIndex = data.name.lastIndexOf(".");
+			const baseName = lastDotIndex !== -1 ? data.name.slice(0, lastDotIndex) : data.name;
+			const extension = lastDotIndex !== -1 ? data.name.slice(lastDotIndex) : "";
 
 			ctx.fillStyle = "#FFFFFF";
 			ctx.font = `bold 30px ${FONT_MAIN}`;

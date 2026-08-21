@@ -13,7 +13,7 @@ const corsHeaders = {
 
 export const handler: Handler = {
 	domain: config.isDevEnvironment ? "localhost:1202" : "api.onion.wixonic.fr",
-	origin: config.isDevEnvironment ? "localhost:2011" : "onion.wixonic.fr",
+	origin: "*",
 	path: "*",
 	handle: async (req) => {
 		const url = new URL(req.url);
@@ -41,12 +41,14 @@ export const handler: Handler = {
 						id: user.id,
 						username: user.username,
 						displayName: user.displayName,
-						avatar: user.avatar("webp", 256, true),
-						avatarDecoration: user.avatarDecoration(true)
+						displayNameStyle: await user.displayNameStyle(),
+						avatar: user.avatar("webp", 256, false),
+						avatarDecoration: user.avatarDecoration(false)
 					} : {
 						id: file.uploader,
 						username: null,
 						displayName: null,
+						displayNameStyle: null,
 						avatar: null,
 						avatarDecoration: null
 					},
@@ -157,6 +159,7 @@ export const handler: Handler = {
 				const file = await getFile(fileId);
 				if (!file) return Response.json({ error: "File not found" }, { status: 404, headers: corsHeaders });
 
+				const user = file.uploader ? await client.getUser(file.uploader) : null;
 				const fifoPosition = await getDeletionQueuePosition(fileId);
 
 				const cardBuffer = await generateRichPicture({
@@ -165,7 +168,14 @@ export const handler: Handler = {
 						name: file.name,
 						mimeType: file.mimeType,
 						size: file.size,
-						fifoPosition
+						fifoPosition,
+						uploader: user ? {
+							username: user.username,
+							displayName: user.displayName,
+							avatarUrl: user.avatar("webp", 256, false),
+							avatarDecorationUrl: user.avatarDecoration(false) ?? undefined,
+							displayNameStyle: await user.displayNameStyle()
+						} : undefined
 					}
 				});
 

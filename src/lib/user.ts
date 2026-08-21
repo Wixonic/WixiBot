@@ -168,8 +168,15 @@ export class User {
 	};
 
 	async displayNameStyle() {
-		const response = await client.discord?.rest.get(`/users/${this.discord.id}`) as { display_name_styles?: { colors: number[], effect_id: string, font_id: string } } | null;
-		return response?.display_name_styles;
+		try {
+			const response = await client.discord?.rest.get(`/users/${this.discord.id}`) as {
+				display_name_styles?: { colors?: number[], effect_id?: string | number, font_id?: string | number };
+				display_name_style?: { colors?: number[], effect_id?: string | number, font_id?: string | number };
+			} | null;
+			return response?.display_name_styles ?? response?.display_name_style ?? null;
+		} catch {
+			return null;
+		}
 	};
 
 	touch() { this.lastAccessed = Date.now() };
@@ -570,13 +577,16 @@ export class User {
 
 					if (botChannel && botChannel.isTextBased()) {
 						const displayName = await this.getGuildDisplayName(guildId);
+						const displayNameStyle = await this.displayNameStyle();
 
 						if (newLevel > oldLevel) {
 							const levelUpBuffer = await generateRichPicture({
 								type: RichPictureType.LevelUp,
 								data: {
 									username: displayName,
-									avatarUrl: this.avatar("png", 256, false),
+									avatarUrl: this.avatar("webp", 256, false),
+									avatarDecorationUrl: this.avatarDecoration(false) ?? undefined,
+									displayNameStyle,
 									oldLevel,
 									newLevel
 								}
@@ -593,7 +603,9 @@ export class User {
 										type: RichPictureType.Achievement,
 										data: {
 											username: displayName,
-											avatarUrl: this.avatar("png", 256, false),
+											avatarUrl: this.avatar("webp", 256, false),
+											avatarDecorationUrl: this.avatarDecoration(false) ?? undefined,
+											displayNameStyle,
 											achievementName: achievement.name,
 											achievementDescription: achievement.description
 										}

@@ -12,7 +12,7 @@ import {
 	SlashCommandBuilder
 } from "discord.js";
 
-import type { Command } from "../lib/client.ts";
+import { client, type Command } from "../lib/client.ts";
 import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 import {
 	canUserDownload,
@@ -191,25 +191,26 @@ export const command = {
 				return;
 			}
 
-			let downloadUrl = `${baseUrl}/files/${file.id}`;
+			let downloadUrl = `${baseUrl}/files/download/${file.id}`;
 			let directApiUrl = `${apiUrl}/${file.id}/download`;
 
 			if (file.restrictedTo !== null) {
 				if (file.restrictedTo.type === "key") {
 					if (providedKey) {
-						downloadUrl = `${baseUrl}/files/${file.id}?key=${providedKey}`;
+						downloadUrl = `${baseUrl}/files/download/${file.id}?key=${providedKey}`;
 						directApiUrl = `${apiUrl}/${file.id}/download?key=${providedKey}`;
 					}
 				} else {
 					const token = await generateDownloadToken(file.id);
 					if (token) {
-						downloadUrl = `${baseUrl}/files/${file.id}?key=${token}`;
+						downloadUrl = `${baseUrl}/files/download/${file.id}?key=${token}`;
 						directApiUrl = `${apiUrl}/${file.id}/download?key=${token}`;
 					}
 				}
 			}
 
 			const fifoPosition = await getDeletionQueuePosition(file.id);
+			const uploaderUser = await client.getUser(file.uploader);
 
 			const cardBuffer = await generateRichPicture({
 				type: RichPictureType.StorageFile,
@@ -217,7 +218,14 @@ export const command = {
 					name: file.name,
 					mimeType: file.mimeType,
 					size: file.size,
-					fifoPosition
+					fifoPosition,
+					uploader: uploaderUser ? {
+						username: uploaderUser.username,
+						displayName: uploaderUser.displayName,
+						avatarUrl: uploaderUser.avatar("webp", 256, false),
+						avatarDecorationUrl: uploaderUser.avatarDecoration(false) ?? undefined,
+						displayNameStyle: await uploaderUser.displayNameStyle()
+					} : undefined
 				}
 			});
 
