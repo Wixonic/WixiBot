@@ -133,8 +133,7 @@ export const command = {
 			} else if (secretKey) restrictedTo = { type: "key", key: secretKey };
 
 			const { file, uploadKey } = await createSlot({
-				uploaderId: interaction.user.id,
-				uploaderName: interaction.user.displayName || interaction.user.username,
+				uploader: interaction.user.id,
 				description,
 				expiresIn,
 				maxDownloads,

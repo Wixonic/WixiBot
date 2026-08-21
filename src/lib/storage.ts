@@ -13,8 +13,7 @@ export interface FileEntry {
 	size: number;
 	mimeType: string | null;
 	sha256: string;
-	uploaderId: string;
-	uploaderName: string;
+	uploader: string;
 	uploadKey: string;
 	uploaded: boolean;
 	createdAt: string;
@@ -62,9 +61,14 @@ let initialized = false;
 const loadIndex = async () => {
 	try {
 		const data = await Deno.readTextFile(getStoragePath("files", "index.json"));
-		const parsed: FileEntry[] = JSON.parse(data);
+		const parsed: (FileEntry & { uploaderId?: string; uploaderName?: string })[] = JSON.parse(data);
 		index.clear();
-		for (const file of parsed) index.set(file.id, file);
+		for (const file of parsed) {
+			if (!file.uploader && file.uploaderId) file.uploader = file.uploaderId;
+			delete file.uploaderId;
+			delete file.uploaderName;
+			index.set(file.id, file);
+		}
 	} catch {
 		index.clear();
 	}
@@ -124,8 +128,7 @@ export const cleanupExpired = async () => {
 };
 
 export const createSlot = async (options: {
-	uploaderId: string;
-	uploaderName: string;
+	uploader: string;
 	description?: string | null;
 	expiresIn?: number | null;
 	maxDownloads?: number | null;
@@ -145,8 +148,7 @@ export const createSlot = async (options: {
 		size: 0,
 		mimeType: null,
 		sha256: "",
-		uploaderId: options.uploaderId,
-		uploaderName: options.uploaderName,
+		uploader: options.uploader,
 		uploadKey,
 		uploaded: false,
 		createdAt: new Date().toISOString(),
@@ -263,7 +265,7 @@ export const canUserDownload = (file: FileEntry, userId?: string, memberRoleIds?
 	if (file.restrictedTo.type === "key")
 		return (providedKey !== undefined && file.restrictedTo.key === providedKey) || !!hasValidToken;
 
-	if (userId && file.uploaderId === userId) return true;
+	if (userId && file.uploader === userId) return true;
 
 	if (file.restrictedTo.type === "user")
 		return (userId !== undefined && file.restrictedTo.id === userId) || !!hasValidToken;
@@ -313,7 +315,7 @@ export const deleteFile = async (fileId: string, userId?: string, isAdmin = fals
 	await ensureReady();
 	const file = index.get(fileId);
 	if (!file) return false;
-	if (!isAdmin && userId && file.uploaderId !== userId) return false;
+	if (!isAdmin && userId && file.uploader !== userId) return false;
 
 	await removeFile(fileId);
 	index.delete(fileId);

@@ -1,6 +1,7 @@
 import type { Handler } from "../../Server/src/main.ts";
 import { config } from "../../Server/src/config.ts";
 
+import { client } from "../lib/client.ts";
 import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 import { consumeDownload, getDeletionQueuePosition, getFile, getFileRaw, getStorageConfig, getStorageStats, uploadFile } from "../lib/storage.ts";
 
@@ -28,6 +29,7 @@ export const handler: Handler = {
 
 				const stats = await getStorageStats();
 				const fifoPosition = await getDeletionQueuePosition(fileId);
+				const user = await client.getUser(file.uploader);
 
 				return Response.json({
 					id: file.id,
@@ -35,7 +37,19 @@ export const handler: Handler = {
 					size: file.size,
 					mimeType: file.mimeType,
 					sha256: file.sha256,
-					uploader: file.uploaderName,
+					uploader: user ? {
+						id: user.id,
+						username: user.username,
+						displayName: user.displayName,
+						avatar: user.avatar("webp", 256, true),
+						avatarDecoration: user.avatarDecoration(true)
+					} : {
+						id: file.uploader,
+						username: null,
+						displayName: null,
+						avatar: null,
+						avatarDecoration: null
+					},
 					createdAt: file.createdAt,
 					expiresAt: file.expiresAt,
 					maxDownloads: file.maxDownloads,
