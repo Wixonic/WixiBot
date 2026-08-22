@@ -1,6 +1,7 @@
 import type { Handler } from "../../Server/src/main.ts";
 import { config } from "../../Server/src/config.ts";
-import { client } from "../lib/client.ts";
+
+import { client } from "../../WixiBot/src/lib/client.ts";
 
 export const handler: Handler = {
 	domain: config.isDevEnvironment ? "localhost:1201" : "discord.wixonic.fr",

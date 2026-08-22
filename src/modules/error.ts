@@ -1,27 +1,22 @@
 import type { Handler } from "../../Server/src/main.ts";
 import { config } from "../../Server/src/config.ts";
-import { getSettings } from "../lib/settings.ts";
+
+import { getSettings } from "../../WixiBot/src/lib/settings.ts";
 
 export const handler: Handler = {
 	domain: config.isDevEnvironment ? "localhost:1200" : "server.wixonic.fr",
+	origin: "*",
 	path: "/error/",
 	handle: async (req) => {
 		const settings = getSettings();
 		const data = await req.json();
-
-		/*
-		location: location.href,
-		reason,
-		message,
-		trace
-		 */
 
 		if (data?.location) {
 			try {
 				await fetch(settings.discord.webhookUrl, {
 					body: JSON.stringify({
 						username: "Website Error",
-						content: `A fatal error occured on the website:\n\`\`\`${data.reason}\n${data.message}\n${data.trace}\`\`\`\n-# Location: ${data.location}`
+						content: `A fatal error occured on the website:\n\`\`\`${data.reason}\n${data.message}\n${data.trace}\`\`\`\n-# Location: <${data.location}>`
 					})
 				});
 
