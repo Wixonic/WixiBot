@@ -1,22 +1,27 @@
 import type { Handler } from "../../Server/src/main.ts";
 import { config } from "../../Server/src/config.ts";
 
-import { getSettings } from "../../WixiBot/src/lib/settings.ts";
+import { getSettings } from "../lib/settings.ts";
 
 export const handler: Handler = {
 	domain: config.isDevEnvironment ? "localhost:1200" : "server.wixonic.fr",
 	origin: "*",
-	path: "/error/",
+	path: "/error",
 	handle: async (req) => {
-		const settings = getSettings();
-		const data = await req.json();
+		if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
+
+		const data = await req.json().catch(() => null);
 
 		if (data?.location) {
 			try {
+				const settings = getSettings();
 				await fetch(settings.discord.webhookUrl, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
 						username: "Website Error",
-						content: `A fatal error occured on the website:\n\`\`\`${data.reason}\n${data.message}\n${data.trace}\`\`\`\n-# Location: <${data.location}>`
+						content: `@everyone A fatal error occured on the website:\n\`\`\`${data.reason}\n${data.message}\n${data.trace}\`\`\`\n-# Location: <${data.location}>`,
+						allowed_mentions: { parse: ["everyone"] }
 					})
 				});
 

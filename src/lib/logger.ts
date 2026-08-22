@@ -1,3 +1,4 @@
+import { getSettings } from "./settings.ts";
 import { safeStringify } from "./utils.ts";
 
 export const colors = {
@@ -46,7 +47,57 @@ export interface Logger extends LoggerOptions {
 	jump(): void;
 }
 
-const rawLog = (level: string, color: string, options: LoggerOptions, ...any: unknown[]): void => {
+export interface WebhookOptions {
+	mention?: string;
+	suppressNotifications?: boolean;
+};
+
+const sendWebhook = async (level: string, message: string, options: WebhookOptions = {}): Promise<void> => {
+	try {
+		const settings = getSettings();
+		if (!settings.discord?.webhookUrl) return;
+
+		const prefix = options.mention ? `${options.mention} ` : "";
+		const safeMessage = message.replaceAll("```", "` ` `");
+		const maxMessageLength = 2000 - prefix.length - 8 - level.trim().length - 2;
+		const truncated = safeMessage.length > maxMessageLength ? safeMessage.slice(0, maxMessageLength - 3) + "..." : safeMessage;
+
+		await fetch(settings.discord.webhookUrl, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				content: `${prefix}\`\`\`\n${level.trim()}: ${truncated}\n\`\`\``,
+				flags: options.suppressNotifications ? 4096 : undefined,
+				allowed_mentions: options.mention ? { parse: ["everyone"] } : { parse: [] }
+			})
+		});
+	} catch { }
+};
+
+const formatItem = (item: unknown): string => {
+	if (item instanceof Error) {
+		let str = item.stack || String(item);
+		if (item.cause) str += `\nCaused by: ${formatItem(item.cause)}`;
+		return str;
+	}
+
+	if (typeof item === "object" && item !== null) {
+		if ("cause" in item) {
+			const causeOutput = formatItem((item as Record<string, unknown>).cause);
+			const rest = { ...(item as Record<string, unknown>) };
+			delete rest.cause;
+
+			if (Object.keys(rest).length === 0) return `\nCaused by: ${causeOutput}`;
+			return safeStringify(rest) + `\nCaused by: ${causeOutput}`;
+		}
+
+		return safeStringify(item);
+	}
+
+	return String(item);
+};
+
+const rawLog = (level: string, color: string, options: LoggerOptions, webhookOptions?: WebhookOptions, ...any: unknown[]): void => {
 	const logParts: string[] = [];
 
 	if (options.displayLevel) logParts.push(color + level + colors.reset);
@@ -61,33 +112,12 @@ const rawLog = (level: string, color: string, options: LoggerOptions, ...any: un
 		);
 	}
 
-	const formatItem = (item: unknown): string => {
-		if (item instanceof Error) {
-			let str = item.stack || String(item);
-			if (item.cause) str += `\nCaused by: ${formatItem(item.cause)}`;
-			return str;
-		}
-
-		if (typeof item === "object" && item !== null) {
-			if ("cause" in item) {
-				const causeOutput = formatItem((item as Record<string, unknown>).cause);
-				const rest = { ...(item as Record<string, unknown>) };
-				delete rest.cause;
-
-				if (Object.keys(rest).length === 0) return `\nCaused by: ${causeOutput}`;
-				return safeStringify(rest) + `\nCaused by: ${causeOutput}`;
-			}
-
-			return safeStringify(item);
-		}
-
-		return String(item);
-	};
-
 	const argsJoined = any.map(formatItem).join(" ");
 
 	logParts.push(color + argsJoined + colors.reset);
 	console.log(logParts.join(" "));
+
+	if (webhookOptions) sendWebhook(level, argsJoined, webhookOptions);
 };
 
 const createLogger = (options: Partial<LoggerOptions> & { prefix?: string | (() => string) } = {}): Logger => {
@@ -106,10 +136,10 @@ const createLogger = (options: Partial<LoggerOptions> & { prefix?: string | (() 
 	};
 
 	return {
-		debug: (...any) => rawLog("[DEBUG]", colors.debug, mergedOptions, ...injectPrefix(any)),
-		error: (...any) => rawLog("[ERROR]", colors.error, mergedOptions, ...injectPrefix(any)),
-		info: (...any) => rawLog(" [INFO]", colors.info, mergedOptions, ...injectPrefix(any)),
-		warn: (...any) => rawLog(" [WARN]", colors.warn, mergedOptions, ...injectPrefix(any)),
+		debug: (...any) => rawLog("[DEBUG]", colors.debug, mergedOptions, undefined, ...injectPrefix(any)),
+		error: (...any) => rawLog("[ERROR]", colors.error, mergedOptions, { mention: "@everyone" }, ...injectPrefix(any)),
+		info: (...any) => rawLog(" [INFO]", colors.info, mergedOptions, { suppressNotifications: true }, ...injectPrefix(any)),
+		warn: (...any) => rawLog(" [WARN]", colors.warn, mergedOptions, {}, ...injectPrefix(any)),
 		clone: (prefixGenerator) => createLogger({
 			...mergedOptions,
 			prefix: () => {
