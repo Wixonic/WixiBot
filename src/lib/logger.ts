@@ -108,11 +108,6 @@ const rawLog = (level: string, color: string, options: LoggerOptions, webhookOpt
 
 	if (options.displayLevel) logParts.push(color + level + colors.reset);
 
-	if (options.prefix) {
-		const prefixString = typeof options.prefix === "function" ? options.prefix() : options.prefix;
-		if (prefixString) logParts.push(color + prefixString + colors.reset);
-	}
-
 	if (options.displayDate) {
 		const now = new Date();
 		logParts.push(
@@ -121,6 +116,11 @@ const rawLog = (level: string, color: string, options: LoggerOptions, webhookOpt
 			now.toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3 }) +
 			colors.reset
 		);
+	}
+
+	if (options.prefix) {
+		const prefixString = typeof options.prefix === "function" ? options.prefix() : options.prefix;
+		if (prefixString) logParts.push(color + prefixString + colors.reset);
 	}
 
 	const joinedArguments = any.map(formatItem).join(" ");
