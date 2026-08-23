@@ -1,5 +1,5 @@
 import { getSettings } from "./settings.ts";
-import { safeStringify } from "./utils.ts";
+import { safeStringify, wait } from "./utils.ts";
 
 export const colors = {
 	reset: "\x1b[0m",
@@ -55,29 +55,83 @@ export interface WebhookOptions {
 	webhookUsername?: string;
 };
 
-const sendWebhook = async (level: string, message: string, options: WebhookOptions = {}): Promise<void> => {
-	try {
-		const settings = getSettings();
-		if (!settings.discord?.webhookUrl) return;
+interface WebhookQueueItem {
+	level: string;
+	message: string;
+	options: WebhookOptions;
+}
 
-		const prefix = options.mention ? `${options.mention} ` : "";
-		const messageWithoutDebug = message.split(colors.debug)[0].trim();
+const webhookQueue: WebhookQueueItem[] = [];
+let isProcessingQueue = false;
+
+const processQueue = async (): Promise<void> => {
+	if (isProcessingQueue) return;
+	isProcessingQueue = true;
+
+	while (webhookQueue.length > 0) {
+		const item = webhookQueue[0];
+		const settings = getSettings();
+		if (!settings.discord?.webhookUrl) {
+			webhookQueue.length = 0;
+			break;
+		}
+
+		const prefix = item.options.mention ? `${item.options.mention} ` : "";
+		const messageWithoutDebug = item.message.split(colors.debug)[0].trim();
 		const escapeCharacter = String.fromCharCode(27);
 		const safeMessage = messageWithoutDebug.replace(new RegExp(`${escapeCharacter}\\[[0-9;]*m`, "g"), "").replaceAll("```", "` ` `");
-		const maxMessageLength = 2000 - prefix.length - 8 - level.trim().length - 2;
+		const maxMessageLength = 2000 - prefix.length - 8 - item.level.trim().length - 2;
 		const truncated = safeMessage.length > maxMessageLength ? safeMessage.slice(0, maxMessageLength - 3) + "..." : safeMessage;
 
-		await fetch(settings.discord.webhookUrl, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				username: options.webhookUsername,
-				content: `${prefix}\`\`\`\n${level.trim()}: ${truncated}\n\`\`\``,
-				flags: options.suppressNotifications ? 4096 : undefined,
-				allowed_mentions: options.mention ? { parse: ["everyone"] } : { parse: [] }
-			})
-		});
-	} catch { }
+		try {
+			const response = await fetch(settings.discord.webhookUrl, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					username: item.options.webhookUsername,
+					content: `${prefix}\`\`\`\n${item.level.trim()}: ${truncated}\n\`\`\``,
+					flags: item.options.suppressNotifications ? 4096 : undefined,
+					allowed_mentions: item.options.mention ? { parse: ["everyone"] } : { parse: [] }
+				})
+			});
+
+			if (response.status === 429) {
+				const retryAfterHeader = response.headers.get("retry-after");
+				let delayMilliseconds = 1000;
+				if (retryAfterHeader) {
+					const parsedDelay = parseFloat(retryAfterHeader);
+					if (!isNaN(parsedDelay)) delayMilliseconds = Math.ceil(parsedDelay * 1000);
+				} else {
+					const responseData = await response.json().catch(() => null);
+					if (responseData?.retry_after) delayMilliseconds = Math.ceil(Number(responseData.retry_after) * 1000);
+				}
+
+				await wait(delayMilliseconds + 100);
+				continue;
+			}
+
+			if (response.status >= 500) {
+				await wait(2000);
+				continue;
+			}
+
+			webhookQueue.shift();
+			await wait(500);
+		} catch {
+			await wait(2000);
+		}
+	}
+
+	isProcessingQueue = false;
+};
+
+const sendWebhook = (level: string, message: string, options: WebhookOptions = {}): void => {
+	const settings = getSettings();
+	if (!settings.discord?.webhookUrl) return;
+
+	if (webhookQueue.length >= 256) webhookQueue.shift();
+	webhookQueue.push({ level, message, options });
+	processQueue();
 };
 
 const formatItem = (item: unknown): string => {
