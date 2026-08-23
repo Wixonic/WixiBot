@@ -1,9 +1,9 @@
 import type { Handler } from "../../Server/src/main.ts";
 import { config } from "../../Server/src/config.ts";
 
-import { client } from "../../WixiBot/src/lib/client.ts";
-import { generateRichPicture, RichPictureType } from "../../WixiBot/src/lib/richPicture.ts";
-import { consumeDownload, getDeletionQueuePosition, getFile, getFileRaw, getStorageConfig, getStorageStats, uploadFile } from "../../WixiBot/src/lib/storage.ts";
+import { client } from "../lib/client.ts";
+import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
+import { consumeDownload, getDeletionQueuePosition, getFile, getFileRaw, getStorageConfig, getStorageStats, uploadFile } from "../lib/storage.ts";
 
 const corsHeaders = {
 	"Access-Control-Allow-Origin": "*",
