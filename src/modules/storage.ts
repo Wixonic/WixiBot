@@ -1,8 +1,7 @@
-import type { Handler } from "../../Server/src/main.ts";
+import type { Handler, Logger } from "../../Server/src/main.ts";
 import { config } from "../../Server/src/config.ts";
 
 import { client } from "../lib/client.ts";
-import type { Logger } from "../lib/logger.ts";
 import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 import { consumeDownload, getDeletionQueuePosition, getFile, getFileRaw, getStorageConfig, getStorageStats, uploadFile } from "../lib/storage.ts";
 
