@@ -8,85 +8,25 @@ import {
 
 import type { Command } from "../lib/client.ts";
 import { client } from "../lib/client.ts";
+import type { Logger } from "../lib/logger.ts";
 import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 import { getStoragePath } from "../lib/utils.ts";
 
-let leaderboardCache: { data: any[], expires: number } | null = null;
+interface LeaderboardUserStatistics {
+	id: string;
+	xp: number;
+	level: number;
+	streak: number;
+};
 
-export const command = {
-	data: new SlashCommandBuilder()
-		.setName("leaderboard")
-		.setDescription("Displays the leaderboard of the most active members (Top XP).")
-		.setIntegrationTypes([
-			ApplicationIntegrationType.GuildInstall
-		])
-		.setContexts([
-			InteractionContextType.Guild
-		]),
+let leaderboardCache: { data: LeaderboardUserStatistics[], updatedAt: number, expires: number } | null = null;
 
-	async execute(_logger, interaction) {
-		await interaction.deferReply();
-
-		if (leaderboardCache && leaderboardCache.expires > Date.now()) {
-			return sendLeaderboard(interaction, leaderboardCache.data);
-		}
-
-		const users = [];
-		try {
-			for await (const dirEntry of Deno.readDir(getStoragePath("users"))) {
-				if (dirEntry.isDirectory) {
-					const user = await client.getUser(dirEntry.name);
-					if (user) users.push(user);
-				}
-			}
-		} catch (error) {
-			await interaction.followUp("Error reading users data.");
-			return;
-		}
-
-		const statsPromises = users.map(async (user) => {
-			const stats = await user.getTotalStats();
-			const level = await user.getLevel();
-			return {
-				id: user.id,
-				username: await user.getGuildDisplayName(interaction.guildId ?? undefined),
-				xp: stats.totalXp,
-				level,
-				streak: user.data.streak || 0
-			};
-		});
-
-		const leaderboardData = await Promise.all(statsPromises);
-		leaderboardData.sort((a, b) => b.xp - a.xp);
-
-		const top10 = leaderboardData.slice(0, 10);
-
-		leaderboardCache = {
-			data: top10,
-			expires: Date.now() + 5 * 60 * 1000 // Cache for 5 minutes
-		};
-
-		await sendLeaderboard(interaction, top10);
-	}
-} satisfies Command<ChatInputCommandInteraction>;
-
-async function sendLeaderboard(interaction: ChatInputCommandInteraction, top10: any[]) {
-	const entries = await Promise.all(top10.map(async (leaderboardUser, index) => {
+const sendLeaderboard = async (_logger: Logger, interaction: ChatInputCommandInteraction, topUsers: LeaderboardUserStatistics[], updatedAt: number) => {
+	const entries = await Promise.all(topUsers.map(async (leaderboardUser, index) => {
 		const user = await client.getUser(leaderboardUser.id);
-		const displayName = user ? await user.getGuildDisplayName(interaction.guildId ?? undefined) : leaderboardUser.username;
-		let avatarUrl: string | undefined = user?.avatar("webp", 256, false);
-		const avatarDecorationUrl: string | undefined = user?.avatarDecoration(false) ?? undefined;
-
-		if (!avatarUrl && interaction.guild) {
-			const guildMember = await interaction.guild.members.fetch(leaderboardUser.id).catch(() => null);
-			if (guildMember) avatarUrl = guildMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true });
-		}
-
-		if (!avatarUrl) {
-			const discordUser = await client.discord?.users.fetch(leaderboardUser.id).catch(() => null);
-			if (discordUser) avatarUrl = discordUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true });
-		}
-
+		const displayName = user ? await user.getGuildDisplayName(interaction.guildId ?? undefined) : leaderboardUser.id;
+		const avatarUrl = user?.avatar("webp", 256, false);
+		const avatarDecorationUrl = user?.avatarDecoration(false) ?? undefined;
 		const displayNameStyle = await user?.displayNameStyle();
 
 		return {
@@ -107,6 +47,82 @@ async function sendLeaderboard(interaction: ChatInputCommandInteraction, top10: 
 	});
 
 	const attachment = new AttachmentBuilder(pictureBuffer, { name: "leaderboard.png" });
+	const updatedTimestamp = Math.floor(updatedAt / 1000);
 
-	await interaction.followUp({ files: [attachment] });
-}
+	await interaction.followUp({ content: `-# Updated <t:${updatedTimestamp}:R>`, files: [attachment] });
+};
+
+export const command = {
+	data: new SlashCommandBuilder()
+		.setName("leaderboard")
+		.setDescription("Displays the leaderboard of the most active members (Top XP).")
+		.setIntegrationTypes([
+			ApplicationIntegrationType.GuildInstall
+		])
+		.setContexts([
+			InteractionContextType.Guild
+		]),
+
+	async execute(logger, interaction) {
+		await interaction.deferReply();
+
+		if (leaderboardCache && leaderboardCache.expires > Date.now()) return sendLeaderboard(logger, interaction, leaderboardCache.data, leaderboardCache.updatedAt);
+
+		const userDirectoryNames: string[] = [];
+		try {
+			for await (const directoryEntry of Deno.readDir(getStoragePath("users"))) {
+				if (directoryEntry.isDirectory) userDirectoryNames.push(directoryEntry.name);
+			}
+		} catch (error) {
+			logger.error("Failed to read users storage directory", { cause: error });
+			await interaction.followUp("Error reading users data.");
+			return;
+		}
+
+		const statisticsPromises = userDirectoryNames.map(async (userId) => {
+			const loadedUser = client.users.get(userId);
+			if (loadedUser) {
+				const statistics = await loadedUser.getTotalStats();
+				return {
+					id: loadedUser.id,
+					xp: statistics.totalXp,
+					level: Math.floor(Math.sqrt(statistics.totalXp / 50)),
+					streak: loadedUser.data.streak || 0
+				};
+			}
+
+			try {
+				const content = await Deno.readTextFile(getStoragePath("users", userId, "data.json"));
+				const data = JSON.parse(content);
+				let totalXp = 0;
+
+				if (data.stats) totalXp = ((data.stats.totalMessages || 0) * 10) + ((data.stats.totalStageEvents || 0) * 2500) + ((data.stats.totalForumPosts || 0) * 250) + ((data.stats.totalReactions || 0) * 1);
+				if (data.bonusXp) totalXp += data.bonusXp;
+
+				return {
+					id: userId,
+					xp: totalXp,
+					level: Math.floor(Math.sqrt(totalXp / 50)),
+					streak: data.streak || 0
+				};
+			} catch (error) {
+				logger.warn(`Failed to read user data for ${userId}`, { cause: error });
+				return null;
+			}
+		});
+
+		const leaderboardData = (await Promise.all(statisticsPromises)).filter((item): item is NonNullable<typeof item> => item !== null);
+		leaderboardData.sort((firstUser, secondUser) => secondUser.xp - firstUser.xp);
+
+		const topUsers = leaderboardData.slice(0, 10);
+		const updatedAt = Date.now();
+
+		leaderboardCache = {
+			data: topUsers,
+			updatedAt,
+			expires: updatedAt + 5 * 60 * 1000
+		};
+
+		await sendLeaderboard(logger, interaction, topUsers, updatedAt);
+	}
+} satisfies Command<ChatInputCommandInteraction>;
