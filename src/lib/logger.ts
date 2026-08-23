@@ -36,6 +36,8 @@ export const colors = {
 export interface LoggerOptions {
 	displayDate: boolean;
 	displayLevel: boolean;
+	prefix?: string | (() => string);
+	webhookUsername?: string;
 }
 
 export interface Logger extends LoggerOptions {
@@ -43,13 +45,14 @@ export interface Logger extends LoggerOptions {
 	error(...any: unknown[]): void;
 	info(...any: unknown[]): void;
 	warn(...any: unknown[]): void;
-	clone(prefixGenerator: string | (() => string)): Logger;
+	clone(optionsOrPrefix: string | (() => string) | Partial<LoggerOptions>): Logger;
 	jump(): void;
 }
 
 export interface WebhookOptions {
 	mention?: string;
 	suppressNotifications?: boolean;
+	webhookUsername?: string;
 };
 
 const sendWebhook = async (level: string, message: string, options: WebhookOptions = {}): Promise<void> => {
@@ -58,7 +61,9 @@ const sendWebhook = async (level: string, message: string, options: WebhookOptio
 		if (!settings.discord?.webhookUrl) return;
 
 		const prefix = options.mention ? `${options.mention} ` : "";
-		const safeMessage = message.replaceAll("```", "` ` `");
+		const messageWithoutDebug = message.split(colors.debug)[0].trim();
+		const escapeCharacter = String.fromCharCode(27);
+		const safeMessage = messageWithoutDebug.replace(new RegExp(`${escapeCharacter}\\[[0-9;]*m`, "g"), "").replaceAll("```", "` ` `");
 		const maxMessageLength = 2000 - prefix.length - 8 - level.trim().length - 2;
 		const truncated = safeMessage.length > maxMessageLength ? safeMessage.slice(0, maxMessageLength - 3) + "..." : safeMessage;
 
@@ -66,6 +71,7 @@ const sendWebhook = async (level: string, message: string, options: WebhookOptio
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
+				username: options.webhookUsername,
 				content: `${prefix}\`\`\`\n${level.trim()}: ${truncated}\n\`\`\``,
 				flags: options.suppressNotifications ? 4096 : undefined,
 				allowed_mentions: options.mention ? { parse: ["everyone"] } : { parse: [] }
@@ -76,9 +82,9 @@ const sendWebhook = async (level: string, message: string, options: WebhookOptio
 
 const formatItem = (item: unknown): string => {
 	if (item instanceof Error) {
-		let str = item.stack || String(item);
-		if (item.cause) str += `\nCaused by: ${formatItem(item.cause)}`;
-		return str;
+		let stack = item.stack || String(item);
+		if (item.cause) stack += `\nCaused by: ${formatItem(item.cause)}`;
+		return stack;
 	}
 
 	if (typeof item === "object" && item !== null) {
@@ -102,6 +108,11 @@ const rawLog = (level: string, color: string, options: LoggerOptions, webhookOpt
 
 	if (options.displayLevel) logParts.push(color + level + colors.reset);
 
+	if (options.prefix) {
+		const prefixString = typeof options.prefix === "function" ? options.prefix() : options.prefix;
+		if (prefixString) logParts.push(color + prefixString + colors.reset);
+	}
+
 	if (options.displayDate) {
 		const now = new Date();
 		logParts.push(
@@ -112,45 +123,51 @@ const rawLog = (level: string, color: string, options: LoggerOptions, webhookOpt
 		);
 	}
 
-	const argsJoined = any.map(formatItem).join(" ");
+	const joinedArguments = any.map(formatItem).join(" ");
 
-	logParts.push(color + argsJoined + colors.reset);
+	logParts.push(color + joinedArguments + colors.reset);
 	console.log(logParts.join(" "));
 
-	if (webhookOptions) sendWebhook(level, argsJoined, webhookOptions);
+	if (webhookOptions) {
+		const prefixString = typeof options.prefix === "function" ? options.prefix() : options.prefix;
+		const fullMessage = prefixString ? `${prefixString} ${joinedArguments}` : joinedArguments;
+		sendWebhook(level, fullMessage, { webhookUsername: options.webhookUsername, ...webhookOptions });
+	}
 };
 
-const createLogger = (options: Partial<LoggerOptions> & { prefix?: string | (() => string) } = {}): Logger => {
+const createLogger = (options: Partial<LoggerOptions> = {}): Logger => {
 	const mergedOptions: LoggerOptions = {
 		displayDate: options.displayDate ?? true,
 		displayLevel: options.displayLevel ?? true,
-	};
-
-	const injectPrefix = (args: unknown[]): unknown[] => {
-		if (options.prefix) {
-			const prefixStr = typeof options.prefix === "function" ? options.prefix() : options.prefix;
-			return [prefixStr, ...args];
-		}
-
-		return args;
+		prefix: options.prefix,
+		webhookUsername: options.webhookUsername
 	};
 
 	return {
-		debug: (...any) => rawLog("[DEBUG]", colors.debug, mergedOptions, undefined, ...injectPrefix(any)),
-		error: (...any) => rawLog("[ERROR]", colors.error, mergedOptions, { mention: "@everyone" }, ...injectPrefix(any)),
-		info: (...any) => rawLog(" [INFO]", colors.info, mergedOptions, { suppressNotifications: true }, ...injectPrefix(any)),
-		warn: (...any) => rawLog(" [WARN]", colors.warn, mergedOptions, {}, ...injectPrefix(any)),
-		clone: (prefixGenerator) => createLogger({
-			...mergedOptions,
-			prefix: () => {
-				const oldPrefix = options.prefix ? (typeof options.prefix === "function" ? options.prefix() : options.prefix) : "";
-				const newPrefix = typeof prefixGenerator === "function" ? prefixGenerator() : prefixGenerator;
-				return oldPrefix ? `${oldPrefix} ${newPrefix}` : newPrefix;
+		debug: (...any) => rawLog("[DEBUG]", colors.debug, mergedOptions, undefined, ...any),
+		error: (...any) => rawLog("[ERROR]", colors.error, mergedOptions, { mention: "@everyone" }, ...any),
+		info: (...any) => rawLog(" [INFO]", colors.info, mergedOptions, { suppressNotifications: true }, ...any),
+		warn: (...any) => rawLog(" [WARN]", colors.warn, mergedOptions, {}, ...any),
+		clone: (optionsOrPrefix) => {
+			if (typeof optionsOrPrefix === "string" || typeof optionsOrPrefix === "function") {
+				return createLogger({
+					...mergedOptions,
+					prefix: () => {
+						const oldPrefix = mergedOptions.prefix ? (typeof mergedOptions.prefix === "function" ? mergedOptions.prefix() : mergedOptions.prefix) : "";
+						const newPrefix = typeof optionsOrPrefix === "function" ? optionsOrPrefix() : optionsOrPrefix;
+						return oldPrefix ? `${oldPrefix} ${newPrefix}` : newPrefix;
+					}
+				});
 			}
-		}),
+
+			return createLogger({
+				...mergedOptions,
+				...optionsOrPrefix
+			});
+		},
 		jump: () => console.log(""),
 		...mergedOptions
 	};
 };
 
-export const logger = createLogger();
+export const logger = createLogger({ prefix: "[WixiBot]", webhookUsername: "WixiBot" });

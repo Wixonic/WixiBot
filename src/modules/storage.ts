@@ -2,6 +2,7 @@ import type { Handler } from "../../Server/src/main.ts";
 import { config } from "../../Server/src/config.ts";
 
 import { client } from "../lib/client.ts";
+import type { Logger } from "../lib/logger.ts";
 import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 import { consumeDownload, getDeletionQueuePosition, getFile, getFileRaw, getStorageConfig, getStorageStats, uploadFile } from "../lib/storage.ts";
 
@@ -15,15 +16,15 @@ export const handler: Handler = {
 	domain: config.isDevEnvironment ? "localhost:1202" : "api.onion.wixonic.fr",
 	origin: "*",
 	path: "*",
-	handle: async (req) => {
-		const url = new URL(req.url);
+	handle: async (_logger: Logger, request: Request) => {
+		const url = new URL(request.url);
 		const pathname = url.pathname.replace(/\/+$/, "") || "/";
 		const parts = pathname.split("/").filter(Boolean);
 
 		if (parts.length === 1) {
 			const fileId = parts[0];
 
-			if (req.method === "GET") {
+			if (request.method === "GET") {
 				const file = await getFile(fileId);
 				if (!file) return Response.json({ error: "File not found" }, { status: 404, headers: corsHeaders });
 
@@ -70,7 +71,7 @@ export const handler: Handler = {
 		if (parts.length === 2) {
 			const [fileId, action] = parts;
 
-			if (action === "upload" && req.method === "POST") {
+			if (action === "upload" && request.method === "POST") {
 				const key = url.searchParams.get("key");
 				if (!key) return Response.json({ error: "Missing upload key" }, { status: 400, headers: corsHeaders });
 
@@ -78,11 +79,11 @@ export const handler: Handler = {
 				let fileName: string | undefined;
 				let mimeType: string | undefined;
 
-				const contentType = req.headers.get("content-type") || "";
+				const contentType = request.headers.get("content-type") || "";
 
 				if (contentType.includes("multipart/form-data")) {
 					try {
-						const formData = await req.formData();
+						const formData = await request.formData();
 						const formFile = formData.get("file");
 
 						if (!(formFile instanceof File)) return Response.json({ error: "Missing file field in form data" }, { status: 400, headers: corsHeaders });
@@ -94,7 +95,7 @@ export const handler: Handler = {
 						return Response.json({ error: "Invalid multipart form data", details: String(error) }, { status: 400, headers: corsHeaders });
 					}
 				} else {
-					data = new Uint8Array(await req.arrayBuffer());
+					data = new Uint8Array(await request.arrayBuffer());
 					fileName = url.searchParams.get("name") || undefined;
 					mimeType = contentType || "application/octet-stream";
 				}
@@ -127,7 +128,7 @@ export const handler: Handler = {
 				}
 			}
 
-			if (action === "download" && req.method === "GET") {
+			if (action === "download" && request.method === "GET") {
 				const key = url.searchParams.get("key") || undefined;
 				const download = await consumeDownload(fileId, key);
 
@@ -155,7 +156,7 @@ export const handler: Handler = {
 				}
 			}
 
-			if (action === "card.webp" && req.method === "GET") {
+			if (action === "card.webp" && request.method === "GET") {
 				const file = await getFile(fileId);
 				if (!file) return Response.json({ error: "File not found" }, { status: 404, headers: corsHeaders });
 

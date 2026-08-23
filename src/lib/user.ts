@@ -274,7 +274,7 @@ export class User {
 			this.currentActivity.presence = newPresence;
 
 			if (this.settings.activity.record) {
-				this.logger.debug(`Presence changed for ${this.username}.Old: ${JSON.stringify(this.currentActivity.presence)} New: ${JSON.stringify(newPresence)} `);
+				this.logger.debug(`Presence changed for ${this.username} - Old: ${JSON.stringify(this.currentActivity.presence)}; New: ${JSON.stringify(newPresence)}`);
 				this.currentActivity.changed = true;
 			} else this.currentActivity.changed = false;
 		}
