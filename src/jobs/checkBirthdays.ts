@@ -45,8 +45,7 @@ export const job: Job = {
 
 			if (birthdayRoleId) {
 				try {
-					const members = await discordGuild.members.fetch();
-					for (const member of members.values()) {
+					for (const member of discordGuild.members.cache.values()) {
 						const hasRole = member.roles.cache.has(birthdayRoleId);
 						const isBirthdayToday = todayBirthdayUserIds.has(member.id);
 
@@ -63,7 +62,7 @@ export const job: Job = {
 			for (const userId of todayBirthdayUserIds) {
 				let member;
 				try {
-					member = await discordGuild.members.fetch(userId);
+					member = discordGuild.members.cache.get(userId) ?? await discordGuild.members.fetch(userId);
 				} catch {
 					continue;
 				}
