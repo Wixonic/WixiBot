@@ -141,7 +141,7 @@ export const command = {
 			});
 
 			const uploadUrl = `${baseUrl}/files/upload/${file.id}?key=${uploadKey}`;
-			const downloadUrl = `${baseUrl}/files/${file.id}`;
+			const downloadUrl = `${baseUrl}/files/download/${file.id}`;
 
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
