@@ -2,14 +2,6 @@ import type { ClientSettings } from "../../lib/settings.ts";
 import { secrets } from "./secrets.ts";
 
 export const settings: ClientSettings = {
-	ai: {
-		enabled: true,
-		apiKey: secrets.ai?.apiKey,
-		baseURL: "http://127.0.0.1:8888",
-		models: {
-			default: "unsloth/gemma-4-E2B-it-qat-GGUF:UD-Q4_K_XL"
-		}
-	},
 	discord: {
 		clientId: "1481288839250182304",
 		primaryGuildId: "1243943943779909652",

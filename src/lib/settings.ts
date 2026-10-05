@@ -1,17 +1,6 @@
 import type { ClientOptions } from "discord.js";
 import index from "../settings/index.json" with { type: "json" };
 
-export interface AISettings {
-	enabled: boolean;
-	apiKey: string;
-	baseURL: string;
-	models: {
-		default: string;
-		deep_research?: string;
-		summary?: string;
-	};
-};
-
 export interface DiscordSkuSettings {
 	funding?: string;
 };
@@ -42,7 +31,6 @@ export interface StorageSettings {
 };
 
 export interface ClientSettings {
-	ai?: AISettings;
 	discord: DiscordSettings;
 	links?: ClientLinksSettings;
 	storage?: StorageSettings;
