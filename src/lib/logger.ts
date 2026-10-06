@@ -1,4 +1,4 @@
-import { getSettings } from "./settings.ts";
+import { getSettings, isSettingsLoaded } from "./settings.ts";
 import { safeStringify, wait } from "./utils.ts";
 
 export const colors = {
@@ -70,6 +70,10 @@ const processQueue = async (): Promise<void> => {
 
 	while (webhookQueue.length > 0) {
 		const item = webhookQueue[0];
+		if (!isSettingsLoaded()) {
+			webhookQueue.length = 0;
+			break;
+		}
 		const settings = getSettings();
 		if (!settings.discord?.webhookUrl) {
 			webhookQueue.length = 0;
@@ -126,6 +130,7 @@ const processQueue = async (): Promise<void> => {
 };
 
 const sendWebhook = (level: string, message: string, options: WebhookOptions = {}): void => {
+	if (!isSettingsLoaded()) return;
 	const settings = getSettings();
 	if (!settings.discord?.webhookUrl) return;
 

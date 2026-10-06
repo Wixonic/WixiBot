@@ -63,4 +63,6 @@ const getSettings = (): ClientSettings => {
 	else throw new Error("Settings not loaded. Call loadSettings() first.");
 };
 
-export { loadSettings, getSettings };
+const isSettingsLoaded = (): boolean => current !== null;
+
+export { loadSettings, getSettings, isSettingsLoaded };
