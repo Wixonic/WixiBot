@@ -132,8 +132,7 @@ export const resolveDynamicSettingsScopeContextFor = async (path: string, intera
 	}
 
 	if (path.startsWith("/Guild") && interaction.guildId) {
-		const hasPermission = interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild, true);
-		if (hasPermission === false) return null;
+		if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild, true)) return null;
 
 		const guild = await client.getGuild(interaction.guildId);
 		if (!guild) return null;
