@@ -135,15 +135,6 @@ export const command = {
 					const user = await client.getUser(dirEntry.name);
 					if (!user || !user.data.birthday) continue;
 
-					if (interaction.guild) {
-						try {
-							const member = await interaction.guild.members.fetch(user.id);
-							if (!member) continue;
-						} catch {
-							continue;
-						}
-					}
-
 					const { day, month } = user.data.birthday;
 					let targetDate = new Date(now.getFullYear(), month - 1, day);
 					if (targetDate < todayMidnight) targetDate = new Date(now.getFullYear() + 1, month - 1, day);
@@ -161,7 +152,7 @@ export const command = {
 			}
 
 			if (usersWithBirthdays.length === 0) {
-				await interaction.followUp("No upcoming birthdays registered in this server!\nRegister yours with `/birthday set`!");
+				await interaction.followUp("No upcoming birthdays registered!\nRegister yours with `/birthday set`!");
 				return;
 			}
 
