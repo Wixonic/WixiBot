@@ -302,6 +302,18 @@ export const component = {
 					return;
 				}
 
+				const supportChannelId = guild.settings.tickets.channel;
+				if (supportChannelId) {
+					const supportChannel = await interaction.guild.channels.fetch(supportChannelId).catch(() => null);
+					if (supportChannel && "permissionsFor" in supportChannel) {
+						const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
+						if (!member || !supportChannel.permissionsFor(member).has(PermissionFlagsBits.ViewChannel)) {
+							await interaction.editReply("You do not have access to the support channel.");
+							return;
+						}
+					}
+				}
+
 				ticket.interactions.claimedBy = interaction.user.id;
 				ticket.state = "Claimed";
 				await guild.saveTicket(ticket);
@@ -336,12 +348,24 @@ export const component = {
 					return;
 				}
 
+				const supportChannelId = guild.settings.tickets.channel;
+				if (supportChannelId) {
+					const supportChannel = await interaction.guild.channels.fetch(supportChannelId).catch(() => null);
+					if (supportChannel && "permissionsFor" in supportChannel) {
+						const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
+						if (!member || !supportChannel.permissionsFor(member).has(PermissionFlagsBits.ViewChannel)) {
+							await interaction.editReply("You do not have access to the support channel.");
+							return;
+						}
+					}
+				}
+
 				const alreadyViewed = ticket.interactions.viewedBy.includes(interaction.user.id);
 				if (!alreadyViewed) {
 					ticket.interactions.viewedBy.push(interaction.user.id);
 					await guild.saveTicket(ticket);
 
-					const channel = await interaction.guild.channels.fetch(interaction.channelId).catch(() => null);
+					const channel = await interaction.guild.channels.fetch(ticket.channel).catch(() => null);
 					if (channel?.isTextBased() && "permissionOverwrites" in channel) {
 						try {
 							await channel.permissionOverwrites.create(interaction.user.id, {
