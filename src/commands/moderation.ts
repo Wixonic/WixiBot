@@ -54,6 +54,13 @@ export const command = {
 			throw new Error("This command can only be used in a guild");
 		}
 
+		if (!interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers)) {
+			await interaction.editReply({
+				content: "You do not have permission to use moderation commands."
+			});
+			return;
+		}
+
 		const guild = await client.getGuild(interaction.guild.id);
 		if (!guild) {
 			await interaction.deleteReply();

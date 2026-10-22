@@ -49,6 +49,14 @@ export const command = {
 		),
 
 	async execute(logger, interaction) {
+		if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+			await interaction.reply({
+				content: "You do not have permission to use debug tools.",
+				flags: MessageFlags.Ephemeral
+			});
+			return;
+		}
+
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 		const subcommand = interaction.options.getSubcommand();

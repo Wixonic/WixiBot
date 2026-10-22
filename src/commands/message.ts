@@ -57,6 +57,14 @@ export const command = {
 		),
 
 	async execute(_logger, interaction) {
+		if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+			await interaction.reply({
+				content: "You do not have permission to use this command.",
+				flags: MessageFlags.Ephemeral
+			});
+			return;
+		}
+
 		if (interaction.options.getSubcommand(true) !== "as") {
 			await interaction.deferReply({
 				flags: MessageFlags.Ephemeral

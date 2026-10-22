@@ -76,10 +76,23 @@ const loadIndex = async () => {
 	}
 };
 
-const saveIndex = async () => {
-	const tmpPath = getStoragePath("files", "index.json.tmp");
-	await Deno.writeTextFile(tmpPath, JSON.stringify(Array.from(index.values()), null, "\t"));
-	await Deno.rename(tmpPath, getStoragePath("files", "index.json"));
+let saveQueue: Promise<void> = Promise.resolve();
+
+const saveIndex = (): Promise<void> => {
+	const execute = async () => {
+		const temporaryPath = getStoragePath("files", `index.${crypto.randomUUID()}.tmp`);
+		try {
+			await Deno.writeTextFile(temporaryPath, JSON.stringify(Array.from(index.values()), null, "\t"));
+			await Deno.rename(temporaryPath, getStoragePath("files", "index.json"));
+		} catch (error) {
+			await Deno.remove(temporaryPath).catch(() => { });
+			throw error;
+		}
+	};
+
+	const next = saveQueue.then(execute, execute);
+	saveQueue = next.catch(() => { });
+	return next;
 };
 
 const ensureReady = async () => {

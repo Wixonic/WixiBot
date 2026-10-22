@@ -303,15 +303,21 @@ export const component = {
 				}
 
 				const supportChannelId = guild.settings.tickets.channel;
-				if (supportChannelId) {
-					const supportChannel = await interaction.guild.channels.fetch(supportChannelId).catch(() => null);
-					if (supportChannel && "permissionsFor" in supportChannel) {
-						const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
-						if (!member || !supportChannel.permissionsFor(member).has(PermissionFlagsBits.ViewChannel)) {
-							await interaction.editReply("You do not have access to the support channel.");
-							return;
-						}
-					}
+				if (!supportChannelId) {
+					await interaction.editReply("Support channel is not configured on this server.");
+					return;
+				}
+
+				const supportChannel = await interaction.guild.channels.fetch(supportChannelId).catch(() => null);
+				if (!supportChannel || !("permissionsFor" in supportChannel)) {
+					await interaction.editReply("Support channel could not be accessed.");
+					return;
+				}
+
+				const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
+				if (!member || !supportChannel.permissionsFor(member).has(PermissionFlagsBits.ViewChannel)) {
+					await interaction.editReply("You do not have access to the support channel.");
+					return;
 				}
 
 				ticket.interactions.claimedBy = interaction.user.id;
@@ -349,15 +355,21 @@ export const component = {
 				}
 
 				const supportChannelId = guild.settings.tickets.channel;
-				if (supportChannelId) {
-					const supportChannel = await interaction.guild.channels.fetch(supportChannelId).catch(() => null);
-					if (supportChannel && "permissionsFor" in supportChannel) {
-						const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
-						if (!member || !supportChannel.permissionsFor(member).has(PermissionFlagsBits.ViewChannel)) {
-							await interaction.editReply("You do not have access to the support channel.");
-							return;
-						}
-					}
+				if (!supportChannelId) {
+					await interaction.editReply("Support channel is not configured on this server.");
+					return;
+				}
+
+				const supportChannel = await interaction.guild.channels.fetch(supportChannelId).catch(() => null);
+				if (!supportChannel || !("permissionsFor" in supportChannel)) {
+					await interaction.editReply("Support channel could not be accessed.");
+					return;
+				}
+
+				const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
+				if (!member || !supportChannel.permissionsFor(member).has(PermissionFlagsBits.ViewChannel)) {
+					await interaction.editReply("You do not have access to the support channel.");
+					return;
 				}
 
 				const alreadyViewed = ticket.interactions.viewedBy.includes(interaction.user.id);

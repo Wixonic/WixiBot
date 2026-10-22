@@ -39,6 +39,22 @@ export const command = {
 		),
 
 	async execute(logger, interaction) {
+		if (!interaction.guild) {
+			await interaction.reply({
+				content: "This command can only be used in a server.",
+				flags: MessageFlags.Ephemeral
+			});
+			return;
+		}
+
+		if (!interaction.memberPermissions?.has(PermissionFlagsBits.MoveMembers)) {
+			await interaction.reply({
+				content: "You do not have permission to move members.",
+				flags: MessageFlags.Ephemeral
+			});
+			return;
+		}
+
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral
 		});
