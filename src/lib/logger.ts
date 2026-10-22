@@ -75,7 +75,7 @@ const processQueue = async (): Promise<void> => {
 			break;
 		}
 		const settings = getSettings();
-		if (!settings.discord?.webhookUrl) {
+		if (!settings.discord?.webhookURL) {
 			webhookQueue.length = 0;
 			break;
 		}
@@ -88,7 +88,7 @@ const processQueue = async (): Promise<void> => {
 		const truncated = safeMessage.length > maxMessageLength ? safeMessage.slice(0, maxMessageLength - 3) + "..." : safeMessage;
 
 		try {
-			const response = await fetch(settings.discord.webhookUrl, {
+			const response = await fetch(settings.discord.webhookURL, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -132,7 +132,7 @@ const processQueue = async (): Promise<void> => {
 const sendWebhook = (level: string, message: string, options: WebhookOptions = {}): void => {
 	if (!isSettingsLoaded()) return;
 	const settings = getSettings();
-	if (!settings.discord?.webhookUrl) return;
+	if (!settings.discord?.webhookURL) return;
 
 	if (webhookQueue.length >= 256) webhookQueue.shift();
 	webhookQueue.push({ level, message, options });

@@ -15,7 +15,7 @@ export const settings: ClientSettings = {
 			funding: "1483116808193183765"
 		},
 		token: secrets.token,
-		webhookUrl: secrets.webhookUrl
+		webhookURL: secrets.webhookURL
 	},
 	links: {
 		funding: "https://discord.gg/2QB7QkPtrA",

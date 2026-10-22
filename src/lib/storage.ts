@@ -43,16 +43,16 @@ export const getStorageConfig = () => {
 			maxCapacity: storage?.maxCapacity ?? 100 * 1024 * 1024 * 1024,
 			tokenLifetime: storage?.tokenLifetime ?? 5 * 60 * 1000,
 			slotExpiry: storage?.slotExpiry ?? 24 * 60 * 60 * 1000,
-			baseUrl: storage?.baseUrl ?? (isDev ? "http://localhost:2011" : "https://onion.wixonic.fr"),
-			apiUrl: storage?.apiUrl ?? (isDev ? "http://localhost:1202" : "https://api.onion.wixonic.fr")
+			baseURL: storage?.baseURL ?? (isDev ? "http://localhost:2011" : "https://onion.wixonic.fr"),
+			apiURL: storage?.apiURL ?? (isDev ? "http://localhost:1202" : "https://api.onion.wixonic.fr")
 		};
 	} catch {
 		return {
 			maxCapacity: 100 * 1024 * 1024 * 1024,
 			tokenLifetime: 5 * 60 * 1000,
 			slotExpiry: 24 * 60 * 60 * 1000,
-			baseUrl: isDev ? "http://localhost:2011" : "https://onion.wixonic.fr",
-			apiUrl: isDev ? "http://localhost:1202" : "https://api.onion.wixonic.fr"
+			baseURL: isDev ? "http://localhost:2011" : "https://onion.wixonic.fr",
+			apiURL: isDev ? "http://localhost:1202" : "https://api.onion.wixonic.fr"
 		};
 	}
 };
@@ -206,13 +206,13 @@ export const uploadFileStream = async (
 		}
 	} catch (err) {
 		destination.close();
-		await Deno.remove(tempPath).catch(() => {});
+		await Deno.remove(tempPath).catch(() => { });
 		throw err;
 	}
 	destination.close();
 
 	if (size === 0) {
-		await Deno.remove(tempPath).catch(() => {});
+		await Deno.remove(tempPath).catch(() => { });
 		throw new Error("EMPTY_FILE");
 	}
 
@@ -220,7 +220,7 @@ export const uploadFileStream = async (
 
 	for (const [existingId, existing] of index) {
 		if (existing.uploaded && existing.sha256 === sha256 && existingId !== fileId) {
-			await Deno.remove(tempPath).catch(() => {});
+			await Deno.remove(tempPath).catch(() => { });
 			throw new Error("DUPLICATE_FILE");
 		}
 	}
@@ -239,7 +239,7 @@ export const uploadFileStream = async (
 		}
 
 		if (usedSize + size > maxCapacity) {
-			await Deno.remove(tempPath).catch(() => {});
+			await Deno.remove(tempPath).catch(() => { });
 			throw new Error("STORAGE_FULL");
 		}
 	}

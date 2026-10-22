@@ -10,37 +10,32 @@ import {
 	StringSelectMenuOptionBuilder
 } from "discord.js";
 import { Buffer } from "node:buffer";
+import { zipSync } from "fflate";
 
 import { client, type Component } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
 import type { User } from "../lib/user.ts";
 
+const readDirectoryRecursively = async (baseDir: string, currentDir = ""): Promise<Record<string, Uint8Array>> => {
+	const files: Record<string, Uint8Array> = {};
+	const fullDir = currentDir ? `${baseDir}/${currentDir}` : baseDir;
+
+	for await (const entry of Deno.readDir(fullDir)) {
+		const relPath = currentDir ? `${currentDir}/${entry.name}` : entry.name;
+		if (entry.isFile) {
+			files[relPath] = await Deno.readFile(`${baseDir}/${relPath}`);
+		} else if (entry.isDirectory) {
+			Object.assign(files, await readDirectoryRecursively(baseDir, relPath));
+		}
+	}
+
+	return files;
+};
+
 const createUserStorageArchive = async (user: User): Promise<Uint8Array> => {
 	await Deno.stat(user.storagePath);
-
-	const directory = await Deno.makeTempDir();
-	const archivePath = `${directory}/U-${user.id}.zip`;
-
-	try {
-		const result = await new Deno.Command("zip", {
-			args: ["-r", "-q", archivePath, "."],
-			cwd: user.storagePath,
-			stdout: "piped",
-			stderr: "piped"
-		}).output();
-
-		if (result.success) return await Deno.readFile(archivePath);
-
-		throw new Error(
-			new TextDecoder().decode(result.stderr)
-			|| new TextDecoder().decode(result.stdout)
-			|| "Failed to create ZIP archive"
-		);
-	} finally {
-		await Deno.remove(directory, { recursive: true }).catch((error) => {
-			if (!(error instanceof Deno.errors.NotFound)) throw error;
-		});
-	}
+	const files = await readDirectoryRecursively(user.storagePath);
+	return zipSync(files);
 };
 
 export const component = {

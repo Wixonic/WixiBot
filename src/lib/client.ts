@@ -97,6 +97,15 @@ export class Client extends EventEmitter {
 
 		await this.discord.login(settings.discord.token);
 
+		this.discord.once("ready", async (readyClient) => {
+			for (const guild of readyClient.guilds.cache.values()) {
+				if (guild.id !== settings.discord.primaryGuildId) {
+					logger.warn(`Leaving unauthorized guild detected at startup: ${guild.name} (${guild.id})`);
+					await guild.leave().catch(() => {});
+				}
+			}
+		});
+
 		try {
 			await this.discord.rest.patch(`/guilds/${settings.discord.primaryGuildId}/members/@me`, {
 				body: {
@@ -174,6 +183,11 @@ export class Client extends EventEmitter {
 	};
 
 	async getGuild(id: string) {
+		if (this.settings && id !== this.settings.discord.primaryGuildId) {
+			this.logger.warn(`Blocked access to unauthorized guild ${id}`);
+			return null;
+		}
+
 		let guild = this.guilds.get(id);
 
 		if (!guild) {
@@ -272,8 +286,8 @@ export class Client extends EventEmitter {
 
 			for await (const entry of Deno.readDir(new URL("../commands", import.meta.url))) {
 				if (entry.isFile && (entry.name.endsWith(".ts") || entry.name.endsWith(".js"))) {
-					const moduleUrl = new URL(`../commands/${entry.name}`, import.meta.url).href;
-					const module = await import(moduleUrl);
+					const moduleURL = new URL(`../commands/${entry.name}`, import.meta.url).href;
+					const module = await import(moduleURL);
 
 					if ("command" in module) {
 						const command = module.command;
@@ -299,8 +313,8 @@ export class Client extends EventEmitter {
 
 			for await (const entry of Deno.readDir(new URL("../components", import.meta.url))) {
 				if (entry.isFile && (entry.name.endsWith(".ts") || entry.name.endsWith(".js"))) {
-					const moduleUrl = new URL(`../components/${entry.name}`, import.meta.url).href;
-					const module = await import(moduleUrl);
+					const moduleURL = new URL(`../components/${entry.name}`, import.meta.url).href;
+					const module = await import(moduleURL);
 					if ("component" in module) {
 						this.components.add(module.component);
 						count++;
@@ -324,8 +338,8 @@ export class Client extends EventEmitter {
 
 			for await (const entry of Deno.readDir(new URL("../events", import.meta.url))) {
 				if (entry.isFile && (entry.name.endsWith(".ts") || entry.name.endsWith(".js"))) {
-					const moduleUrl = new URL(`../events/${entry.name}`, import.meta.url).href;
-					const module = await import(moduleUrl);
+					const moduleURL = new URL(`../events/${entry.name}`, import.meta.url).href;
+					const module = await import(moduleURL);
 
 					if ("event" in module) {
 						const event = module.event;
@@ -352,8 +366,8 @@ export class Client extends EventEmitter {
 
 			for await (const entry of Deno.readDir(new URL("../jobs", import.meta.url))) {
 				if (entry.isFile && (entry.name.endsWith(".ts") || entry.name.endsWith(".js"))) {
-					const moduleUrl = new URL(`../jobs/${entry.name}`, import.meta.url).href;
-					const module = await import(moduleUrl);
+					const moduleURL = new URL(`../jobs/${entry.name}`, import.meta.url).href;
+					const module = await import(moduleURL);
 
 					if ("job" in module) {
 						const job: Job = module.job;
@@ -413,8 +427,8 @@ export class Client extends EventEmitter {
 
 			for await (const entry of Deno.readDir(new URL("../modals", import.meta.url))) {
 				if (entry.isFile && (entry.name.endsWith(".ts") || entry.name.endsWith(".js"))) {
-					const moduleUrl = new URL(`../modals/${entry.name}`, import.meta.url).href;
-					const module = await import(moduleUrl);
+					const moduleURL = new URL(`../modals/${entry.name}`, import.meta.url).href;
+					const module = await import(moduleURL);
 
 					if ("modal" in module) {
 						this.modals.add(module.modal);

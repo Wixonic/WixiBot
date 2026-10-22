@@ -26,8 +26,8 @@ const deploy = async () => {
 	try {
 		for await (const file of Deno.readDir("./src/commands")) {
 			if (file.isFile && (file.name.endsWith(".ts") || file.name.endsWith(".js"))) {
-				const moduleUrl = new URL(`./commands/${file.name}`, import.meta.url).href;
-				const module = await import(moduleUrl);
+				const moduleURL = new URL(`./commands/${file.name}`, import.meta.url).href;
+				const module = await import(moduleURL);
 
 				if ("command" in module) {
 					commands.push(module.command.data.toJSON());

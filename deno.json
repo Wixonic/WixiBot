@@ -17,6 +17,7 @@
 	"imports": {
 		"@napi-rs/canvas": "npm:@napi-rs/canvas@^1.0.3",
 		"discord.js": "npm:discord.js@14.26.2",
+		"fflate": "npm:fflate@^0.8.3",
 		"std/": "https://deno.land/std@0.203.0/"
 	},
 	"compilerOptions": {

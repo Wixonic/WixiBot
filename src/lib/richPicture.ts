@@ -60,8 +60,8 @@ export interface DisplayNameStyle {
 
 export interface ProfileCardData {
 	username: string;
-	avatarUrl?: string;
-	avatarDecorationUrl?: string;
+	avatarURL?: string;
+	avatarDecorationURL?: string;
 	displayNameStyle?: DisplayNameStyle | null;
 	level: number;
 	xp: number;
@@ -80,8 +80,8 @@ export interface LeaderboardEntry {
 	level: number;
 	xp: number;
 	streak?: number;
-	avatarUrl?: string;
-	avatarDecorationUrl?: string;
+	avatarURL?: string;
+	avatarDecorationURL?: string;
 	displayNameStyle?: DisplayNameStyle | null;
 };
 
@@ -91,8 +91,8 @@ export interface LeaderboardCardData {
 
 export interface LevelUpCardData {
 	username: string;
-	avatarUrl?: string;
-	avatarDecorationUrl?: string;
+	avatarURL?: string;
+	avatarDecorationURL?: string;
 	displayNameStyle?: DisplayNameStyle | null;
 	oldLevel: number;
 	newLevel: number;
@@ -100,8 +100,8 @@ export interface LevelUpCardData {
 
 export interface AchievementCardData {
 	username: string;
-	avatarUrl?: string;
-	avatarDecorationUrl?: string;
+	avatarURL?: string;
+	avatarDecorationURL?: string;
 	displayNameStyle?: DisplayNameStyle | null;
 	achievementName: string;
 	achievementDescription: string;
@@ -109,8 +109,8 @@ export interface AchievementCardData {
 
 export interface WelcomeMemberCardData {
 	username: string;
-	avatarUrl?: string;
-	avatarDecorationUrl?: string;
+	avatarURL?: string;
+	avatarDecorationURL?: string;
 	displayNameStyle?: DisplayNameStyle | null;
 	serverName: string;
 	memberCount?: number;
@@ -118,16 +118,16 @@ export interface WelcomeMemberCardData {
 
 export interface SupporterCardData {
 	username: string;
-	avatarUrl?: string;
-	avatarDecorationUrl?: string;
+	avatarURL?: string;
+	avatarDecorationURL?: string;
 	displayNameStyle?: DisplayNameStyle | null;
 	type: "Boost" | "Supporter";
 };
 
 export interface WarnCardData {
 	targetUsername: string;
-	targetAvatarUrl?: string;
-	targetAvatarDecorationUrl?: string;
+	targetAvatarURL?: string;
+	targetAvatarDecorationURL?: string;
 	targetDisplayNameStyle?: DisplayNameStyle | null;
 	moderatorUsername?: string;
 	reason: string;
@@ -135,8 +135,8 @@ export interface WarnCardData {
 
 export interface ReportCardData {
 	targetUsername: string;
-	targetAvatarUrl?: string;
-	targetAvatarDecorationUrl?: string;
+	targetAvatarURL?: string;
+	targetAvatarDecorationURL?: string;
 	targetDisplayNameStyle?: DisplayNameStyle | null;
 	reporterUsername?: string;
 	reportType: "Message" | "User";
@@ -147,8 +147,8 @@ export interface ReportCardData {
 export interface TicketHeaderCardData {
 	ticketId: string;
 	creatorUsername: string;
-	creatorAvatarUrl?: string;
-	creatorAvatarDecorationUrl?: string;
+	creatorAvatarURL?: string;
+	creatorAvatarDecorationURL?: string;
 	creatorDisplayNameStyle?: DisplayNameStyle | null;
 	reason: string;
 	state: "Waiting" | "Claimed" | "Resolved" | "Closed";
@@ -158,8 +158,8 @@ export interface TicketHeaderCardData {
 
 export interface BirthdayCardData {
 	username: string;
-	avatarUrl?: string;
-	avatarDecorationUrl?: string;
+	avatarURL?: string;
+	avatarDecorationURL?: string;
 	displayNameStyle?: DisplayNameStyle | null;
 	serverName?: string;
 };
@@ -167,8 +167,8 @@ export interface BirthdayCardData {
 export interface StorageFileUploader {
 	username?: string;
 	displayName?: string;
-	avatarUrl?: string;
-	avatarDecorationUrl?: string;
+	avatarURL?: string;
+	avatarDecorationURL?: string;
 	displayNameStyle?: DisplayNameStyle | null;
 };
 
@@ -238,8 +238,8 @@ const drawRoundedRect = (ctx: CanvasRenderingContext2D, x: number, y: number, wi
 
 export const drawCircularAvatar = async (
 	context: CanvasRenderingContext2D,
-	avatarUrl: string | undefined | null,
-	avatarDecorationUrl: string | undefined | null,
+	avatarURL: string | undefined | null,
+	avatarDecorationURL: string | undefined | null,
 	xPosition: number,
 	yPosition: number,
 	avatarSize: number,
@@ -251,10 +251,10 @@ export const drawCircularAvatar = async (
 	context.closePath();
 	context.clip();
 
-	if (avatarUrl) {
+	if (avatarURL) {
 		try {
-			const staticAvatarUrl = avatarUrl.replace(/\.gif(\?.*)?$/i, ".webp$1").replace(/([?&])animated=true/g, "");
-			const image = await loadImage(staticAvatarUrl);
+			const staticAvatarURL = avatarURL.replace(/\.gif(\?.*)?$/i, ".webp$1").replace(/([?&])animated=true/g, "");
+			const image = await loadImage(staticAvatarURL);
 			drawImage(context, image, xPosition, yPosition, avatarSize, avatarSize);
 		} catch {
 			context.fillStyle = "#2C2C2E";
@@ -276,10 +276,10 @@ export const drawCircularAvatar = async (
 	}
 	context.restore();
 
-	if (avatarDecorationUrl) {
+	if (avatarDecorationURL) {
 		try {
-			const staticDecorationUrl = avatarDecorationUrl.replace(/\.gif(\?.*)?$/i, ".webp$1").replace(/\/animated(\?.*)?$/i, "/static$1");
-			const decorationImage = await loadImage(staticDecorationUrl);
+			const staticDecorationURL = avatarDecorationURL.replace(/\.gif(\?.*)?$/i, ".webp$1").replace(/\/animated(\?.*)?$/i, "/static$1");
+			const decorationImage = await loadImage(staticDecorationURL);
 			const decorationSize = Math.floor(avatarSize * 1.2);
 			const decorationOffset = Math.floor((decorationSize - avatarSize) / 2);
 			drawImage(context, decorationImage, xPosition - decorationOffset, yPosition - decorationOffset, decorationSize, decorationSize);
@@ -339,8 +339,8 @@ const drawSvgIcon = async (ctx: CanvasRenderingContext2D, iconName: string, colo
 		svg = svg.replace(/<rect[^>]*\/>/g, "");
 		svg = svg.replace(/<svg /, `<svg width="${size}" height="${size}" `);
 		svg = svg.replace(/path /g, `path fill="${color}" `);
-		const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
-		const image = await loadImage(dataUrl);
+		const dataURL = `data:image/svg+xml;base64,${btoa(svg)}`;
+		const image = await loadImage(dataURL);
 		drawImage(ctx, image, x, y, size, size);
 	} catch {
 		// Ignore SVG load error
@@ -367,8 +367,8 @@ const drawTextPatternIconWatermark = async (
 		svg = svg.replace(/<rect[^>]*\/>/g, "");
 		svg = svg.replace(/<svg /, `<svg width="${size}" height="${size}" `);
 		svg = svg.replace(/path /g, `path fill="${accentColor}" `);
-		const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
-		const image = await loadImage(dataUrl);
+		const dataURL = `data:image/svg+xml;base64,${btoa(svg)}`;
+		const image = await loadImage(dataURL);
 
 		ctx.save();
 		ctx.globalAlpha = 0.05;
@@ -493,7 +493,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 	switch (type) {
 		case RichPictureType.Profile: {
 			const data = options.data as ProfileCardData;
-			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 40, 115, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarURL, data.avatarDecorationURL, cardX + 45, cardY + 40, 115, data.username[0]);
 
 			drawStyledUsername(ctx, data.username, cardX + 185, cardY + 85, data.displayNameStyle, `bold 38px ${FONT_MAIN}`, "#FFFFFF", "left");
 
@@ -614,7 +614,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 				ctx.textAlign = "left";
 				ctx.fillText(`#${entry.rank}`, cardX + 45, y);
 
-				await drawCircularAvatar(ctx, entry.avatarUrl, entry.avatarDecorationUrl, cardX + 110, y - 26, 42, entry.username[0]);
+				await drawCircularAvatar(ctx, entry.avatarURL, entry.avatarDecorationURL, cardX + 110, y - 26, 42, entry.username[0]);
 
 				drawStyledUsername(ctx, entry.username, cardX + 168, y, entry.displayNameStyle, `bold 22px ${FONT_MAIN}`, "#FFFFFF", "left");
 
@@ -631,7 +631,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.LevelUp: {
 			const data = options.data as LevelUpCardData;
 
-			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 40, 110, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarURL, data.avatarDecorationURL, cardX + 45, cardY + 40, 110, data.username[0]);
 
 			await drawSvgIcon(ctx, "flame", accentColor, cardX + 180, cardY + 49, 22);
 			ctx.fillStyle = accentColor;
@@ -651,7 +651,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.Achievement: {
 			const data = options.data as AchievementCardData;
 
-			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 45, 110, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarURL, data.avatarDecorationURL, cardX + 45, cardY + 45, 110, data.username[0]);
 
 			await drawSvgIcon(ctx, "medal-military", accentColor, cardX + 180, cardY + 46, 22);
 			ctx.fillStyle = accentColor;
@@ -680,7 +680,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.WelcomeMember: {
 			const data = options.data as WelcomeMemberCardData;
 
-			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 40, 110, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarURL, data.avatarDecorationURL, cardX + 45, cardY + 40, 110, data.username[0]);
 
 			await drawSvgIcon(ctx, "hand-waving", accentColor, cardX + 180, cardY + 49, 22);
 			ctx.fillStyle = accentColor;
@@ -701,7 +701,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.Birthday: {
 			const data = options.data as BirthdayCardData;
 
-			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 40, 110, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarURL, data.avatarDecorationURL, cardX + 45, cardY + 40, 110, data.username[0]);
 
 			await drawSvgIcon(ctx, "cake", accentColor, cardX + 180, cardY + 49, 22);
 			ctx.fillStyle = accentColor;
@@ -724,7 +724,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			const data = options.data as SupporterCardData;
 			const iconName = data.type === "Boost" ? "rocket-launch" : "hand-heart";
 
-			await drawCircularAvatar(ctx, data.avatarUrl, data.avatarDecorationUrl, cardX + 45, cardY + 40, 110, data.username[0]);
+			await drawCircularAvatar(ctx, data.avatarURL, data.avatarDecorationURL, cardX + 45, cardY + 40, 110, data.username[0]);
 
 			const badgeText = data.type === "Boost" ? "SERVER BOOST" : "NEW SUPPORTER";
 			await drawSvgIcon(ctx, iconName, accentColor, cardX + 180, cardY + 49, 22);
@@ -748,7 +748,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.Warn: {
 			const data = options.data as WarnCardData;
 
-			await drawCircularAvatar(ctx, data.targetAvatarUrl, data.targetAvatarDecorationUrl, cardX + 45, cardY + 35, 95, data.targetUsername[0]);
+			await drawCircularAvatar(ctx, data.targetAvatarURL, data.targetAvatarDecorationURL, cardX + 45, cardY + 35, 95, data.targetUsername[0]);
 
 			await drawSvgIcon(ctx, "shield-warning", accentColor, cardX + 160, cardY + 43, 20);
 			ctx.fillStyle = accentColor;
@@ -780,7 +780,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.ReportUser: {
 			const data = options.data as ReportCardData;
 
-			await drawCircularAvatar(ctx, data.targetAvatarUrl, data.targetAvatarDecorationUrl, cardX + 45, cardY + 35, 95, data.targetUsername[0]);
+			await drawCircularAvatar(ctx, data.targetAvatarURL, data.targetAvatarDecorationURL, cardX + 45, cardY + 35, 95, data.targetUsername[0]);
 
 			const reportTitle = data.reportType === "Message" ? "MESSAGE REPORT" : "USER REPORT";
 			await drawSvgIcon(ctx, "shield-warning", accentColor, cardX + 160, cardY + 43, 20);
@@ -820,7 +820,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 		case RichPictureType.TicketHeader: {
 			const data = options.data as TicketHeaderCardData;
 
-			await drawCircularAvatar(ctx, data.creatorAvatarUrl, data.creatorAvatarDecorationUrl, cardX + 45, cardY + 35, 95, data.creatorUsername[0]);
+			await drawCircularAvatar(ctx, data.creatorAvatarURL, data.creatorAvatarDecorationURL, cardX + 45, cardY + 35, 95, data.creatorUsername[0]);
 
 			await drawSvgIcon(ctx, "chats-teardrop", accentColor, cardX + 160, cardY + 43, 20);
 			ctx.fillStyle = accentColor;
@@ -863,7 +863,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 				const avatarPositionX = cardX + cardW - 45 - avatarSize;
 				const avatarPositionY = cardY + 38;
 
-				await drawCircularAvatar(ctx, data.uploader.avatarUrl, data.uploader.avatarDecorationUrl, avatarPositionX, avatarPositionY, avatarSize, uploaderName[0]);
+				await drawCircularAvatar(ctx, data.uploader.avatarURL, data.uploader.avatarDecorationURL, avatarPositionX, avatarPositionY, avatarSize, uploaderName[0]);
 
 				ctx.fillStyle = "#A1A1A6";
 				ctx.font = `12px ${FONT_MAIN}`;

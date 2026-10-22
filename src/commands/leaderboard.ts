@@ -25,15 +25,15 @@ const sendLeaderboard = async (_logger: Logger, interaction: ChatInputCommandInt
 	const entries = await Promise.all(topUsers.map(async (leaderboardUser, index) => {
 		const user = await client.getUser(leaderboardUser.id);
 		const displayName = user ? await user.getGuildDisplayName(interaction.guildId ?? undefined) : leaderboardUser.id;
-		const avatarUrl = user?.avatar("webp", 256, false);
-		const avatarDecorationUrl = user?.avatarDecoration(false) ?? undefined;
+		const avatarURL = user?.avatar("webp", 256, false);
+		const avatarDecorationURL = user?.avatarDecoration(false) ?? undefined;
 		const displayNameStyle = await user?.displayNameStyle();
 
 		return {
 			rank: index + 1,
 			username: displayName,
-			avatarUrl,
-			avatarDecorationUrl,
+			avatarURL,
+			avatarDecorationURL,
 			displayNameStyle,
 			level: leaderboardUser.level,
 			xp: leaderboardUser.xp,

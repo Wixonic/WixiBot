@@ -384,8 +384,8 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 					type: RichPictureType.Warn,
 					data: {
 						targetUsername: target.displayName,
-						targetAvatarUrl: targetUser?.avatar("webp", 256, false) ?? target.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
-						targetAvatarDecorationUrl: targetUser?.avatarDecoration(false) ?? undefined,
+						targetAvatarURL: targetUser?.avatar("webp", 256, false) ?? target.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+						targetAvatarDecorationURL: targetUser?.avatarDecoration(false) ?? undefined,
 						targetDisplayNameStyle: await targetUser?.displayNameStyle(),
 						moderatorUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reason
@@ -427,8 +427,8 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 					type: RichPictureType.ReportMessage,
 					data: {
 						targetUsername: authorDisplayName,
-						targetAvatarUrl: authorUser?.avatar("webp", 256, false) ?? message.author.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
-						targetAvatarDecorationUrl: authorUser?.avatarDecoration(false) ?? undefined,
+						targetAvatarURL: authorUser?.avatar("webp", 256, false) ?? message.author.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+						targetAvatarDecorationURL: authorUser?.avatarDecoration(false) ?? undefined,
 						targetDisplayNameStyle: await authorUser?.displayNameStyle(),
 						reporterUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reportType: "Message",
@@ -509,8 +509,8 @@ Reason: ${reason || "No reason provided"}`, "reports");
 					type: RichPictureType.ReportUser,
 					data: {
 						targetUsername: discordMember.displayName,
-						targetAvatarUrl: memberUser?.avatar("webp", 256, false) ?? discordMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
-						targetAvatarDecorationUrl: memberUser?.avatarDecoration(false) ?? undefined,
+						targetAvatarURL: memberUser?.avatar("webp", 256, false) ?? discordMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+						targetAvatarDecorationURL: memberUser?.avatarDecoration(false) ?? undefined,
 						targetDisplayNameStyle: await memberUser?.displayNameStyle(),
 						reporterUsername: by ? ("displayName" in by && by.displayName ? (by.displayName as string) : ("user" in by ? by.user.username : undefined)) : undefined,
 						reportType: "User",
@@ -628,16 +628,16 @@ ${error instanceof Error ? error.stack : String(error)}
 				const discordMember = await this.discordGuild.members.fetch(userId).catch(() => null);
 				const fundingUser = await client.getUser(userId);
 				const username = discordMember ? discordMember.displayName : userId;
-				const avatarUrl = fundingUser?.avatar("webp", 256, false) ?? (discordMember ? discordMember.user.displayAvatarURL({ extension: "png", size: 256 }) : undefined);
-				const avatarDecorationUrl = fundingUser?.avatarDecoration(false) ?? undefined;
+				const avatarURL = fundingUser?.avatar("webp", 256, false) ?? (discordMember ? discordMember.user.displayAvatarURL({ extension: "png", size: 256 }) : undefined);
+				const avatarDecorationURL = fundingUser?.avatarDecoration(false) ?? undefined;
 				const displayNameStyle = await fundingUser?.displayNameStyle();
 
 				const buffer = await generateRichPicture({
 					type: type === "boost" ? RichPictureType.Boost : RichPictureType.Supporter,
 					data: {
 						username,
-						avatarUrl,
-						avatarDecorationUrl,
+						avatarURL,
+						avatarDecorationURL,
 						displayNameStyle,
 						type: type === "boost" ? "Boost" : "Supporter"
 					}

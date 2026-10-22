@@ -53,8 +53,8 @@ export const command = {
 			type: RichPictureType.Profile,
 			data: {
 				username: displayName,
-				avatarUrl: user.avatar("webp", 256, false),
-				avatarDecorationUrl: user.avatarDecoration(false) ?? undefined,
+				avatarURL: user.avatar("webp", 256, false),
+				avatarDecorationURL: user.avatarDecoration(false) ?? undefined,
 				displayNameStyle: await user.displayNameStyle(),
 				level,
 				xp: stats.totalXp,

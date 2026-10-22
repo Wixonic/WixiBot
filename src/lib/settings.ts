@@ -14,7 +14,7 @@ export interface DiscordSettings {
 	roles: Record<string, string>;
 	sku: DiscordSkuSettings;
 	token: string;
-	webhookUrl: URL;
+	webhookURL: URL;
 };
 
 export interface ClientLinksSettings {
@@ -26,8 +26,8 @@ export interface StorageSettings {
 	maxCapacity?: number;
 	tokenLifetime?: number;
 	slotExpiry?: number;
-	baseUrl?: string;
-	apiUrl?: string;
+	baseURL?: string;
+	apiURL?: string;
 };
 
 export interface ClientSettings {

@@ -53,7 +53,7 @@ export const handler: Handler = {
 						avatarDecoration: null
 					},
 					createdAt: file.createdAt,
-					expiresAt: file.expiresAt,
+					expiresAt: file.expiresAt ? new Date(file.expiresAt).getTime() : null,
 					maxDownloads: file.maxDownloads,
 					downloadCount: file.downloadCount,
 					description: file.description,
@@ -103,7 +103,7 @@ export const handler: Handler = {
 
 				try {
 					const file = await uploadFileStream(fileId, key, stream, fileName, mimeType);
-					const { baseUrl } = getStorageConfig();
+					const { baseURL } = getStorageConfig();
 					return Response.json({
 						success: true,
 						id: file.id,
@@ -111,7 +111,7 @@ export const handler: Handler = {
 						size: file.size,
 						mimeType: file.mimeType,
 						sha256: file.sha256,
-						url: `${baseUrl}/files/${file.id}`
+						url: `${baseURL}/files/download/${file.id}`
 					}, { headers: corsHeaders });
 				} catch (error) {
 					if (error instanceof Error) {
@@ -223,8 +223,8 @@ export const handler: Handler = {
 						uploader: user ? {
 							username: user.username,
 							displayName: user.displayName,
-							avatarUrl: user.avatar("webp", 256, false),
-							avatarDecorationUrl: user.avatarDecoration(false) ?? undefined,
+							avatarURL: user.avatar("webp", 256, false),
+							avatarDecorationURL: user.avatarDecoration(false) ?? undefined,
 							displayNameStyle: await user.displayNameStyle()
 						} : undefined
 					}

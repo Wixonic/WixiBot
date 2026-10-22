@@ -108,7 +108,7 @@ export const command = {
 		if (subcommand === "stats") await interaction.deferReply();
 		else await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-		const { baseUrl, apiUrl } = getStorageConfig();
+		const { baseURL, apiURL } = getStorageConfig();
 
 		if (subcommand === "upload") {
 
@@ -142,18 +142,18 @@ export const command = {
 				restrictedTo
 			});
 
-			const uploadUrl = `${baseUrl}/files/upload/${file.id}?key=${uploadKey}`;
-			const downloadUrl = `${baseUrl}/files/download/${file.id}`;
+			const uploadURL = `${baseURL}/files/upload/${file.id}?key=${uploadKey}`;
+			const downloadURL = secretKey ? `${baseURL}/files/download/${file.id}?key=${encodeURIComponent(secretKey)}` : `${baseURL}/files/download/${file.id}`;
 
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setStyle(ButtonStyle.Link)
 					.setLabel("Upload File")
-					.setURL(uploadUrl),
+					.setURL(uploadURL),
 				new ButtonBuilder()
 					.setStyle(ButtonStyle.Link)
 					.setLabel("Download Page")
-					.setURL(downloadUrl)
+					.setURL(downloadURL)
 			);
 
 			const details: string[] = [
@@ -191,20 +191,20 @@ export const command = {
 				return;
 			}
 
-			let downloadUrl = `${baseUrl}/files/download/${file.id}`;
-			let directApiUrl = `${apiUrl}/${file.id}/download`;
+			let downloadURL = `${baseURL}/files/download/${file.id}`;
+			let directApiURL = `${apiURL}/${file.id}/download`;
 
 			if (file.restrictedTo !== null) {
 				if (file.restrictedTo.type === "key") {
 					if (providedKey) {
-						downloadUrl = `${baseUrl}/files/download/${file.id}?key=${providedKey}`;
-						directApiUrl = `${apiUrl}/${file.id}/download?key=${providedKey}`;
+						downloadURL = `${baseURL}/files/download/${file.id}?key=${providedKey}`;
+						directApiURL = `${apiURL}/${file.id}/download?key=${providedKey}`;
 					}
 				} else {
 					const token = await generateDownloadToken(file.id);
 					if (token) {
-						downloadUrl = `${baseUrl}/files/download/${file.id}?key=${token}`;
-						directApiUrl = `${apiUrl}/${file.id}/download?key=${token}`;
+						downloadURL = `${baseURL}/files/download/${file.id}?key=${token}`;
+						directApiURL = `${apiURL}/${file.id}/download?key=${token}`;
 					}
 				}
 			}
@@ -222,8 +222,8 @@ export const command = {
 					uploader: uploaderUser ? {
 						username: uploaderUser.username,
 						displayName: uploaderUser.displayName,
-						avatarUrl: uploaderUser.avatar("webp", 256, false),
-						avatarDecorationUrl: uploaderUser.avatarDecoration(false) ?? undefined,
+						avatarURL: uploaderUser.avatar("webp", 256, false),
+						avatarDecorationURL: uploaderUser.avatarDecoration(false) ?? undefined,
 						displayNameStyle: await uploaderUser.displayNameStyle()
 					} : undefined
 				}
@@ -235,11 +235,11 @@ export const command = {
 				new ButtonBuilder()
 					.setStyle(ButtonStyle.Link)
 					.setLabel("Download Page")
-					.setURL(downloadUrl),
+					.setURL(downloadURL),
 				new ButtonBuilder()
 					.setStyle(ButtonStyle.Link)
 					.setLabel("Direct Download")
-					.setURL(directApiUrl)
+					.setURL(directApiURL)
 			);
 
 			await interaction.editReply({
@@ -275,13 +275,13 @@ export const command = {
 				new ButtonBuilder()
 					.setStyle(ButtonStyle.Link)
 					.setLabel("Open Storage")
-					.setURL(baseUrl)
+					.setURL(baseURL)
 			);
 
 			let content: string | undefined = undefined;
 
 			if (files.length > 0) {
-				const lines = files.slice(0, 15).map((f) => `- \`${f.id}\`: [${f.name}](<${baseUrl}/files/${f.id}>)\n-# ${f.mimeType}${f.description ? ` • ${f.description}` : ""}`);
+				const lines = files.slice(0, 15).map((file) => `- \`${file.id}\`: [${file.name}](<${baseURL}/files/download/${file.id}>)\n-# ${file.mimeType}${file.description ? ` • ${file.description}` : ""}`);
 				if (files.length > 15) lines.push(`*...and ${files.length - 15} more files.*`);
 				content = lines.join("\n");
 			}
@@ -317,7 +317,7 @@ export const command = {
 				new ButtonBuilder()
 					.setStyle(ButtonStyle.Link)
 					.setLabel("Open Storage")
-					.setURL(baseUrl)
+					.setURL(baseURL)
 			);
 
 			await interaction.editReply({ files: [attachment], components: [row] });

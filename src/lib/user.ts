@@ -584,8 +584,8 @@ export class User {
 								type: RichPictureType.LevelUp,
 								data: {
 									username: displayName,
-									avatarUrl: this.avatar("webp", 256, false),
-									avatarDecorationUrl: this.avatarDecoration(false) ?? undefined,
+									avatarURL: this.avatar("webp", 256, false),
+									avatarDecorationURL: this.avatarDecoration(false) ?? undefined,
 									displayNameStyle,
 									oldLevel,
 									newLevel
@@ -603,8 +603,8 @@ export class User {
 										type: RichPictureType.Achievement,
 										data: {
 											username: displayName,
-											avatarUrl: this.avatar("webp", 256, false),
-											avatarDecorationUrl: this.avatarDecoration(false) ?? undefined,
+											avatarURL: this.avatar("webp", 256, false),
+											avatarDecorationURL: this.avatarDecoration(false) ?? undefined,
 											displayNameStyle,
 											achievementName: achievement.name,
 											achievementDescription: achievement.description

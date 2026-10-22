@@ -123,8 +123,8 @@ export const createTicketHeaderAttachment = async (interaction: MessageComponent
 		data: {
 			ticketId: ticket.id,
 			creatorUsername: creatorDisplayName,
-			creatorAvatarUrl: ticketCreatorUser?.avatar("webp", 256, false) ?? (creatorUser ? creatorUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }) : undefined),
-			creatorAvatarDecorationUrl: ticketCreatorUser?.avatarDecoration(false) ?? undefined,
+			creatorAvatarURL: ticketCreatorUser?.avatar("webp", 256, false) ?? (creatorUser ? creatorUser.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }) : undefined),
+			creatorAvatarDecorationURL: ticketCreatorUser?.avatarDecoration(false) ?? undefined,
 			creatorDisplayNameStyle: await ticketCreatorUser?.displayNameStyle(),
 			reason: ticket.reason || "General support ticket",
 			state: ticket.state || "Waiting",

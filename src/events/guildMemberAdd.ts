@@ -43,8 +43,8 @@ export const event = {
 						type: RichPictureType.WelcomeMember,
 						data: {
 							username: discordMember.displayName,
-							avatarUrl: user?.avatar("webp", 256, false) ?? discordMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
-							avatarDecorationUrl: user?.avatarDecoration(false) ?? undefined,
+							avatarURL: user?.avatar("webp", 256, false) ?? discordMember.user.displayAvatarURL({ extension: "png", size: 256, forceStatic: true }),
+							avatarDecorationURL: user?.avatarDecoration(false) ?? undefined,
 							displayNameStyle: await user?.displayNameStyle(),
 							serverName: discordMember.guild.name,
 							memberCount: discordMember.guild.memberCount
