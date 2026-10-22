@@ -44,6 +44,11 @@ export const component = {
 
 		switch (action) {
 			case "close": {
+				if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)) {
+					await interaction.followUp("You don't have permissions to warn this member!");
+					return;
+				}
+
 				await interaction.followUp(`Report closed by <@${interaction.user.id}>.`);
 				if (interaction.message && "edit" in interaction.message) {
 					await interaction.message.edit({
@@ -61,18 +66,21 @@ export const component = {
 
 			case "delete": {
 				if (targetType === "message") {
+					if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)) {
+						await interaction.followUp("You don't have permissions to delete this message!");
+						return;
+					}
+
 					try {
 						const channelId = extraId ? targetId : interaction.channelId;
 						const messageId = extraId ? extraId : targetId;
 						const channel = await interaction.guild.channels.fetch(channelId).catch(() => null);
 						if (channel && channel.isTextBased()) {
-							const msg = await channel.messages.fetch(messageId).catch(() => null);
-							if (msg && msg.deletable) {
-								await msg.delete();
+							const message = await channel.messages.fetch(messageId).catch(() => null);
+							if (message && message.deletable) {
+								await message.delete();
 								await interaction.followUp("Target message deleted successfully.");
-							} else {
-								await interaction.followUp("Could not delete message (already deleted or missing permissions).");
-							}
+							} else await interaction.followUp("Could not delete message (already deleted or missing permissions).");
 						}
 					} catch (error) {
 						logger.error("Failed to delete reported message", { cause: error });
@@ -89,6 +97,11 @@ export const component = {
 
 					if (!member) {
 						await interaction.followUp("Member not found in guild.");
+						return;
+					}
+
+					if (!interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers)) {
+						await interaction.followUp("You don't have permissions to warn this member!");
 						return;
 					}
 
@@ -116,6 +129,11 @@ export const component = {
 						return;
 					}
 
+					if (!interaction.memberPermissions?.has(PermissionFlagsBits.BanMembers)) {
+						await interaction.followUp("You don't have permissions to ban this member!");
+						return;
+					}
+
 					await member.ban({ reason: "Moderation report action" });
 					await interaction.followUp(`User **${member.user.tag}** has been banned.`);
 				} catch (error) {
@@ -137,6 +155,11 @@ export const component = {
 
 					if (!member.moderatable) {
 						await interaction.followUp("I do not have permissions to timeout this member.");
+						return;
+					}
+
+					if (!interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers)) {
+						await interaction.followUp("You don't have permissions to timeout this member!");
 						return;
 					}
 
