@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { getSettings } from "../lib/settings.ts";
 import { getStoragePath } from "../lib/utils.ts";
 
@@ -165,7 +167,13 @@ export const createSlot = async (options: {
 	return { file, uploadKey };
 };
 
-export const uploadFile = async (fileId: string, uploadKey: string, data: Uint8Array, fileName?: string, mimeType?: string): Promise<FileEntry> => {
+export const uploadFileStream = async (
+	fileId: string,
+	uploadKey: string,
+	stream: ReadableStream<Uint8Array>,
+	fileName?: string,
+	mimeType?: string
+): Promise<FileEntry> => {
 	await ensureReady();
 	await cleanupExpired();
 
@@ -175,35 +183,71 @@ export const uploadFile = async (fileId: string, uploadKey: string, data: Uint8A
 	if (file.uploaded) throw new Error("ALREADY_UPLOADED");
 
 	const { maxCapacity } = getStorageConfig();
-	if (data.length > maxCapacity) throw new Error("FILE_TOO_LARGE");
 
-	const hashBuffer = await crypto.subtle.digest("SHA-256", data.slice().buffer);
-	const sha256 = Array.from(new Uint8Array(hashBuffer), (b) => b.toString(16).padStart(2, "0")).join("");
+	const tempPath = getStoragePath("files", "data", `${fileId}.tmp`);
+	const targetPath = getStoragePath("files", "data", fileId);
 
-	for (const [existingId, existing] of index)
-		if (existing.uploaded && existing.sha256 === sha256 && existingId !== fileId) throw new Error("DUPLICATE_FILE");
+	const hasher = createHash("sha256");
+	let size = 0;
+
+	const destination = await Deno.open(tempPath, { write: true, create: true, truncate: true });
+
+	try {
+		const reader = stream.getReader();
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			size += value.byteLength;
+			if (size > maxCapacity) {
+				throw new Error("FILE_TOO_LARGE");
+			}
+			hasher.update(value);
+			await destination.write(value);
+		}
+	} catch (err) {
+		destination.close();
+		await Deno.remove(tempPath).catch(() => {});
+		throw err;
+	}
+	destination.close();
+
+	if (size === 0) {
+		await Deno.remove(tempPath).catch(() => {});
+		throw new Error("EMPTY_FILE");
+	}
+
+	const sha256 = hasher.digest("hex");
+
+	for (const [existingId, existing] of index) {
+		if (existing.uploaded && existing.sha256 === sha256 && existingId !== fileId) {
+			await Deno.remove(tempPath).catch(() => {});
+			throw new Error("DUPLICATE_FILE");
+		}
+	}
 
 	let usedSize = getTotalUsedSize();
-
-	if (usedSize + data.length > maxCapacity) {
+	if (usedSize + size > maxCapacity) {
 		const candidates = getUploadedFiles()
 			.filter((f) => f.id !== fileId)
 			.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
 		for (const old of candidates) {
-			if (usedSize + data.length <= maxCapacity) break;
+			if (usedSize + size <= maxCapacity) break;
 			await removeFile(old.id);
 			index.delete(old.id);
 			usedSize -= old.size;
 		}
 
-		if (usedSize + data.length > maxCapacity) throw new Error("STORAGE_FULL");
+		if (usedSize + size > maxCapacity) {
+			await Deno.remove(tempPath).catch(() => {});
+			throw new Error("STORAGE_FULL");
+		}
 	}
 
-	await Deno.writeFile(getStoragePath("files", "data", fileId), data);
+	await Deno.rename(tempPath, targetPath);
 
 	file.uploaded = true;
-	file.size = data.length;
+	file.size = size;
 	file.sha256 = sha256;
 	file.createdAt = new Date().toISOString();
 	if (fileName) file.name = fileName;
@@ -212,6 +256,16 @@ export const uploadFile = async (fileId: string, uploadKey: string, data: Uint8A
 
 	await saveIndex();
 	return file;
+};
+
+export const uploadFile = async (fileId: string, uploadKey: string, data: Uint8Array, fileName?: string, mimeType?: string): Promise<FileEntry> => {
+	const stream = new ReadableStream<Uint8Array>({
+		start(controller) {
+			controller.enqueue(data);
+			controller.close();
+		}
+	});
+	return await uploadFileStream(fileId, uploadKey, stream, fileName, mimeType);
 };
 
 export const getFile = async (fileId: string): Promise<FileEntry | null> => {

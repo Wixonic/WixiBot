@@ -3,7 +3,7 @@ import { config } from "../../Server/src/config.ts";
 
 import { client } from "../lib/client.ts";
 import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
-import { consumeDownload, getDeletionQueuePosition, getFile, getFileRaw, getStorageConfig, getStorageStats, uploadFile } from "../lib/storage.ts";
+import { consumeDownload, getDeletionQueuePosition, getFile, getFileRaw, getStorageConfig, getStorageStats, uploadFileStream } from "../lib/storage.ts";
 
 const corsHeaders = {
 	"Access-Control-Allow-Origin": "*",
@@ -74,7 +74,7 @@ export const handler: Handler = {
 				const key = url.searchParams.get("key");
 				if (!key) return Response.json({ error: "Missing upload key" }, { status: 400, headers: corsHeaders });
 
-				let data: Uint8Array;
+				let stream: ReadableStream<Uint8Array> | null = null;
 				let fileName: string | undefined;
 				let mimeType: string | undefined;
 
@@ -87,22 +87,22 @@ export const handler: Handler = {
 
 						if (!(formFile instanceof File)) return Response.json({ error: "Missing file field in form data" }, { status: 400, headers: corsHeaders });
 
-						data = new Uint8Array(await formFile.arrayBuffer());
+						stream = formFile.stream();
 						fileName = formFile.name;
 						mimeType = formFile.type || "application/octet-stream";
 					} catch (error) {
 						return Response.json({ error: "Invalid multipart form data", details: String(error) }, { status: 400, headers: corsHeaders });
 					}
 				} else {
-					data = new Uint8Array(await request.arrayBuffer());
+					stream = request.body;
 					fileName = url.searchParams.get("name") || undefined;
 					mimeType = contentType || "application/octet-stream";
 				}
 
-				if (data.length === 0) return Response.json({ error: "Empty file payload" }, { status: 400, headers: corsHeaders });
+				if (!stream) return Response.json({ error: "Empty file payload" }, { status: 400, headers: corsHeaders });
 
 				try {
-					const file = await uploadFile(fileId, key, data, fileName, mimeType);
+					const file = await uploadFileStream(fileId, key, stream, fileName, mimeType);
 					const { baseUrl } = getStorageConfig();
 					return Response.json({
 						success: true,
@@ -115,6 +115,7 @@ export const handler: Handler = {
 					}, { headers: corsHeaders });
 				} catch (error) {
 					if (error instanceof Error) {
+						if (error.message === "EMPTY_FILE") return Response.json({ error: "Empty file payload" }, { status: 400, headers: corsHeaders });
 						if (error.message === "INVALID_UPLOAD_KEY") return Response.json({ error: "Invalid upload key" }, { status: 401, headers: corsHeaders });
 						if (error.message === "FILE_NOT_FOUND") return Response.json({ error: "File slot not found" }, { status: 404, headers: corsHeaders });
 						if (error.message === "ALREADY_UPLOADED") return Response.json({ error: "File already uploaded" }, { status: 400, headers: corsHeaders });
@@ -138,15 +139,65 @@ export const handler: Handler = {
 				}
 
 				try {
-					const fileBuffer = await Deno.readFile(download.filePath);
+					const fileInfo = await Deno.stat(download.filePath);
 					const encodedName = encodeURIComponent(download.file.name);
+					const rangeHeader = request.headers.get("range");
 
-					return new Response(fileBuffer, {
+					if (rangeHeader && rangeHeader.startsWith("bytes=")) {
+						const parts = rangeHeader.replace(/bytes=/, "").split("-");
+						const start = parseInt(parts[0], 10);
+						const end = parts[1] ? parseInt(parts[1], 10) : fileInfo.size - 1;
+
+						if (!isNaN(start) && start < fileInfo.size && end < fileInfo.size && start <= end) {
+							const fileHandle = await Deno.open(download.filePath, { read: true });
+							await fileHandle.seek(start, Deno.SeekMode.Start);
+							const contentLength = end - start + 1;
+
+							let bytesRemaining = contentLength;
+							const rangeStream = new ReadableStream<Uint8Array>({
+								async pull(controller) {
+									const buffer = new Uint8Array(Math.min(64 * 1024, bytesRemaining));
+									const bytesRead = await fileHandle.read(buffer);
+									if (bytesRead === null || bytesRead === 0 || bytesRemaining <= 0) {
+										controller.close();
+										fileHandle.close();
+									} else {
+										const actualBytes = Math.min(bytesRead, bytesRemaining);
+										bytesRemaining -= actualBytes;
+										controller.enqueue(buffer.subarray(0, actualBytes));
+										if (bytesRemaining <= 0) {
+											controller.close();
+											fileHandle.close();
+										}
+									}
+								},
+								cancel() {
+									fileHandle.close();
+								}
+							});
+
+							return new Response(rangeStream, {
+								status: 206,
+								headers: {
+									"Content-Type": download.file.mimeType || "application/octet-stream",
+									"Content-Disposition": `attachment; filename="${encodedName}"; filename*=UTF-8''${encodedName}`,
+									"Content-Range": `bytes ${start}-${end}/${fileInfo.size}`,
+									"Content-Length": String(contentLength),
+									"Accept-Ranges": "bytes",
+									...corsHeaders
+								}
+							});
+						}
+					}
+
+					const fileHandle = await Deno.open(download.filePath, { read: true });
+					return new Response(fileHandle.readable, {
 						status: 200,
 						headers: {
 							"Content-Type": download.file.mimeType || "application/octet-stream",
 							"Content-Disposition": `attachment; filename="${encodedName}"; filename*=UTF-8''${encodedName}`,
-							"Content-Length": String(fileBuffer.length),
+							"Content-Length": String(fileInfo.size),
+							"Accept-Ranges": "bytes",
 							...corsHeaders
 						}
 					});
