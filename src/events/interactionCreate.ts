@@ -11,7 +11,7 @@ export const event = {
 	async execute(logger: Logger, interaction: Interaction) {
 		const interactionLogger = logger.clone(() => `[I-${interaction.id}]`);
 
-		await client.getUser(interaction.user.id);
+		client.getUser(interaction.user.id).catch(() => {});
 
 		interactionLogger.debug(`Received interaction by ${interaction.user.username} (${interaction.user.id})`);
 
