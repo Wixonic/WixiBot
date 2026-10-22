@@ -105,10 +105,12 @@ export const command = {
 
 	async execute(_logger, interaction) {
 		const subcommand = interaction.options.getSubcommand(true);
+		if (subcommand === "stats") await interaction.deferReply();
+		else await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
 		const { baseUrl, apiUrl } = getStorageConfig();
 
 		if (subcommand === "upload") {
-			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 			const description = interaction.options.getString("description");
 			const expiresInInput = interaction.options.getString("expires_in");
@@ -168,8 +170,6 @@ export const command = {
 		}
 
 		if (subcommand === "download") {
-			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
 			const fileId = interaction.options.getString("file", true).trim();
 			const providedKey = interaction.options.getString("key") || undefined;
 
@@ -251,8 +251,6 @@ export const command = {
 		}
 
 		if (subcommand === "list") {
-			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
 			let memberRoleIds: string[] = [];
 			if (interaction.guild && interaction.member && "roles" in interaction.member) {
 				const roles = interaction.member.roles;
@@ -293,8 +291,6 @@ export const command = {
 		}
 
 		if (subcommand === "delete") {
-			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
 			const fileId = interaction.options.getString("file", true).trim();
 			const isAdmin = interaction.memberPermissions?.has(PermissionFlagsBits.Administrator) ?? false;
 
@@ -305,8 +301,6 @@ export const command = {
 		}
 
 		if (subcommand === "stats") {
-			await interaction.deferReply();
-
 			const stats = await getStorageStats();
 
 			const statsBuffer = await generateRichPicture({
