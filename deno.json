@@ -15,10 +15,10 @@
 		"test:richpicture": "deno run --allow-all src/scripts/testRichPicture.ts"
 	},
 	"imports": {
-		"@napi-rs/canvas": "npm:@napi-rs/canvas@^1.0.3",
-		"discord.js": "npm:discord.js@14.26.2",
+		"@napi-rs/canvas": "npm:@napi-rs/canvas@^1.0.13",
+		"discord.js": "npm:discord.js@^14.27.0",
 		"fflate": "npm:fflate@^0.8.3",
-		"std/": "https://deno.land/std@0.203.0/"
+		"std/": "https://deno.land/std/"
 	},
 	"compilerOptions": {
 		"strict": true

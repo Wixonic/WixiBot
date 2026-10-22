@@ -97,11 +97,11 @@ export class Client extends EventEmitter {
 
 		await this.discord.login(settings.discord.token);
 
-		this.discord.once("ready", async (readyClient) => {
+		this.discord.once("clientReady", async (readyClient) => {
 			for (const guild of readyClient.guilds.cache.values()) {
 				if (guild.id !== settings.discord.primaryGuildId) {
 					logger.warn(`Leaving unauthorized guild detected at startup: ${guild.name} (${guild.id})`);
-					await guild.leave().catch(() => {});
+					await guild.leave().catch(() => { });
 				}
 			}
 		});
