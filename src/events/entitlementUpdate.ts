@@ -40,7 +40,7 @@ export const event = {
 			if (user) {
 				try {
 					await user.send(`Your supporter perks were removed because your funding has ended.
-			You can renew support here: ${settings.links?.funding ?? "<https://go.wixonic.fr/funding>"}`);
+You can renew support here: ${settings.links?.funding ?? "<https://go.wixonic.fr/funding>"}`);
 					logger.info(`Sent funding renewal DM to ${entitlement.userId} after funding removal.`);
 				} catch (error) {
 					logger.error(`Failed to DM ${entitlement.userId} after funding removal.`, {
