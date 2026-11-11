@@ -1,4 +1,4 @@
-import { REST, Routes } from "discord.js";
+import { REST, Routes, type RESTPostAPIApplicationCommandsJSONBody } from "discord.js";
 
 import { logger as mainLogger } from "./lib/logger.ts";
 import { type ClientType, loadSettings, getSettings } from "./lib/settings.ts";
@@ -19,12 +19,12 @@ const deploy = async () => {
 	const settings = getSettings();
 	const rest = new REST().setToken(settings.discord.token);
 
-	const commands = [];
+	const commands: RESTPostAPIApplicationCommandsJSONBody[] = [];
 
 	logger.debug("Scanning commands...");
 
 	try {
-		for await (const file of Deno.readDir("./src/commands")) {
+		for await (const file of Deno.readDir(new URL("./commands", import.meta.url))) {
 			if (file.isFile && (file.name.endsWith(".ts") || file.name.endsWith(".js"))) {
 				const moduleURL = new URL(`./commands/${file.name}`, import.meta.url).href;
 				const module = await import(moduleURL);

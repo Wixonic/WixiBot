@@ -234,6 +234,7 @@ export class Guild {
 	private storagePath: string;
 	private logger: Logger;
 	private supportersStickyMessage: StickyMessage | null = null;
+	private supportersStickyMessageInit: Promise<void> | null = null;
 
 	lastAccessed: number = Date.now();
 	settings: GuildSettings = {
@@ -300,10 +301,15 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 	};
 
 	async saveSettings() {
-		await Deno.mkdir(this.storagePath, { recursive: true });
-		const temporaryPath = path.join(this.storagePath, "settings.json.tmp");
-		await Deno.writeTextFile(temporaryPath, JSON.stringify(this.settings, null, "\t"));
-		await Deno.rename(temporaryPath, path.join(this.storagePath, "settings.json"));
+		try {
+			await Deno.mkdir(this.storagePath, { recursive: true });
+			const temporaryPath = path.join(this.storagePath, "settings.json.tmp");
+			await Deno.writeTextFile(temporaryPath, JSON.stringify(this.settings, null, "\t"));
+			await Deno.rename(temporaryPath, path.join(this.storagePath, "settings.json"));
+		} catch (error) {
+			this.logger.error("Failed to save guild settings", { cause: error });
+		}
+
 		this.touch();
 	};
 
@@ -350,7 +356,9 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 	async saveTicket(ticket: TicketData): Promise<void> {
 		const ticketsDirectory = path.join(this.storagePath, "tickets");
 		await Deno.mkdir(ticketsDirectory, { recursive: true });
-		await Deno.writeTextFile(path.join(ticketsDirectory, `${ticket.id}.json`), JSON.stringify(ticket));
+		const temporaryPath = path.join(ticketsDirectory, `${ticket.id}.json.tmp`);
+		await Deno.writeTextFile(temporaryPath, JSON.stringify(ticket));
+		await Deno.rename(temporaryPath, path.join(ticketsDirectory, `${ticket.id}.json`));
 		this.touch();
 	};
 
@@ -387,7 +395,10 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		}));
 
 		if (this.settings.moderation.warnings) {
-			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.warnings);
+			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.warnings).catch((error) => {
+				this.reportError("Failed to fetch configured warnings channel", error);
+				return null;
+			});
 			if (channel && channel.isTextBased()) {
 				const targetUser = await client.getUser(target.id);
 				const buffer = await generateRichPicture({
@@ -429,7 +440,10 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		}));
 
 		if (this.settings.moderation.reports) {
-			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.reports);
+			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.reports).catch((error) => {
+				this.reportError("Failed to fetch configured reports channel", error);
+				return null;
+			});
 			if (channel && channel.isTextBased()) {
 				const authorDisplayName = message.member?.displayName ?? message.author.displayName ?? message.author.username;
 				const authorUser = await client.getUser(message.author.id);
@@ -512,7 +526,10 @@ Reason: ${reason || "No reason provided"}`, "reports");
 		}));
 
 		if (this.settings.moderation.reports) {
-			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.reports);
+			const channel = await this.discordGuild.channels.fetch(this.settings.moderation.reports).catch((error) => {
+				this.reportError("Failed to fetch configured reports channel", error);
+				return null;
+			});
 			if (channel && channel.isTextBased()) {
 				const memberUser = await client.getUser(discordMember.id);
 				const buffer = await generateRichPicture({
@@ -672,7 +689,7 @@ ${error instanceof Error ? error.stack : String(error)}
 		const supportersChannelId = this.settings.channels.supporters;
 		if (supportersChannelId && message.channelId === supportersChannelId) {
 			if (!this.supportersStickyMessage) {
-				this.supportersStickyMessage = new StickyMessage({
+				const stickyMessage = new StickyMessage({
 					storagePath: this.storagePath,
 					key: "supporters",
 					getContent: async () => {
@@ -681,8 +698,13 @@ ${error instanceof Error ? error.stack : String(error)}
 						return `Hi! This channel is for displaying new server boosters and supporters that wants or wanted to support my creator's work!\n\nIf you want to support us, use the ${commandText} command to learn more!`;
 					}
 				});
-				await this.supportersStickyMessage.init();
+				this.supportersStickyMessage = stickyMessage;
+				this.supportersStickyMessageInit = stickyMessage.init().then(() => {
+					this.supportersStickyMessageInit = null;
+				});
 			}
+
+			if (this.supportersStickyMessageInit) await this.supportersStickyMessageInit;
 
 			await this.supportersStickyMessage.handleMessage(message);
 		}

@@ -203,6 +203,14 @@ export const component = {
 									PermissionFlagsBits.ReadMessageHistory
 								]
 							},
+							...(interaction.guild.members.me ? [{
+								id: interaction.guild.members.me.id,
+								allow: [
+									PermissionFlagsBits.ViewChannel,
+									PermissionFlagsBits.SendMessages,
+									PermissionFlagsBits.ReadMessageHistory
+								]
+							}] : []),
 							{
 								id: interaction.guild.roles.everyone,
 								deny: [
@@ -212,9 +220,11 @@ export const component = {
 						]
 					});
 
+					const ticketReason = `Moderation report reply for @${targetUser.username}`;
+
 					const ticketData: TicketMessageData = {
 						id: ticketId,
-						reason: `Moderation report reply for @${targetUser.username}`,
+						reason: ticketReason,
 						state: "Claimed",
 						interactions: {
 							createdBy: interaction.user.id,
@@ -247,7 +257,7 @@ export const component = {
 					await guild.createTicket(ticketId, ticketChannel.id, interaction.user.id, {
 						channel: ticketMessage.id,
 						guild: logChannelMessageId
-					}, `Moderation report reply for ${targetUser.username}`, "Claimed", interaction.user.id);
+					}, ticketReason, "Claimed", interaction.user.id);
 
 					await interaction.followUp(`Moderation ticket created in <#${ticketChannel.id}>.`);
 				} catch (error) {

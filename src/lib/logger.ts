@@ -88,8 +88,8 @@ const processQueue = async (): Promise<void> => {
 		const messageWithoutDebug = item.message.split(colors.debug)[0].trim();
 		const escapeCharacter = String.fromCharCode(27);
 		const safeMessage = messageWithoutDebug.replace(new RegExp(`${escapeCharacter}\\[[0-9;]*m`, "g"), "").replaceAll("```", "` ` `");
-		const maxMessageLength = 2000 - prefix.length - 8 - item.level.trim().length - 2;
-		const truncated = safeMessage.length > maxMessageLength ? safeMessage.slice(0, maxMessageLength - 3) + "..." : safeMessage;
+		const maxMessageLength = Math.max(0, 2000 - prefix.length - 8 - item.level.trim().length - 2);
+		const truncated = safeMessage.length > maxMessageLength ? safeMessage.slice(0, Math.max(0, maxMessageLength - 3)) + "..." : safeMessage;
 
 		try {
 			const response = await fetch(settings.discord.webhookURL, {
@@ -114,8 +114,15 @@ const processQueue = async (): Promise<void> => {
 					if (responseData?.retry_after) delayMilliseconds = Math.ceil(Number(responseData.retry_after) * 1000);
 				}
 
+				attempts++;
+				if (attempts >= MAX_WEBHOOK_ATTEMPTS) {
+					console.warn(`Webhook message dropped after ${attempts} rate-limit responses (HTTP 429).`);
+					webhookQueue.shift();
+					attempts = 0;
+					continue;
+				}
+
 				await wait(delayMilliseconds + 100);
-				attempts = 0;
 				continue;
 			}
 
@@ -157,6 +164,13 @@ const sendWebhook = (level: string, message: string, options: WebhookOptions = {
 	if (webhookQueue.length >= 256) webhookQueue.shift();
 	webhookQueue.push({ level, message, options });
 	processQueue();
+};
+
+export const waitForWebhookQueue = async (timeoutMilliseconds = 3000): Promise<void> => {
+	const deadline = Date.now() + timeoutMilliseconds;
+	while (Date.now() < deadline && (webhookQueue.length > 0 || isProcessingQueue)) {
+		await wait(50);
+	}
 };
 
 const formatItem = (item: unknown): string => {

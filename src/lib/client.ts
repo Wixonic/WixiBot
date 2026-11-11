@@ -56,10 +56,23 @@ export class Client extends EventEmitter {
 	users = new Map<string, User>();
 	jobs = new Map<string, Job>();
 	private jobControllers = new Map<string, AbortController>();
+	private guildRequests = new Map<string, Promise<Guild | null>>();
+	private userRequests = new Map<string, Promise<User | null>>();
+	private commandIdCache = new Map<string, string>();
 
 	async init(logger: Logger, settings: ClientSettings) {
 		this.logger = logger;
 		this.settings = settings;
+
+		this.commands.clear();
+		this.components.clear();
+		this.modals.clear();
+		this.guilds.clear();
+		this.users.clear();
+		this.jobs.clear();
+		this.guildRequests.clear();
+		this.userRequests.clear();
+		this.commandIdCache.clear();
 
 		logger.debug("Initializing Discord client...");
 
@@ -128,17 +141,17 @@ export class Client extends EventEmitter {
 	};
 
 	stopJobs() {
-		const logger = this.logger?.clone(() => "[Jobs]");
+		const logger = this.logger.clone(() => "[Jobs]");
 		const count = this.jobControllers.size;
 
 		for (const [name, controller] of this.jobControllers) {
 			controller.abort();
-			logger?.debug(`Stopped job ${name}.`);
+			logger.debug(`Stopped job ${name}.`);
 		}
 
 		this.jobControllers.clear();
 
-		if (count > 0) logger?.debug(`Stopped ${count} active job${count === 1 ? "" : "s"}.`);
+		if (count > 0) logger.debug(`Stopped ${count} active job${count === 1 ? "" : "s"}.`);
 	};
 
 	get user() {
@@ -150,26 +163,34 @@ export class Client extends EventEmitter {
 	};
 
 	async getCommandId(name: string, guildId?: string): Promise<string | null> {
-		if (this.discord?.application) {
-			try {
-				const globalCommands = await this.discord.application.commands.fetch();
-				const globalCommand = globalCommands.find((command) => command.name === name);
-				if (globalCommand) return globalCommand.id;
+		if (!this.discord?.application) return null;
 
-				if (guildId) {
-					const guild = await this.discord.guilds.fetch(guildId).catch(() => null);
+		const cacheKey = guildId ? `${name}:${guildId}` : name;
+		const cached = this.commandIdCache.get(cacheKey);
+		if (cached) return cached;
 
-					if (guild) {
-						const localCommands = await guild.commands.fetch();
-						const localCommand = localCommands.find((command) => command.name === name);
-						if (localCommand) return localCommand.id;
-					}
-				}
-			} catch (error) {
-				this.logger.error(`Failed to fetch command ID for ${name}`, { cause: error });
+		try {
+			const globalCommands = await this.discord.application.commands.fetch();
+			const globalCommand = globalCommands.find((command) => command.name === name);
+			if (globalCommand) {
+				this.commandIdCache.set(cacheKey, globalCommand.id);
+				return globalCommand.id;
 			}
 
-			return null;
+			if (guildId) {
+				const guild = await this.discord.guilds.fetch(guildId).catch(() => null);
+
+				if (guild) {
+					const localCommands = await guild.commands.fetch();
+					const localCommand = localCommands.find((command) => command.name === name);
+					if (localCommand) {
+						this.commandIdCache.set(cacheKey, localCommand.id);
+						return localCommand.id;
+					}
+				}
+			}
+		} catch (error) {
+			this.logger.error(`Failed to fetch command ID for ${name}`, { cause: error });
 		}
 
 		return null;
@@ -188,23 +209,36 @@ export class Client extends EventEmitter {
 			return null;
 		}
 
-		let guild = this.guilds.get(id);
-
-		if (!guild) {
-			try {
-				const discordGuild = await this.discord?.guilds.fetch(id);
-				if (!discordGuild) throw new Error(`Client is not ready`);
-
-				guild = new Guild(this.logger.clone(() => `[Guild ${id}]`), discordGuild);
-				await guild.init();
-				this.addGuild(guild);
-			} catch (error) {
-				this.logger.warn(`Failed to fetch guild ${id}`, { cause: error });
-				return null;
-			}
+		const cached = this.guilds.get(id);
+		if (cached) {
+			cached.touch();
+			return cached;
 		}
 
-		guild.touch();
+		// Memoize the in-flight creation promise so concurrent callers share one instance.
+		let request = this.guildRequests.get(id);
+		if (!request) {
+			request = (async () => {
+				try {
+					const discordGuild = await this.discord?.guilds.fetch(id);
+					if (!discordGuild) throw new Error(`Client is not ready`);
+
+					const guild = new Guild(this.logger.clone(() => `[Guild ${id}]`), discordGuild);
+					await guild.init();
+					this.addGuild(guild);
+					return guild;
+				} catch (error) {
+					this.logger.warn(`Failed to fetch guild ${id}`, { cause: error });
+					return null;
+				} finally {
+					this.guildRequests.delete(id);
+				}
+			})();
+			this.guildRequests.set(id, request);
+		}
+
+		const guild = await request;
+		guild?.touch();
 		return guild;
 	};
 
@@ -220,23 +254,36 @@ export class Client extends EventEmitter {
 	};
 
 	async getUser(id: string) {
-		let user = this.users.get(id);
-
-		if (!user) {
-			try {
-				const discordUser = await this.discord?.users.fetch(id);
-				if (!discordUser) throw new Error(`Client is not ready`);
-
-				user = new User(this.logger.clone(() => `[User ${id}]`), discordUser);
-				await user.init();
-				this.addUser(user);
-			} catch (error) {
-				this.logger.warn(`Failed to fetch user ${id}`, { cause: error });
-				return null;
-			}
+		const cached = this.users.get(id);
+		if (cached) {
+			cached.touch();
+			return cached;
 		}
 
-		user.touch();
+		// Memoize the in-flight creation promise so concurrent callers share one instance.
+		let request = this.userRequests.get(id);
+		if (!request) {
+			request = (async () => {
+				try {
+					const discordUser = await this.discord?.users.fetch(id);
+					if (!discordUser) throw new Error(`Client is not ready`);
+
+					const user = new User(this.logger.clone(() => `[User ${id}]`), discordUser);
+					await user.init();
+					this.addUser(user);
+					return user;
+				} catch (error) {
+					this.logger.warn(`Failed to fetch user ${id}`, { cause: error });
+					return null;
+				} finally {
+					this.userRequests.delete(id);
+				}
+			})();
+			this.userRequests.set(id, request);
+		}
+
+		const user = await request;
+		user?.touch();
 		return user;
 	};
 

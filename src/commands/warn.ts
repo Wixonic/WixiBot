@@ -44,10 +44,12 @@ export const command = {
 			throw new Error("Guild not found");
 		}
 
-		const targetMember = await interaction.guild.members.fetch(interaction.targetId);
+		const targetMember = await interaction.guild.members.fetch(interaction.targetId).catch(() => null);
 		if (!targetMember) {
-			await interaction.deleteReply();
-			throw new Error("User not found");
+			await interaction.editReply({
+				content: "User not found in this server."
+			});
+			return;
 		}
 
 		await guild.warn(targetMember, interaction.member, "No reason provided");

@@ -15,8 +15,7 @@ export const modal = {
 					return;
 				}
 
-				const ephemeralCheckbox = interaction.fields.getCheckbox("ephemeral");
-				const isEphemeral = ephemeralCheckbox || false;
+				const isEphemeral = interaction.fields.getCheckbox("ephemeral");
 
 				await interaction.deferReply({
 					flags: isEphemeral ? MessageFlags.Ephemeral : undefined
@@ -24,12 +23,9 @@ export const modal = {
 
 				const content = interaction.fields.getTextInputValue("content");
 
-				/* switch (interaction.fields.getRadioGroup("style")) {
-					default: */
 				await interaction.editReply({
 					content: content
 				});
-				// }
 				break;
 			}
 

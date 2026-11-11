@@ -10,6 +10,7 @@ import type { Command } from "../lib/client.ts";
 import { client } from "../lib/client.ts";
 import type { Logger } from "../lib/logger.ts";
 import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
+import { computeTotalXp, getLevelFromTotalXp } from "../lib/user.ts";
 import { getStoragePath } from "../lib/utils.ts";
 
 interface LeaderboardUserStatistics {
@@ -86,7 +87,7 @@ export const command = {
 				return {
 					id: loadedUser.id,
 					xp: statistics.totalXp,
-					level: Math.floor(Math.sqrt(statistics.totalXp / 50)),
+					level: getLevelFromTotalXp(statistics.totalXp),
 					streak: loadedUser.data.streak || 0
 				};
 			}
@@ -94,15 +95,12 @@ export const command = {
 			try {
 				const content = await Deno.readTextFile(getStoragePath("users", userId, "data.json"));
 				const data = JSON.parse(content);
-				let totalXp = 0;
-
-				if (data.stats) totalXp = ((data.stats.totalMessages || 0) * 10) + ((data.stats.totalStageEvents || 0) * 2500) + ((data.stats.totalForumPosts || 0) * 250) + ((data.stats.totalReactions || 0) * 1);
-				if (data.bonusXp) totalXp += data.bonusXp;
+				const totalXp = computeTotalXp(data.stats, data.bonusXp);
 
 				return {
 					id: userId,
 					xp: totalXp,
-					level: Math.floor(Math.sqrt(totalXp / 50)),
+					level: getLevelFromTotalXp(totalXp),
 					streak: data.streak || 0
 				};
 			} catch (error) {

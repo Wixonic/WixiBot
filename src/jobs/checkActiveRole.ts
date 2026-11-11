@@ -31,11 +31,19 @@ export const syncActiveRoles = async (logger: Logger, targetGuildId?: string) =>
 				const hasRole = member.roles.cache.has(activeRoleId);
 
 				if (hasThreshold && !hasRole) {
-					await member.roles.add(activeRoleId, "Active member threshold reached (28 days)").catch(() => null);
-					added++;
+					try {
+						await member.roles.add(activeRoleId, "Active member threshold reached (28 days)");
+						added++;
+					} catch (error) {
+						logger.warn(`Failed to add active role to ${member.user.username} (${member.id}) in guild ${discordGuild.id}`, { cause: error });
+					}
 				} else if (!hasThreshold && hasRole) {
-					await member.roles.remove(activeRoleId, "Inactive in the last 28 days").catch(() => null);
-					removed++;
+					try {
+						await member.roles.remove(activeRoleId, "Inactive in the last 28 days");
+						removed++;
+					} catch (error) {
+						logger.warn(`Failed to remove active role from ${member.user.username} (${member.id}) in guild ${discordGuild.id}`, { cause: error });
+					}
 				}
 			}
 		} catch (error) {

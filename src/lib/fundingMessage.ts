@@ -35,7 +35,7 @@ Learn more about the perks of supporting me by clicking the button below!`)
 				)
 				.addTextDisplayComponents((component) => component
 					.setContent(`### On Discord
-You can either subscribe and get the <@&${settings.discord.roles.supporter}> role or boost ${guildId ? "this" : "my"} server and get the ${guild && guild.settings.roles?.server_booster !== undefined ? `<@&${guild.settings.roles.server_booster}>` : "booster"} role!`)
+You can either subscribe and get the <@&${settings.discord.roles.supporter}> role or boost ${guildId ? "this" : "my"} server and get the ${guild?.settings.roles?.server_booster ? `<@&${guild.settings.roles.server_booster}>` : "booster"} role!`)
 				)
 				.addActionRowComponents((component) => component
 					.addComponents(

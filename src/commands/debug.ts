@@ -115,6 +115,9 @@ export const command = {
 			await interaction.followUp("Running active roles synchronization for this server...");
 			const result = await syncActiveRoles(logger, interaction.guildId);
 			await interaction.followUp(`Active roles sync complete! Checked: **${result.checked}**, Added: **${result.added}**, Removed: **${result.removed}**.`);
+			return;
 		}
+
+		await interaction.followUp(`Unknown subcommand \`${subcommand}\`.`);
 	}
 } satisfies Command<ChatInputCommandInteraction>;

@@ -197,7 +197,7 @@ const samples = [
 
 for (const sample of samples) {
 	try {
-		// @ts-ignore
+		// @ts-ignore - samples intentionally cover all option shapes without a discriminated union
 		const buffer = await generateRichPicture(sample.options);
 		const filename = sample.filename.endsWith(".png") ? sample.filename.replace(/\.png$/, ".webp") : sample.filename;
 		const filePath = path.join(outputDir, filename);

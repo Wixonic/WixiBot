@@ -5,9 +5,24 @@ export const getStoragePath = (...subPaths: string[]) => join(fileURLToPath(new 
 
 export const clone = <T>(obj: T, cloned = new WeakMap<object, unknown>()): T => {
 	if (obj === null || typeof obj !== "object") return obj;
+	if (obj instanceof Date) return new Date(obj.getTime()) as T;
 
 	const objectRef = obj as object;
 	if (cloned.has(objectRef)) return cloned.get(objectRef) as T;
+
+	if (obj instanceof Map) {
+		const clonedMap = new Map<unknown, unknown>();
+		cloned.set(objectRef, clonedMap);
+		for (const [key, value] of obj) clonedMap.set(clone(key, cloned), clone(value, cloned));
+		return clonedMap as T;
+	}
+
+	if (obj instanceof Set) {
+		const clonedSet = new Set() as unknown as Set<unknown>;
+		cloned.set(objectRef, clonedSet);
+		for (const value of obj) clonedSet.add(clone(value, cloned));
+		return clonedSet as T;
+	}
 
 	const clonedObj = (Array.isArray(obj) ? [] : {}) as Record<string, unknown>;
 	cloned.set(objectRef, clonedObj);
@@ -50,10 +65,10 @@ export const displayCommand = (command: ApplicationCommand) => {
 };
 
 export const formatBytes = (bytes: number): string => {
-	if (bytes === 0) return "0 B";
+	if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
 	const k = 1024;
 	const sizes = ["B", "KB", "MB", "GB", "TB"];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
 	return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 };
 

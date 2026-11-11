@@ -26,6 +26,7 @@ registerFontSafely("NewRocker.ttf", "New Rocker");
 registerFontSafely("Kalam.ttf", "Kalam");
 
 const ICONS_DIR = new URL("../assets/icons/", import.meta.url);
+const IMAGES_DIR = new URL("../assets/images/", import.meta.url);
 
 type DrawImageContext = CanvasRenderingContext2D & {
 	drawImage: (image: unknown, dx: number, dy: number, dw: number, dh: number) => void;
@@ -215,8 +216,8 @@ const AccentColors: Record<RichPictureType, string> = {
 	[RichPictureType.ReportUser]: "#FF3B30",
 	[RichPictureType.TicketHeader]: "#34C759",
 	[RichPictureType.Birthday]: "#00A2FF",
-	[RichPictureType.StorageFile]: "#5865F2",
-	[RichPictureType.StorageStats]: "#5865F2"
+	[RichPictureType.StorageFile]: "#FFFFFF",
+	[RichPictureType.StorageStats]: "#FFFFFF"
 };
 
 const FONT_MAIN = '"OpenSans", sans-serif';
@@ -245,6 +246,8 @@ export const drawCircularAvatar = async (
 	avatarSize: number,
 	fallbackLetter = "?"
 ) => {
+	const fallbackCharacter = (fallbackLetter || "?").toUpperCase();
+
 	context.save();
 	context.beginPath();
 	context.arc(xPosition + avatarSize / 2, yPosition + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
@@ -263,7 +266,7 @@ export const drawCircularAvatar = async (
 			context.font = `bold ${Math.floor(avatarSize * 0.52)}px ${FONT_ACCENT}`;
 			context.textAlign = "center";
 			context.textBaseline = "middle";
-			context.fillText(fallbackLetter.toUpperCase(), Math.floor(xPosition + avatarSize / 2), Math.floor(yPosition + avatarSize / 2 + Math.floor(avatarSize * 0.05)));
+			context.fillText(fallbackCharacter, Math.floor(xPosition + avatarSize / 2), Math.floor(yPosition + avatarSize / 2 + Math.floor(avatarSize * 0.05)));
 		}
 	} else {
 		context.fillStyle = "#2C2C2E";
@@ -272,7 +275,7 @@ export const drawCircularAvatar = async (
 		context.font = `bold ${Math.floor(avatarSize * 0.52)}px ${FONT_ACCENT}`;
 		context.textAlign = "center";
 		context.textBaseline = "middle";
-		context.fillText(fallbackLetter.toUpperCase(), Math.floor(xPosition + avatarSize / 2), Math.floor(yPosition + avatarSize / 2 + Math.floor(avatarSize * 0.05)));
+		context.fillText(fallbackCharacter, Math.floor(xPosition + avatarSize / 2), Math.floor(yPosition + avatarSize / 2 + Math.floor(avatarSize * 0.05)));
 	}
 	context.restore();
 
@@ -339,7 +342,12 @@ const drawSvgIcon = async (ctx: CanvasRenderingContext2D, iconName: string, colo
 		svg = svg.replace(/<rect[^>]*\/>/g, "");
 		svg = svg.replace(/<svg /, `<svg width="${size}" height="${size}" `);
 		svg = svg.replace(/path /g, `path fill="${color}" `);
-		const dataURL = `data:image/svg+xml;base64,${btoa(svg)}`;
+		const svgBytes = new TextEncoder().encode(svg);
+		let svgBinary = "";
+		for (let offset = 0; offset < svgBytes.length; offset += 0x8000) {
+			svgBinary += String.fromCharCode(...svgBytes.subarray(offset, offset + 0x8000));
+		}
+		const dataURL = `data:image/svg+xml;base64,${btoa(svgBinary)}`;
 		const image = await loadImage(dataURL);
 		drawImage(ctx, image, x, y, size, size);
 	} catch {
@@ -347,11 +355,28 @@ const drawSvgIcon = async (ctx: CanvasRenderingContext2D, iconName: string, colo
 	}
 };
 
-const drawTextPatternIconWatermark = async (
+const drawBadgeTitle = async (
 	ctx: CanvasRenderingContext2D,
 	iconName: string,
-	patternText: string,
-	accentColor: string,
+	iconColor: string,
+	text: string,
+	xPosition: number,
+	baselineY: number,
+	size: number,
+	font: string
+) => {
+	ctx.font = font;
+	const metrics = ctx.measureText(text);
+	const visualCenterY = baselineY - metrics.actualBoundingBoxAscent / 2;
+	await drawSvgIcon(ctx, iconName, iconColor, xPosition, visualCenterY - size / 2, size);
+	ctx.fillStyle = iconColor;
+	ctx.textAlign = "left";
+	ctx.fillText(text, xPosition + size + 10, baselineY);
+};
+
+const drawWatermarkIcon = async (
+	ctx: CanvasRenderingContext2D,
+	iconName: string,
 	cardX: number,
 	cardY: number,
 	cardW: number,
@@ -363,48 +388,10 @@ const drawTextPatternIconWatermark = async (
 	const y = customY !== undefined ? customY : cardY + (cardH - size) / 2;
 
 	try {
-		let svg = await Deno.readTextFile(new URL(`${iconName}.svg`, ICONS_DIR));
-		svg = svg.replace(/<rect[^>]*\/>/g, "");
-		svg = svg.replace(/<svg /, `<svg width="${size}" height="${size}" `);
-		svg = svg.replace(/path /g, `path fill="${accentColor}" `);
-		const dataURL = `data:image/svg+xml;base64,${btoa(svg)}`;
-		const image = await loadImage(dataURL);
-
-		ctx.save();
-		ctx.globalAlpha = 0.05;
+		const image = await loadImage(fileURLToPath(new URL(`${iconName}.webp`, ICONS_DIR)));
 		drawImage(ctx, image, x, y, size, size);
-		ctx.restore();
-
-		const padding = size;
-		const offscreen = createCanvas(size + padding * 2, size + padding * 2);
-		const offscreenContext = offscreen.getContext("2d");
-
-		offscreenContext.fillStyle = accentColor;
-		offscreenContext.font = `bold 8px ${FONT_ACCENT}`;
-		offscreenContext.save();
-		offscreenContext.translate(padding + size / 2, padding + size / 2);
-		offscreenContext.rotate(-Math.PI / 12);
-
-		const unit = patternText.toUpperCase() + "  •  ";
-		const lineText = unit.repeat(30);
-		let lineIndex = 0;
-
-		for (let linePosition = -size * 2; linePosition < size * 2; linePosition += 10) {
-			const staggerOffset = lineIndex % 2 === 0 ? 0 : 25;
-			offscreenContext.fillText(lineText, -size * 2 + staggerOffset, linePosition);
-			lineIndex++;
-		}
-		offscreenContext.restore();
-
-		offscreenContext.globalCompositeOperation = "destination-in";
-		drawImage(offscreenContext, image, padding, padding, size, size);
-
-		ctx.save();
-		ctx.globalAlpha = 0.1;
-		drawImage(ctx, offscreen, x - padding, y - padding, size + padding * 2, size + padding * 2);
-		ctx.restore();
 	} catch {
-		// Ignore watermark error
+		// Ignore watermark icon load error
 	}
 };
 
@@ -441,43 +428,69 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 	drawRoundedRect(ctx, cardX, cardY, cardW, cardH, radius);
 	ctx.clip();
 
-	ctx.fillStyle = "#0A0A0C";
+	ctx.fillStyle = "#000000";
 	ctx.fillRect(cardX, cardY, cardW, cardH);
 
-	const grad = ctx.createRadialGradient(cardX + cardW / 2, cardY, 10, cardX + cardW / 2, cardY, cardW * 0.7);
-	grad.addColorStop(0, accentColor + "22");
-	grad.addColorStop(1, "transparent");
-	ctx.fillStyle = grad;
+	try {
+		const backgroundImage = await loadImage(fileURLToPath(new URL("background.webp", IMAGES_DIR)));
+		const imageRatio = backgroundImage.width / backgroundImage.height;
+		const cardRatio = cardW / cardH;
+		let backgroundWidth: number;
+		let backgroundHeight: number;
+		let backgroundOffsetX: number;
+		let backgroundOffsetY: number;
+		if (imageRatio > cardRatio) {
+			backgroundHeight = cardH;
+			backgroundWidth = cardH * imageRatio;
+			backgroundOffsetX = (cardW - backgroundWidth) / 2;
+			backgroundOffsetY = 0;
+		} else {
+			backgroundWidth = cardW;
+			backgroundHeight = cardW / imageRatio;
+			backgroundOffsetX = 0;
+			backgroundOffsetY = (cardH - backgroundHeight) / 2;
+		}
+		drawImage(ctx, backgroundImage, cardX + backgroundOffsetX, cardY + backgroundOffsetY, backgroundWidth, backgroundHeight);
+	} catch {
+		// Keep pitch black if the background image fails to load
+	}
+
+	ctx.save();
+
+	ctx.globalCompositeOperation = "multiply";
+	ctx.globalAlpha = 0.5;
+	ctx.fillStyle = accentColor;
 	ctx.fillRect(cardX, cardY, cardW, cardH);
+	ctx.restore();
 
 	switch (type) {
 		case RichPictureType.LevelUp:
-			await drawTextPatternIconWatermark(ctx, "flame", "LEVEL UP", accentColor, cardX, cardY, cardW, cardH, 180);
+			await drawWatermarkIcon(ctx, "flame", cardX, cardY, cardW, cardH, 180);
 			break;
 		case RichPictureType.Achievement:
-			await drawTextPatternIconWatermark(ctx, "medal-military", "ACHIEVEMENT", accentColor, cardX, cardY, cardW, cardH, 180);
+			await drawWatermarkIcon(ctx, "medal-military", cardX, cardY, cardW, cardH, 180);
 			break;
 		case RichPictureType.WelcomeMember:
-			await drawTextPatternIconWatermark(ctx, "hand-waving", "WELCOME", accentColor, cardX, cardY, cardW, cardH, 180);
+			await drawWatermarkIcon(ctx, "hand-waving", cardX, cardY, cardW, cardH, 180);
 			break;
 		case RichPictureType.Boost:
-			await drawTextPatternIconWatermark(ctx, "rocket-launch", "SERVER BOOST", accentColor, cardX, cardY, cardW, cardH, 180);
+			await drawWatermarkIcon(ctx, "rocket-launch", cardX, cardY, cardW, cardH, 180);
 			break;
 		case RichPictureType.Supporter:
-			await drawTextPatternIconWatermark(ctx, "hand-heart", "SUPPORTER", accentColor, cardX, cardY, cardW, cardH, 180);
+			await drawWatermarkIcon(ctx, "hand-heart", cardX, cardY, cardW, cardH, 180);
 			break;
 		case RichPictureType.Birthday:
-			await drawTextPatternIconWatermark(ctx, "cake", "HAPPY BIRTHDAY", accentColor, cardX, cardY, cardW, cardH, 180);
+			await drawWatermarkIcon(ctx, "cake", cardX, cardY, cardW, cardH, 180);
 			break;
 		case RichPictureType.Warn:
-			await drawTextPatternIconWatermark(ctx, "shield-warning", "WARNING", accentColor, cardX, cardY, cardW, cardH, 130, cardY + 15);
+			await drawWatermarkIcon(ctx, "shield-warning", cardX, cardY, cardW, cardH, 130, cardY + 15);
 			break;
 		case RichPictureType.ReportMessage:
 		case RichPictureType.ReportUser:
-			await drawTextPatternIconWatermark(ctx, "shield-warning", "REPORT", accentColor, cardX, cardY, cardW, cardH, 130, cardY + 15);
+			await drawWatermarkIcon(ctx, "shield-warning", cardX, cardY, cardW, cardH, 130, cardY + 15);
 			break;
 		case RichPictureType.TicketHeader:
-			await drawTextPatternIconWatermark(ctx, "chats-teardrop", "TICKET", accentColor, cardX, cardY, cardW, cardH, 130, cardY + 15);
+			await drawWatermarkIcon(ctx, "chats-teardrop", cardX, cardY, cardW, cardH, 110, cardY + 42);
 			break;
 	}
 
@@ -485,7 +498,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 
 	drawRoundedRect(ctx, cardX, cardY, cardW, cardH, radius);
 	ctx.lineWidth = 2;
-	ctx.strokeStyle = accentColor;
+	ctx.strokeStyle = accentColor + "2E";
 	ctx.stroke();
 
 	ctx.save();
@@ -520,7 +533,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 				ctx.fillText(streakText, cardX + cardW - 45, cardY + 85);
 			}
 
-			ctx.strokeStyle = "#242428";
+			ctx.strokeStyle = "#FFFFFF1F";
 			ctx.lineWidth = 1.5;
 			ctx.beginPath();
 			ctx.moveTo(cardX + 45, cardY + 185);
@@ -558,7 +571,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			const barWidth = cardW - 90;
 			const barHeight = 12;
 
-			ctx.fillStyle = "#242428";
+			ctx.fillStyle = "#1C1C20";
 			drawRoundedRect(ctx, cardX + 45, barY, barWidth, barHeight, 6);
 			ctx.fill();
 
@@ -595,7 +608,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.textAlign = "right";
 			ctx.fillText("TOP MEMBERS BY XP", cardX + cardW - 45, cardY + 58);
 
-			ctx.strokeStyle = "#242428";
+			ctx.strokeStyle = "#FFFFFF1F";
 			ctx.lineWidth = 1.5;
 			ctx.beginPath();
 			ctx.moveTo(cardX + 45, cardY + 85);
@@ -633,11 +646,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 
 			await drawCircularAvatar(ctx, data.avatarURL, data.avatarDecorationURL, cardX + 45, cardY + 40, 110, data.username[0]);
 
-			await drawSvgIcon(ctx, "flame", accentColor, cardX + 180, cardY + 49, 22);
-			ctx.fillStyle = accentColor;
-			ctx.font = `20px ${FONT_ACCENT}`;
-			ctx.textAlign = "left";
-			ctx.fillText("LEVEL UP!", cardX + 210, cardY + 68);
+			await drawBadgeTitle(ctx, "flame", accentColor, "LEVEL UP!", cardX + 180, cardY + 68, 22, `20px ${FONT_ACCENT}`);
 
 			drawStyledUsername(ctx, data.username, cardX + 180, cardY + 116, data.displayNameStyle, `bold 38px ${FONT_MAIN}`, "#FFFFFF", "left");
 
@@ -653,11 +662,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 
 			await drawCircularAvatar(ctx, data.avatarURL, data.avatarDecorationURL, cardX + 45, cardY + 45, 110, data.username[0]);
 
-			await drawSvgIcon(ctx, "medal-military", accentColor, cardX + 180, cardY + 46, 22);
-			ctx.fillStyle = accentColor;
-			ctx.font = `18px ${FONT_ACCENT}`;
-			ctx.textAlign = "left";
-			ctx.fillText("ACHIEVEMENT UNLOCKED", cardX + 210, cardY + 64);
+			await drawBadgeTitle(ctx, "medal-military", accentColor, "ACHIEVEMENT UNLOCKED", cardX + 180, cardY + 64, 22, `18px ${FONT_ACCENT}`);
 
 			ctx.fillStyle = "#FFFFFF";
 			ctx.font = `bold 34px ${FONT_MAIN}`;
@@ -682,11 +687,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 
 			await drawCircularAvatar(ctx, data.avatarURL, data.avatarDecorationURL, cardX + 45, cardY + 40, 110, data.username[0]);
 
-			await drawSvgIcon(ctx, "hand-waving", accentColor, cardX + 180, cardY + 49, 22);
-			ctx.fillStyle = accentColor;
-			ctx.font = `18px ${FONT_ACCENT}`;
-			ctx.textAlign = "left";
-			ctx.fillText("WELCOME TO THE SERVER", cardX + 210, cardY + 67);
+			await drawBadgeTitle(ctx, "hand-waving", accentColor, "WELCOME TO THE SERVER", cardX + 180, cardY + 67, 22, `18px ${FONT_ACCENT}`);
 
 			drawStyledUsername(ctx, data.username, cardX + 180, cardY + 116, data.displayNameStyle, `bold 38px ${FONT_MAIN}`, "#FFFFFF", "left");
 
@@ -703,11 +704,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 
 			await drawCircularAvatar(ctx, data.avatarURL, data.avatarDecorationURL, cardX + 45, cardY + 40, 110, data.username[0]);
 
-			await drawSvgIcon(ctx, "cake", accentColor, cardX + 180, cardY + 49, 22);
-			ctx.fillStyle = accentColor;
-			ctx.font = `18px ${FONT_ACCENT}`;
-			ctx.textAlign = "left";
-			ctx.fillText("HAPPY BIRTHDAY!", cardX + 210, cardY + 67);
+			await drawBadgeTitle(ctx, "cake", accentColor, "HAPPY BIRTHDAY!", cardX + 180, cardY + 67, 22, `18px ${FONT_ACCENT}`);
 
 			drawStyledUsername(ctx, data.username, cardX + 180, cardY + 116, data.displayNameStyle, `bold 38px ${FONT_MAIN}`, "#FFFFFF", "left");
 
@@ -727,12 +724,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			await drawCircularAvatar(ctx, data.avatarURL, data.avatarDecorationURL, cardX + 45, cardY + 40, 110, data.username[0]);
 
 			const badgeText = data.type === "Boost" ? "SERVER BOOST" : "NEW SUPPORTER";
-			await drawSvgIcon(ctx, iconName, accentColor, cardX + 180, cardY + 49, 22);
-
-			ctx.fillStyle = accentColor;
-			ctx.font = `18px ${FONT_ACCENT}`;
-			ctx.textAlign = "left";
-			ctx.fillText(badgeText, cardX + 210, cardY + 67);
+			await drawBadgeTitle(ctx, iconName, accentColor, badgeText, cardX + 180, cardY + 67, 22, `18px ${FONT_ACCENT}`);
 
 			drawStyledUsername(ctx, data.username, cardX + 180, cardY + 116, data.displayNameStyle, `bold 38px ${FONT_MAIN}`, "#FFFFFF", "left");
 
@@ -750,11 +742,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 
 			await drawCircularAvatar(ctx, data.targetAvatarURL, data.targetAvatarDecorationURL, cardX + 45, cardY + 35, 95, data.targetUsername[0]);
 
-			await drawSvgIcon(ctx, "shield-warning", accentColor, cardX + 160, cardY + 43, 20);
-			ctx.fillStyle = accentColor;
-			ctx.font = `17px ${FONT_ACCENT}`;
-			ctx.textAlign = "left";
-			ctx.fillText("MEMBER WARNING", cardX + 188, cardY + 60);
+			await drawBadgeTitle(ctx, "shield-warning", accentColor, "MEMBER WARNING", cardX + 160, cardY + 60, 20, `17px ${FONT_ACCENT}`);
 
 			drawStyledUsername(ctx, data.targetUsername, cardX + 160, cardY + 98, data.targetDisplayNameStyle, `bold 30px ${FONT_MAIN}`, "#FFFFFF", "left");
 
@@ -762,9 +750,12 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.font = `17px ${FONT_MAIN}`;
 			if (data.moderatorUsername) ctx.fillText(`Issued by @${data.moderatorUsername}`, cardX + 160, cardY + 132);
 
-			ctx.fillStyle = "#151518";
+			ctx.fillStyle = "#0F0F12";
 			drawRoundedRect(ctx, cardX + 45, cardY + 165, cardW - 90, 105, 18);
 			ctx.fill();
+			ctx.strokeStyle = "#FFFFFF1A";
+			ctx.lineWidth = 1.5;
+			ctx.stroke();
 
 			ctx.fillStyle = "#A1A1A6";
 			ctx.font = `14px ${FONT_MAIN}`;
@@ -783,12 +774,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			await drawCircularAvatar(ctx, data.targetAvatarURL, data.targetAvatarDecorationURL, cardX + 45, cardY + 35, 95, data.targetUsername[0]);
 
 			const reportTitle = data.reportType === "Message" ? "MESSAGE REPORT" : "USER REPORT";
-			await drawSvgIcon(ctx, "shield-warning", accentColor, cardX + 160, cardY + 43, 20);
-
-			ctx.fillStyle = accentColor;
-			ctx.font = `17px ${FONT_ACCENT}`;
-			ctx.textAlign = "left";
-			ctx.fillText(reportTitle, cardX + 188, cardY + 60);
+			await drawBadgeTitle(ctx, "shield-warning", accentColor, reportTitle, cardX + 160, cardY + 60, 20, `17px ${FONT_ACCENT}`);
 
 			ctx.fillStyle = "#FFFFFF";
 			ctx.font = `bold 30px ${FONT_MAIN}`;
@@ -803,9 +789,12 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 				ctx.fillText(`Reported by @${data.reporterUsername}`, cardX + 160, cardY + 132);
 			}
 
-			ctx.fillStyle = "#151518";
+			ctx.fillStyle = "#0F0F12";
 			drawRoundedRect(ctx, cardX + 45, cardY + 165, cardW - 90, 105, 18);
 			ctx.fill();
+			ctx.strokeStyle = "#FFFFFF1A";
+			ctx.lineWidth = 1.5;
+			ctx.stroke();
 
 			ctx.fillStyle = "#A1A1A6";
 			ctx.font = `14px ${FONT_MAIN}`;
@@ -822,11 +811,12 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 
 			await drawCircularAvatar(ctx, data.creatorAvatarURL, data.creatorAvatarDecorationURL, cardX + 45, cardY + 35, 95, data.creatorUsername[0]);
 
-			await drawSvgIcon(ctx, "chats-teardrop", accentColor, cardX + 160, cardY + 43, 20);
-			ctx.fillStyle = accentColor;
-			ctx.font = `17px ${FONT_ACCENT}`;
-			ctx.textAlign = "left";
-			ctx.fillText(`SUPPORT TICKET #${data.ticketId}`, cardX + 188, cardY + 60);
+			await drawBadgeTitle(ctx, "chats-teardrop", accentColor, "SUPPORT TICKET", cardX + 160, cardY + 60, 20, `17px ${FONT_ACCENT}`);
+
+			ctx.fillStyle = "#A1A1A6";
+			ctx.font = `16px ${FONT_MAIN}`;
+			ctx.textAlign = "right";
+			ctx.fillText(`#${data.ticketId}`, cardX + cardW - 35, cardY + 30);
 
 			ctx.fillStyle = "#FFFFFF";
 			ctx.font = `bold 30px ${FONT_MAIN}`;
@@ -840,9 +830,12 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			const claimStatus = data.claimedByUsername ? `Claimed by @${data.claimedByUsername}` : "Unclaimed";
 			ctx.fillText(`Status: ${data.state}  •  ${claimStatus}`, cardX + 160, cardY + 132);
 
-			ctx.fillStyle = "#151518";
+			ctx.fillStyle = "#0F0F12";
 			drawRoundedRect(ctx, cardX + 45, cardY + 165, cardW - 90, 105, 18);
 			ctx.fill();
+			ctx.strokeStyle = "#FFFFFF1A";
+			ctx.lineWidth = 1.5;
+			ctx.stroke();
 
 			ctx.fillStyle = "#A1A1A6";
 			ctx.font = `14px ${FONT_MAIN}`;
@@ -890,7 +883,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.fillStyle = "#A1A1A6";
 			ctx.fillText(extension, cardX + 45 + baseNameWidth, cardY + 98);
 
-			ctx.strokeStyle = "#242428";
+			ctx.strokeStyle = "#FFFFFF1F";
 			ctx.lineWidth = 1.5;
 			ctx.beginPath();
 			ctx.moveTo(cardX + 45, cardY + 124);
@@ -934,7 +927,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.textAlign = "right";
 			ctx.fillText(`${data.totalFiles} ACTIVE FILES`, cardX + cardW - 45, cardY + 52);
 
-			ctx.strokeStyle = "#242428";
+			ctx.strokeStyle = "#FFFFFF1F";
 			ctx.lineWidth = 1.5;
 			ctx.beginPath();
 			ctx.moveTo(cardX + 45, cardY + 78);
@@ -976,7 +969,7 @@ export const generateRichPicture = async (options: RichPictureOptions): Promise<
 			ctx.fillText(`${(usageRatio * 100).toFixed(1)}%`, cardX + cardW - 45, barY - 10);
 
 			drawRoundedRect(ctx, cardX + 45, barY, barWidth, barHeight, 6);
-			ctx.fillStyle = "#1F1F24";
+			ctx.fillStyle = "#1C1C20";
 			ctx.fill();
 
 			if (usageRatio > 0) {

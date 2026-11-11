@@ -65,13 +65,15 @@ export const command = {
 			return;
 		}
 
-		if (interaction.options.getSubcommand(true) !== "as") {
+		const subcommand = interaction.options.getSubcommand(true);
+
+		if (subcommand !== "as") {
 			await interaction.deferReply({
 				flags: MessageFlags.Ephemeral
 			});
 		}
 
-		switch (interaction.options.getSubcommand(true)) {
+		switch (subcommand) {
 			case "as": {
 				const modal = new ModalBuilder()
 					.setCustomId("message:as")
@@ -87,17 +89,6 @@ export const command = {
 							.setRequired(true)
 					);
 
-				/* const style = new LabelBuilder()
-					.setLabel("Message Style")
-					.setRadioGroupComponent(
-						new RadioGroupBuilder()
-							.setCustomId("style")
-							.setOptions([
-								new RadioGroupOptionBuilder().setLabel("Raw Message").setValue("raw").setDefault(true)
-							])
-							.setRequired(true)
-					); */
-
 				const ephemeral = new LabelBuilder()
 					.setLabel("Ephemeral")
 					.setDescription("Send as an ephemeral message?")
@@ -108,7 +99,7 @@ export const command = {
 					);
 
 				await interaction.showModal(modal
-					.addLabelComponents(content, /* style, */ ephemeral)
+					.addLabelComponents(content, ephemeral)
 				);
 				break;
 			}
@@ -152,7 +143,7 @@ Please adjust the permissions and try again.`
 							}
 						}
 
-						const applicationBotName = interaction.client.user?.username;
+						const applicationBotName = interaction.client.user?.username ?? "the bot";
 						const guildName = interaction.guild.name;
 
 						await channel.send({
@@ -239,6 +230,8 @@ Our support team will review your request and get back to you as soon as possibl
 							components: fundingComponents,
 							flags: MessageFlags.IsComponentsV2 | MessageFlags.SuppressNotifications
 						});
+
+						await interaction.deleteReply();
 					} else {
 						await interaction.deleteReply();
 						throw new Error("Guild not found")

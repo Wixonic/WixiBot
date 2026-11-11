@@ -17,11 +17,11 @@ export const event = {
 		if (fundingSku && supporterRoleId) {
 			logger.debug(`Checking entitlements for ${discordMember.id} on join in guild ${discordMember.guild.id}.`);
 
-			const entitlements = await discordMember.client.application.entitlements.fetch({
+			const entitlements = await discordMember.client.application?.entitlements.fetch({
 				user: discordMember.id
-			});
+			}).catch(() => null);
 
-			if (entitlements.some((entitlement) => entitlement.skuId === fundingSku && entitlement.isActive())) {
+			if (entitlements?.some((entitlement) => entitlement.skuId === fundingSku && entitlement.isActive())) {
 				try {
 					await discordMember.roles.add(supporterRoleId, "Funding entitlement active on join");
 					logger.info(`Assigned supporter role to ${discordMember.id} on join in guild ${discordMember.guild.id}.`);
@@ -35,7 +35,7 @@ export const event = {
 
 		const guild = await client.getGuild(discordMember.guild.id);
 		if (guild && guild.settings.channels.welcome) {
-			const channel = await discordMember.guild.channels.fetch(guild.settings.channels.welcome);
+			const channel = await discordMember.guild.channels.fetch(guild.settings.channels.welcome).catch(() => null);
 			if (channel && channel.isTextBased()) {
 				try {
 					const user = await client.getUser(discordMember.id);

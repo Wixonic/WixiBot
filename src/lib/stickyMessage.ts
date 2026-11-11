@@ -14,6 +14,7 @@ export class StickyMessage {
 	private key: string;
 	private getContent: () => StickyContent | Promise<StickyContent>;
 	private lastStickyMessageId: string | null = null;
+	private previousStickyMessageId: string | null = null;
 	private isLocked = false;
 
 	constructor(options: StickyMessageOptions) {
@@ -44,21 +45,21 @@ export class StickyMessage {
 		if (this.isLocked) return;
 
 		this.isLocked = true;
+		this.previousStickyMessageId = this.lastStickyMessageId;
 
 		try {
 			const channel = message.channel;
 			if (!channel.isSendable()) return;
-
-			if (this.lastStickyMessageId) {
-				await channel.messages.delete(this.lastStickyMessageId).catch(() => null);
-				await this.saveId(null);
-			}
 
 			const payload = await this.getContent();
 			const messageOptions = typeof payload === "string" ? { content: payload } : payload;
 
 			const newSticky = await channel.send(messageOptions);
 			await this.saveId(newSticky.id);
+
+			if (this.previousStickyMessageId && this.previousStickyMessageId !== newSticky.id) {
+				await channel.messages.delete(this.previousStickyMessageId).catch(() => null);
+			}
 		} catch {
 			// Ignore error
 		} finally {

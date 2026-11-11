@@ -142,6 +142,9 @@ export const handler: Handler = {
 
 				try {
 					const fileInfo = await Deno.stat(download.filePath);
+
+					if (download.exhausted) await Deno.remove(download.filePath).catch(() => { });
+
 					const encodedName = encodeURIComponent(download.file.name);
 
 					if (rangeHeader && rangeHeader.startsWith("bytes=")) {

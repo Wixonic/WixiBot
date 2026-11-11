@@ -21,6 +21,14 @@ export const component = {
 		}
 
 		if (action === "yes") {
+			if (type !== "boost" && type !== "supporter") {
+				await interaction.update({
+					content: "Unknown announcement type.",
+					components: []
+				});
+				return;
+			}
+
 			const guild = await client.getGuild(guildId);
 			if (!guild) {
 				await interaction.update({
@@ -30,7 +38,7 @@ export const component = {
 				return;
 			}
 
-			const success = await guild.publishFundingAnnouncement(interaction.user.id, type as "boost" | "supporter");
+			const success = await guild.publishFundingAnnouncement(interaction.user.id, type);
 
 			if (success) {
 				await interaction.update({
@@ -43,6 +51,11 @@ export const component = {
 					components: []
 				});
 			}
+		} else {
+			await interaction.update({
+				content: "Unknown action.",
+				components: []
+			});
 		}
 	}
 };

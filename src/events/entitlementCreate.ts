@@ -25,6 +25,8 @@ export const event = {
 			let memberFound = false;
 
 			for (const discordGuild of guilds) {
+				if (!discordGuild.roles.cache.has(supporterRoleId)) continue;
+
 				const member = await discordGuild.members.fetch(entitlement.userId).catch(() => null);
 
 				if (member) {

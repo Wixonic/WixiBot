@@ -69,8 +69,13 @@ export const command = {
 		const failed: GuildMember[] = [];
 
 		await Promise.all(Array.from(members.values()).map(async (member) => {
+			if (!member.voice) {
+				failed.push(member);
+				return;
+			}
+
 			try {
-				await member.voice?.setChannel(to);
+				await member.voice.setChannel(to);
 			} catch (error) {
 				logger.warn(`Failed to move member ${member.user.username} (${member.user.id}) from ${from.name} (${from.id}) to ${to.name} (${to.id}) in ${guild.name} (${guild.id})`, error);
 				failed.push(member);

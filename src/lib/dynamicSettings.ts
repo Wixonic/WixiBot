@@ -114,6 +114,11 @@ const isSettingDefaultValue = (setting: DynamicSetting, value: unknown): boolean
 
 	if (value === undefined) return true;
 
+	if (Array.isArray(value) && Array.isArray(valueSetting.default)) {
+		const defaultValue = valueSetting.default;
+		return value.length === defaultValue.length && value.every((item, index) => item === defaultValue[index]);
+	}
+
 	return value === valueSetting.default;
 };
 

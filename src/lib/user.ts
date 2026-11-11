@@ -128,6 +128,14 @@ export interface UserMonthlyGuildActivity {
 	};
 };
 
+export const getLevelFromTotalXp = (totalXp: number): number => Math.floor(Math.sqrt(totalXp / 50));
+
+export const computeTotalXp = (stats: { totalMessages?: number; totalStageEvents?: number; totalForumPosts?: number; totalReactions?: number } | undefined, bonusXp?: number): number => {
+	let totalXp = ((stats?.totalMessages || 0) * 10) + ((stats?.totalStageEvents || 0) * 2500) + ((stats?.totalForumPosts || 0) * 250) + ((stats?.totalReactions || 0) * 1);
+	if (bonusXp) totalXp += bonusXp;
+	return totalXp;
+};
+
 export interface MonthlyActivity {
 	yearMonth: string;
 	guilds: Record<string, UserMonthlyGuildActivity>;
@@ -151,7 +159,10 @@ export class User {
 		guilds: {}
 	};
 
-	// Cache for total aggregated stats
+	private isRecordingActivity = false;
+
+	private activityQueue: Promise<unknown>[] = [];
+
 	private statsCache: {
 		lastUpdate: number;
 		totalXp: number;
@@ -303,14 +314,20 @@ export class User {
 			if (this.settings.activity.record) {
 				this.logger.debug(`Presence changed for ${this.username} - Old: ${JSON.stringify(oldPresence)}; New: ${JSON.stringify(newPresence)}`);
 				this.currentActivity.changed = true;
-			} else this.currentActivity.changed = false;
+			}
+			// When recording is disabled, leave "changed" untouched so pending guild
+			// stats are not silently dropped.
 		}
 
 		this.touch();
 	};
 
 	async recordActivity() {
-		if (this.currentActivity.changed && this.settings.activity.record) {
+		if (this.isRecordingActivity || !this.currentActivity.changed || !this.settings.activity.record) return;
+
+		this.isRecordingActivity = true;
+
+		try {
 			this.logger.debug(`Saving activity to disk for ${this.username}...`);
 			const activityDirectory = path.join(this.storagePath, "activity");
 			await Deno.mkdir(activityDirectory, { recursive: true });
@@ -319,18 +336,47 @@ export class User {
 			const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 			const monthFilePath = path.join(activityDirectory, `${yearMonth}.json`);
 
+			const pendingGuilds = this.currentActivity.guilds;
+			this.currentActivity = {
+				presence: this.currentActivity.presence,
+				changed: false,
+				date: new Date(),
+				guilds: {}
+			};
+
+			const restorePending = () => {
+				for (const guildId in pendingGuilds) {
+					const pending = pendingGuilds[guildId];
+					const current = this.currentActivity.guilds[guildId] ??= { achievements: [], messages: { sent: 0, mentions: 0, reactions: { added: 0, received: 0 } }, stageEvents: { attended: 0 }, forum: { posts: 0 } };
+					current.messages.sent += pending.messages?.sent || 0;
+					current.messages.mentions += pending.messages?.mentions || 0;
+					current.messages.reactions.added += pending.messages?.reactions?.added || 0;
+					current.messages.reactions.received += pending.messages?.reactions?.received || 0;
+					current.forum.posts += pending.forum?.posts || 0;
+					current.stageEvents.attended += pending.stageEvents?.attended || 0;
+					if (pending.achievements) current.achievements.push(...pending.achievements);
+				}
+				this.currentActivity.changed = true;
+			};
+
 			let monthData: MonthlyActivity = { yearMonth, guilds: {} };
 			try {
 				const existingContent = await Deno.readTextFile(monthFilePath);
 				monthData = JSON.parse(existingContent);
 			} catch (error) {
-				if (!(error instanceof Deno.errors.NotFound)) this.logger.error("Failed to read monthly activity file", { cause: error });
+				if (error instanceof Deno.errors.NotFound) {
+					// First entry of the month: start a fresh file.
+				} else {
+					restorePending();
+					this.logger.error("Failed to read monthly activity file, skipping this flush", { cause: error });
+					return;
+				}
 			}
 
 			this.data.stats ??= { totalMessages: 0, totalStageEvents: 0, totalForumPosts: 0, totalReactions: 0 };
 
-			for (const guildId in this.currentActivity.guilds) {
-				const currentGuild = this.currentActivity.guilds[guildId];
+			for (const guildId in pendingGuilds) {
+				const currentGuild = pendingGuilds[guildId];
 				monthData.guilds[guildId] ??= { achievements: [], messages: { sent: 0, mentions: 0, reactions: { added: 0, received: 0 } }, stageEvents: { attended: 0 }, forum: { posts: 0 } };
 				const targetGuild = monthData.guilds[guildId];
 
@@ -359,26 +405,26 @@ export class User {
 				}
 			}
 
-			const temporaryMonthPath = `${monthFilePath}.tmp`;
-			await Deno.writeTextFile(temporaryMonthPath, JSON.stringify(monthData));
-			await Deno.rename(temporaryMonthPath, monthFilePath);
-			await this.saveData();
-
-			this.currentActivity = {
-				presence: this.currentActivity.presence,
-				changed: false,
-				date: new Date(),
-				guilds: {}
-			};
+			try {
+				const temporaryMonthPath = `${monthFilePath}.tmp`;
+				await Deno.writeTextFile(temporaryMonthPath, JSON.stringify(monthData));
+				await Deno.rename(temporaryMonthPath, monthFilePath);
+				await this.saveData();
+			} catch (error) {
+				restorePending();
+				this.logger.error("Failed to save monthly activity", { cause: error });
+			}
 
 			this.touch();
+		} finally {
+			this.isRecordingActivity = false;
 		}
 	};
 
-	async sendReplay(_targetMonth?: Date): Promise<boolean> {
+	sendReplay(_targetMonth?: Date): Promise<boolean> {
 		this.logger.debug("Replay generation is disabled for now.");
 		this.touch();
-		return false;
+		return Promise.resolve(false);
 	};
 
 	async getRecentStats(days = 28) {
@@ -403,15 +449,20 @@ export class User {
 					const month = directoryEntry.name.slice(0, -".json".length);
 					if (!includedMonths.has(month)) continue;
 
-					const content = await Deno.readTextFile(path.join(activityPath, directoryEntry.name));
-					const activity: MonthlyActivity = JSON.parse(content);
+					try {
+						const content = await Deno.readTextFile(path.join(activityPath, directoryEntry.name));
+						const activity: MonthlyActivity = JSON.parse(content);
 
-					for (const guildId in activity.guilds) {
-						const guildData = activity.guilds[guildId];
-						totalMessages += guildData.messages?.sent || 0;
-						totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
-						totalForumPosts += guildData.forum?.posts || 0;
-						totalStageEvents += guildData.stageEvents?.attended || 0;
+						for (const guildId in activity.guilds) {
+							const guildData = activity.guilds[guildId];
+							totalMessages += guildData.messages?.sent || 0;
+							totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
+							totalForumPosts += guildData.forum?.posts || 0;
+							totalStageEvents += guildData.stageEvents?.attended || 0;
+						}
+					} catch (error) {
+						this.logger.warn(`Failed to read activity file ${directoryEntry.name}`, { cause: error });
+						continue;
 					}
 				}
 			}
@@ -448,20 +499,25 @@ export class User {
 				if (directoryEntry.isFile && directoryEntry.name.endsWith(".json")) {
 					if (targetMonthKey && directoryEntry.name.slice(0, -".json".length) !== targetMonthKey) continue;
 
-					const content = await Deno.readTextFile(path.join(activityPath, directoryEntry.name));
-					const activity: MonthlyActivity = JSON.parse(content);
+					try {
+						const content = await Deno.readTextFile(path.join(activityPath, directoryEntry.name));
+						const activity: MonthlyActivity = JSON.parse(content);
 
-					for (const guildId in activity.guilds) {
-						const guildData = activity.guilds[guildId];
+						for (const guildId in activity.guilds) {
+							const guildData = activity.guilds[guildId];
 
-						totalMessages += guildData.messages?.sent || 0;
-						totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
-						totalForumPosts += guildData.forum?.posts || 0;
-						totalStageEvents += guildData.stageEvents?.attended || 0;
+							totalMessages += guildData.messages?.sent || 0;
+							totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
+							totalForumPosts += guildData.forum?.posts || 0;
+							totalStageEvents += guildData.stageEvents?.attended || 0;
 
-						if (guildData.achievements) {
-							for (const achievement of guildData.achievements) monthlyAchievements.push(achievement.name);
+							if (guildData.achievements) {
+								for (const achievement of guildData.achievements) monthlyAchievements.push(achievement.name);
+							}
 						}
+					} catch (error) {
+						this.logger.warn(`Failed to read activity file ${directoryEntry.name}`, { cause: error });
+						continue;
 					}
 				}
 			}
@@ -504,8 +560,7 @@ export class User {
 				totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
 			}
 
-			let totalXp = (totalMessages * 10) + (totalStageEvents * 2500) + (totalForumPosts * 250) + (totalReactions * 1);
-			if (this.data.bonusXp) totalXp += this.data.bonusXp;
+			const totalXp = computeTotalXp({ totalMessages, totalStageEvents, totalForumPosts, totalReactions }, this.data.bonusXp);
 
 			this.touch();
 			return { totalMessages, totalStageEvents, totalForumPosts, totalReactions, totalXp, achievements: [] };
@@ -513,9 +568,7 @@ export class User {
 
 		if (!this.statsCache || Date.now() - this.statsCache.lastUpdate > 60000) {
 			const stats = await this.getAggregatedStats();
-
-			let totalXp = (stats.totalMessages * 10) + (stats.totalStageEvents * 2500) + (stats.totalForumPosts * 250) + (stats.totalReactions * 1);
-			if (this.data.bonusXp) totalXp += this.data.bonusXp;
+			const totalXp = computeTotalXp(stats, this.data.bonusXp);
 
 			this.statsCache = {
 				lastUpdate: Date.now(),
@@ -530,54 +583,62 @@ export class User {
 
 	async getLevel() {
 		const stats = await this.getTotalStats();
-		return Math.floor(Math.sqrt(stats.totalXp / 50));
+		return getLevelFromTotalXp(stats.totalXp);
+	};
+
+	private enqueueActivity<T>(task: () => Promise<T>): Promise<T> {
+		const previous = this.activityQueue.pop() ?? Promise.resolve();
+		const next = previous.then(task, task);
+		this.activityQueue.push(next.catch(() => { }));
+		return next;
 	};
 
 	async addActivity(guildId: string, type: "message" | "mention" | "reactionAdd" | "reactionReceive" | "forumPost" | "stageEvent") {
-		this.logger.debug(`Recording activity[${type}]for ${this.username}`);
-		const oldLevel = await this.getLevel();
+		this.logger.debug(`Recording activity[${type}] for ${this.username}`);
 
-		const todayDate = new Date();
-		const today = todayDate.toISOString().split("T")[0];
+		const { oldLevel, newLevel, unlockedAchievementIds, streakChanged } = await this.enqueueActivity(async () => {
+			const oldLevel = await this.getLevel();
 
-		let streakChanged = false;
-		if (this.data.lastActiveDate !== today) {
-			const yesterdayDate = new Date();
-			yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-			const yesterday = yesterdayDate.toISOString().split("T")[0];
+			const todayDate = new Date();
+			const today = todayDate.toISOString().split("T")[0];
 
-			if (!this.data.lastActiveDate || this.data.lastActiveDate < yesterday) this.data.streak = 1;
-			else if (this.data.lastActiveDate === yesterday) {
-				this.data.streak = (this.data.streak || 1) + 1;
-				const bonus = Math.min(this.data.streak * 5, 50);
-				this.data.bonusXp = (this.data.bonusXp || 0) + bonus;
+			let streakChanged = false;
+			if (this.data.lastActiveDate !== today) {
+				const yesterdayDate = new Date();
+				yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+				const yesterday = yesterdayDate.toISOString().split("T")[0];
+
+				if (!this.data.lastActiveDate || this.data.lastActiveDate < yesterday) this.data.streak = 1;
+				else if (this.data.lastActiveDate === yesterday) {
+					this.data.streak = (this.data.streak || 1) + 1;
+					const bonus = Math.min(this.data.streak * 5, 50);
+					this.data.bonusXp = (this.data.bonusXp || 0) + bonus;
+				}
+
+				if (!this.data.bestStreak || (this.data.streak && this.data.streak > this.data.bestStreak)) this.data.bestStreak = this.data.streak;
+
+				this.data.lastActiveDate = today;
+				streakChanged = true;
 			}
 
-			if (!this.data.bestStreak || (this.data.streak && this.data.streak > this.data.bestStreak)) this.data.bestStreak = this.data.streak;
+			this.currentActivity.guilds[guildId] ??= { achievements: [], messages: { sent: 0, mentions: 0, reactions: { added: 0, received: 0 } }, stageEvents: { attended: 0 }, forum: { posts: 0 } };
 
-			this.data.lastActiveDate = today;
-			streakChanged = true;
-		}
+			const guildActivity = this.currentActivity.guilds[guildId];
 
-		this.currentActivity.guilds[guildId] ??= { achievements: [], messages: { sent: 0, mentions: 0, reactions: { added: 0, received: 0 } }, stageEvents: { attended: 0 }, forum: { posts: 0 } };
+			if (type === "message") guildActivity.messages.sent++;
+			if (type === "mention") guildActivity.messages.mentions++;
+			if (type === "reactionAdd") guildActivity.messages.reactions.added++;
+			if (type === "reactionReceive") guildActivity.messages.reactions.received++;
+			if (type === "forumPost") guildActivity.forum.posts++;
+			if (type === "stageEvent") guildActivity.stageEvents.attended++;
 
-		const guildActivity = this.currentActivity.guilds[guildId];
+			this.currentActivity.changed = true;
+			if (this.statsCache) this.statsCache.lastUpdate = 0;
+			this.touch();
 
-		if (type === "message") guildActivity.messages.sent++;
-		if (type === "mention") guildActivity.messages.mentions++;
-		if (type === "reactionAdd") guildActivity.messages.reactions.added++;
-		if (type === "reactionReceive") guildActivity.messages.reactions.received++;
-		if (type === "forumPost") guildActivity.forum.posts++;
-		if (type === "stageEvent") guildActivity.stageEvents.attended++;
+			const newLevel = await this.getLevel();
+			const unlockedAchievementIds = await checkNewAchievements(this);
 
-		this.currentActivity.changed = true;
-		if (this.statsCache) this.statsCache.lastUpdate = 0;
-		this.touch();
-
-		const newLevel = await this.getLevel();
-		const unlockedAchievementIds = await checkNewAchievements(this);
-
-		if (newLevel > oldLevel || unlockedAchievementIds.length > 0 || streakChanged) {
 			if (unlockedAchievementIds.length > 0) {
 				this.data.unlockedAchievements ??= [];
 				this.data.unlockedAchievements.push(...unlockedAchievementIds);
@@ -587,17 +648,22 @@ export class User {
 					if (achievement) guildActivity.achievements.push({ id: achievement.id, name: achievement.name, description: achievement.description });
 				}
 			}
+
 			if (streakChanged || unlockedAchievementIds.length > 0) {
 				await this.saveData();
 			}
 
+			return { oldLevel, newLevel, unlockedAchievementIds, streakChanged };
+		});
+
+		if (newLevel > oldLevel || unlockedAchievementIds.length > 0 || streakChanged) {
 			try {
 				const guild = await client.getGuild(guildId);
 				const botChannelId = guild?.settings.channels.bot;
 
 				if (botChannelId) {
 					const discordGuild = await client.discord?.guilds.fetch(guildId);
-					const botChannel = await discordGuild?.channels.fetch(botChannelId);
+					const botChannel = await discordGuild?.channels.fetch(botChannelId).catch(() => null);
 
 					if (botChannel && botChannel.isTextBased()) {
 						const displayName = await this.getGuildDisplayName(guildId);
@@ -676,9 +742,14 @@ export class User {
 	};
 
 	async delete(): Promise<void> {
-		await Deno.remove(this.storagePath, {
-			recursive: true
-		});
+		try {
+			await Deno.remove(this.storagePath, {
+				recursive: true
+			});
+		} catch (error) {
+			if (!(error instanceof Deno.errors.NotFound)) throw error;
+		}
+
 		this.settings = {
 			activity: {}
 		};

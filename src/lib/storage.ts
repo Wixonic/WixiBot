@@ -68,7 +68,7 @@ const loadIndex = async () => {
 	}
 };
 
-let saveQueue: Promise<void> = Promise.resolve();
+const saveQueue: Promise<unknown>[] = [];
 
 const saveIndex = (): Promise<void> => {
 	const execute = async () => {
@@ -82,8 +82,18 @@ const saveIndex = (): Promise<void> => {
 		}
 	};
 
-	const next = saveQueue.then(execute, execute);
-	saveQueue = next.catch(() => { });
+	const previous = saveQueue.pop() ?? Promise.resolve();
+	const next = previous.then(execute, execute);
+	saveQueue.push(next.catch(() => { }));
+	return next;
+};
+
+const commitQueue: Promise<unknown>[] = [];
+
+const enqueueCommit = <T>(task: () => Promise<T>): Promise<T> => {
+	const previous = commitQueue.pop() ?? Promise.resolve();
+	const next = previous.then(task, task);
+	commitQueue.push(next.catch(() => { }));
 	return next;
 };
 
@@ -209,10 +219,10 @@ export const uploadFileStream = async (
 			hasher.update(value);
 			await destination.write(value);
 		}
-	} catch (err) {
+	} catch (error) {
 		destination.close();
 		await Deno.remove(tempPath).catch(() => { });
-		throw err;
+		throw error;
 	}
 	destination.close();
 
@@ -230,37 +240,44 @@ export const uploadFileStream = async (
 		}
 	}
 
-	let usedSize = getTotalUsedSize();
-	if (usedSize + size > maxCapacity) {
-		const candidates = getUploadedFiles()
-			.filter((f) => f.id !== fileId)
-			.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-
-		for (const old of candidates) {
-			if (usedSize + size <= maxCapacity) break;
-			await removeFile(old.id);
-			index.delete(old.id);
-			usedSize -= old.size;
-		}
-
+	return await enqueueCommit(async () => {
+		let usedSize = getTotalUsedSize();
 		if (usedSize + size > maxCapacity) {
-			await Deno.remove(tempPath).catch(() => { });
-			throw new Error("STORAGE_FULL");
+			const candidates = getUploadedFiles()
+				.filter((f) => f.id !== fileId)
+				.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+			for (const old of candidates) {
+				if (usedSize + size <= maxCapacity) break;
+				await removeFile(old.id);
+				index.delete(old.id);
+				usedSize -= old.size;
+			}
+
+			if (usedSize + size > maxCapacity) {
+				await Deno.remove(tempPath).catch(() => { });
+				throw new Error("STORAGE_FULL");
+			}
 		}
-	}
 
-	await Deno.rename(tempPath, targetPath);
+		try {
+			await Deno.rename(tempPath, targetPath);
+		} catch (error) {
+			await Deno.remove(tempPath).catch(() => { });
+			throw error;
+		}
 
-	file.uploaded = true;
-	file.size = size;
-	file.sha256 = sha256;
-	file.createdAt = new Date().toISOString();
-	if (fileName) file.name = fileName;
+		file.uploaded = true;
+		file.size = size;
+		file.sha256 = sha256;
+		file.createdAt = new Date().toISOString();
+		if (fileName) file.name = fileName;
 
-	file.mimeType = (mimeType && mimeType !== "application/octet-stream") ? mimeType : null;
+		file.mimeType = (mimeType && mimeType !== "application/octet-stream") ? mimeType : null;
 
-	await saveIndex();
-	return file;
+		await saveIndex();
+		return file;
+	});
 };
 
 export const uploadFile = async (fileId: string, uploadKey: string, data: Uint8Array, fileName?: string, mimeType?: string): Promise<FileEntry> => {
@@ -347,7 +364,7 @@ export const generateDownloadToken = async (fileId: string): Promise<string | nu
 	return token;
 };
 
-export const consumeDownload = async (fileId: string, providedKey?: string, userId?: string, memberRoleIds?: string[], options?: { count?: boolean }): Promise<{ filePath: string; file: FileEntry } | null> => {
+export const consumeDownload = async (fileId: string, providedKey?: string, userId?: string, memberRoleIds?: string[], options?: { count?: boolean }): Promise<{ filePath: string; file: FileEntry; exhausted: boolean } | null> => {
 	await ensureReady();
 	await cleanupExpired();
 
@@ -356,21 +373,21 @@ export const consumeDownload = async (fileId: string, providedKey?: string, user
 	if (!canUserDownload(file, userId, memberRoleIds, providedKey)) return null;
 
 	const count = options?.count !== false;
+	let exhausted = false;
 
 	if (count) {
 		if (providedKey && file.downloadTokens[providedKey]) delete file.downloadTokens[providedKey];
 
 		file.downloadCount++;
 		if (file.maxDownloads !== null && file.downloadCount >= file.maxDownloads) {
+			exhausted = true;
 			index.delete(fileId);
-			await saveIndex();
-			return { filePath: getStoragePath("files", "data", fileId), file };
 		}
 
 		await saveIndex();
 	}
 
-	return { filePath: getStoragePath("files", "data", fileId), file };
+	return { filePath: getStoragePath("files", "data", fileId), file, exhausted };
 };
 
 export const deleteFile = async (fileId: string, userId?: string, isAdmin = false): Promise<boolean> => {

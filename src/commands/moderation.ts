@@ -71,11 +71,11 @@ export const command = {
 			case "warn": {
 				const providedUser = interaction.options.getUser("user", true);
 
-				const member = await interaction.guild.members.fetch(providedUser.id);
+				const member = await interaction.guild.members.fetch(providedUser.id).catch(() => null);
 
 				if (!member) {
-					await interaction.deleteReply();
-					throw new Error("User not found");
+					await interaction.editReply({ content: "User <@" + providedUser.id + "> was not found in this server." });
+					return;
 				}
 
 				await guild.warn(member, interaction.member, interaction.options.getString("reason") || "No reason provided");

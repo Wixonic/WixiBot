@@ -61,12 +61,14 @@ export const ticketMessages = (interaction: MessageComponentInteraction, ticket:
 	}
 
 	if (ticket.interactions.closedBy) {
+		const closedText = ticket.state === "Resolved" ? "has resolved this ticket." : "has closed this ticket.";
+
 		ticketChannelMessageContent.addTextDisplayComponents((component) => component
-			.setContent(`<@${ticket.interactions.closedBy}> has closed this ticket.`)
+			.setContent(`<@${ticket.interactions.closedBy}> ${closedText}`)
 		);
 
 		channelMessageContent.addTextDisplayComponents((component) => component
-			.setContent(`<@${ticket.interactions.closedBy}> has closed this ticket.`)
+			.setContent(`<@${ticket.interactions.closedBy}> ${closedText}`)
 		);
 	} else {
 		ticketChannelMessageContent.addActionRowComponents((component) => component
@@ -229,6 +231,14 @@ export const component = {
 								PermissionFlagsBits.ReadMessageHistory
 							]
 						},
+						...(interaction.guild.members.me ? [{
+							id: interaction.guild.members.me.id,
+							allow: [
+								PermissionFlagsBits.ViewChannel,
+								PermissionFlagsBits.SendMessages,
+								PermissionFlagsBits.ReadMessageHistory
+							]
+						}] : []),
 						{
 							id: interaction.guild.roles.everyone,
 							deny: [
@@ -250,28 +260,33 @@ export const component = {
 				const [ticketChannelMessageContent, channelMessageContent] = ticketMessages(interaction, ticketData);
 				const attachment = await createTicketHeaderAttachment(interaction, ticketData);
 
-				const ticketChannelMessage = await ticketChannel.send({
-					files: [attachment],
-					components: [
-						ticketChannelMessageContent
-					],
-					flags: MessageFlags.IsComponentsV2
-				});
+				try {
+					const ticketChannelMessage = await ticketChannel.send({
+						files: [attachment],
+						components: [
+							ticketChannelMessageContent
+						],
+						flags: MessageFlags.IsComponentsV2
+					});
 
-				const channelMessage = await channel.send({
-					components: [
-						channelMessageContent
-					],
-					flags: MessageFlags.IsComponentsV2
-				});
+					const channelMessage = await channel.send({
+						components: [
+							channelMessageContent
+						],
+						flags: MessageFlags.IsComponentsV2
+					});
 
-				const ticket = await guild.createTicket(id, ticketChannel.id, interaction.user.id, {
-					channel: ticketChannelMessage.id,
-					guild: channelMessage.id
-				}, interaction.values[0]);
+					await guild.createTicket(id, ticketChannel.id, interaction.user.id, {
+						channel: ticketChannelMessage.id,
+						guild: channelMessage.id
+					}, interaction.values[0]);
+				} catch (error) {
+					await ticketChannel.delete("Ticket creation failed").catch(() => { });
+					throw error;
+				}
 
 				await interaction.editReply({
-					content: `Your ticket has been created in <#${ticket.channel}>.`
+					content: `Your ticket has been created in <#${ticketChannel.id}>.`
 				});
 				break;
 			}
@@ -299,6 +314,11 @@ export const component = {
 					await interaction.editReply({
 						content: "Ticket not found."
 					});
+					return;
+				}
+
+				if (ticket.state !== "Waiting") {
+					await interaction.editReply("This ticket has already been claimed, resolved or closed.");
 					return;
 				}
 

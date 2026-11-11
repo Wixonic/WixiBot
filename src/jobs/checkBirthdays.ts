@@ -43,6 +43,23 @@ export const job: Job = {
 			const birthdayChannelId = guild.settings.channels?.birthday;
 			const birthdayRoleId = guild.settings.roles?.birthday;
 
+			const announcedToday = new Set<string>();
+			if (birthdayChannelId) {
+				try {
+					const existingChannel = await discordGuild.channels.fetch(birthdayChannelId);
+					if (existingChannel && existingChannel.isTextBased() && "messages" in existingChannel) {
+						const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+						const recentMessages = await existingChannel.messages.fetch({ limit: 50 });
+						for (const recentMessage of recentMessages.values()) {
+							if (recentMessage.createdTimestamp < dayStart || !/happy birthday/i.test(recentMessage.content)) continue;
+							for (const mentionedUser of recentMessage.mentions.users.values()) announcedToday.add(mentionedUser.id);
+						}
+					}
+				} catch (error) {
+					logger.warn(`Failed to scan recent birthday announcements in guild ${discordGuild.id}`, { cause: error });
+				}
+			}
+
 			if (birthdayRoleId) {
 				try {
 					await discordGuild.members.fetch();
@@ -68,6 +85,8 @@ export const job: Job = {
 				} catch {
 					continue;
 				}
+
+				if (announcedToday.has(member.id)) continue;
 
 				if (birthdayRoleId && !member.roles.cache.has(birthdayRoleId)) {
 					await member.roles.add(birthdayRoleId, "Happy Birthday!").catch((error) => {

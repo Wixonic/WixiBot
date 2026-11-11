@@ -1,5 +1,5 @@
 import { client } from "./lib/client.ts";
-import { colors, logger as mainLogger } from "./lib/logger.ts";
+import { colors, logger as mainLogger, waitForWebhookQueue } from "./lib/logger.ts";
 import {
 	type ClientSettings,
 	type ClientType,
@@ -35,7 +35,14 @@ const main = async () => {
 			cause: new StopSignal()
 		});
 
-		client.destroy().then(() => Deno.exit(0));
+		client.destroy().catch((error) => {
+			logger.error("Failed to destroy client", {
+				cause: error
+			});
+		}).finally(async () => {
+			await waitForWebhookQueue();
+			Deno.exit(0);
+		});
 	};
 
 	Deno.addSignalListener("SIGINT", stopHandler);
@@ -49,7 +56,8 @@ const main = async () => {
 			try {
 				await client.init(logger, settings);
 				logger.info(`Client connected as ${client.user?.username}.`);
-				retries = 0;
+
+				const startedAt = Date.now();
 
 				const abortController = new AbortController();
 				await new Promise((_, reject) => {
@@ -66,6 +74,8 @@ const main = async () => {
 					client.on("error", reject);
 					abortController.signal.addEventListener("abort", () => client.off("error", reject));
 				}).finally(() => abortController.abort());
+
+				if (Date.now() - startedAt > 5 * 60 * 1000) retries = 0;
 			} catch (error) {
 				logger.error("Failed to start client", {
 					cause: error
