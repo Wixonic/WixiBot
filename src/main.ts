@@ -49,6 +49,7 @@ const main = async () => {
 			try {
 				await client.init(logger, settings);
 				logger.info(`Client connected as ${client.user?.username}.`);
+				retries = 0;
 
 				const abortController = new AbortController();
 				await new Promise((_, reject) => {
