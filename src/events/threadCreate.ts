@@ -6,7 +6,7 @@ export const event = {
 	type: Events.ThreadCreate,
 	once: false,
 
-	async execute(_logger: Logger, thread: AnyThreadChannel, newlyCreated: boolean) {
+	async execute(logger: Logger, thread: AnyThreadChannel, newlyCreated: boolean) {
 		if (!newlyCreated) return;
 
 		if (!thread.ownerId) {
@@ -22,7 +22,7 @@ export const event = {
 		const parent = thread.parent;
 		if (parent && parent.type === ChannelType.GuildForum) {
 			const user = await client.getUser(thread.ownerId);
-			if (user && user.settings.activity.record) user.addActivity(thread.guildId, "forumPost");
+			if (user && user.settings.activity.record) user.addActivity(thread.guildId, "forumPost").catch((error) => logger.error("Failed to add forum post activity", { cause: error }));
 		}
 	}
 };

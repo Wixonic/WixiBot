@@ -208,9 +208,9 @@ export const component = {
 					throw new Error("Guild not found");
 				}
 
-				const id = Math.random().toString(36).substring(2, 8).toUpperCase();
+				const id = await guild.generateTicketId();
 
-				const channel = await interaction.guild.channels.fetch(guild.settings.tickets.channel ?? "-1");
+				const channel = await interaction.guild.channels.fetch(guild.settings.tickets.channel ?? "-1").catch(() => null);
 				if (!channel || !channel.isTextBased()) {
 					await interaction.deleteReply();
 					throw new Error("Tickets channel not found or is not text-based");

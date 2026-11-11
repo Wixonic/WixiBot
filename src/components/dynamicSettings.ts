@@ -18,6 +18,7 @@ import {
 
 import {
 	generateDynamicSettingsComponentFor,
+	ensureParentSettingsFor,
 	resolveDynamicSettingsPath,
 	resolveDynamicSettingsScopeContextFor,
 	type DynamicChannelSetting,
@@ -34,42 +35,6 @@ const normalizeSettingsPath = (path: string): string => {
 	if (withoutTrailingSlash.startsWith("/user")) return withoutTrailingSlash.replace(/^\/user/, "/User");
 
 	return withoutTrailingSlash;
-};
-
-const ensureParentSettings = async (path: string, setting: DynamicSetting, interaction: MessageComponentInteraction) => {
-	const scope = await resolveDynamicSettingsScopeContextFor(path, interaction);
-	if (!scope) return null;
-
-	const context = resolveDynamicSettingsPath(scope, path);
-	if (!context || !context.targetKey || context.targetSetting !== setting) return null;
-	if (context.parentSettings) return {
-		scope,
-		context,
-		parentSettings: context.parentSettings
-	};
-
-	const segments = path.replace(scope.scopePath, "").split("/").filter(Boolean);
-	const parentSegments = segments.slice(0, -1);
-	let schema = scope.schemaRoot as DynamicSetting | typeof scope.schemaRoot;
-	let cursor = scope.settingsRoot;
-
-	for (const segment of parentSegments) {
-		if (schema.type !== "object") return null;
-		const child = schema.children[segment];
-		if (!child || child.type !== "object") return null;
-
-		const next = cursor[child.key];
-		if (!next || typeof next !== "object") cursor[child.key] = {};
-
-		cursor = cursor[child.key] as Record<string, unknown>;
-		schema = child;
-	}
-
-	return {
-		scope,
-		context,
-		parentSettings: cursor
-	};
 };
 
 export const component = {
@@ -280,7 +245,7 @@ export const component = {
 						const context = resolveDynamicSettingsPath(scope, targetPath);
 						if (!context || !context.targetSetting || !context.targetKey || context.targetSetting.type !== type) throw new Error("Setting path is invalid");
 
-						const parentResolved = await ensureParentSettings(targetPath, context.targetSetting, interaction);
+						const parentResolved = await ensureParentSettingsFor(targetPath, interaction);
 						if (!parentResolved) throw new Error("Could not resolve parent settings");
 
 						let value: unknown;
@@ -325,7 +290,7 @@ export const component = {
 						const context = resolveDynamicSettingsPath(scope, targetPath);
 						if (!context || !context.targetSetting || !context.targetKey || context.targetSetting.type === "object") throw new Error("Setting path is invalid");
 
-						const parentResolved = await ensureParentSettings(targetPath, context.targetSetting, interaction);
+						const parentResolved = await ensureParentSettingsFor(targetPath, interaction);
 						if (!parentResolved) throw new Error("Could not resolve parent settings");
 
 						parentResolved.parentSettings[parentResolved.context.targetKey!] = context.targetSetting.default;

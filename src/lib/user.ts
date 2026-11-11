@@ -107,6 +107,32 @@ export const userSettingsSchema: DynamicSettingsSchema = {
 	}
 };
 
+export interface UserMonthlyGuildActivity {
+	achievements: Achievement[];
+
+	messages: {
+		sent: number;
+		mentions: number;
+		reactions: {
+			added: number;
+			received: number;
+		};
+	};
+
+	stageEvents: {
+		attended: number;
+	};
+
+	forum: {
+		posts: number;
+	};
+};
+
+export interface MonthlyActivity {
+	yearMonth: string;
+	guilds: Record<string, UserMonthlyGuildActivity>;
+};
+
 export interface UserReplayStats {
 	messages: number;
 	stageEvents: number;
@@ -271,10 +297,11 @@ export class User {
 		};
 
 		if (JSON.stringify(this.currentActivity.presence) !== JSON.stringify(newPresence)) {
+			const oldPresence = this.currentActivity.presence;
 			this.currentActivity.presence = newPresence;
 
 			if (this.settings.activity.record) {
-				this.logger.debug(`Presence changed for ${this.username} - Old: ${JSON.stringify(this.currentActivity.presence)}; New: ${JSON.stringify(newPresence)}`);
+				this.logger.debug(`Presence changed for ${this.username} - Old: ${JSON.stringify(oldPresence)}; New: ${JSON.stringify(newPresence)}`);
 				this.currentActivity.changed = true;
 			} else this.currentActivity.changed = false;
 		}
@@ -289,10 +316,10 @@ export class User {
 			await Deno.mkdir(activityDirectory, { recursive: true });
 
 			const now = new Date();
-			const yearMonth = `${now.getFullYear()} -${String(now.getMonth() + 1).padStart(2, "0")} `;
+			const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 			const monthFilePath = path.join(activityDirectory, `${yearMonth}.json`);
 
-			let monthData: any = { yearMonth, guilds: {} };
+			let monthData: MonthlyActivity = { yearMonth, guilds: {} };
 			try {
 				const existingContent = await Deno.readTextFile(monthFilePath);
 				monthData = JSON.parse(existingContent);
@@ -320,15 +347,6 @@ export class User {
 				targetGuild.messages.reactions.received += received;
 				targetGuild.forum.posts += posts;
 				targetGuild.stageEvents.attended += attended;
-
-				/** @type {UserMappedActivity[]} */
-				const mappedActivities = (this.currentActivity.presence?.activities || []).map((activity) => ({
-					name: activity.name,
-					type: activity.type,
-					state: activity.state,
-					details: activity.details,
-					applicationId: activity.applicationId
-				})).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
 				this.data.stats.totalMessages += sent;
 				this.data.stats.totalForumPosts += posts;
@@ -369,24 +387,31 @@ export class User {
 		let totalForumPosts = 0;
 		let totalReactions = 0;
 
-		const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+		const now = new Date();
+		const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+		const includedMonths = new Set([currentMonth]);
+
+		if (days > now.getDate()) {
+			const previousDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+			includedMonths.add(`${previousDate.getFullYear()}-${String(previousDate.getMonth() + 1).padStart(2, "0")}`);
+		}
 
 		try {
 			const activityPath = path.join(this.storagePath, "activity");
 			for await (const directoryEntry of Deno.readDir(activityPath)) {
 				if (directoryEntry.isFile && directoryEntry.name.endsWith(".json")) {
-					const content = await Deno.readTextFile(path.join(activityPath, directoryEntry.name));
-					const activity: any = JSON.parse(content);
+					const month = directoryEntry.name.slice(0, -".json".length);
+					if (!includedMonths.has(month)) continue;
 
-					const timestamp = typeof activity.date === "number" && activity.date < 3000000000 ? activity.date * 1000 : Number(activity.date) || 0;
-					if (!activity.date || timestamp >= cutoff || directoryEntry.name.length === 7) {
-						for (const guildId in activity.guilds) {
-							const guildData = activity.guilds[guildId];
-							totalMessages += guildData.messages?.sent || 0;
-							totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
-							totalForumPosts += guildData.forum?.posts || 0;
-							totalStageEvents += guildData.stageEvents?.attended || 0;
-						}
+					const content = await Deno.readTextFile(path.join(activityPath, directoryEntry.name));
+					const activity: MonthlyActivity = JSON.parse(content);
+
+					for (const guildId in activity.guilds) {
+						const guildData = activity.guilds[guildId];
+						totalMessages += guildData.messages?.sent || 0;
+						totalReactions += (guildData.messages?.reactions?.added || 0) + (guildData.messages?.reactions?.received || 0);
+						totalForumPosts += guildData.forum?.posts || 0;
+						totalStageEvents += guildData.stageEvents?.attended || 0;
 					}
 				}
 			}
@@ -413,17 +438,18 @@ export class User {
 		let totalReactions = 0;
 		const monthlyAchievements: string[] = [];
 
+		const targetMonthKey = targetMonth
+			? `${targetMonth.getFullYear()}-${String(targetMonth.getMonth() + 1).padStart(2, "0")}`
+			: null;
+
 		try {
 			const activityPath = path.join(this.storagePath, "activity");
 			for await (const directoryEntry of Deno.readDir(activityPath)) {
 				if (directoryEntry.isFile && directoryEntry.name.endsWith(".json")) {
+					if (targetMonthKey && directoryEntry.name.slice(0, -".json".length) !== targetMonthKey) continue;
+
 					const content = await Deno.readTextFile(path.join(activityPath, directoryEntry.name));
-					const activity: UserActivity = JSON.parse(content);
-
-					const timestamp = typeof activity.date === "number" && activity.date < 2000000000000 && activity.date < 3000000000 ? activity.date * 1000 : activity.date;
-					const activityDate = new Date(timestamp);
-
-					if (targetMonth && (activityDate.getMonth() !== targetMonth.getMonth() || activityDate.getFullYear() !== targetMonth.getFullYear())) continue;
+					const activity: MonthlyActivity = JSON.parse(content);
 
 					for (const guildId in activity.guilds) {
 						const guildData = activity.guilds[guildId];
@@ -546,7 +572,6 @@ export class User {
 
 		this.currentActivity.changed = true;
 		if (this.statsCache) this.statsCache.lastUpdate = 0;
-		if (this.statsCache && streakChanged) this.statsCache.lastUpdate = 0;
 		this.touch();
 
 		const newLevel = await this.getLevel();
@@ -563,7 +588,6 @@ export class User {
 				}
 			}
 			if (streakChanged || unlockedAchievementIds.length > 0) {
-				await this.saveSettings();
 				await this.saveData();
 			}
 

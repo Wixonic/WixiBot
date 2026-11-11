@@ -301,7 +301,9 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 
 	async saveSettings() {
 		await Deno.mkdir(this.storagePath, { recursive: true });
-		await Deno.writeTextFile(path.join(this.storagePath, "settings.json"), JSON.stringify(this.settings, null, "\t"));
+		const temporaryPath = path.join(this.storagePath, "settings.json.tmp");
+		await Deno.writeTextFile(temporaryPath, JSON.stringify(this.settings, null, "\t"));
+		await Deno.rename(temporaryPath, path.join(this.storagePath, "settings.json"));
 		this.touch();
 	};
 
@@ -363,6 +365,14 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 		}
 	};
 
+	async generateTicketId(): Promise<string> {
+		let id: string;
+		do {
+			id = crypto.randomUUID().replaceAll("-", "").slice(0, 8).toUpperCase();
+		} while (await this.loadTicket(id));
+		return id;
+	};
+
 	async warn(target: GuildMember, by: GuildMember | APIInteractionGuildMember | null, reason: string) {
 		const moderationDirectory = path.join(this.storagePath, "moderation", target.id, "warnings");
 
@@ -370,7 +380,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 			recursive: true
 		});
 
-		await Deno.writeTextFile(path.join(moderationDirectory, `${Date.now()}.json`), JSON.stringify({
+		await Deno.writeTextFile(path.join(moderationDirectory, `${Date.now()}-${crypto.randomUUID().slice(0, 8)}.json`), JSON.stringify({
 			date: new Date().toISOString(),
 			reason,
 			by: by?.user.id || null
@@ -405,7 +415,7 @@ Check the available commands by typing ${helpCommandId ? `</help:${helpCommandId
 			recursive: true
 		});
 
-		await Deno.writeTextFile(path.join(moderationDirectory, `${Date.now()}.json`), JSON.stringify({
+		await Deno.writeTextFile(path.join(moderationDirectory, `${Date.now()}-${crypto.randomUUID().slice(0, 8)}.json`), JSON.stringify({
 			date: new Date().toISOString(),
 			type: "Message",
 			message: {
@@ -493,7 +503,7 @@ Reason: ${reason || "No reason provided"}`, "reports");
 			recursive: true
 		});
 
-		await Deno.writeTextFile(path.join(moderationDirectory, `${Date.now()}.json`), JSON.stringify({
+		await Deno.writeTextFile(path.join(moderationDirectory, `${Date.now()}-${crypto.randomUUID().slice(0, 8)}.json`), JSON.stringify({
 			date: new Date().toISOString(),
 			type: "User",
 			user: discordMember.id,
@@ -596,13 +606,15 @@ Reason: ${reason || "No reason provided"}`, "reports");
 		return { warnings, reports };
 	};
 
-	private reportError(message: string, error: unknown) {
+	private async reportError(message: string, error: unknown) {
 		this.logger.error(message, {
 			cause: error
 		});
 
+		this.touch();
+
 		if (this.settings.channels.logs) {
-			const channel = this.discordGuild.channels.cache.get(this.settings.channels.logs);
+			const channel = await this.discordGuild.channels.fetch(this.settings.channels.logs).catch(() => null);
 
 			if (channel && channel.isTextBased()) return sendChunks(`An error occurred:
 					\`\`\`
@@ -616,12 +628,11 @@ ${error instanceof Error ? error.stack : String(error)}
 ${String(message)}
 ${error instanceof Error ? error.stack : String(error)}
 \`\`\``, "logs");
-		this.touch();
 	};
 
 	async publishFundingAnnouncement(userId: string, type: "boost" | "supporter"): Promise<boolean> {
 		const channelId = this.settings.channels.supporters || this.settings.channels.bot || this.settings.channels.welcome;
-		const channel = channelId ? this.discordGuild.channels.cache.get(channelId) : this.discordGuild.systemChannel;
+		const channel = channelId ? await this.discordGuild.channels.fetch(channelId).catch(() => null) : this.discordGuild.systemChannel;
 
 		if (channel && channel.isTextBased()) {
 			try {

@@ -111,9 +111,3 @@ export const checkNewAchievements = async (user: User): Promise<string[]> => {
 
 	return unlocked;
 };
-
-export const getLevelRewards = (_level: number): string[] => {
-	const rewards: string[] = [];
-	// TODO: Role rewards based on level
-	return rewards;
-};

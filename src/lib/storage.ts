@@ -37,24 +37,15 @@ export interface StorageStats {
 
 export const getStorageConfig = () => {
 	const isDev = Deno.env.get("CLIENT") === "dev";
-	try {
-		const storage = getSettings().storage;
-		return {
-			maxCapacity: storage?.maxCapacity ?? 100 * 1024 * 1024 * 1024,
-			tokenLifetime: storage?.tokenLifetime ?? 5 * 60 * 1000,
-			slotExpiry: storage?.slotExpiry ?? 24 * 60 * 60 * 1000,
-			baseURL: storage?.baseURL ?? (isDev ? "http://localhost:2011" : "https://onion.wixonic.fr"),
-			apiURL: storage?.apiURL ?? (isDev ? "http://localhost:1202" : "https://api.onion.wixonic.fr")
-		};
-	} catch {
-		return {
-			maxCapacity: 100 * 1024 * 1024 * 1024,
-			tokenLifetime: 5 * 60 * 1000,
-			slotExpiry: 24 * 60 * 60 * 1000,
-			baseURL: isDev ? "http://localhost:2011" : "https://onion.wixonic.fr",
-			apiURL: isDev ? "http://localhost:1202" : "https://api.onion.wixonic.fr"
-		};
-	}
+	const storage = getSettings().storage ?? {};
+
+	return {
+		maxCapacity: storage.maxCapacity ?? 100 * 1024 * 1024 * 1024,
+		tokenLifetime: storage.tokenLifetime ?? 5 * 60 * 1000,
+		slotExpiry: storage.slotExpiry ?? 24 * 60 * 60 * 1000,
+		baseURL: storage.baseURL ?? (isDev ? "http://localhost:2011" : "https://onion.wixonic.fr"),
+		apiURL: storage.apiURL ?? (isDev ? "http://localhost:1202" : "https://api.onion.wixonic.fr")
+	};
 };
 
 const index = new Map<string, FileEntry>();
@@ -69,6 +60,7 @@ const loadIndex = async () => {
 			if (!file.uploader && file.uploaderId) file.uploader = file.uploaderId;
 			delete file.uploaderId;
 			delete file.uploaderName;
+			if (file.mimeType === "Unknown type") file.mimeType = null;
 			index.set(file.id, file);
 		}
 	} catch {
@@ -265,7 +257,7 @@ export const uploadFileStream = async (
 	file.createdAt = new Date().toISOString();
 	if (fileName) file.name = fileName;
 
-	file.mimeType = (!mimeType || mimeType === "application/octet-stream") ? "Unknown type" : mimeType || "application/octet-stream";
+	file.mimeType = (mimeType && mimeType !== "application/octet-stream") ? mimeType : null;
 
 	await saveIndex();
 	return file;
@@ -355,7 +347,7 @@ export const generateDownloadToken = async (fileId: string): Promise<string | nu
 	return token;
 };
 
-export const consumeDownload = async (fileId: string, providedKey?: string, userId?: string, memberRoleIds?: string[]): Promise<{ filePath: string; file: FileEntry } | null> => {
+export const consumeDownload = async (fileId: string, providedKey?: string, userId?: string, memberRoleIds?: string[], options?: { count?: boolean }): Promise<{ filePath: string; file: FileEntry } | null> => {
 	await ensureReady();
 	await cleanupExpired();
 
@@ -363,26 +355,29 @@ export const consumeDownload = async (fileId: string, providedKey?: string, user
 	if (!file || !file.uploaded) return null;
 	if (!canUserDownload(file, userId, memberRoleIds, providedKey)) return null;
 
-	if (providedKey && file.downloadTokens[providedKey]) delete file.downloadTokens[providedKey];
+	const count = options?.count !== false;
 
-	file.downloadCount++;
-	const filePath = getStoragePath("files", "data", fileId);
+	if (count) {
+		if (providedKey && file.downloadTokens[providedKey]) delete file.downloadTokens[providedKey];
 
-	if (file.maxDownloads !== null && file.downloadCount >= file.maxDownloads) {
-		index.delete(fileId);
+		file.downloadCount++;
+		if (file.maxDownloads !== null && file.downloadCount >= file.maxDownloads) {
+			index.delete(fileId);
+			await saveIndex();
+			return { filePath: getStoragePath("files", "data", fileId), file };
+		}
+
 		await saveIndex();
-		return { filePath, file };
 	}
 
-	await saveIndex();
-	return { filePath, file };
+	return { filePath: getStoragePath("files", "data", fileId), file };
 };
 
 export const deleteFile = async (fileId: string, userId?: string, isAdmin = false): Promise<boolean> => {
 	await ensureReady();
 	const file = index.get(fileId);
 	if (!file) return false;
-	if (!isAdmin && userId && file.uploader !== userId) return false;
+	if (!isAdmin && file.uploader !== userId) return false;
 
 	await removeFile(fileId);
 	index.delete(fileId);

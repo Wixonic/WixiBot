@@ -5,7 +5,7 @@ import { generateRichPicture, RichPictureType } from "../lib/richPicture.ts";
 import { getStoragePath } from "../lib/utils.ts";
 
 export const job: Job = {
-	cron: "0 0 * * *",
+	cron: "5 0 * * *",
 	name: "Check Birthdays",
 	async execute(logger: Logger) {
 		if (!client.discord) {
@@ -45,13 +45,15 @@ export const job: Job = {
 
 			if (birthdayRoleId) {
 				try {
+					await discordGuild.members.fetch();
+
 					for (const member of discordGuild.members.cache.values()) {
 						const hasRole = member.roles.cache.has(birthdayRoleId);
 						const isBirthdayToday = todayBirthdayUserIds.has(member.id);
 
 						if (hasRole && !isBirthdayToday) {
 							await member.roles.remove(birthdayRoleId, "Birthday over").catch(() => null);
-							logger.debug(`Removed birthday role from ${member.user.tag} in ${discordGuild.name}.`);
+							logger.debug(`Removed birthday role from ${member.user.username} in ${discordGuild.name}.`);
 						}
 					}
 				} catch (error) {
@@ -69,7 +71,7 @@ export const job: Job = {
 
 				if (birthdayRoleId && !member.roles.cache.has(birthdayRoleId)) {
 					await member.roles.add(birthdayRoleId, "Happy Birthday!").catch((error) => {
-						logger.error(`Failed to add birthday role to ${member.user.tag}`, { cause: error });
+						logger.error(`Failed to add birthday role to ${member.user.username}`, { cause: error });
 					});
 				}
 
@@ -94,10 +96,10 @@ export const job: Job = {
 								files: [attachment]
 							});
 
-							logger.debug(`Sent birthday announcement for ${member.user.tag} in ${discordGuild.name}.`);
+							logger.debug(`Sent birthday announcement for ${member.user.username} in ${discordGuild.name}.`);
 						}
 					} catch (error) {
-						logger.error(`Failed to send birthday announcement for ${member.user.tag} in ${discordGuild.name}`, { cause: error });
+						logger.error(`Failed to send birthday announcement for ${member.user.username} in ${discordGuild.name}`, { cause: error });
 					}
 				}
 			}

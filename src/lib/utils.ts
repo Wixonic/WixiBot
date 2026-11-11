@@ -73,7 +73,7 @@ export const parseCustomId = (customId: string): [string, ...string[]] => {
 };
 
 export const parseDuration = (input: string): number | null => {
-	const durationRegex = /(\d+)\s*(seconds?|secs?|s|minutes?|mins?|m|hours?|h|days?|d|weeks?|w|months?|mo|years?|y)/gi;
+	const durationRegex = /(\d+)\s*(years?|y|months?|mo|weeks?|w|days?|d|hours?|h|minutes?|mins?|m|seconds?|secs?|s)/gi;
 	let milliseconds = 0;
 	let found = false;
 

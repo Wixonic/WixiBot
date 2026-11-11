@@ -21,12 +21,12 @@ export const event = {
 		if (!reaction.message.guildId) return;
 
 		const user = await client.getUser(discordUser.id);
-		if (user && user.settings.activity.record) user.addActivity(reaction.message.guildId, "reactionAdd");
+		if (user && user.settings.activity.record) user.addActivity(reaction.message.guildId, "reactionAdd").catch((error) => logger.error("Failed to add reaction activity", { cause: error }));
 
 		const author = reaction.message.author;
 		if (author && !author.bot && author.id !== discordUser.id) {
 			const authorUser = await client.getUser(author.id);
-			if (authorUser && authorUser.settings.activity.record) authorUser.addActivity(reaction.message.guildId, "reactionReceive");
+			if (authorUser && authorUser.settings.activity.record) authorUser.addActivity(reaction.message.guildId, "reactionReceive").catch((error) => logger.error("Failed to add received reaction activity", { cause: error }));
 		}
 	}
 };

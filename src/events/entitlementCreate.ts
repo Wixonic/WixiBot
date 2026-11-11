@@ -11,8 +11,9 @@ export const event = {
 	async execute(logger: Logger, entitlement: Entitlement) {
 		const settings = getSettings();
 		const fundingSku = settings.discord.sku.funding;
+		const supporterRoleId = settings.discord.roles.supporter;
 
-		if (fundingSku && entitlement.skuId === fundingSku) {
+		if (fundingSku && supporterRoleId && entitlement.skuId === fundingSku) {
 			const guilds: Guild[] = [];
 			if (entitlement.guildId) {
 				const discordGuild = await client.discord?.guilds.fetch(entitlement.guildId).catch(() => null);
@@ -29,7 +30,7 @@ export const event = {
 				if (member) {
 					memberFound = true;
 					try {
-						await member.roles.add(settings.discord.roles.supporter, "Purchased funding SKU");
+						await member.roles.add(supporterRoleId, "Purchased funding SKU");
 						logger.info(`Assigned supporter role to ${entitlement.userId} in guild ${discordGuild.id}.`);
 					} catch (error) {
 						logger.error(`Failed to assign supporter role to ${entitlement.userId} in guild ${discordGuild.id}`, {

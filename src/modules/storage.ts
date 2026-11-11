@@ -35,7 +35,7 @@ export const handler: Handler = {
 					id: file.id,
 					name: file.name,
 					size: file.size,
-					mimeType: file.mimeType,
+					mimeType: file.mimeType ?? "Unknown type",
 					sha256: file.sha256,
 					uploader: user ? {
 						id: user.id,
@@ -109,7 +109,7 @@ export const handler: Handler = {
 						id: file.id,
 						name: file.name,
 						size: file.size,
-						mimeType: file.mimeType,
+						mimeType: file.mimeType ?? "Unknown type",
 						sha256: file.sha256,
 						url: `${baseURL}/files/download/${file.id}`
 					}, { headers: corsHeaders });
@@ -130,7 +130,9 @@ export const handler: Handler = {
 
 			if (action === "download" && request.method === "GET") {
 				const key = url.searchParams.get("key") || undefined;
-				const download = await consumeDownload(fileId, key);
+				const rangeHeader = request.headers.get("range");
+
+				const download = await consumeDownload(fileId, key, undefined, undefined, { count: !rangeHeader });
 
 				if (!download) {
 					const rawFile = await getFileRaw(fileId);
@@ -141,7 +143,6 @@ export const handler: Handler = {
 				try {
 					const fileInfo = await Deno.stat(download.filePath);
 					const encodedName = encodeURIComponent(download.file.name);
-					const rangeHeader = request.headers.get("range");
 
 					if (rangeHeader && rangeHeader.startsWith("bytes=")) {
 						const parts = rangeHeader.replace(/bytes=/, "").split("-");
@@ -217,7 +218,7 @@ export const handler: Handler = {
 					type: RichPictureType.StorageFile,
 					data: {
 						name: file.name,
-						mimeType: file.mimeType,
+						mimeType: file.mimeType ?? "Unknown type",
 						size: file.size,
 						fifoPosition,
 						uploader: user ? {

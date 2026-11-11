@@ -128,7 +128,10 @@ export const command = {
 			}
 
 			let restrictedTo: FileRestriction = null;
-			if (mentionable) {
+			if (mentionable && secretKey) {
+				await interaction.editReply({ content: "Please choose either a user/role restriction or a secret key, not both." });
+				return;
+			} else if (mentionable) {
 				if (mentionable instanceof Role) restrictedTo = { type: "role", id: mentionable.id };
 				else if ("user" in mentionable && mentionable.user) restrictedTo = { type: "user", id: mentionable.user.id };
 				else if ("id" in mentionable) restrictedTo = { type: "user", id: (mentionable as { id: string }).id };
@@ -197,8 +200,8 @@ export const command = {
 			if (file.restrictedTo !== null) {
 				if (file.restrictedTo.type === "key") {
 					if (providedKey) {
-						downloadURL = `${baseURL}/files/download/${file.id}?key=${providedKey}`;
-						directApiURL = `${apiURL}/${file.id}/download?key=${providedKey}`;
+						downloadURL = `${baseURL}/files/download/${file.id}?key=${encodeURIComponent(providedKey)}`;
+						directApiURL = `${apiURL}/${file.id}/download?key=${encodeURIComponent(providedKey)}`;
 					}
 				} else {
 					const token = await generateDownloadToken(file.id);
@@ -216,7 +219,7 @@ export const command = {
 				type: RichPictureType.StorageFile,
 				data: {
 					name: file.name,
-					mimeType: file.mimeType,
+					mimeType: file.mimeType ?? "Unknown type",
 					size: file.size,
 					fifoPosition,
 					uploader: uploaderUser ? {
@@ -281,7 +284,7 @@ export const command = {
 			let content: string | undefined = undefined;
 
 			if (files.length > 0) {
-				const lines = files.slice(0, 15).map((file) => `- \`${file.id}\`: [${file.name}](<${baseURL}/files/download/${file.id}>)\n-# ${file.mimeType}${file.description ? ` • ${file.description}` : ""}`);
+				const lines = files.slice(0, 15).map((file) => `- \`${file.id}\`: [${file.name}](<${baseURL}/files/download/${file.id}>)\n-# ${file.mimeType ?? "Unknown type"}${file.description ? ` • ${file.description}` : ""}`);
 				if (files.length > 15) lines.push(`*...and ${files.length - 15} more files.*`);
 				content = lines.join("\n");
 			}

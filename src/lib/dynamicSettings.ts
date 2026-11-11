@@ -188,6 +188,46 @@ export const resolveDynamicSettingsPath = (scope: DynamicSettingsScopeContext, p
 	};
 };
 
+export const ensureParentSettingsFor = async (path: string, interaction: ChatInputCommandInteraction | MessageComponentInteraction | ModalSubmitInteraction): Promise<{
+	scope: DynamicSettingsScopeContext;
+	context: DynamicSettingsPathContext;
+	parentSettings: Record<string, unknown>;
+} | null> => {
+	const scope = await resolveDynamicSettingsScopeContextFor(path, interaction);
+	if (!scope) return null;
+
+	const context = resolveDynamicSettingsPath(scope, path);
+	if (!context || !context.targetKey || !context.targetSetting || context.targetSetting.type === "object") return null;
+	if (context.parentSettings) return {
+		scope,
+		context,
+		parentSettings: context.parentSettings
+	};
+
+	const segments = path.replace(scope.scopePath, "").split("/").filter(Boolean);
+	const parentSegments = segments.slice(0, -1);
+	let schema: DynamicSetting | DynamicRootObjectSetting = scope.schemaRoot;
+	let cursor = scope.settingsRoot;
+
+	for (const segment of parentSegments) {
+		if (schema.type !== "object") return null;
+		const child: DynamicSetting | undefined = schema.children[segment];
+		if (!child || child.type !== "object") return null;
+
+		const next = cursor[child.key];
+		if (!next || typeof next !== "object") cursor[child.key] = {};
+
+		cursor = cursor[child.key] as Record<string, unknown>;
+		schema = child;
+	}
+
+	return {
+		scope,
+		context,
+		parentSettings: cursor
+	};
+};
+
 const generateDynamicSettingsScopeComponentFor = (path: string, scope: DynamicSettingsScopeContext, backButton: ButtonBuilder): ContainerBuilder | null => {
 	const pathContext = resolveDynamicSettingsPath(scope, path);
 	if (!pathContext || pathContext.schema.type !== "object") return null;

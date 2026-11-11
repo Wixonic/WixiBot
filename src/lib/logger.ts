@@ -64,9 +64,13 @@ interface WebhookQueueItem {
 const webhookQueue: WebhookQueueItem[] = [];
 let isProcessingQueue = false;
 
+const MAX_WEBHOOK_ATTEMPTS = 5;
+
 const processQueue = async (): Promise<void> => {
 	if (isProcessingQueue) return;
 	isProcessingQueue = true;
+
+	let attempts = 0;
 
 	while (webhookQueue.length > 0) {
 		const item = webhookQueue[0];
@@ -111,17 +115,33 @@ const processQueue = async (): Promise<void> => {
 				}
 
 				await wait(delayMilliseconds + 100);
+				attempts = 0;
 				continue;
 			}
 
 			if (response.status >= 500) {
+				attempts++;
+				if (attempts >= MAX_WEBHOOK_ATTEMPTS) {
+					console.warn(`Webhook message dropped after ${attempts} failed attempts (HTTP ${response.status}).`);
+					webhookQueue.shift();
+					attempts = 0;
+					continue;
+				}
 				await wait(2000);
 				continue;
 			}
 
 			webhookQueue.shift();
+			attempts = 0;
 			await wait(500);
 		} catch {
+			attempts++;
+			if (attempts >= MAX_WEBHOOK_ATTEMPTS) {
+				console.warn(`Webhook message dropped after ${attempts} failed attempts (network error).`);
+				webhookQueue.shift();
+				attempts = 0;
+				continue;
+			}
 			await wait(2000);
 		}
 	}

@@ -45,7 +45,7 @@ export const component = {
 		switch (action) {
 			case "close": {
 				if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)) {
-					await interaction.followUp("You don't have permissions to warn this member!");
+					await interaction.followUp("You don't have permissions to close this report!");
 					return;
 				}
 
@@ -135,7 +135,7 @@ export const component = {
 					}
 
 					await member.ban({ reason: "Moderation report action" });
-					await interaction.followUp(`User **${member.user.tag}** has been banned.`);
+					await interaction.followUp(`User <@${member.id}> has been banned.`);
 				} catch (error) {
 					logger.error("Failed to ban member from report card", { cause: error });
 					await interaction.followUp("Failed to ban member.");
@@ -164,7 +164,7 @@ export const component = {
 					}
 
 					await member.timeout(60 * 60 * 1000, "Moderation report action (1 hour)");
-					await interaction.followUp(`User **${member.user.tag}** has been timed out for 1 hour.`);
+					await interaction.followUp(`User <@${member.id}> has been timed out for 1 hour.`);
 				} catch (error) {
 					logger.error("Failed to timeout member from report card", { cause: error });
 					await interaction.followUp("Failed to timeout member.");
@@ -181,7 +181,7 @@ export const component = {
 						return;
 					}
 
-					const ticketId = Math.random().toString(36).substring(2, 8).toUpperCase();
+					const ticketId = await guild.generateTicketId();
 					const ticketChannel = await interaction.guild.channels.create({
 						name: `mod-ticket-${ticketId}`,
 						type: ChannelType.GuildText,
